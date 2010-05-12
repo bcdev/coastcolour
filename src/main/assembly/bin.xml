@@ -43,6 +43,17 @@
                 <include>*.sh</include>
             </includes>
         </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/macosx</directory>
+            <outputDirectory>bin</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+            <includes>
+                <include>*.command</include>
+            </includes>
+        </fileSet>
     </fileSets>
 
     <moduleSets>

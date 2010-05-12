@@ -222,7 +222,21 @@ return;</preActivation>
                     <object class="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction">
                       <void property="file">
                         <object class="java.io.File">
-                          <string>bin/worldql.sh</string>
+                          <string>bin/wql.sh</string>
+                        </object>
+                      </void>
+                    </object>
+                  </java>
+                </serializedBean>
+                <condition />
+              </action>
+              <action name="" id="203" beanClass="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction" enabled="true" commentSet="false" comment="" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
+                <serializedBean>
+                  <java class="java.beans.XMLDecoder">
+                    <object class="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction">
+                      <void property="file">
+                        <object class="java.io.File">
+                          <string>bin/wql.command</string>
                         </object>
                       </void>
                     </object>
@@ -236,7 +250,7 @@ return;</preActivation>
                     <object class="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction">
                       <void property="file">
                         <object class="java.io.File">
-                          <string>bin/worldql.bat</string>
+                          <string>bin/wql.bat</string>
                         </object>
                       </void>
                     </object>
@@ -356,7 +370,8 @@ return;</preActivation>
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="bin/worldql.sh" fileType="regular" />
+        <entry location="bin/wql.command" fileType="regular" />
+        <entry location="bin/wql.sh" fileType="regular" />
       </exclude>
       <variables />
     </win32>
@@ -366,7 +381,8 @@ return;</preActivation>
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="bin/worldql.bat" fileType="regular" />
+        <entry location="bin/wql.bat" fileType="regular" />
+        <entry location="bin/wql.sh" fileType="regular" />
       </exclude>
       <variables />
     </macosFolder>
@@ -376,7 +392,8 @@ return;</preActivation>
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="bin/worldql.bat" fileType="regular" />
+        <entry location="bin/wql.bat" fileType="regular" />
+        <entry location="bin/wql.command" fileType="regular" />
       </exclude>
       <variables />
       <installerScript mode="1" file="">
@@ -389,7 +406,8 @@ return;</preActivation>
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="bin/worldql.bat" fileType="regular" />
+        <entry location="bin/wql.bat" fileType="regular" />
+        <entry location="bin/wql.command" fileType="regular" />
       </exclude>
       <variables />
       <installerScript mode="1" file="">

@@ -70,7 +70,7 @@ public class WorldQuickLookGeneratorMain {
         System.out.println("COASTCOLOUR product directory quick-look tool, version 1.0");
         System.out.println("May 11, 2010");
         System.out.println();
-        System.out.println("usage : quicklook.sh WORLD SOURCE TARGET");
+        System.out.println("usage : wql.sh WORLD SOURCE TARGET");
         System.out.println();
         System.out.println();
         System.out.println("WORLD\n" +

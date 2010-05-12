@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>COASTCOLOUR</name>
+    <groupId>org.esa.beam.coastcolour</groupId>
+    <artifactId>coastcolour</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <packaging>pom</packaging>
+
+    <repositories>
+        <repository>
+            <id>bc-mvn-repo-public</id>
+            <name>Public Maven Repository at Brockmann-Consult</name>
+            <url>http://www.brockmann-consult.de/mvn/os</url>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>bc-mvn-repo-public</id>
+            <name>Public Maven Repository at Brockmann-Consult</name>
+            <url>http://www.brockmann-consult.de/mvn/os</url>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>apache.org</id>
+            <name>Maven Plugin Snapshots</name>
+            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <modules>
+        <module>coastcolour-bootstrap</module>
+        <module>coastcolour-util</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Ceres System Level Module ############################################# -->
+
+            <dependency>
+                <groupId>com.bc.ceres</groupId>
+                <artifactId>ceres-launcher</artifactId>
+                <version>0.11-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.bc.ceres</groupId>
+                <artifactId>ceres-core</artifactId>
+                <version>0.11-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.bc.ceres</groupId>
+                <artifactId>ceres-binding</artifactId>
+                <version>0.11-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.bc.ceres</groupId>
+                <artifactId>ceres-ui</artifactId>
+                <version>0.11-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.bc.ceres</groupId>
+                <artifactId>ceres-binio</artifactId>
+                <version>0.11-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.bc.ceres</groupId>
+                <artifactId>ceres-glayer</artifactId>
+                <version>0.11-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.bc.ceres</groupId>
+                <artifactId>ceres-jai</artifactId>
+                <version>0.11-SNAPSHOT</version>
+            </dependency>
+
+            <!-- BEAM System Level Modules ############################################# -->
+
+            <dependency>
+                <groupId>org.esa.beam</groupId>
+                <artifactId>beam-bootstrap</artifactId>
+                <version>4.8-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.beam</groupId>
+                <artifactId>beam-core</artifactId>
+                <version>4.8-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.beam</groupId>
+                <artifactId>beam-ui</artifactId>
+                <version>4.8-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.beam</groupId>
+                <artifactId>beam-visat</artifactId>
+                <version>4.8-SNAPSHOT</version>
+            </dependency>
+
+            <!-- COASTCOLOUR Libraries ############################################# -->
+
+            <dependency>
+                <groupId>org.esa.beam.coastcolour</groupId>
+                <artifactId>coastcolour-util</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+
+            <!-- JUnit Libraries ############################################# -->
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.5</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
+
+    <!--
+    In version 3 of Maven the sourceEncoding property will be embedded in the
+    build tag. For now the convention is to that it as property.
+    TODO: Move the sourceEncoding property to the build tag if version 3 is released
+    -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <debug>true</debug>
+                    <fork>false</fork>
+                    <encoding>ISO-8859-1</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2-beta-5</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/bin.xml</descriptor>
+                        <descriptor>src/main/assembly/project.xml</descriptor>
+                    </descriptors>
+                    <finalName>coastcolour</finalName>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-idea-plugin</artifactId>
+                <configuration>
+                    <downloadSources>true</downloadSources>
+                    <downloadJavadocs>true</downloadJavadocs>
+                    <jdkName>1.6</jdkName>
+                    <jdkLevel>1.6</jdkLevel>
+                    <exclude>target</exclude>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <configuration>
+                    <downloadSources>true</downloadSources>
+                    <downloadJavadocs>true</downloadJavadocs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludeResources>true</excludeResources>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <developers>
+        <developer>
+            <id>ralf</id>
+            <name>Ralf Quast</name>
+            <email>ralf.quast@brockmann-consult.de</email>
+            <organization>Brockmann Consult</organization>
+            <roles>
+                <role>Software Developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <excludePackageNames>*.internal;</excludePackageNames>
+                    <quiet>true</quiet>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
+
+</project>

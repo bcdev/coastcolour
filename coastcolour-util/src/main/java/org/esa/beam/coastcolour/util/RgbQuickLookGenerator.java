@@ -48,7 +48,7 @@ class RgbQuickLookGenerator {
             };
             final ImageLayer imageLayer = new ImageLayer(
                     BandImageMultiLevelSource.create(rgbBands, ProgressMonitor.NULL));
-            final RenderedImage image = imageLayer.getImage(imageLayer.getMultiLevelSource().getModel().getLevel(0.5));
+            final RenderedImage image = imageLayer.getImage(imageLayer.getMultiLevelSource().getModel().getLevel(4.0));
 
             return PlanarImage.wrapRenderedImage(image).getAsBufferedImage();
         }

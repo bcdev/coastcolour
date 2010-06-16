@@ -48,7 +48,7 @@ public class RgbQuickLookGeneratorMain implements RuntimeRunnable {
                         ImageIO.write(image, "jpg", createImageFile(targetDir, product));
                     }
                     pm.worked(1);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     handler.warning(e);
                 } finally {
                     if (product != null) {

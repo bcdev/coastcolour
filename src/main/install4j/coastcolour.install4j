@@ -216,14 +216,27 @@ return;</preActivation>
                 </serializedBean>
                 <condition />
               </action>
-              <action name="" id="168" beanClass="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction" enabled="true" commentSet="false" comment="" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
+              <action name="" id="201" beanClass="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction" enabled="true" commentSet="false" comment="" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
+                <serializedBean>
+                  <java class="java.beans.XMLDecoder">
+                    <object class="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction">
+                      <void property="file">
+                        <object class="java.io.File">
+                          <string>bin/wql.sh</string>
+                        </object>
+                      </void>
+                    </object>
+                  </java>
+                </serializedBean>
+                <condition />
+              </action>
+              <action name="" id="202" beanClass="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction" enabled="true" commentSet="false" comment="" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
                 <serializedBean>
                   <java class="java.beans.XMLDecoder">
                     <object class="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction">
                       <void property="file">
                         <object class="java.io.File">
                           <string>bin/rgbql.sh</string>
-                          <string>bin/wql.sh</string>
                         </object>
                       </void>
                     </object>
@@ -237,7 +250,6 @@ return;</preActivation>
                     <object class="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction">
                       <void property="file">
                         <object class="java.io.File">
-                          <string>bin/rgbql.command</string>
                           <string>bin/wql.command</string>
                         </object>
                       </void>
@@ -252,8 +264,36 @@ return;</preActivation>
                     <object class="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction">
                       <void property="file">
                         <object class="java.io.File">
-                          <string>bin/rgbql.bat</string>
+                          <string>bin/rgbql.command</string>
+                        </object>
+                      </void>
+                    </object>
+                  </java>
+                </serializedBean>
+                <condition />
+              </action>
+              <action name="" id="205" beanClass="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction" enabled="true" commentSet="false" comment="" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
+                <serializedBean>
+                  <java class="java.beans.XMLDecoder">
+                    <object class="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction">
+                      <void property="file">
+                        <object class="java.io.File">
                           <string>bin/wql.bat</string>
+                        </object>
+                      </void>
+                    </object>
+                  </java>
+                </serializedBean>
+                <condition />
+              </action>
+            </actions>
+              <action name="" id="206" beanClass="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction" enabled="true" commentSet="false" comment="" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
+                <serializedBean>
+                  <java class="java.beans.XMLDecoder">
+                    <object class="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction">
+                      <void property="file">
+                        <object class="java.io.File">
+                          <string>bin/rgbql.bat</string>
                         </object>
                       </void>
                     </object>

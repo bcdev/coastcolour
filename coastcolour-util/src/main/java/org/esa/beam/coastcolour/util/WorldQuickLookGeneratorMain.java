@@ -4,6 +4,7 @@ import com.bc.ceres.core.PrintWriterProgressMonitor;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.util.SystemUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -13,6 +14,8 @@ import java.io.IOException;
 public class WorldQuickLookGeneratorMain {
 
     public static void main(String[] args) {
+        SystemUtils.initThirdPartyLibraries();
+
         if (args.length == 3) {
             final String worldImagePath = args[0];
             final String sourceDirPath = args[1];

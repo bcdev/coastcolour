@@ -13,37 +13,26 @@ public class WorldQuickLookGeneratorMain {
     public static void main(String[] args) {
         if (args.length == 3) {
             final String worldImagePath = args[0];
-            final String productDirPath = args[1];
+            final String sourceDirPath = args[1];
             final String quickLookImagePath = args[2];
 
             final File worldImageFile = new File(worldImagePath);
-            final File productDir = new File(productDirPath);
+            final File sourceDir = new File(sourceDirPath);
             final File quickLookImageFile = new File(quickLookImagePath);
 
 
-            execute(worldImageFile, productDir, quickLookImageFile, new ErrorHandler() {
-                @Override
-                public void warning(Throwable t) {
-                    t.printStackTrace();
-                }
-
-                @Override
-                public void error(Throwable t) {
-                    t.printStackTrace();
-                    System.exit(1);
-                }
-            });
+            execute(worldImageFile, sourceDir, quickLookImageFile, new DefaultErrorHandler());
         } else {
             printUsage();
         }
     }
 
-    private static void execute(File worldImageFile, File productDir, File quickLookImageFile, ErrorHandler handler) {
+    private static void execute(File worldImageFile, File sourceDir, File quickLookImageFile, ErrorHandler handler) {
         try {
             final BufferedImage worldImage = ImageIO.read(worldImageFile);
 
             final WorldQuickLookGenerator generator = new WorldQuickLookGenerator();
-            for (final File file : productDir.listFiles()) {
+            for (final File file : sourceDir.listFiles()) {
                 Product product = null;
                 try {
                     product = ProductIO.readProduct(file);

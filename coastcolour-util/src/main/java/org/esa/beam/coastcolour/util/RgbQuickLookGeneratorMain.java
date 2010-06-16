@@ -12,41 +12,29 @@ import java.io.IOException;
 public class RgbQuickLookGeneratorMain {
 
     public static void main(String[] args) {
-        if (args.length == 3) {
-            final String productDirPath = args[0];
-            final String quickLookDirPath = args[1];
+        if (args.length == 2) {
+            final String sourceDirPath = args[0];
+            final String targetDirPath = args[1];
 
-            final File productDir = new File(productDirPath);
-            final File quickLookImageDir = new File(quickLookDirPath);
+            final File sourceDir = new File(sourceDirPath);
+            final File targetDir = new File(targetDirPath);
 
-
-            execute(productDir, quickLookImageDir, new ErrorHandler() {
-                @Override
-                public void warning(Throwable t) {
-                    t.printStackTrace();
-                }
-
-                @Override
-                public void error(Throwable t) {
-                    t.printStackTrace();
-                    System.exit(1);
-                }
-            });
+            execute(sourceDir, targetDir, new DefaultErrorHandler());
         } else {
             printUsage();
         }
     }
 
-    private static void execute(File productDir, File quickLookImageDir, ErrorHandler handler) {
+    private static void execute(File sourceDir, File targetDir, ErrorHandler handler) {
         try {
             final RgbQuickLookGenerator generator = new RgbQuickLookGenerator("MERIS L1b - Tristimulus");
-            for (final File file : productDir.listFiles()) {
+            for (final File file : sourceDir.listFiles()) {
                 Product product = null;
                 try {
                     product = ProductIO.readProduct(file);
                     if (product != null) {
-                        final BufferedImage quickLookImage = generator.createQuickLookImage(product);
-                        ImageIO.write(quickLookImage, "jpg", createFile(quickLookImageDir, product));
+                        final BufferedImage image = generator.createQuickLookImage(product);
+                        ImageIO.write(image, "jpg", createImageFile(targetDir, product));
                     }
                 } catch (IOException e) {
                     handler.warning(e);
@@ -61,8 +49,8 @@ public class RgbQuickLookGeneratorMain {
         }
     }
 
-    private static File createFile(File quickLookImageDir, Product product) {
-        return new File(quickLookImageDir, FileUtils.exchangeExtension(product.getFileLocation().getName(), ".jpg"));
+    private static File createImageFile(File targetDir, Product product) {
+        return new File(targetDir, FileUtils.exchangeExtension(product.getFileLocation().getName(), ".jpg"));
     }
 
     private static void printUsage() {
@@ -83,4 +71,5 @@ public class RgbQuickLookGeneratorMain {
         System.out.println();
         System.out.println();
     }
+
 }

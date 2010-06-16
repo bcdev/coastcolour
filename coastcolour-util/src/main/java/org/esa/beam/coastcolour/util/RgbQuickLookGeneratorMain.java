@@ -17,29 +17,28 @@ public class RgbQuickLookGeneratorMain implements RuntimeRunnable {
 
     public static void main(String[] args) {
         SystemUtils.initThirdPartyLibraries();
-        
+
         if (args.length == 3) {
-            final String rgbFilePath = args[0];
+            final String rgbProfile = args[0];
             final String sourceDirPath = args[1];
             final String targetDirPath = args[2];
 
-            final File rgbFile = new File(rgbFilePath);
             final File sourceDir = new File(sourceDirPath);
             final File targetDir = new File(targetDirPath);
 
-            execute(rgbFile, sourceDir, targetDir, new DefaultErrorHandler(),
+            execute(rgbProfile, sourceDir, targetDir, new DefaultErrorHandler(),
                     new PrintWriterProgressMonitor(System.out));
         } else {
             printUsage();
         }
     }
 
-    private static void execute(File rgbFile, File sourceDir, File targetDir, ErrorHandler handler,
+    private static void execute(String rgbProfile, File sourceDir, File targetDir, ErrorHandler handler,
                                 ProgressMonitor pm) {
         final File[] sourceFiles = sourceDir.listFiles();
         try {
             pm.beginTask("Generating quick-look images...", sourceFiles.length);
-            final RgbQuickLookGenerator generator = new RgbQuickLookGenerator(rgbFile);
+            final RgbQuickLookGenerator generator = new RgbQuickLookGenerator(rgbProfile);
             for (final File file : sourceFiles) {
                 Product product = null;
                 try {
@@ -77,7 +76,7 @@ public class RgbQuickLookGeneratorMain implements RuntimeRunnable {
         System.out.println();
         System.out.println("RGB\n" +
                            "\n" +
-                           "    The path of the file containing the RGB image profile.");
+                           "    The name or path of the RGB image profile.");
         System.out.println();
         System.out.println();
         System.out.println("SOURCE\n" +

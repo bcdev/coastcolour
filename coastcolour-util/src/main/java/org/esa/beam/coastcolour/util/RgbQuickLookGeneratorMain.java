@@ -12,27 +12,29 @@ import java.io.IOException;
 public class RgbQuickLookGeneratorMain {
 
     public static void main(String[] args) {
-        if (args.length == 2) {
-            final String sourceDirPath = args[0];
-            final String targetDirPath = args[1];
+        if (args.length == 3) {
+            final String rgbFilePath = args[0];
+            final String sourceDirPath = args[1];
+            final String targetDirPath = args[2];
 
+            final File rgbFile = new File(rgbFilePath);
             final File sourceDir = new File(sourceDirPath);
             final File targetDir = new File(targetDirPath);
 
-            execute(sourceDir, targetDir, new DefaultErrorHandler());
+            execute(rgbFile, sourceDir, targetDir, new DefaultErrorHandler());
         } else {
             printUsage();
         }
     }
 
-    private static void execute(File sourceDir, File targetDir, ErrorHandler handler) {
+    private static void execute(File rgbFile, File sourceDir, File targetDir, ErrorHandler handler) {
         try {
-            final RgbQuickLookGenerator generator = new RgbQuickLookGenerator("MERIS L1b - Tristimulus");
+            final RgbQuickLookGenerator generator = new RgbQuickLookGenerator(rgbFile);
             for (final File file : sourceDir.listFiles()) {
                 Product product = null;
                 try {
                     product = ProductIO.readProduct(file);
-                    if (product != null) {
+                    if (product != null && generator.isApplicableTo(product)) {
                         final BufferedImage image = generator.createQuickLookImage(product);
                         ImageIO.write(image, "jpg", createImageFile(targetDir, product));
                     }
@@ -57,7 +59,12 @@ public class RgbQuickLookGeneratorMain {
         System.out.println("COASTCOLOUR product directory RGB quick-look tool, version 1.0");
         System.out.println("June 16, 2010");
         System.out.println();
-        System.out.println("usage : rgbql.sh SOURCE TARGET");
+        System.out.println("usage : rgbql.sh RGB SOURCE TARGET");
+        System.out.println();
+        System.out.println();
+        System.out.println("RGB\n" +
+                           "\n" +
+                           "    The path of the file containing the RGB image profile.");
         System.out.println();
         System.out.println();
         System.out.println("SOURCE\n" +

@@ -286,7 +286,6 @@ return;</preActivation>
                 </serializedBean>
                 <condition />
               </action>
-            </actions>
               <action name="" id="206" beanClass="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction" enabled="true" commentSet="false" comment="" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
                 <serializedBean>
                   <java class="java.beans.XMLDecoder">

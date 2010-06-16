@@ -222,6 +222,7 @@ return;</preActivation>
                     <object class="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction">
                       <void property="file">
                         <object class="java.io.File">
+                          <string>bin/rgbql.sh</string>
                           <string>bin/wql.sh</string>
                         </object>
                       </void>
@@ -236,6 +237,7 @@ return;</preActivation>
                     <object class="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction">
                       <void property="file">
                         <object class="java.io.File">
+                          <string>bin/rgbql.command</string>
                           <string>bin/wql.command</string>
                         </object>
                       </void>
@@ -250,6 +252,7 @@ return;</preActivation>
                     <object class="com.install4j.runtime.beans.actions.text.ReplaceInstallerVariablesAction">
                       <void property="file">
                         <object class="java.io.File">
+                          <string>bin/rgbql.bat</string>
                           <string>bin/wql.bat</string>
                         </object>
                       </void>
@@ -370,6 +373,8 @@ return;</preActivation>
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
+        <entry location="bin/rgbql.command" fileType="regular" />
+        <entry location="bin/rgbql.sh" fileType="regular" />
         <entry location="bin/wql.command" fileType="regular" />
         <entry location="bin/wql.sh" fileType="regular" />
       </exclude>
@@ -381,6 +386,8 @@ return;</preActivation>
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
+        <entry location="bin/rgbql.bat" fileType="regular" />
+        <entry location="bin/rgbql.sh" fileType="regular" />
         <entry location="bin/wql.bat" fileType="regular" />
         <entry location="bin/wql.sh" fileType="regular" />
       </exclude>
@@ -392,6 +399,8 @@ return;</preActivation>
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
+        <entry location="bin/rgbql.bat" fileType="regular" />
+        <entry location="bin/rgbql.command" fileType="regular" />
         <entry location="bin/wql.bat" fileType="regular" />
         <entry location="bin/wql.command" fileType="regular" />
       </exclude>
@@ -406,6 +415,8 @@ return;</preActivation>
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
+        <entry location="bin/rgbql.bat" fileType="regular" />
+        <entry location="bin/rgbql.command" fileType="regular" />
         <entry location="bin/wql.bat" fileType="regular" />
         <entry location="bin/wql.command" fileType="regular" />
       </exclude>

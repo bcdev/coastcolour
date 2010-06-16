@@ -18,7 +18,7 @@ if [ -z "$BEAM4_HOME" ]; then
     exit 2
 fi
 
-"$app_java_home/bin/java" \
+"java" \
     -Xmx1024M \
     -Dceres.context=beam \
     "-Dbeam.mainClass=org.esa.beam.coastcolour.util.RgbQuickLookGeneratorMain" \

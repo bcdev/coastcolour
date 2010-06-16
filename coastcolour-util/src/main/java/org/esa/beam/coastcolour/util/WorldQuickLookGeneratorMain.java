@@ -1,5 +1,7 @@
 package org.esa.beam.coastcolour.util;
 
+import com.bc.ceres.core.PrintWriterProgressMonitor;
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 
@@ -21,24 +23,29 @@ public class WorldQuickLookGeneratorMain {
             final File quickLookImageFile = new File(quickLookImagePath);
 
 
-            execute(worldImageFile, sourceDir, quickLookImageFile, new DefaultErrorHandler());
+            execute(worldImageFile, sourceDir, quickLookImageFile, new DefaultErrorHandler(),
+                    new PrintWriterProgressMonitor(System.out));
         } else {
             printUsage();
         }
     }
 
-    private static void execute(File worldImageFile, File sourceDir, File quickLookImageFile, ErrorHandler handler) {
+    private static void execute(File worldImageFile, File sourceDir, File quickLookImageFile, ErrorHandler handler,
+                                ProgressMonitor pm) {
+        final File[] sourceFiles = sourceDir.listFiles();
         try {
+            pm.beginTask("Generating world quick-look image...", sourceFiles.length);
             final BufferedImage worldImage = ImageIO.read(worldImageFile);
 
             final WorldQuickLookGenerator generator = new WorldQuickLookGenerator();
-            for (final File file : sourceDir.listFiles()) {
+            for (final File file : sourceFiles) {
                 Product product = null;
                 try {
                     product = ProductIO.readProduct(file);
                     if (product != null) {
                         generator.addProduct(product);
                     }
+                    pm.worked(1);
                 } catch (IOException e) {
                     handler.warning(e);
                 } finally {
@@ -52,6 +59,8 @@ public class WorldQuickLookGeneratorMain {
             ImageIO.write(quickLookImage, "jpg", quickLookImageFile);
         } catch (IOException e) {
             handler.error(e);
+        } finally {
+            pm.done();
         }
     }
 

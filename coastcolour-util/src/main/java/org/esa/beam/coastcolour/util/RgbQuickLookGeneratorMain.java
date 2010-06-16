@@ -1,7 +1,11 @@
 package org.esa.beam.coastcolour.util;
 
+import com.bc.ceres.core.PrintWriterProgressMonitor;
+import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.runtime.RuntimeRunnable;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
 
 import javax.imageio.ImageIO;
@@ -9,9 +13,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class RgbQuickLookGeneratorMain {
+public class RgbQuickLookGeneratorMain implements RuntimeRunnable {
 
     public static void main(String[] args) {
+        SystemUtils.initThirdPartyLibraries();
+        
         if (args.length == 3) {
             final String rgbFilePath = args[0];
             final String sourceDirPath = args[1];
@@ -21,16 +27,20 @@ public class RgbQuickLookGeneratorMain {
             final File sourceDir = new File(sourceDirPath);
             final File targetDir = new File(targetDirPath);
 
-            execute(rgbFile, sourceDir, targetDir, new DefaultErrorHandler());
+            execute(rgbFile, sourceDir, targetDir, new DefaultErrorHandler(),
+                    new PrintWriterProgressMonitor(System.out));
         } else {
             printUsage();
         }
     }
 
-    private static void execute(File rgbFile, File sourceDir, File targetDir, ErrorHandler handler) {
+    private static void execute(File rgbFile, File sourceDir, File targetDir, ErrorHandler handler,
+                                ProgressMonitor pm) {
+        final File[] sourceFiles = sourceDir.listFiles();
         try {
+            pm.beginTask("Generating quick-look images...", sourceFiles.length);
             final RgbQuickLookGenerator generator = new RgbQuickLookGenerator(rgbFile);
-            for (final File file : sourceDir.listFiles()) {
+            for (final File file : sourceFiles) {
                 Product product = null;
                 try {
                     product = ProductIO.readProduct(file);
@@ -38,6 +48,7 @@ public class RgbQuickLookGeneratorMain {
                         final BufferedImage image = generator.createQuickLookImage(product);
                         ImageIO.write(image, "jpg", createImageFile(targetDir, product));
                     }
+                    pm.worked(1);
                 } catch (IOException e) {
                     handler.warning(e);
                 } finally {
@@ -48,6 +59,8 @@ public class RgbQuickLookGeneratorMain {
             }
         } catch (Exception e) {
             handler.error(e);
+        } finally {
+            pm.done();
         }
     }
 
@@ -79,4 +92,8 @@ public class RgbQuickLookGeneratorMain {
         System.out.println();
     }
 
+    @Override
+    public void run(Object argument, ProgressMonitor pm) throws Exception {
+        main((String[]) argument);
+    }
 }

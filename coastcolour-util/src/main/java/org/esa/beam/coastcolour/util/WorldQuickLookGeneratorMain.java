@@ -13,8 +13,11 @@ import java.io.IOException;
 
 public class WorldQuickLookGeneratorMain {
 
+    private WorldQuickLookGeneratorMain() {
+    }
+
     public static void main(String[] args) {
-        SystemUtils.initThirdPartyLibraries();
+        SystemUtils.init3rdPartyLibs(WorldQuickLookGeneratorMain.class.getClassLoader());
 
         if (args.length == 3) {
             final String worldImagePath = args[0];

@@ -16,7 +16,7 @@ import java.io.IOException;
 public class RgbQuickLookGeneratorMain implements RuntimeRunnable {
 
     public static void main(String[] args) {
-        SystemUtils.initThirdPartyLibraries();
+        SystemUtils.init3rdPartyLibs(RgbQuickLookGeneratorMain.class.getClassLoader());
 
         if (args.length == 3) {
             final String rgbProfile = args[0];

@@ -59,6 +59,17 @@
         <module>coastcolour-util</module>
     </modules>
 
+    <properties>
+        <!--
+        In version 3 of Maven the sourceEncoding property will be embedded in the
+        build tag. For now the convention is to that it as property.
+        TODO: Move the sourceEncoding property to the build tag if version 3 is released
+        -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <ceresVersion>0.11</ceresVersion>
+        <beamVersion>4.8</beamVersion>
+    </properties>
+    
     <dependencyManagement>
         <dependencies>
             <!-- Ceres System Level Module ############################################# -->
@@ -66,43 +77,43 @@
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-launcher</artifactId>
-                <version>0.11-SNAPSHOT</version>
+                <version>${ceresVersion}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-core</artifactId>
-                <version>0.11-SNAPSHOT</version>
+                <version>${ceresVersion}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-binding</artifactId>
-                <version>0.11-SNAPSHOT</version>
+                <version>${ceresVersion}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-ui</artifactId>
-                <version>0.11-SNAPSHOT</version>
+                <version>${ceresVersion}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-binio</artifactId>
-                <version>0.11-SNAPSHOT</version>
+                <version>${ceresVersion}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-glayer</artifactId>
-                <version>0.11-SNAPSHOT</version>
+                <version>${ceresVersion}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-jai</artifactId>
-                <version>0.11-SNAPSHOT</version>
+                <version>${ceresVersion}</version>
             </dependency>
 
             <!-- BEAM System Level Modules ############################################# -->
@@ -110,22 +121,27 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-bootstrap</artifactId>
-                <version>4.8-SNAPSHOT</version>
+                <version>${beamVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-core</artifactId>
-                <version>4.8-SNAPSHOT</version>
+                <version>${beamVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-ui</artifactId>
-                <version>4.8-SNAPSHOT</version>
+                <version>${beamVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat</artifactId>
-                <version>4.8-SNAPSHOT</version>
+                <version>${beamVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.beam</groupId>
+                <artifactId>beam-gpf</artifactId>
+                <version>${beamVersion}</version>
             </dependency>
 
             <!-- COASTCOLOUR Libraries ############################################# -->
@@ -133,7 +149,7 @@
             <dependency>
                 <groupId>org.esa.beam.coastcolour</groupId>
                 <artifactId>coastcolour-util</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- JUnit Libraries ############################################# -->
@@ -141,7 +157,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.5</version>
+                <version>4.8.1</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -154,14 +170,6 @@
         </dependency>
     </dependencies>
 
-    <!--
-    In version 3 of Maven the sourceEncoding property will be embedded in the
-    build tag. For now the convention is to that it as property.
-    TODO: Move the sourceEncoding property to the build tag if version 3 is released
-    -->
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <build>
         <plugins>
@@ -230,7 +238,7 @@
             <roles>
                 <role>Software Developer</role>
             </roles>
-        </developer>
+        </developer>        
     </developers>
 
     <reporting>

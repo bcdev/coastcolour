@@ -4,10 +4,15 @@ import Jama.Matrix;
 
 public class FuzzyClassification {
 
-    private FuzzyClassification() {
+    private double[][] uReflecMeans;
+    private double[][][] invCovMatrix;
+
+    public FuzzyClassification(double[][] uReflecMeans, double[][][] invCovMatrix) {
+        this.uReflecMeans = uReflecMeans.clone();
+        this.invCovMatrix = invCovMatrix.clone();
     }
 
-    public static double[] fuzzyFunc(double[] reflectances, double[][] uReflecMeans, double[][][] invCovMatrix) {
+    public double[] fuzzyFunc(double[] reflectances) {
         int bandCount = reflectances.length;
         int classCount = invCovMatrix.length;
 

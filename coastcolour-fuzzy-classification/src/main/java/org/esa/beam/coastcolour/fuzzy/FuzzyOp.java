@@ -1,6 +1,5 @@
 package org.esa.beam.coastcolour.fuzzy;
 
-import Jama.Matrix;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -24,7 +23,7 @@ public class FuzzyOp extends PixelOperator {
     @SourceProduct(alias = "source")
     private Product sourceProduct;
 
-    @Parameter(defaultValue = "6",
+    @Parameter(defaultValue = "5",
                label = "The number of bands to consider.")
     private int bandCount;        // NBANDS
 
@@ -32,8 +31,7 @@ public class FuzzyOp extends PixelOperator {
                label = "The number of classes output by the algorithm")
     private int classCount;  // NCLASSES
 
-    private double[][] reflecMeans;
-    private double[][][] invCovMatrix;
+    private FuzzyClassification fuzzyClassification;
 
     @Override
     protected void configureTargetProduct(Product targetProduct) {
@@ -53,9 +51,8 @@ public class FuzzyOp extends PixelOperator {
         } catch (Exception e) {
             throw new OperatorException(e);
         }
-        reflecMeans = auxdata.getSpectralMeans();
-        double[][][] reflecCovMatrix = auxdata.getCovarianceMatrices();
-        invCovMatrix = covarianceInversion(reflecCovMatrix);
+        fuzzyClassification = new FuzzyClassification(auxdata.getSpectralMeans(),
+                                                      auxdata.getInvertedCovarianceMatrices());
 
         // actual sample configuration
         configurator.defineSample(0, "reflec_1");
@@ -63,7 +60,7 @@ public class FuzzyOp extends PixelOperator {
         configurator.defineSample(2, "reflec_3");
         configurator.defineSample(3, "reflec_4");
         configurator.defineSample(4, "reflec_5");
-//        configurator.defineSample( 5, "radiance7" );
+//        configurator.defineSample( 5, "reflec_7" );
     }
 
     @Override
@@ -81,34 +78,19 @@ public class FuzzyOp extends PixelOperator {
             throw new OperatorException("Wrong number of source samples: Expected: " + bandCount +
                                         ", Actual: " + sourceSamples.length);
         }
-        double[] reflectances = new double[bandCount];
+        double[] rrs = new double[bandCount];
         for (int i = 0; i < bandCount; i++) {
             Sample sourceSample = sourceSamples[i];
-            reflectances[i] = sourceSample.getDouble();
+            final double merisL2Reflec = sourceSample.getDouble();
+            final double rrsAboveWater = merisL2Reflec / Math.PI;
+            rrs[i] = rrsAboveWater / (0.52 + 1.7 * rrsAboveWater);
         }
-        double[] membershipIndicator = FuzzyClassification.fuzzyFunc(reflectances, reflecMeans,
-                                                                     invCovMatrix); // outdata
-
-//        for (int i = 0; i < membershipIndicator.length; i++) {
-//            double value = membershipIndicator[i];
-//            System.out.printf("value[%d] = %s%n", i, value);
-//        }
+        double[] membershipIndicator = fuzzyClassification.fuzzyFunc(rrs); // outdata
 
         for (int i = 0; i < targetSamples.length; i++) {
             WritableSample targetSample = targetSamples[i];
             targetSample.set(membershipIndicator[i]);
         }
-    }
-
-    private static double[][][] covarianceInversion(double[][][] reflecCovMatrix) {
-        double[][][] invReflecCovMatrix = new double[reflecCovMatrix.length][][];
-        for (int i = 0; i < reflecCovMatrix.length; i++) {
-            final Matrix matrix = new Matrix(reflecCovMatrix[i]);
-            final Matrix invMatrix = matrix.inverse();
-            invReflecCovMatrix[i] = invMatrix.getArray();
-
-        }
-        return invReflecCovMatrix;
     }
 
     public static class Spi extends OperatorSpi {

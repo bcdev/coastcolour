@@ -1,5 +1,6 @@
 package org.esa.beam.coastcolour.fuzzy;
 
+import Jama.Matrix;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;
@@ -14,7 +15,7 @@ import java.util.List;
 public class Auxdata {
 
     private double[][] spectralMeans;
-    private double[][][] covarianceMatrices;
+    private double[][][] invCovarianceMatrices;
 
     public Auxdata(String resourcePath) throws IOException, InvalidRangeException {
         final NetcdfFile netcdfFile = NetcdfFile.open(resourcePath);
@@ -30,7 +31,8 @@ public class Auxdata {
                     spectralMeans = (double[][]) array.copyToNDJavaArray();
                 }
                 if ("class_covariance".equals(variable.getName()) || "Yinv".equals(variable.getName())) {
-                    covarianceMatrices = (double[][][]) array.copyToNDJavaArray();
+                    double[][][] covarianceMatrices = (double[][][]) array.copyToNDJavaArray();
+                    invCovarianceMatrices = covarianceInversion(covarianceMatrices);
                 }
             }
         } finally {
@@ -42,7 +44,20 @@ public class Auxdata {
         return spectralMeans;
     }
 
-    public double[][][] getCovarianceMatrices() {
-        return covarianceMatrices;
+
+    public double[][][] getInvertedCovarianceMatrices() {
+        return invCovarianceMatrices;
     }
+
+    private static double[][][] covarianceInversion(double[][][] reflecCovMatrix) {
+        double[][][] invReflecCovMatrix = new double[reflecCovMatrix.length][][];
+        for (int i = 0; i < reflecCovMatrix.length; i++) {
+            final Matrix matrix = new Matrix(reflecCovMatrix[i]);
+            final Matrix invMatrix = matrix.inverse();
+            invReflecCovMatrix[i] = invMatrix.getArray();
+
+        }
+        return invReflecCovMatrix;
+    }
+
 }

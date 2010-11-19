@@ -68,8 +68,8 @@
         TODO: Move the sourceEncoding property to the build tag if version 3 is released
         -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ceresVersion>0.11</ceresVersion>
-        <beamVersion>4.8</beamVersion>
+        <ceresVersion>0.12-SNAPSHOT</ceresVersion>
+        <beamVersion>4.9-SNAPSHOT</beamVersion>
     </properties>
 
     <dependencyManagement>
@@ -151,6 +151,12 @@
             <dependency>
                 <groupId>org.esa.beam.coastcolour</groupId>
                 <artifactId>coastcolour-util</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.beam.coastcolour</groupId>
+                <artifactId>coastcolour-fuzzy-classification</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

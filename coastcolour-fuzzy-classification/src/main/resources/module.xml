@@ -1,0 +1,56 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>coastcolour-fuzzy-classification</symbolicName>
+    <version>1.0</version>
+    <name>CoastColour FuzzyClassification</name>
+
+    <description>
+        Performs fuzzy classification.
+    </description>
+
+    <changelog>
+        <![CDATA[]]>
+    </changelog>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2010 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-envisat-reader</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+
+    <categories>Processing,MERIS</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>fuzzyClassification</id>
+            <helpId>fuzzyClassification</helpId>
+            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+            <parent>tools</parent>
+            <text>Fuzzy Classification (MERIS)...</text>
+            <mnemonic>E</mnemonic>
+            <operatorName>CoastColour.FuzzyClassification</operatorName>
+            <dialogTitle>Fuzzy Correction</dialogTitle>
+            <targetProductNameSuffix>_fuzz</targetProductNameSuffix>
+        </action>
+    </extension>
+
+
+    <extension point="beam-ui:helpSets">
+        <helpSet>
+            <parent>beam-help</parent>
+            <path>doc/help/fuzzyclassification.hs</path>
+        </helpSet>
+    </extension>
+
+</module>

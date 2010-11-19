@@ -27,6 +27,11 @@
             <groupId>org.esa.beam.coastcolour</groupId>
             <artifactId>coastcolour-util</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.esa.beam.coastcolour</groupId>
+            <artifactId>coastcolour-fuzzy-classification</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

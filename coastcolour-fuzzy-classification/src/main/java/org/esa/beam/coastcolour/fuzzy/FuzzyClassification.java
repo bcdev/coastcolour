@@ -7,13 +7,14 @@ public class FuzzyClassification {
     private FuzzyClassification() {
     }
 
-    public static double[] fuzzyFunc(double[] reflectances, double[][] uReflecMeans, double[][][] invCovMatrix,
-                                     int classCount, int bandCount) {
+    public static double[] fuzzyFunc(double[] reflectances, double[][] uReflecMeans, double[][][] invCovMatrix) {
+        int bandCount = reflectances.length;
+        int classCount = invCovMatrix.length;
 
         double[] y = new double[bandCount];
         double[][] yInvers = new double[bandCount][bandCount];   // yinv
-
         double[] alphaChi = new double[classCount];
+
         for (int i = 0; i < classCount; i++) {
             for (int j = 0; j < bandCount; j++) {
                 y[j] = reflectances[j] - uReflecMeans[j][i];

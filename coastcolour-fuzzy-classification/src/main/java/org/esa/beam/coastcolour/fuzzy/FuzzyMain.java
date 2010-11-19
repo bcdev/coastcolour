@@ -9,7 +9,6 @@ import java.net.URL;
 public class FuzzyMain {
 
     private static final int BAND_COUNT = 5;        // NBANDS
-    private static final int CLASS_COUNT = 16;  // NCLASSES
 
     private FuzzyMain() {
     }
@@ -27,8 +26,7 @@ public class FuzzyMain {
         double[][][] invCovMatrix = covarianceInversion(reflecCovMatrix); // y3inv
 
         // end of initialisation; for each pixel, do:
-        double[] outdata = FuzzyClassification.fuzzyFunc(reflectances, reflecMeans, invCovMatrix,
-                                                         CLASS_COUNT, BAND_COUNT);
+        double[] outdata = FuzzyClassification.fuzzyFunc(reflectances, reflecMeans, invCovMatrix);
 
         for (int i = 0, outdataLength = outdata.length; i < outdataLength; i++) {
             double value = outdata[i];

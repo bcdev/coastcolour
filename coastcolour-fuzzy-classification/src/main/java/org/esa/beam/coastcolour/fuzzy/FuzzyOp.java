@@ -1,6 +1,7 @@
 package org.esa.beam.coastcolour.fuzzy;
 
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.IndexCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -13,6 +14,7 @@ import org.esa.beam.framework.gpf.experimental.PointOperator;
 
 import java.net.URL;
 
+@SuppressWarnings({"UnusedDeclaration"})
 @OperatorMetadata(alias = "CoastColour.FuzzyClassification",
                   description = ".",
                   authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
@@ -20,37 +22,45 @@ import java.net.URL;
                   version = "1.0")
 public class FuzzyOp extends PixelOperator {
 
+    private static final String AUXDATA_PATH = "owt16_meris_stats_101119_5band_double.hdf";
+    private static final float[] BAND_WAVELENGTHS = new float[]{410.0f, 443.0f, 490.0f, 510.0f, 555.0f, 670.0f};
+    private static final int CLASS_COUNT = 9;
+
     @SourceProduct(alias = "source")
     private Product sourceProduct;
-
-    @Parameter(notNull = true,
-               valueSet = {
-                       "owt16_meris_stats_101119_5band.hdf",
-                       "owt16_meris_stats_101119_5band_double.hdf",
-                       "owt16_meris_stats_101119_6band.hdf",
-                       "owt16_modis_stats_101111.hdf",
-                       "owt16_seawifs_stats_101111.hdf"
-               })
-    private String auxdataPath;
 
     @Parameter(defaultValue = "reflec")
     private String reflectancesPrefix;
 
     private FuzzyClassification fuzzyClassification;
+    private int bandCount;
 
-    private static final int CLASS_COUNT = 11;
 
     @Override
     protected void configureTargetProduct(Product targetProduct) {
-        for (int i = 0; i < CLASS_COUNT; i++) {
-            targetProduct.addBand("Class " + i, ProductData.TYPE_FLOAT64);
+        for (int i = 1; i <= CLASS_COUNT; i++) {
+            final Band classBand = targetProduct.addBand("class_" + i, ProductData.TYPE_FLOAT32);
+            classBand.setValidPixelExpression(classBand.getName() + " > 0.0");
+            classBand.setNoDataValueUsed(true);
         }
+        final Band domClassBand = targetProduct.addBand("dominant_class", ProductData.TYPE_INT8);
+        domClassBand.setNoDataValue(-1);
+        domClassBand.setNoDataValueUsed(true);
+        final IndexCoding indexCoding = new IndexCoding("Cluster_classes");
+        for (int i = 1; i <= CLASS_COUNT; i++) {
+            indexCoding.addIndex("class_" + i, i, "Class " + i);
+        }
+        targetProduct.getIndexCodingGroup().add(indexCoding);
+        domClassBand.setSampleCoding(indexCoding);
+
+        final Band sumBand = targetProduct.addBand("class_sum", ProductData.TYPE_FLOAT32);
+        sumBand.setValidPixelExpression(sumBand.getName() + " > 0.0");
     }
 
     @Override
     protected void configureSourceSamples(PointOperator.Configurator configurator) {
         // general initialisation
-        final URL resourceUrl = FuzzyClassification.class.getResource(auxdataPath);
+        final URL resourceUrl = FuzzyClassification.class.getResource(AUXDATA_PATH);
         final String filePath = resourceUrl.getFile();
         final Auxdata auxdata;
         try {
@@ -60,16 +70,35 @@ public class FuzzyOp extends PixelOperator {
         }
         fuzzyClassification = new FuzzyClassification(auxdata.getSpectralMeans(),
                                                       auxdata.getInvertedCovarianceMatrices());
-
-        // actual sample configuration
-        configurator.defineSample(0, reflectancesPrefix + "_1");
-        configurator.defineSample(1, reflectancesPrefix + "_2");
-        configurator.defineSample(2, reflectancesPrefix + "_3");
-        configurator.defineSample(3, reflectancesPrefix + "_4");
-        configurator.defineSample(4, reflectancesPrefix + "_5");
-        if (getBandCount() == 6) {
-            configurator.defineSample(5, reflectancesPrefix + "_7");
+        bandCount = auxdata.getSpectralMeans().length;
+        for (int i = 0; i < bandCount; i++) {
+            final String bandName = getSourceBandName(reflectancesPrefix, BAND_WAVELENGTHS[i]);
+            configurator.defineSample(i, bandName);
         }
+    }
+
+    private String getSourceBandName(String reflectancesPrefix, float wavelength) {
+        final double maxDistance = 10.0;
+        final String[] bandNames = sourceProduct.getBandNames();
+        String bestBandName = null;
+        double wavelengthDist = Double.MAX_VALUE;
+        for (String bandName : bandNames) {
+            final Band band = sourceProduct.getBand(bandName);
+            final boolean isSpectralBand = band.getSpectralBandIndex() > -1;
+            if (isSpectralBand && bandName.startsWith(reflectancesPrefix)) {
+                final float currentWavelengthDist = Math.abs(band.getSpectralWavelength() - wavelength);
+                if (currentWavelengthDist < wavelengthDist && currentWavelengthDist < maxDistance) {
+                    wavelengthDist = currentWavelengthDist;
+                    bestBandName = bandName;
+                }
+            }
+        }
+        if (bestBandName == null) {
+            throw new OperatorException(
+                    String.format("Not able to find band with prefix '%s' and wavelength '%4.3f'.",
+                                  reflectancesPrefix, wavelength));
+        }
+        return bestBandName;
     }
 
     @Override
@@ -83,17 +112,23 @@ public class FuzzyOp extends PixelOperator {
 
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
-        int bandCount = getBandCount();        // NBANDS
         if (sourceSamples.length != bandCount) {
             throw new OperatorException("Wrong number of source samples: Expected: " + bandCount +
                                         ", Actual: " + sourceSamples.length);
         }
+
+        if (!areSourceSamplesValid(x, y, sourceSamples)) {
+            for (int i = 0; i < CLASS_COUNT; i++) {
+                targetSamples[i].set(Double.NaN);
+            }
+            targetSamples[9].set(-1);
+            targetSamples[10].set(Double.NaN);
+            return;
+        }
+
         double[] rrsBelowWater = new double[bandCount];
         for (int i = 0; i < bandCount; i++) {
-            Sample sourceSample = sourceSamples[i];
-            final double merisL2Reflec = sourceSample.getDouble();
-            final double rrsAboveWater = merisL2Reflec / Math.PI;
-            rrsBelowWater[i] = rrsAboveWater / (0.52 + 1.7 * rrsAboveWater);
+            rrsBelowWater[i] = convertToSubsurfaceWaterRrs(sourceSamples[i].getDouble());
         }
         double[] membershipIndicators = fuzzyClassification.fuzzyFunc(rrsBelowWater);
 
@@ -106,36 +141,47 @@ public class FuzzyOp extends PixelOperator {
 
         // setting the value for the 9th class to the sum of the last 8 classes
         double ninthClassValue = 0.0;
-        for (int i = 8; i < 16; i++) {
+        for (int i = 8; i < membershipIndicators.length; i++) {
             ninthClassValue += membershipIndicators[i];
         }
         targetSamples[8].set(ninthClassValue);
 
-        // setting the value for the 10th class, which is the max value of all other classes
-        double tenthClassValue = Double.MIN_VALUE;
-        for (int i = 0; i < 16; i++) {
-            final double other = membershipIndicators[i];
-            if (other > tenthClassValue) {
-                tenthClassValue = other;
+        // setting the value for dominant class, which is the max value of all other classes
+        // setting the value for class sum, which is the sum of all other classes
+        int dominantClass = -1;
+        double dominantClassValue = Double.MIN_VALUE;
+        double classSum = 0.0;
+        for (int i = 0; i < 9; i++) {
+            final double currentClassValue = targetSamples[i].getDouble();
+            if (currentClassValue > dominantClassValue) {
+                dominantClassValue = currentClassValue;
+                dominantClass = i + 1;
             }
+            classSum += currentClassValue;
         }
-        targetSamples[9].set(tenthClassValue);
-
-        // setting the value for the 11th class, which is the sum of all other classes
-        double eleventhClassValue = 0.0;
-        for (int i = 0; i < 10; i++) {
-            eleventhClassValue += targetSamples[i].getDouble();
-        }
-        targetSamples[10].set(eleventhClassValue);
+        targetSamples[CLASS_COUNT].set(dominantClass);
+        targetSamples[CLASS_COUNT + 1].set(classSum);
     }
 
-    private int getBandCount() {
-        if (auxdataPath.startsWith("owt16_meris_stats")) {
-            int bandIndex = auxdataPath.lastIndexOf("band");
-            final String number = auxdataPath.substring(bandIndex - 1, bandIndex);
-            return Integer.parseInt(number);
+    private boolean areSourceSamplesValid(int x, int y, Sample[] sourceSamples) {
+        if (!sourceProduct.containsPixel(x, y)) {
+            return false;
         }
-        return 5;
+        for (Sample sourceSample : sourceSamples) {
+            if (!sourceSample.getNode().isPixelValid(x, y)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // todo - conversion should be configurable
+    // should be discussed with CB, KS
+    private double convertToSubsurfaceWaterRrs(double merisL2Reflec) {
+        // convert to remote sensing reflectances
+        final double rrsAboveWater = merisL2Reflec / Math.PI;
+        // convert to subsurface water remote sensing reflectances
+        return rrsAboveWater / (0.52 + 1.7 * rrsAboveWater);
     }
 
     public static class Spi extends OperatorSpi {

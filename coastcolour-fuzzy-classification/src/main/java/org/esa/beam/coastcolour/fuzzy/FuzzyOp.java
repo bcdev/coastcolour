@@ -23,19 +23,26 @@ public class FuzzyOp extends PixelOperator {
     @SourceProduct(alias = "source")
     private Product sourceProduct;
 
-    @Parameter(defaultValue = "5",
-               label = "The number of bands to consider.")
-    private int bandCount;        // NBANDS
+    @Parameter(notNull = true,
+               valueSet = {
+                       "owt16_meris_stats_101119_5band.hdf",
+                       "owt16_meris_stats_101119_5band_double.hdf",
+                       "owt16_meris_stats_101119_6band.hdf",
+                       "owt16_modis_stats_101111.hdf",
+                       "owt16_seawifs_stats_101111.hdf"
+               })
+    private String auxdataPath;
 
-    @Parameter(defaultValue = "16",
-               label = "The number of classes output by the algorithm")
-    private int classCount;  // NCLASSES
+    @Parameter(defaultValue = "reflec")
+    private String reflectancesPrefix;
 
     private FuzzyClassification fuzzyClassification;
 
+    private static final int CLASS_COUNT = 11;
+
     @Override
     protected void configureTargetProduct(Product targetProduct) {
-        for (int i = 0; i < classCount; i++) {
+        for (int i = 0; i < CLASS_COUNT; i++) {
             targetProduct.addBand("Class " + i, ProductData.TYPE_FLOAT64);
         }
     }
@@ -43,7 +50,7 @@ public class FuzzyOp extends PixelOperator {
     @Override
     protected void configureSourceSamples(PointOperator.Configurator configurator) {
         // general initialisation
-        final URL resourceUrl = FuzzyClassification.class.getResource("owt16_meris_stats_101119_5band_double.hdf");
+        final URL resourceUrl = FuzzyClassification.class.getResource(auxdataPath);
         final String filePath = resourceUrl.getFile();
         final Auxdata auxdata;
         try {
@@ -55,12 +62,14 @@ public class FuzzyOp extends PixelOperator {
                                                       auxdata.getInvertedCovarianceMatrices());
 
         // actual sample configuration
-        configurator.defineSample(0, "reflec_1");
-        configurator.defineSample(1, "reflec_2");
-        configurator.defineSample(2, "reflec_3");
-        configurator.defineSample(3, "reflec_4");
-        configurator.defineSample(4, "reflec_5");
-//        configurator.defineSample( 5, "reflec_7" );
+        configurator.defineSample(0, reflectancesPrefix + "_1");
+        configurator.defineSample(1, reflectancesPrefix + "_2");
+        configurator.defineSample(2, reflectancesPrefix + "_3");
+        configurator.defineSample(3, reflectancesPrefix + "_4");
+        configurator.defineSample(4, reflectancesPrefix + "_5");
+        if (getBandCount() == 6) {
+            configurator.defineSample(5, reflectancesPrefix + "_7");
+        }
     }
 
     @Override
@@ -74,6 +83,7 @@ public class FuzzyOp extends PixelOperator {
 
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
+        int bandCount = getBandCount();        // NBANDS
         if (sourceSamples.length != bandCount) {
             throw new OperatorException("Wrong number of source samples: Expected: " + bandCount +
                                         ", Actual: " + sourceSamples.length);
@@ -85,12 +95,47 @@ public class FuzzyOp extends PixelOperator {
             final double rrsAboveWater = merisL2Reflec / Math.PI;
             rrs[i] = rrsAboveWater / (0.52 + 1.7 * rrsAboveWater);
         }
-        double[] membershipIndicator = fuzzyClassification.fuzzyFunc(rrs); // outdata
+        double[] membershipIndicators = fuzzyClassification.fuzzyFunc(rrs); // outdata
 
-        for (int i = 0; i < targetSamples.length; i++) {
+        // setting the values for the first 8 classes
+        for (int i = 0; i < 8; i++) {
             WritableSample targetSample = targetSamples[i];
-            targetSample.set(membershipIndicator[i]);
+            final double membershipIndicator = membershipIndicators[i];
+            targetSample.set(membershipIndicator);
         }
+
+        // setting the value for the 9th class to the sum of the last 8 classes
+        double ninthClassValue = 0.0;
+        for( int i = 8; i < 16; i++ ) {
+            ninthClassValue += membershipIndicators[i];
+        }
+        targetSamples[8].set(ninthClassValue);
+
+        // setting the value for the 10th class, which is the max value of all other classes
+        double tenthClassValue = Double.MIN_VALUE;
+        for( int i = 0; i < 16; i++ ) {
+            final double other = membershipIndicators[i];
+            if(other > tenthClassValue) {
+                tenthClassValue = other;
+            }
+        }
+        targetSamples[9].set(tenthClassValue);
+
+        // setting the value for the 11th class, which is the sum of all other classes
+        double eleventhClassValue = 0.0;
+        for( int i = 0; i < 10; i++ ) {
+            eleventhClassValue += targetSamples[i].getDouble();
+        }
+        targetSamples[10].set(eleventhClassValue);
+    }
+
+    private int getBandCount() {
+        if (auxdataPath.startsWith("owt16_meris_stats")) {
+            int bandIndex = auxdataPath.lastIndexOf("band");
+            final String number = auxdataPath.substring(bandIndex - 1, bandIndex);
+            return Integer.parseInt(number);
+        }
+        return 5;
     }
 
     public static class Spi extends OperatorSpi {

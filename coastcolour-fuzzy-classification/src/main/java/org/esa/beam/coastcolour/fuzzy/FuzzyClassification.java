@@ -4,8 +4,8 @@ import Jama.Matrix;
 
 public class FuzzyClassification {
 
-    private double[][] uReflecMeans;
-    private double[][][] invCovMatrix;
+    private final double[][] uReflecMeans;
+    private final double[][][] invCovMatrix;
 
     public FuzzyClassification(double[][] uReflecMeans, double[][][] invCovMatrix) {
         this.uReflecMeans = uReflecMeans.clone();

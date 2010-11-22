@@ -78,14 +78,14 @@ public class FuzzyOp extends PixelOperator {
             throw new OperatorException("Wrong number of source samples: Expected: " + bandCount +
                                         ", Actual: " + sourceSamples.length);
         }
-        double[] rrs = new double[bandCount];
+        double[] rrsBelowWater = new double[bandCount];
         for (int i = 0; i < bandCount; i++) {
             Sample sourceSample = sourceSamples[i];
             final double merisL2Reflec = sourceSample.getDouble();
             final double rrsAboveWater = merisL2Reflec / Math.PI;
-            rrs[i] = rrsAboveWater / (0.52 + 1.7 * rrsAboveWater);
+            rrsBelowWater[i] = rrsAboveWater / (0.52 + 1.7 * rrsAboveWater);
         }
-        double[] membershipIndicator = fuzzyClassification.fuzzyFunc(rrs); // outdata
+        double[] membershipIndicator = fuzzyClassification.fuzzyFunc(rrsBelowWater);
 
         for (int i = 0; i < targetSamples.length; i++) {
             WritableSample targetSample = targetSamples[i];

@@ -37,10 +37,10 @@
             <helpId>fuzzyClassification</helpId>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
             <parent>tools</parent>
-            <text>Fuzzy Classification (MERIS)...</text>
+            <text>Fuzzy Water Classification (MERIS)...</text>
             <mnemonic>E</mnemonic>
             <operatorName>CoastColour.FuzzyClassification</operatorName>
-            <dialogTitle>Fuzzy Correction</dialogTitle>
+            <dialogTitle>Fuzzy Water Classification</dialogTitle>
             <targetProductNameSuffix>_fuzz</targetProductNameSuffix>
         </action>
     </extension>

@@ -15,7 +15,7 @@ public class FuzzyClassificationTest {
 
     @Before
     public void setup() throws IOException, InvalidRangeException {
-        final URL resourceUrl = FuzzyClassification.class.getResource("owt16_meris_stats_101119_5band_double.hdf");
+        final URL resourceUrl = FuzzyClassification.class.getResource("owt16_meris_stats_101119_5band.hdf");
         final String filePath = resourceUrl.getFile();
         auxdata = new Auxdata(filePath);
     }

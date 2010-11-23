@@ -2,6 +2,7 @@ package org.esa.beam.coastcolour.fuzzy;
 
 import Jama.Matrix;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;
 import ucar.nc2.Group;
@@ -9,7 +10,6 @@ import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 public class Auxdata {
@@ -17,22 +17,22 @@ public class Auxdata {
     private double[][] spectralMeans;
     private double[][][] invCovarianceMatrices;
 
-    public Auxdata(String resourcePath) throws IOException, InvalidRangeException {
-        final NetcdfFile netcdfFile = NetcdfFile.open(resourcePath);
+    public Auxdata(String filePath) throws IOException, InvalidRangeException {
+        final NetcdfFile netcdfFile = NetcdfFile.open(filePath);
         try {
             final Group rootGroup = netcdfFile.getRootGroup();
             final List<Variable> variableList = rootGroup.getVariables();
 
             for (Variable variable : variableList) {
                 final int[] origin = new int[variable.getRank()];
-                Arrays.fill(origin, 0);
-                final Array array = variable.read(new Section(origin, variable.getShape()));//            
+                final int[] shape = variable.getShape();
+                final Array array = variable.read(new Section(origin, shape));
+                final Array arrayDouble = Array.factory(DataType.DOUBLE, shape, array.get1DJavaArray(Double.class));
                 if ("class_means".equals(variable.getName())) {
-                    spectralMeans = (double[][]) array.copyToNDJavaArray();
+                    spectralMeans = (double[][]) arrayDouble.copyToNDJavaArray();
                 }
                 if ("class_covariance".equals(variable.getName()) || "Yinv".equals(variable.getName())) {
-                    double[][][] covarianceMatrices = (double[][][]) array.copyToNDJavaArray();
-                    invCovarianceMatrices = covarianceInversion(covarianceMatrices);
+                    invCovarianceMatrices = covarianceInversion((double[][][]) arrayDouble.copyToNDJavaArray());
                 }
             }
         } finally {

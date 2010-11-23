@@ -22,7 +22,7 @@ import java.net.URL;
                   version = "1.0")
 public class FuzzyOp extends PixelOperator {
 
-    private static final String AUXDATA_PATH = "owt16_meris_stats_101119_5band_double.hdf";
+    private static final String AUXDATA_PATH = "owt16_meris_stats_101119_5band.hdf";
     private static final float[] BAND_WAVELENGTHS = new float[]{410.0f, 443.0f, 490.0f, 510.0f, 555.0f, 670.0f};
     private static final int CLASS_COUNT = 9;
 

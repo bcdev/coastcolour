@@ -41,7 +41,7 @@
             <mnemonic>E</mnemonic>
             <operatorName>CoastColour.FuzzyClassification</operatorName>
             <dialogTitle>Fuzzy Water Classification</dialogTitle>
-            <targetProductNameSuffix>_fuzz</targetProductNameSuffix>
+            <targetProductNameSuffix>_fwc</targetProductNameSuffix>
         </action>
     </extension>
 

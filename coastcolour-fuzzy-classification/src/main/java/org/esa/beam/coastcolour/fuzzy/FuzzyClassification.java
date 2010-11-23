@@ -1,20 +1,71 @@
 package org.esa.beam.coastcolour.fuzzy;
 
 import Jama.Matrix;
+import com.bc.ceres.core.Assert;
 
+/**
+ * Computes fractional class memberships for a spectrum.
+ */
 public class FuzzyClassification {
 
     private final double[][] uReflecMeans;
     private final double[][][] invCovMatrix;
+    private int bandCount;
+    private int classCount;
 
-    public FuzzyClassification(double[][] uReflecMeans, double[][][] invCovMatrix) {
-        this.uReflecMeans = uReflecMeans.clone();
-        this.invCovMatrix = invCovMatrix.clone();
+    /**
+     * Creates an instance of the fuzzy classification class.
+     *
+     * @param classReflectanceMeans  a two dimensional array specifying the mean spectrum for each class.
+     *                               The first dimension specifies the number of bands,
+     *                               the second specifies the number of classes.
+     * @param invertedClassCovMatrix a three dimensional array.
+     *                               The first dimension specifies the number of classes,
+     *                               the second and third dimensions build up the squared matrix defined by
+     *                               the number of bands.
+     */
+    public FuzzyClassification(double[][] classReflectanceMeans, double[][][] invertedClassCovMatrix) {
+        bandCount = classReflectanceMeans.length;
+        classCount = classReflectanceMeans[0].length;
+        final String pattern = "Number of %s of classReflectanceMeans [%d] and invertedClassCovMatrix [%d] do not match.";
+        Assert.argument(invertedClassCovMatrix.length == classCount,
+                        String.format(pattern, "classes", classCount, invertedClassCovMatrix.length));
+        Assert.argument(invertedClassCovMatrix[0].length == bandCount,
+                        String.format(pattern, "bands", bandCount, invertedClassCovMatrix[0].length));
+        uReflecMeans = classReflectanceMeans.clone();
+        invCovMatrix = invertedClassCovMatrix.clone();
     }
 
+    /**
+     * The number of bands used by the classification.
+     *
+     * @return the number bands used.
+     */
+    public int getBandCount() {
+        return bandCount;
+    }
+
+    /**
+     * The number of classes computed by the classification.
+     *
+     * @return the number classes computed.
+     */
+    public int getClassCount() {
+        return classCount;
+    }
+
+    /**
+     * Computes the fractional class memberships for the given spectrum.
+     *
+     * @param reflectances The spectrum to compute the class memberships for.
+     *                     The length of the spectrum must be equal to {@link #getBandCount()}
+     *
+     * @return The fractional class memberships. The length of the returned array
+     *         is equal to {@link #getClassCount()}
+     */
     public double[] computeClassMemberships(double[] reflectances) {
-        int bandCount = reflectances.length;
-        int classCount = invCovMatrix.length;
+        final String pattern = "Number of reflectances must be %d but is %d.";
+        Assert.argument(reflectances.length == bandCount, String.format(pattern, bandCount, reflectances.length));
 
         double[] y = new double[bandCount];
         double[][] yInvers = new double[bandCount][bandCount];   // yinv
@@ -47,6 +98,7 @@ public class FuzzyClassification {
     }
 
     // Computes the incomplete gamma function by its continued fraction
+
     private static double computeIGFContinuedFraction(double a, double x) {
         final double min = 1.0e-30;
         final double constFactor = Math.exp(-x + a * Math.log(x) - logGamma(a));
@@ -76,6 +128,7 @@ public class FuzzyClassification {
     }
 
     // Computes the incomplete gamma function by its series representation
+
     private static double computeIGFSeries(double a, double x) {
         if (x < 0.0) {
             throw new IllegalArgumentException("x must be greater or equal to zero");

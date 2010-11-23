@@ -25,7 +25,7 @@ public class FuzzyClassificationTest {
         final double[] reflectances = {0.0307, 0.0414, 0.0500, 0.0507, 0.0454};
         final FuzzyClassification fuzzyClassification = new FuzzyClassification(auxdata.getSpectralMeans(),
                                                                                 auxdata.getInvertedCovarianceMatrices());
-        final double[] classMembershipProbability = fuzzyClassification.fuzzyFunc(reflectances);
+        final double[] classMembershipProbability = fuzzyClassification.computeClassMemberships(reflectances);
 
         // these values are validated by algorithm provider Timothy Moore
         double[] expectedValues = new double[]{

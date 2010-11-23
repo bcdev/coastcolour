@@ -130,7 +130,7 @@ public class FuzzyOp extends PixelOperator {
         for (int i = 0; i < bandCount; i++) {
             rrsBelowWater[i] = convertToSubsurfaceWaterRrs(sourceSamples[i].getDouble());
         }
-        double[] membershipIndicators = fuzzyClassification.fuzzyFunc(rrsBelowWater);
+        double[] membershipIndicators = fuzzyClassification.computeClassMemberships(rrsBelowWater);
 
         // setting the values for the first 8 classes
         for (int i = 0; i < 8; i++) {

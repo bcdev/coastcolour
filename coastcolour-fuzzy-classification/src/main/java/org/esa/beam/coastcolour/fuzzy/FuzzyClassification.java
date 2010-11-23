@@ -12,7 +12,7 @@ public class FuzzyClassification {
         this.invCovMatrix = invCovMatrix.clone();
     }
 
-    public double[] fuzzyFunc(double[] reflectances) {
+    public double[] computeClassMemberships(double[] reflectances) {
         int bandCount = reflectances.length;
         int classCount = invCovMatrix.length;
 

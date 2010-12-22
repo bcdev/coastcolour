@@ -58,6 +58,7 @@
         <module>coastcolour-bootstrap</module>
         <module>coastcolour-util</module>
         <module>coastcolour-fuzzy-classification</module>
+        <module>coastcolour-processing</module>
 
     </modules>
 
@@ -145,6 +146,12 @@
                 <artifactId>beam-gpf</artifactId>
                 <version>${beamVersion}</version>
             </dependency>
+            <dependency>
+                <groupId>org.esa.beam</groupId>
+                <artifactId>beam-netcdf</artifactId>
+                <version>1.0.101-SNAPSHOT</version>
+            </dependency>
+
 
             <!-- COASTCOLOUR Libraries ############################################# -->
 

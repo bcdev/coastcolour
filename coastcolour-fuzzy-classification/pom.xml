@@ -10,7 +10,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <name>COASTCOLOUR Fuzzy Classification</name>
+    <name>CoastColour Fuzzy Classification</name>
     <groupId>org.esa.beam.coastcolour</groupId>
     <artifactId>coastcolour-fuzzy-classification</artifactId>
     <version>1.0-SNAPSHOT</version>

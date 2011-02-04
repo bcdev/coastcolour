@@ -13,8 +13,8 @@
 
     <groupId>org.esa.beam.coastcolour</groupId>
     <artifactId>coastcolour-util</artifactId>
-    <name>COASTCOLOUR Utilities</name>
-    <description>COASTCOLOUR Utilities</description>
+    <name>CoastColour Utilities</name>
+    <description>CoastColour Utilities</description>
 
     <dependencies>
         <dependency>

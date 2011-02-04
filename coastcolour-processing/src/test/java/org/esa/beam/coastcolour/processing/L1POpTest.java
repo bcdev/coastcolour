@@ -1,11 +1,13 @@
 package org.esa.beam.coastcolour.processing;
 
 import org.esa.beam.dataio.envisat.EnvisatConstants;
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.OperatorException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -23,7 +25,7 @@ public class L1POpTest {
 
 
     @Test
-    public void testInitialize() throws Exception {
+    public void testInitialize() throws OperatorException, ParseException {
 
         Product source = getL1bProduct();
         HashMap<String, Product> sources = new HashMap<String, Product>();
@@ -31,6 +33,19 @@ public class L1POpTest {
 
         Product target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, sources);
         assertNotNull(target);
+
+        Band[] sourceBands = source.getBands();
+        for (Band sourceBand : sourceBands) {
+            assertNotNull("Target band missing: " + sourceBand.getName(), target.getBand(sourceBand.getName()));
+        }
+
+        // Tests on generated flags dataset
+        String flagsName = "cloud_classif_flags";
+        assertNotNull("Target band missing: " + flagsName, target.getBand(flagsName));
+        assertNotNull(target.getBand(flagsName).getFlagCoding());
+        assertEquals(flagsName, target.getBand(flagsName).getFlagCoding().getName());
+        assertSame(target.getFlagCodingGroup().get(flagsName),
+                   target.getBand(flagsName).getFlagCoding());
     }
 
     private Product getL1bProduct() throws ParseException {
@@ -54,7 +69,7 @@ public class L1POpTest {
         product.addBand("radiance_15", ProductData.TYPE_UINT16);
         product.addBand("l1_flags", ProductData.TYPE_UINT8);
         product.addBand("detector_index", ProductData.TYPE_UINT16);
-        float[] sunZenithData = new float[width*height];
+        float[] sunZenithData = new float[width * height];
         TiePointGrid sunZenithTpg = new TiePointGrid(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME,
                                                      width, height, 0, 0, 1, 1, sunZenithData);
         product.addTiePointGrid(sunZenithTpg);

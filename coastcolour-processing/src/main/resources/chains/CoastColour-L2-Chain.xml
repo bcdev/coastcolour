@@ -1,0 +1,44 @@
+<graph id="CC-L2-Chain">
+    <version>1.0</version>
+
+    <node id="RC">
+        <operator>Meris.CorrectRadiometry</operator>
+        <sources>
+            <source>${source}</source>
+        </sources>
+        <parameters>
+            <doCalibration>false</doCalibration>
+            <doSmile>true</doSmile>
+            <doEqualization>false</doEqualization>
+            <!--      <reproVersion>REPROCESSING_2</reproVersion> -->
+            <doRadToRefl>false</doRadToRefl>
+        </parameters>
+    </node>
+
+    <node id="Idepix">
+        <operator>idepix.ComputeChain</operator>
+        <sources>
+            <source>${source}</source>
+        </sources>
+    </node>
+
+    <node id="Merge">
+        <operator>Merge</operator>
+        <sources>
+            <rc>RC</rc>
+            <idepix>Idepix</idepix>
+        </sources>
+        <parameters>
+            <productType>MER_RR_CCL1P</productType>
+            <baseGeoInfo>rc</baseGeoInfo>
+            <band>
+                <product>rc</product>
+                <namePattern>.*</namePattern>
+            </band>
+            <band>
+                <product>idepix</product>
+                <name>cloud_classif_flags</name>
+            </band>
+        </parameters>
+    </node>
+</graph>

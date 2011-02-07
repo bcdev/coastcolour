@@ -46,6 +46,7 @@ public class L1POpTest {
         assertEquals(flagsName, target.getBand(flagsName).getFlagCoding().getName());
         assertSame(target.getFlagCodingGroup().get(flagsName),
                    target.getBand(flagsName).getFlagCoding());
+        assertEquals("MER_FR_L1P", target.getProductType());
     }
 
     private Product getL1bProduct() throws ParseException {

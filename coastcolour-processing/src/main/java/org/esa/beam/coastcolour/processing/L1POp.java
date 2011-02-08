@@ -3,6 +3,7 @@ package org.esa.beam.coastcolour.processing;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -21,6 +22,7 @@ public class L1POp extends Operator {
     static final String IDEPIX_OPERATOR_ALIAS = "idepix.ComputeChain";
     static final String RADIOMETRY_OPERATOR_ALIAS = "Meris.CorrectRadiometry";
     static final String CLOUD_FLAG_BAND_NAME = "cloud_classif_flags";
+    private static final String L1P_FLAG_BAND_NAME = "l1p_flags";
     @SourceProduct(alias = "l1b", description = "MERIS L1b (N1) product")
     private Product source;
     @Parameter(defaultValue = "true")
@@ -45,13 +47,19 @@ public class L1POp extends Operator {
             throw new OperatorException(msg);
         }
         cloud_classif_flags.setSourceImage(idepixProduct.getBand(CLOUD_FLAG_BAND_NAME).getSourceImage());
+        cloud_classif_flags.setName(L1P_FLAG_BAND_NAME);
+
         final FlagCoding flagCoding = idepixProduct.getBand(CLOUD_FLAG_BAND_NAME).getFlagCoding();
         if (flagCoding == null) {
             String msg = String.format("Flag band '%1$s' has no associated flag-coding.", CLOUD_FLAG_BAND_NAME);
             throw new OperatorException(msg);
         }
+
         ProductUtils.copyFlagCoding(flagCoding, rcProduct);
-        cloud_classif_flags.setSampleCoding(rcProduct.getFlagCodingGroup().get(CLOUD_FLAG_BAND_NAME));
+        final ProductNodeGroup<FlagCoding> rcFlagCodingGroup = rcProduct.getFlagCodingGroup();
+        final FlagCoding cloudFlagCoding = rcFlagCodingGroup.get(CLOUD_FLAG_BAND_NAME);
+        cloud_classif_flags.setSampleCoding(cloudFlagCoding);
+        cloudFlagCoding.setName(L1P_FLAG_BAND_NAME);
 
         final String productType = rcProduct.getProductType();
         rcProduct.setProductType(productType.replaceFirst("_1P", "L1P"));
@@ -59,6 +67,7 @@ public class L1POp extends Operator {
     }
 
     public static class Spi extends OperatorSpi {
+
         public Spi() {
             super(L1POp.class);
         }

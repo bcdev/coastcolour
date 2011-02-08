@@ -39,8 +39,8 @@ public class L1POpTest {
             assertNotNull("Target band missing: " + sourceBand.getName(), target.getBand(sourceBand.getName()));
         }
 
-        // Tests on generated flags dataset
-        String flagsName = "cloud_classif_flags";
+        // Tests on generated flag dataset
+        String flagsName = "l1p_flags";
         assertNotNull("Target band missing: " + flagsName, target.getBand(flagsName));
         assertNotNull(target.getBand(flagsName).getFlagCoding());
         assertEquals(flagsName, target.getBand(flagsName).getFlagCoding().getName());

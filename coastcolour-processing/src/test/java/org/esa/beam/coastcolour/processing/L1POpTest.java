@@ -1,6 +1,5 @@
 package org.esa.beam.coastcolour.processing;
 
-import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Product;
@@ -23,9 +22,17 @@ public class L1POpTest {
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis();
     }
 
+    public static void dumpBands(Product target) {
+        String[] bandNames = target.getBandNames();
+        for (int i = 0, bandNamesLength = bandNames.length; i < bandNamesLength; i++) {
+            String bandName = bandNames[i];
+            System.out.println(target.getName() + ".bands[" + i + "] = " + bandName);
+        }
+    }
+
 
     @Test
-    public void testInitialize() throws OperatorException, ParseException {
+    public void testCreateProduct() throws OperatorException, ParseException {
 
         Product source = getL1bProduct();
         HashMap<String, Product> sources = new HashMap<String, Product>();
@@ -34,46 +41,51 @@ public class L1POpTest {
         Product target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, sources);
         assertNotNull(target);
 
+        L1POpTest.dumpBands(target);
+
         Band[] sourceBands = source.getBands();
         for (Band sourceBand : sourceBands) {
             assertNotNull("Target band missing: " + sourceBand.getName(), target.getBand(sourceBand.getName()));
         }
 
-        // Tests on generated flag dataset
-        String flagsName = "l1p_flags";
+        // Tests on generated flags dataset
+        testFlags(target, "l1p_flags");
+    }
+
+    public static void testFlags(Product target, String flagsName) {
         assertNotNull("Target band missing: " + flagsName, target.getBand(flagsName));
         assertNotNull(target.getBand(flagsName).getFlagCoding());
         assertEquals(flagsName, target.getBand(flagsName).getFlagCoding().getName());
         assertSame(target.getFlagCodingGroup().get(flagsName),
                    target.getBand(flagsName).getFlagCoding());
-        assertEquals("MER_FR_L1P", target.getProductType());
     }
 
-    private Product getL1bProduct() throws ParseException {
+    public static Product getL1bProduct() throws ParseException {
         int width = 10;
         int height = 10;
         Product product = new Product("MER_FR__1P", "MER_FR__1P", width, height);
-        product.addBand("radiance_1", ProductData.TYPE_UINT16);
-        product.addBand("radiance_2", ProductData.TYPE_UINT16);
-        product.addBand("radiance_3", ProductData.TYPE_UINT16);
-        product.addBand("radiance_4", ProductData.TYPE_UINT16);
-        product.addBand("radiance_5", ProductData.TYPE_UINT16);
-        product.addBand("radiance_6", ProductData.TYPE_UINT16);
-        product.addBand("radiance_7", ProductData.TYPE_UINT16);
-        product.addBand("radiance_8", ProductData.TYPE_UINT16);
-        product.addBand("radiance_9", ProductData.TYPE_UINT16);
-        product.addBand("radiance_10", ProductData.TYPE_UINT16);
-        product.addBand("radiance_11", ProductData.TYPE_UINT16);
-        product.addBand("radiance_12", ProductData.TYPE_UINT16);
-        product.addBand("radiance_13", ProductData.TYPE_UINT16);
-        product.addBand("radiance_14", ProductData.TYPE_UINT16);
-        product.addBand("radiance_15", ProductData.TYPE_UINT16);
+        for(int i = 0; i < 15; i++) {
+            product.addBand(String.format("radiance_%d", (i + 1)), ProductData.TYPE_UINT16).setSpectralBandIndex(i);
+
+        }
         product.addBand("l1_flags", ProductData.TYPE_UINT8);
         product.addBand("detector_index", ProductData.TYPE_UINT16);
-        float[] sunZenithData = new float[width * height];
-        TiePointGrid sunZenithTpg = new TiePointGrid(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME,
-                                                     width, height, 0, 0, 1, 1, sunZenithData);
-        product.addTiePointGrid(sunZenithTpg);
+        float[] tiePointData = new float[width * height];
+        product.addTiePointGrid(new TiePointGrid("sun_zenith", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("sun_azimuth", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("view_zenith", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("view_azimuth", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("dem_alt", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("atm_press", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("ozone", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("latitude", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("longitude", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("dem_rough", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("lat_corr", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("lon_corr", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("zonal_wind", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("merid_wind", width, height, 0, 0, 1, 1, tiePointData));
+        product.addTiePointGrid(new TiePointGrid("rel_hum", width, height, 0, 0, 1, 1, tiePointData));
 
         FlagCoding l1_flags = new FlagCoding("l1_flags");
         l1_flags.addFlag("INVALID", 0x01, "No Description.");

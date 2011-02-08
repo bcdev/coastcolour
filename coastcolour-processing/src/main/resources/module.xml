@@ -1,0 +1,116 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>coastcolour-processing</symbolicName>
+    <version>1.0</version>
+    <name>BEAM CoastColour Processing</name>
+
+    <description>
+        <![CDATA[
+
+    ]]>
+    </description>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <changelog>
+        <![CDATA[
+
+        ]]>
+    </changelog>
+
+    <!-- BEAM Basics -->
+
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-envisat-reader</module>
+    </dependency>
+    <dependency>
+        <module>beam-netcdf</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+
+     <!-- Other Operators -->
+
+     <dependency>
+         <module>beam-meris-radiometry</module>
+     </dependency>
+
+     <dependency>
+         <module>beam-meris-glint</module>
+     </dependency>
+
+     <dependency>
+         <module>beam-idepix</module>
+     </dependency>
+
+     <dependency>
+         <module>beam-meris-qaa</module>
+     </dependency>
+
+     <dependency>
+         <module>beam-meris-case2-water</module>
+     </dependency>
+
+
+
+    <categories>Processor,MERIS</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>coastColourProcessingL1P</id>
+            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+            <operatorName>CoastColour.L1P</operatorName>
+            <text>CoastColour L1P...</text>
+            <dialogTitle>CoastColour L1P Processor</dialogTitle>
+            <targetProductNameSuffix>_L1P</targetProductNameSuffix>
+            <shortDescr></shortDescr>
+            <longDescr></longDescr>
+            <mnemonic/>
+            <parent>tools</parent>
+            <helpID></helpID>
+        </action>
+        <action>
+            <id>coastColourProcessingL2R</id>
+            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+            <operatorName>CoastColour.L2R</operatorName>
+            <text>CoastColour L2R...</text>
+            <dialogTitle>CoastColour L2R Processor</dialogTitle>
+            <targetProductNameSuffix>_L2R</targetProductNameSuffix>
+            <shortDescr></shortDescr>
+            <longDescr></longDescr>
+            <mnemonic/>
+            <parent>tools</parent>
+            <helpID></helpID>
+        </action>
+        <action>
+            <id>coastColourProcessingL2W</id>
+            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+            <operatorName>CoastColour.L2W</operatorName>
+            <text>CoastColour L2W...</text>
+            <dialogTitle>CoastColour L2W Processor</dialogTitle>
+            <targetProductNameSuffix>_L2W</targetProductNameSuffix>
+            <shortDescr></shortDescr>
+            <longDescr></longDescr>
+            <mnemonic/>
+            <parent>tools</parent>
+            <helpID></helpID>
+        </action>
+    </extension>
+
+    <!--<extension point="beam-ui:helpSets">-->
+        <!--<helpSet>-->
+            <!--<parent>beam-help</parent>-->
+            <!--<path>doc/help/meris-glint.hs</path>-->
+        <!--</helpSet>-->
+    <!--</extension>-->
+
+</module>

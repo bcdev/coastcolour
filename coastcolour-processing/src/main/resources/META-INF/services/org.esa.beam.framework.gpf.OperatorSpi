@@ -1,1 +1,3 @@
 org.esa.beam.coastcolour.processing.L1POp$Spi
+org.esa.beam.coastcolour.processing.L2ROp$Spi
+org.esa.beam.coastcolour.processing.L2WOp$Spi

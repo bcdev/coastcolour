@@ -36,17 +36,13 @@ public class L2WOpTest {
     public void testCreateProductFromL2R() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
         source = getL1pProduct(source);
-        HashMap<String, Product> sources = new HashMap<String, Product>();
-        sources.put("source", source);
-        source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, sources);
+        source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
         testTargetProduct(source);
     }
 
     private static void testTargetProduct(Product source) {
-        HashMap<String, Product> sources = new HashMap<String, Product>();
-        sources.put("source", source);
 
-        Product target = GPF.createProduct("CoastColour.L2W", GPF.NO_PARAMS, sources);
+        Product target = GPF.createProduct("CoastColour.L2W", GPF.NO_PARAMS, source);
         assertNotNull(target);
 
         L1POpTest.dumpBands(target);
@@ -81,10 +77,7 @@ public class L2WOpTest {
     }
 
     private Product getL1pProduct(Product source) {
-        HashMap<String, Product> sources = new HashMap<String, Product>();
-        sources.put("source", source);
-        source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, sources);
-        return source;
+        return GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
     }
 
 }

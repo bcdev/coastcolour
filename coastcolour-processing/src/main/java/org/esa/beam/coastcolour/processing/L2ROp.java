@@ -14,18 +14,17 @@ import java.util.HashMap;
 public class L2ROp extends Operator {
 
     @SourceProduct(description = "MERIS L1B or L1P product")
-    private Product source;
+    private Product sourceProduct;
 
     @Override
     public void initialize() throws OperatorException {
-        if (!isL1PSourceProduct()) {
-            HashMap<String, Product> l1pSourceProducts = new HashMap<String, Product>();
-            l1pSourceProducts.put("source", source);
-            source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1pSourceProducts);
+        Product sourceProduct = this.sourceProduct;
+        if (!isL1PSourceProduct(sourceProduct)) {
+            sourceProduct = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, sourceProduct);
         }
 
         HashMap<String, Product> sourceProducts = new HashMap<String, Product>();
-        sourceProducts.put("merisProduct", source);
+        sourceProducts.put("merisProduct", sourceProduct);
 
         HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("doSmileCorrection", false);
@@ -42,8 +41,8 @@ public class L2ROp extends Operator {
         setTargetProduct(targetProduct);
     }
 
-    private boolean isL1PSourceProduct() {
-        return source.containsBand("l1p_flags");
+    private boolean isL1PSourceProduct(Product sourceProduct) {
+        return sourceProduct.containsBand("l1p_flags");
     }
 
     public static class Spi extends OperatorSpi {

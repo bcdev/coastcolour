@@ -28,17 +28,13 @@ public class L2ROpTest {
     @Test
     public void testCreateProductFromL1P() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
-        HashMap<String, Product> sources = new HashMap<String, Product>();
-        sources.put("source", source);
-        source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, sources);
+        source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
         testTargetProduct(source);
     }
 
     private static void testTargetProduct(Product source) {
-        HashMap<String, Product> sources = new HashMap<String, Product>();
-        sources.put("source", source);
 
-        Product target = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, sources);
+        Product target = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
         assertNotNull(target);
 
         L1POpTest.dumpBands(target);

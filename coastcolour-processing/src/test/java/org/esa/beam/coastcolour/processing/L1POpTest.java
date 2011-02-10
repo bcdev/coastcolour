@@ -35,10 +35,8 @@ public class L1POpTest {
     public void testCreateProduct() throws OperatorException, ParseException {
 
         Product source = getL1bProduct();
-        HashMap<String, Product> sources = new HashMap<String, Product>();
-        sources.put("source", source);
 
-        Product target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, sources);
+        Product target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
         assertNotNull(target);
 
         L1POpTest.dumpBands(target);

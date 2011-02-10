@@ -24,7 +24,7 @@ public class L1POp extends Operator {
     static final String CLOUD_FLAG_BAND_NAME = "cloud_classif_flags";
     private static final String L1P_FLAG_BAND_NAME = "l1p_flags";
     @SourceProduct(alias = "l1b", description = "MERIS L1b (N1) product")
-    private Product source;
+    private Product sourceProduct;
     @Parameter(defaultValue = "true")
     private boolean doSmile;
 
@@ -36,7 +36,7 @@ public class L1POp extends Operator {
         rcParams.put("doSmile", doSmile);
         rcParams.put("doEqualization", true);
         rcParams.put("doRadToRefl", false);
-        final Product rcProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, source);
+        final Product rcProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);
 
         final Product idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, GPF.NO_PARAMS, rcProduct);
 

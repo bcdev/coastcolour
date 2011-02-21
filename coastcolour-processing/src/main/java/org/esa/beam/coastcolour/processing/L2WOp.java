@@ -6,6 +6,7 @@ import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 
 import java.util.HashMap;
@@ -16,12 +17,25 @@ public class L2WOp extends Operator {
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")
     private Product sourceProduct;
 
+    @Parameter(defaultValue = "true")
+    private boolean useIdepix;
+
+    @Parameter(defaultValue = "toa_reflec_10 > toa_reflec_6 AND toa_reflec_13 > 0.0475",
+               label = "Land detection expression",
+               description = "The arithmetic expression used for land detection.",
+               notEmpty = true, notNull = true)
+    private String landExpression;
+
+
     @Override
     public void initialize() throws OperatorException {
 
         Product sourceProduct = this.sourceProduct;
         if (!isL2RSourceProduct(sourceProduct)) {
-            sourceProduct = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, sourceProduct);
+            HashMap<String, Object> l2rParams = new HashMap<String, Object>();
+            l2rParams.put("useIdepix", useIdepix);
+            l2rParams.put("landExpression", landExpression);
+            sourceProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
         }
 
         HashMap<String, Product> sourceProducts = new HashMap<String, Product>();
@@ -37,6 +51,7 @@ public class L2WOp extends Operator {
     }
 
     public static class Spi extends OperatorSpi {
+
         public Spi() {
             super(L2WOp.class);
         }

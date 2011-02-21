@@ -7,7 +7,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.text.ParseException;
-import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
@@ -48,7 +47,7 @@ public class L2WOpTest {
         L1POpTest.dumpBands(target);
 
         String[] expectedBandNames = new String[]{
-                "reflec_1", "reflec_2", "reflec_13", "a_gelbstoff", "tsm", "chl_conc"
+                "reflec_1", "reflec_2", "reflec_13", "a_ys_443", "tsm", "chl_conc"
         };
         for (String name : expectedBandNames) {
             assertNotNull("Target band missing: " + name, target.getBand(name));

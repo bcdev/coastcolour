@@ -2,6 +2,8 @@ package org.esa.beam.coastcolour.processing;
 
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.TiePointGrid;
@@ -50,6 +52,25 @@ public class L1POpTest {
         testFlags(target, "l1p_flags");
     }
 
+    @Test
+    public void testCreateProductWithoutIdepix() throws OperatorException, ParseException {
+
+        Product source = getL1bProduct();
+        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+        l1pParams.put("useIdepix", false);
+        Product target = GPF.createProduct("CoastColour.L1P", l1pParams, source);
+        assertNotNull(target);
+
+        Band[] sourceBands = source.getBands();
+        for (Band sourceBand : sourceBands) {
+            assertNotNull("Target band missing: " + sourceBand.getName(), target.getBand(sourceBand.getName()));
+        }
+
+        // Tests l1p_flags does not exist
+        assertFalse("l1p_flags is not expected in target product. Idepix is disabled.",
+                    target.containsBand("l1p_flags"));
+    }
+
     public static void testFlags(Product target, String flagsName) {
         assertNotNull("Target band missing: " + flagsName, target.getBand(flagsName));
         assertNotNull(target.getBand(flagsName).getFlagCoding());
@@ -62,7 +83,7 @@ public class L1POpTest {
         int width = 10;
         int height = 10;
         Product product = new Product("MER_FR__1P", "MER_FR__1P", width, height);
-        for(int i = 0; i < 15; i++) {
+        for (int i = 0; i < 15; i++) {
             product.addBand(String.format("radiance_%d", (i + 1)), ProductData.TYPE_UINT16).setSpectralBandIndex(i);
 
         }
@@ -92,6 +113,13 @@ public class L1POpTest {
         product.getFlagCodingGroup().add(l1_flags);
         product.setStartTime(ProductData.UTC.parse("12-Mar-2003 13:45:36"));
         product.setEndTime(ProductData.UTC.parse("12-Mar-2003 13:48:12"));
+        final MetadataElement sph = new MetadataElement("SPH");
+        final MetadataAttribute sphDescriptor = new MetadataAttribute("SPH_DESCRIPTOR",
+                                                                      ProductData.createInstance(
+                                                                              "MER_FR__1P SPECIFIC HEADER"), true);
+        sph.addAttribute(sphDescriptor);
+        product.getMetadataRoot().addElement(sph);
+
         return product;
     }
 

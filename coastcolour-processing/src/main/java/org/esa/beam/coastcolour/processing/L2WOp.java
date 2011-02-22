@@ -26,6 +26,10 @@ public class L2WOp extends Operator {
                notEmpty = true, notNull = true)
     private String landExpression;
 
+    @Parameter(defaultValue = "true", label = "Output water leaving reflectance",
+               description = "Toggles the output of water leaving irradiance reflectance.")
+    private boolean outputReflec;
+
 
     @Override
     public void initialize() throws OperatorException {
@@ -42,6 +46,7 @@ public class L2WOp extends Operator {
         sourceProducts.put("source", sourceProduct);
         HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("doAtmosphericCorrection", false);
+        parameters.put("outputReflec", outputReflec);
         Product targetProduct = GPF.createProduct("Meris.Case2IOP", parameters, sourceProducts);
         setTargetProduct(targetProduct);
     }

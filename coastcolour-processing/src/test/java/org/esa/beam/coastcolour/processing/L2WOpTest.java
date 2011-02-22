@@ -7,6 +7,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -21,14 +23,16 @@ public class L2WOpTest {
     @Test
     public void testCreateProductFromL1B() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
-        testTargetProduct(source);
+        final String[] expectedBandNames = {"reflec_1", "reflec_2", "reflec_13", "a_ys_443", "tsm", "chl_conc"};
+        testTargetProduct(source, expectedBandNames, GPF.NO_PARAMS);
     }
 
     @Test
     public void testCreateProductFromL1P() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
         source = getL1pProduct(source);
-        testTargetProduct(source);
+        final String[] expectedBandNames = {"reflec_1", "reflec_2", "reflec_13", "a_ys_443", "tsm", "chl_conc"};
+        testTargetProduct(source, expectedBandNames, GPF.NO_PARAMS);
     }
 
     @Test
@@ -36,19 +40,33 @@ public class L2WOpTest {
         Product source = L1POpTest.getL1bProduct();
         source = getL1pProduct(source);
         source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
-        testTargetProduct(source);
+        final String[] expectedBandNames = {"reflec_1", "reflec_2", "reflec_13", "a_ys_443", "tsm", "chl_conc"};
+        testTargetProduct(source, expectedBandNames, GPF.NO_PARAMS);
     }
 
-    private static void testTargetProduct(Product source) {
+    @Test
+    public void testCreateProductWithoutReflectances() throws OperatorException, ParseException {
+        Product source = L1POpTest.getL1bProduct();
+        source = getL1pProduct(source);
+        source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
+        final Map<String, Object> params = new HashMap<String, Object>();
+        params.put("outputReflec", false);
+        final Product target = testTargetProduct(source, new String[]{"a_ys_443", "tsm", "chl_conc"}, params);
 
-        Product target = GPF.createProduct("CoastColour.L2W", GPF.NO_PARAMS, source);
+        String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
+        for (String notExpectedBandName : notExpectedBandNames) {
+            assertFalse("Product should not contain " + notExpectedBandName, target.containsBand(notExpectedBandName));
+        }
+    }
+
+    private static Product testTargetProduct(Product source, String[] expectedBandNames,
+                                             Map<String, Object> l2wParams) {
+
+        Product target = GPF.createProduct("CoastColour.L2W", l2wParams, source);
         assertNotNull(target);
 
         L1POpTest.dumpBands(target);
 
-        String[] expectedBandNames = new String[]{
-                "reflec_1", "reflec_2", "reflec_13", "a_ys_443", "tsm", "chl_conc"
-        };
         for (String name : expectedBandNames) {
             assertNotNull("Target band missing: " + name, target.getBand(name));
         }
@@ -62,17 +80,7 @@ public class L2WOpTest {
         // Tests on generated L2W flags dataset
         L1POpTest.testFlags(target, "case2_flags");
 
-//            private static final String BAND_NAME_A_GELBSTOFF = "a_gelbstoff";
-//    private static final String BAND_NAME_A_PIGMENT = "a_pig";
-//    private static final String BAND_NAME_A_TOTAL = "a_total";
-//    private static final String BAND_NAME_B_TSM = "b_tsm";
-//    private static final String BAND_NAME_TSM = "tsm";
-//    private static final String BAND_NAME_CHL_CONC = "chl_conc";
-//    private static final String BAND_NAME_CHI_SQUARE = "chiSquare";
-//    private static final String BAND_NAME_K_MIN = "K_min";
-//    private static final String BAND_NAME_Z90_MAX = "Z90_max";
-//    private static final String BAND_NAME_KD_490 = "Kd_490";
-//    private static final String BAND_NAME_TURBIDITY_INDEX = "turbidity_index";
+        return target;
     }
 
     private Product getL1pProduct(Product source) {

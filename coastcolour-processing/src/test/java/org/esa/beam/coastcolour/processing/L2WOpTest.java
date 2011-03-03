@@ -80,6 +80,9 @@ public class L2WOpTest {
         // Tests on generated L2W flags dataset
         L1POpTest.testFlags(target, "case2_flags");
 
+        assertEquals(source.getStartTime().toString(), target.getStartTime().toString());
+        assertEquals(source.getEndTime().toString(), target.getEndTime().toString());
+
         return target;
     }
 

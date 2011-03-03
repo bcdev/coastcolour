@@ -8,6 +8,7 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.idepix.operators.CloudScreeningSelector;
 
 import java.util.HashMap;
 
@@ -20,11 +21,20 @@ public class L2ROp extends Operator {
     @Parameter(defaultValue = "true")
     private boolean useIdepix;
 
+    @Parameter(defaultValue = "GlobAlbedo", valueSet = {"GlobAlbedo", "QWG",  "CoastColour"})
+    private CloudScreeningSelector algorithm;
+
     @Parameter(defaultValue = "toa_reflec_10 > toa_reflec_6 AND toa_reflec_13 > 0.0475",
                label = "Land detection expression",
                description = "The arithmetic expression used for land detection.",
                notEmpty = true, notNull = true)
     private String landExpression;
+
+    @Parameter(defaultValue = "toa_reflec_14 > 0.2",
+               label = "Cloud/Ice detection expression",
+               description = "The arithmetic expression used for cloud/ice detection.",
+               notEmpty = true, notNull = true)
+    private String cloudIceExpression;
 
 
     @Override
@@ -33,6 +43,7 @@ public class L2ROp extends Operator {
         if (!isL1PSourceProduct(sourceProduct)) {
             HashMap<String, Object> l1pParams = new HashMap<String, Object>();
             l1pParams.put("useIdepix", useIdepix);
+            l1pParams.put("algorithm", algorithm);
             sourceProduct = GPF.createProduct("CoastColour.L1P", l1pParams, sourceProduct);
         }
 
@@ -47,7 +58,7 @@ public class L2ROp extends Operator {
         parameters.put("outputTransmittance", false);
         parameters.put("deriveRwFromPath", false);
         parameters.put("landExpression", landExpression);
-        parameters.put("cloudIceExpression", "toa_reflec_14 > 0.2");
+        parameters.put("cloudIceExpression", cloudIceExpression);
         parameters.put("useFlint", false);
 
         Product targetProduct = GPF.createProduct("Meris.GlintCorrection", parameters, sourceProducts);

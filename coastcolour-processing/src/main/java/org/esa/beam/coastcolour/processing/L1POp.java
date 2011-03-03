@@ -33,6 +33,9 @@ public class L1POp extends Operator {
     @Parameter(defaultValue = "true")
     private boolean useIdepix;
 
+    @Parameter(defaultValue = "GlobAlbedo", valueSet = {"GlobAlbedo", "QWG",  "CoastColour"})
+    private CloudScreeningSelector algorithm;
+
     @Override
     public void initialize() throws OperatorException {
 
@@ -45,7 +48,7 @@ public class L1POp extends Operator {
 
         if (useIdepix) {
             HashMap<String, Object> idepixParams = new HashMap<String, Object>();
-            idepixParams.put("algorithm", CloudScreeningSelector.QWG);
+            idepixParams.put("algorithm", algorithm);
             final Product idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, idepixParams, rcProduct);
 
             final Band cloudClassifFlags = ProductUtils.copyBand(CLOUD_FLAG_BAND_NAME, idepixProduct, rcProduct);

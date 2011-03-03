@@ -8,6 +8,7 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.idepix.operators.CloudScreeningSelector;
 
 import java.util.HashMap;
 
@@ -20,11 +21,20 @@ public class L2WOp extends Operator {
     @Parameter(defaultValue = "true")
     private boolean useIdepix;
 
+    @Parameter(defaultValue = "GlobAlbedo", valueSet = {"GlobAlbedo", "QWG",  "CoastColour"})
+    private CloudScreeningSelector algorithm;
+
     @Parameter(defaultValue = "toa_reflec_10 > toa_reflec_6 AND toa_reflec_13 > 0.0475",
                label = "Land detection expression",
                description = "The arithmetic expression used for land detection.",
                notEmpty = true, notNull = true)
     private String landExpression;
+
+    @Parameter(defaultValue = "toa_reflec_14 > 0.2",
+               label = "Cloud/Ice detection expression",
+               description = "The arithmetic expression used for cloud/ice detection.",
+               notEmpty = true, notNull = true)
+    private String cloudIceExpression;
 
     @Parameter(defaultValue = "true", label = "Output water leaving reflectance",
                description = "Toggles the output of water leaving irradiance reflectance.")
@@ -38,7 +48,9 @@ public class L2WOp extends Operator {
         if (!isL2RSourceProduct(sourceProduct)) {
             HashMap<String, Object> l2rParams = new HashMap<String, Object>();
             l2rParams.put("useIdepix", useIdepix);
+            l2rParams.put("algorithm", algorithm);
             l2rParams.put("landExpression", landExpression);
+            l2rParams.put("cloudIceExpression", cloudIceExpression);
             sourceProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
         }
 

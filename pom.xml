@@ -78,11 +78,6 @@
     </modules>
 
     <properties>
-        <!--
-        In version 3 of Maven the sourceEncoding property will be embedded in the
-        build tag. For now the convention is to that it as property.
-        TODO: Move the sourceEncoding property to the build tag if version 3 is released
-        -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <ceresVersion>0.12-SNAPSHOT</ceresVersion>
         <beamVersion>4.9-SNAPSHOT</beamVersion>
@@ -243,7 +238,6 @@
                     <target>1.6</target>
                     <debug>true</debug>
                     <fork>false</fork>
-                    <encoding>ISO-8859-1</encoding>
                 </configuration>
             </plugin>
             <plugin>

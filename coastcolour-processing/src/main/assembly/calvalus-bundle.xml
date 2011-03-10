@@ -16,6 +16,7 @@
             <includes>
                 <include>*:beam-collocation*</include>
                 <include>*:beam-idepix*</include>
+                <include>*:beam-watermask*</include>
                 <include>*:beam-meris-brr*</include>
                 <include>*:beam-meris-case2-water*</include>
                 <include>*:beam-meris-glint*</include>

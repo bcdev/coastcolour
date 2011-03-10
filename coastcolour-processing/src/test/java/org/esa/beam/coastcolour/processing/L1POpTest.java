@@ -2,10 +2,12 @@ package org.esa.beam.coastcolour.processing;
 
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
+import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -77,6 +79,15 @@ public class L1POpTest {
         assertEquals(flagsName, target.getBand(flagsName).getFlagCoding().getName());
         assertSame(target.getFlagCodingGroup().get(flagsName),
                    target.getBand(flagsName).getFlagCoding());
+        final ProductNodeGroup<Mask> maskGroup = target.getMaskGroup();
+
+        final String msg = "Expected Mask does not exist";
+        assertTrue(msg, maskGroup.contains(("CLOUD_BUFFER")));
+        assertTrue(msg, maskGroup.contains(("CLEAR_LAND")));
+        assertTrue(msg, maskGroup.contains(("CLEAR_WATER")));
+        assertTrue(msg, maskGroup.contains(("BRIGHTWHITE")));
+        assertTrue(msg, maskGroup.contains(("VEG_RISK")));
+        assertTrue(msg, maskGroup.contains(("GLINT_RISK")));
     }
 
     public static Product getL1bProduct() throws ParseException {

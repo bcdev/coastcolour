@@ -18,10 +18,25 @@ public class L2WOp extends Operator {
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")
     private Product sourceProduct;
 
+    @Parameter(defaultValue = "true",
+               label = "Perform calibration",
+               description = "Whether to perform the calibration.")
+    private boolean doCalibration;
+
+    @Parameter(defaultValue = "true",
+               label = "Perform SMILE correction",
+               description = "Whether to perform SMILE correction.")
+    private boolean doSmile;
+
+    @Parameter(defaultValue = "true",
+               label = "Perform equalization",
+               description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
+    private boolean doEqualization;
+
     @Parameter(defaultValue = "true")
     private boolean useIdepix;
 
-    @Parameter(defaultValue = "GlobAlbedo", valueSet = {"GlobAlbedo", "QWG",  "CoastColour"})
+    @Parameter(defaultValue = "GlobAlbedo", valueSet = {"GlobAlbedo", "QWG", "CoastColour"})
     private CloudScreeningSelector algorithm;
 
     @Parameter(defaultValue = "toa_reflec_10 > toa_reflec_6 AND toa_reflec_13 > 0.0475",
@@ -47,6 +62,9 @@ public class L2WOp extends Operator {
         Product sourceProduct = this.sourceProduct;
         if (!isL2RSourceProduct(sourceProduct)) {
             HashMap<String, Object> l2rParams = new HashMap<String, Object>();
+            l2rParams.put("doCalibration", doCalibration);
+            l2rParams.put("doSmile", doSmile);
+            l2rParams.put("doEqualization", doEqualization);
             l2rParams.put("useIdepix", useIdepix);
             l2rParams.put("algorithm", algorithm);
             l2rParams.put("landExpression", landExpression);

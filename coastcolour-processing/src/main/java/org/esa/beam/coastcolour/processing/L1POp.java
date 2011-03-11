@@ -31,14 +31,15 @@ public class L1POp extends Operator {
                description = "Whether to perform the calibration.")
     private boolean doCalibration;
 
-    @Parameter(defaultValue = "true")
+    @Parameter(defaultValue = "true",
+               label = "Perform SMILE correction",
+               description = "Whether to perform SMILE correction.")
     private boolean doSmile;
 
     @Parameter(defaultValue = "true",
                label = "Perform equalization",
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
-
 
     @Parameter(defaultValue = "true")
     private boolean useIdepix;

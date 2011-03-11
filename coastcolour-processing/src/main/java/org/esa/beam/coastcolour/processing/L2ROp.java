@@ -18,10 +18,25 @@ public class L2ROp extends Operator {
     @SourceProduct(description = "MERIS L1B or L1P product")
     private Product sourceProduct;
 
+    @Parameter(defaultValue = "true",
+               label = "Perform calibration",
+               description = "Whether to perform the calibration.")
+    private boolean doCalibration;
+
+    @Parameter(defaultValue = "true",
+               label = "Perform SMILE correction",
+               description = "Whether to perform SMILE correction.")
+    private boolean doSmile;
+
+    @Parameter(defaultValue = "true",
+               label = "Perform equalization",
+               description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
+    private boolean doEqualization;
+
     @Parameter(defaultValue = "true")
     private boolean useIdepix;
 
-    @Parameter(defaultValue = "GlobAlbedo", valueSet = {"GlobAlbedo", "QWG",  "CoastColour"})
+    @Parameter(defaultValue = "GlobAlbedo", valueSet = {"GlobAlbedo", "QWG", "CoastColour"})
     private CloudScreeningSelector algorithm;
 
     @Parameter(defaultValue = "toa_reflec_10 > toa_reflec_6 AND toa_reflec_13 > 0.0475",
@@ -42,6 +57,9 @@ public class L2ROp extends Operator {
         Product sourceProduct = this.sourceProduct;
         if (!isL1PSourceProduct(sourceProduct)) {
             HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+            l1pParams.put("doCalibration", doCalibration);
+            l1pParams.put("doSmile", doSmile);
+            l1pParams.put("doEqualization", doEqualization);
             l1pParams.put("useIdepix", useIdepix);
             l1pParams.put("algorithm", algorithm);
             sourceProduct = GPF.createProduct("CoastColour.L1P", l1pParams, sourceProduct);

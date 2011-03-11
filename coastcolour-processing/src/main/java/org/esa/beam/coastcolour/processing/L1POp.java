@@ -26,8 +26,19 @@ public class L1POp extends Operator {
     @SourceProduct(alias = "l1b", description = "MERIS L1b (N1) product")
     private Product sourceProduct;
 
+    @Parameter(defaultValue = "true",
+               label = "Perform calibration",
+               description = "Whether to perform the calibration.")
+    private boolean doCalibration;
+
     @Parameter(defaultValue = "true")
     private boolean doSmile;
+
+    @Parameter(defaultValue = "true",
+               label = "Perform equalization",
+               description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
+    private boolean doEqualization;
+
 
     @Parameter(defaultValue = "true")
     private boolean useIdepix;
@@ -39,9 +50,9 @@ public class L1POp extends Operator {
     public void initialize() throws OperatorException {
 
         final Map<String, Object> rcParams = new HashMap<String, Object>();
-        rcParams.put("doCalibration", true);
+        rcParams.put("doCalibration", doCalibration);
         rcParams.put("doSmile", doSmile);
-        rcParams.put("doEqualization", true);
+        rcParams.put("doEqualization", doEqualization);
         rcParams.put("doRadToRefl", false);
         final Product rcProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);
 

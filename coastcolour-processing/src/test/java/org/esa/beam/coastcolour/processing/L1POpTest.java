@@ -50,8 +50,22 @@ public class L1POpTest {
             assertNotNull("Target band missing: " + sourceBand.getName(), target.getBand(sourceBand.getName()));
         }
 
+        final ProductNodeGroup<FlagCoding> flagCodingGroup = target.getFlagCodingGroup();
+        assertEquals(2, flagCodingGroup.getNodeCount());
+
         // Tests on generated flags dataset
         testFlags(target, "l1p_flags");
+
+        final ProductNodeGroup<Mask> maskGroup = target.getMaskGroup();
+
+        final String msg = "Expected Mask does not exist";
+        assertTrue(msg, maskGroup.contains(("CLOUD_BUFFER")));
+        assertTrue(msg, maskGroup.contains(("CLEAR_LAND")));
+        assertTrue(msg, maskGroup.contains(("CLEAR_WATER")));
+        assertTrue(msg, maskGroup.contains(("BRIGHTWHITE")));
+        assertTrue(msg, maskGroup.contains(("VEG_RISK")));
+        assertTrue(msg, maskGroup.contains(("GLINT_RISK")));
+
     }
 
     @Test
@@ -77,17 +91,8 @@ public class L1POpTest {
         assertNotNull("Target band missing: " + flagsName, target.getBand(flagsName));
         assertNotNull(target.getBand(flagsName).getFlagCoding());
         assertEquals(flagsName, target.getBand(flagsName).getFlagCoding().getName());
-        assertSame(target.getFlagCodingGroup().get(flagsName),
-                   target.getBand(flagsName).getFlagCoding());
-        final ProductNodeGroup<Mask> maskGroup = target.getMaskGroup();
-
-        final String msg = "Expected Mask does not exist";
-        assertTrue(msg, maskGroup.contains(("CLOUD_BUFFER")));
-        assertTrue(msg, maskGroup.contains(("CLEAR_LAND")));
-        assertTrue(msg, maskGroup.contains(("CLEAR_WATER")));
-        assertTrue(msg, maskGroup.contains(("BRIGHTWHITE")));
-        assertTrue(msg, maskGroup.contains(("VEG_RISK")));
-        assertTrue(msg, maskGroup.contains(("GLINT_RISK")));
+        final ProductNodeGroup<FlagCoding> flagCodingGroup = target.getFlagCodingGroup();
+        assertSame(flagCodingGroup.get(flagsName), target.getBand(flagsName).getFlagCoding());
     }
 
     public static Product getL1bProduct() throws ParseException {

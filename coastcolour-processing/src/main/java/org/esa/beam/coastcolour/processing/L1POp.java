@@ -2,7 +2,9 @@ package org.esa.beam.coastcolour.processing;
 
 import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -23,6 +25,7 @@ public class L1POp extends Operator {
     static final String RADIOMETRY_OPERATOR_ALIAS = "Meris.CorrectRadiometry";
     static final String CLOUD_FLAG_BAND_NAME = "cloud_classif_flags";
     private static final String L1P_FLAG_BAND_NAME = "l1p_flags";
+    private static final String L1_FLAG_BAND_NAME = "l1_flags";
     @SourceProduct(alias = "l1b", description = "MERIS L1b (N1) product")
     private Product sourceProduct;
 
@@ -67,25 +70,31 @@ public class L1POp extends Operator {
                                            CLOUD_FLAG_BAND_NAME, IDEPIX_OPERATOR_ALIAS);
                 throw new OperatorException(msg);
             }
-
-            final Band[] idepixBands = idepixProduct.getBands();
-            for (Band idepixBand : idepixBands) {
-                // remove all flag bands except the CLOUD_FLAG_BAND_NAME
-                // this is done, so ProductUtils.copyFlagBands(...) can be used
-                if (idepixBand.isFlagBand() && !idepixBand.getName().equals(CLOUD_FLAG_BAND_NAME)) {
-                    idepixProduct.removeBand(idepixBand);
-                }
-            }
-            ProductUtils.copyFlagBands(idepixProduct, rcProduct);
-            final MultiLevelImage idepixFlagsSourceImage = idepixProduct.getBand(CLOUD_FLAG_BAND_NAME).getSourceImage();
-            rcProduct.getBand(CLOUD_FLAG_BAND_NAME).setSourceImage(idepixFlagsSourceImage);
-            rcProduct.getBand(CLOUD_FLAG_BAND_NAME).setName(L1P_FLAG_BAND_NAME);
-            rcProduct.getFlagCodingGroup().get(CLOUD_FLAG_BAND_NAME).setName(L1P_FLAG_BAND_NAME);
+            copyIdepixFlagBand(rcProduct, idepixProduct);
         }
 
         final String productType = rcProduct.getProductType();
         rcProduct.setProductType(productType.replaceFirst("_1P", "L1P"));
         setTargetProduct(rcProduct);
+    }
+
+    private void copyIdepixFlagBand(Product rcProduct, Product idepixProduct) {
+        final Band[] idepixBands = idepixProduct.getBands();
+        for (Band idepixBand : idepixBands) {
+            // remove all flag bands except the CLOUD_FLAG_BAND_NAME
+            // this is done, so ProductUtils.copyFlagBands(...) can be used
+            if (idepixBand.isFlagBand() && !idepixBand.getName().equals(CLOUD_FLAG_BAND_NAME)) {
+                idepixProduct.removeBand(idepixBand);
+            }
+        }
+        final ProductNodeGroup<FlagCoding> idepixFlagCodingGroup = idepixProduct.getFlagCodingGroup();
+        idepixFlagCodingGroup.remove(idepixFlagCodingGroup.get(L1_FLAG_BAND_NAME));
+
+        ProductUtils.copyFlagBands(idepixProduct, rcProduct);
+        final MultiLevelImage idepixFlagsSourceImage = idepixProduct.getBand(CLOUD_FLAG_BAND_NAME).getSourceImage();
+        rcProduct.getBand(CLOUD_FLAG_BAND_NAME).setSourceImage(idepixFlagsSourceImage);
+        rcProduct.getBand(CLOUD_FLAG_BAND_NAME).setName(L1P_FLAG_BAND_NAME);
+        rcProduct.getFlagCodingGroup().get(CLOUD_FLAG_BAND_NAME).setName(L1P_FLAG_BAND_NAME);
     }
 
     public static class Spi extends OperatorSpi {

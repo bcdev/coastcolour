@@ -69,6 +69,7 @@ public class L2ROp extends Operator {
         sourceProducts.put("merisProduct", sourceProduct);
 
         HashMap<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("doNormalization", true);
         parameters.put("doSmileCorrection", false);
         parameters.put("outputTosa", false);
         parameters.put("outputReflec", true);

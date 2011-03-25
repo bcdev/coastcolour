@@ -96,6 +96,7 @@ public class L1POp extends Operator {
             idepixParams.put("algorithm", algorithm);
             idepixParams.put("ipfQWGUserDefinedRhoToa442Threshold", brightTestThreshold);
             idepixParams.put("rhoAgReferenceWavelength", brightTestWavelength);
+            idepixParams.put("ipfOutputLandWater", true);
             idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, idepixParams, rcProduct);
 
             checkForExistingFlagBand(idepixProduct, CLOUD_FLAG_BAND_NAME);

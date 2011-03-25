@@ -33,7 +33,7 @@ public class L2WOp extends Operator {
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
 
-    @Parameter(defaultValue = "false")
+    @Parameter(defaultValue = "true")
     private boolean useIdepix;
 
     @Parameter(defaultValue = "CoastColour", valueSet = {"GlobAlbedo", "QWG", "CoastColour"})

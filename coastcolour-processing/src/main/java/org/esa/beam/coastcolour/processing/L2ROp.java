@@ -36,7 +36,7 @@ public class L2ROp extends Operator {
     @Parameter(defaultValue = "true")
     private boolean useIdepix;
 
-    @Parameter(defaultValue = "GlobAlbedo", valueSet = {"GlobAlbedo", "QWG", "CoastColour"})
+    @Parameter(defaultValue = "CoastColour", valueSet = {"GlobAlbedo", "QWG", "CoastColour"})
     private CloudScreeningSelector algorithm;
 
     @Parameter(defaultValue = "toa_reflec_10 > toa_reflec_6 AND toa_reflec_13 > 0.0475",

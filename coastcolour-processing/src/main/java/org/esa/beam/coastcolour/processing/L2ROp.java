@@ -28,7 +28,7 @@ public class L2ROp extends Operator {
                description = "Whether to perform SMILE correction.")
     private boolean doSmile;
 
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
                label = "Perform equalization",
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
@@ -39,13 +39,13 @@ public class L2ROp extends Operator {
     @Parameter(defaultValue = "CoastColour", valueSet = {"GlobAlbedo", "QWG", "CoastColour"})
     private CloudScreeningSelector algorithm;
 
-    @Parameter(defaultValue = "toa_reflec_10 > toa_reflec_6 AND toa_reflec_13 > 0.0475",
+    @Parameter(defaultValue = "l1p_flags.F_LANDCONS",
                label = "Land detection expression",
                description = "The arithmetic expression used for land detection.",
                notEmpty = true, notNull = true)
     private String landExpression;
 
-    @Parameter(defaultValue = "toa_reflec_14 > 0.2",
+    @Parameter(defaultValue = "l1p_flags.F_CLOUD || l1p_flags.F_SNOW_ICE",
                label = "Cloud/Ice detection expression",
                description = "The arithmetic expression used for cloud/ice detection.",
                notEmpty = true, notNull = true)

@@ -59,21 +59,9 @@ public class L1POp extends Operator {
     private double brightTestThreshold;
     @Parameter(label = "Bright Test Reference Wavelength [nm]", defaultValue = "865",
                valueSet = {
-                       "412",
-                       "442",
-                       "490",
-                       "510",
-                       "560",
-                       "620",
-                       "665",
-                       "681",
-                       "705",
-                       "753",
-                       "760",
-                       "775",
-                       "865",
-                       "890",
-                       "900"
+                       "412", "442", "490", "510", "560",
+                       "620", "665", "681", "705", "753",
+                       "760", "775", "865", "890", "900"
                })
     private int brightTestWavelength;
 

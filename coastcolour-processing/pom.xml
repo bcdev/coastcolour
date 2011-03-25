@@ -48,6 +48,7 @@
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-meris-case2-water</artifactId>
         </dependency>
+
     </dependencies>
 
     <build>

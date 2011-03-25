@@ -102,7 +102,6 @@ public class L1POp extends Operator {
             checkForExistingFlagBand(idepixProduct, CLOUD_FLAG_BAND_NAME);
             checkForExistingFlagBand(idepixProduct, LAND_FLAG_BAND_NAME);
 
-//            copyIdepixFlagBand(rcProduct, idepixProduct);
             attacheFlagBandL1P(rcProduct, idepixProduct);
         }
 

@@ -9,8 +9,11 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.esa.beam.framework.gpf.experimental.PixelOperator;
-import org.esa.beam.framework.gpf.experimental.PointOperator;
+import org.esa.beam.framework.gpf.pointop.PixelOperator;
+import org.esa.beam.framework.gpf.pointop.ProductConfigurer;
+import org.esa.beam.framework.gpf.pointop.Sample;
+import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
+import org.esa.beam.framework.gpf.pointop.WritableSample;
 
 import java.net.URL;
 
@@ -35,9 +38,11 @@ public class FuzzyOp extends PixelOperator {
     private FuzzyClassification fuzzyClassification;
     private int bandCount;
 
-
     @Override
-    protected void configureTargetProduct(Product targetProduct) {
+    protected void configureTargetProduct(ProductConfigurer productConfigurer) {
+        super.configureTargetProduct(productConfigurer);
+
+        Product targetProduct = productConfigurer.getTargetProduct();
         for (int i = 1; i <= CLASS_COUNT; i++) {
             final Band classBand = targetProduct.addBand("class_" + i, ProductData.TYPE_FLOAT32);
             classBand.setValidPixelExpression(classBand.getName() + " > 0.0");
@@ -58,7 +63,7 @@ public class FuzzyOp extends PixelOperator {
     }
 
     @Override
-    protected void configureSourceSamples(PointOperator.Configurator configurator) {
+    protected void configureSourceSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
         // general initialisation
         final URL resourceUrl = FuzzyClassification.class.getResource(AUXDATA_PATH);
         final String filePath = resourceUrl.getFile();
@@ -73,7 +78,7 @@ public class FuzzyOp extends PixelOperator {
         bandCount = auxdata.getSpectralMeans().length;
         for (int i = 0; i < bandCount; i++) {
             final String bandName = getSourceBandName(reflectancesPrefix, BAND_WAVELENGTHS[i]);
-            configurator.defineSample(i, bandName);
+            sampleConfigurer.defineSample(i, bandName);
         }
     }
 
@@ -102,11 +107,11 @@ public class FuzzyOp extends PixelOperator {
     }
 
     @Override
-    protected void configureTargetSamples(PointOperator.Configurator configurator) {
+    protected void configureTargetSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
         Band[] bands = getTargetProduct().getBands();
         for (int i = 0; i < bands.length; i++) {
             Band band = bands[i];
-            configurator.defineSample(i, band.getName());
+            sampleConfigurer.defineSample(i, band.getName());
         }
     }
 
@@ -114,7 +119,7 @@ public class FuzzyOp extends PixelOperator {
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         if (sourceSamples.length != bandCount) {
             throw new OperatorException("Wrong number of source samples: Expected: " + bandCount +
-                                        ", Actual: " + sourceSamples.length);
+                                                ", Actual: " + sourceSamples.length);
         }
 
         if (!areSourceSamplesValid(x, y, sourceSamples)) {

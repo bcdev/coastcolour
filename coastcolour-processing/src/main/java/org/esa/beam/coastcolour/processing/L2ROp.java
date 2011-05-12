@@ -24,8 +24,8 @@ public class L2ROp extends Operator {
     private boolean doCalibration;
 
     @Parameter(defaultValue = "true",
-               label = "Perform SMILE correction",
-               description = "Whether to perform SMILE correction.")
+               label = "Perform Smile-effect correction",
+               description = "Whether to perform MERIS Smile-effect correction.")
     private boolean doSmile;
 
     @Parameter(defaultValue = "false",

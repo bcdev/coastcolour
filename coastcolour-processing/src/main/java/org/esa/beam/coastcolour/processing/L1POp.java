@@ -1,6 +1,7 @@
 package org.esa.beam.coastcolour.processing;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Mask;
@@ -16,6 +17,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
+import org.esa.beam.util.ProductUtils;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -65,7 +67,8 @@ public class L1POp extends Operator {
                })
     private int brightTestWavelength;
 
-    private Product idepixProduct;
+    private Band landFlagBand;
+    private Band cloudFlagBand;
     private int shiftCloudFlags;
 
 
@@ -77,7 +80,10 @@ public class L1POp extends Operator {
         rcParams.put("doSmile", doSmile);
         rcParams.put("doEqualization", doEqualization);
         rcParams.put("doRadToRefl", false);
-        final Product rcProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);
+        final Product l1pProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);
+        // TODO - cause of a bug in MerisRadiometryCorrectionOp (BEAM-1305) we need to
+        // copy the masks manually
+        ProductUtils.copyMasks(sourceProduct, l1pProduct);
 
         if (useIdepix) {
             HashMap<String, Object> idepixParams = new HashMap<String, Object>();
@@ -85,20 +91,39 @@ public class L1POp extends Operator {
             idepixParams.put("ipfQWGUserDefinedRhoToa442Threshold", brightTestThreshold);
             idepixParams.put("rhoAgReferenceWavelength", brightTestWavelength);
             idepixParams.put("ipfOutputLandWater", true);
-            idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, idepixParams, rcProduct);
+            Product idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, idepixParams, l1pProduct);
 
             checkForExistingFlagBand(idepixProduct, CLOUD_FLAG_BAND_NAME);
             checkForExistingFlagBand(idepixProduct, LAND_FLAG_BAND_NAME);
+            landFlagBand = idepixProduct.getBand(LAND_FLAG_BAND_NAME);
+            cloudFlagBand = idepixProduct.getBand(CLOUD_FLAG_BAND_NAME);
 
-            attacheFlagBandL1P(rcProduct, idepixProduct);
+            attachFlagBandL1P(l1pProduct, idepixProduct);
         }
 
-        final String productType = rcProduct.getProductType();
-        rcProduct.setProductType(productType.replaceFirst("_1P", "L1P"));
-        setTargetProduct(rcProduct);
+        reorderBands(l1pProduct);
+
+        final String productType = l1pProduct.getProductType();
+        l1pProduct.setProductType(productType.replaceFirst("_1P", "L1P"));
+        setTargetProduct(l1pProduct);
     }
 
-    private void attacheFlagBandL1P(Product targetProduct, Product idepixProduct) {
+    private void reorderBands(Product l1pProduct) {
+        Band detectorBand = l1pProduct.getBand(EnvisatConstants.MERIS_DETECTOR_INDEX_DS_NAME);
+        Band l1bFlagBand = l1pProduct.getBand(EnvisatConstants.MERIS_L1B_FLAGS_DS_NAME);
+        Band l1pFlagBand = l1pProduct.getBand(L1P_FLAG_BAND_NAME);
+        l1pProduct.removeBand(detectorBand);
+        l1pProduct.removeBand(l1bFlagBand);
+        if (l1pFlagBand != null) {
+            l1pProduct.removeBand(l1pFlagBand);
+        }
+
+        l1pProduct.addBand(detectorBand);
+        l1pProduct.addBand(l1bFlagBand);
+        l1pProduct.addBand(l1pFlagBand);
+    }
+
+    private void attachFlagBandL1P(Product l1pProduct, Product idepixProduct) {
         FlagCoding l1pFC = new FlagCoding(L1P_FLAG_BAND_NAME);
         final FlagCoding landFC = idepixProduct.getFlagCodingGroup().get(LAND_FLAG_BAND_NAME);
         final FlagCoding cloudFC = idepixProduct.getFlagCodingGroup().get(CLOUD_FLAG_BAND_NAME);
@@ -107,17 +132,17 @@ public class L1POp extends Operator {
         shiftCloudFlags = landFC.getNumAttributes();
         copyFlags(cloudFC, l1pFC, shiftCloudFlags);
 
-        targetProduct.getFlagCodingGroup().add(l1pFC);
-        final Band l1pBand = targetProduct.addBand(L1P_FLAG_BAND_NAME, ProductData.TYPE_INT32);
+        l1pProduct.getFlagCodingGroup().add(l1pFC);
+        final Band l1pBand = l1pProduct.addBand(L1P_FLAG_BAND_NAME, ProductData.TYPE_INT32);
         l1pBand.setSampleCoding(l1pFC);
 
         Mask[] landMasks = createLandMasks(landFC);
         for (Mask mask : landMasks) {
-            targetProduct.getMaskGroup().add(mask);
+            l1pProduct.getMaskGroup().add(mask);
         }
         Mask[] cloudMasks = createCloudMasks(cloudFC);
         for (Mask mask : cloudMasks) {
-            targetProduct.getMaskGroup().add(mask);
+            l1pProduct.getMaskGroup().add(mask);
         }
     }
 
@@ -176,8 +201,8 @@ public class L1POp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         final Rectangle rectangle = targetTile.getRectangle();
-        final Tile landTile = getSourceTile(idepixProduct.getBand(LAND_FLAG_BAND_NAME), rectangle);
-        final Tile cloudTile = getSourceTile(idepixProduct.getBand(CLOUD_FLAG_BAND_NAME), rectangle);
+        final Tile landTile = getSourceTile(landFlagBand, rectangle);
+        final Tile cloudTile = getSourceTile(cloudFlagBand, rectangle);
 
         final int[] targetBuffer = targetTile.getDataBufferInt();
         final byte[] landBuffer = landTile.getDataBufferByte();

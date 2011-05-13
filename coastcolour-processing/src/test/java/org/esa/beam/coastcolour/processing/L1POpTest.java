@@ -56,6 +56,11 @@ public class L1POpTest {
         // Tests on generated flags dataset
         testFlags(target, "l1p_flags");
 
+        // test order of bands
+        int index = target.getBandIndex("detector_index");
+        assertEquals("l1_flags", target.getBandAt(index + 1).getName());
+        assertEquals("l1p_flags", target.getBandAt(index + 2).getName());
+
         final ProductNodeGroup<Mask> maskGroup = target.getMaskGroup();
 
         final String msg = "Expected Mask does not exist";

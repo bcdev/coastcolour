@@ -110,17 +110,17 @@ public class L1POp extends Operator {
 
     private void reorderBands(Product l1pProduct) {
         Band detectorBand = l1pProduct.getBand(EnvisatConstants.MERIS_DETECTOR_INDEX_DS_NAME);
-        Band l1bFlagBand = l1pProduct.getBand(EnvisatConstants.MERIS_L1B_FLAGS_DS_NAME);
-        Band l1pFlagBand = l1pProduct.getBand(L1P_FLAG_BAND_NAME);
         l1pProduct.removeBand(detectorBand);
+        l1pProduct.addBand(detectorBand);
+        Band l1bFlagBand = l1pProduct.getBand(EnvisatConstants.MERIS_L1B_FLAGS_DS_NAME);
         l1pProduct.removeBand(l1bFlagBand);
+        l1pProduct.addBand(l1bFlagBand);
+        Band l1pFlagBand = l1pProduct.getBand(L1P_FLAG_BAND_NAME);
         if (l1pFlagBand != null) {
             l1pProduct.removeBand(l1pFlagBand);
+            l1pProduct.addBand(l1pFlagBand);
         }
 
-        l1pProduct.addBand(detectorBand);
-        l1pProduct.addBand(l1bFlagBand);
-        l1pProduct.addBand(l1pFlagBand);
     }
 
     private void attachFlagBandL1P(Product l1pProduct, Product idepixProduct) {

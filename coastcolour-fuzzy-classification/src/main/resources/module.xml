@@ -3,6 +3,7 @@
     <symbolicName>coastcolour-fuzzy-classification</symbolicName>
     <version>1.0</version>
     <name>CoastColour FuzzyClassification</name>
+    <packaging>dir</packaging>
 
     <description>
         Performs fuzzy classification.

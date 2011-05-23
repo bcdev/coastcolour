@@ -77,7 +77,7 @@ public class L2WOp extends Operator {
         HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("doAtmosphericCorrection", false);
         parameters.put("outputReflec", outputReflec);
-        Product targetProduct = GPF.createProduct("Meris.Case2IOP", parameters, sourceProducts);
+        Product targetProduct = GPF.createProduct("Meris.Case2Regional", parameters, sourceProducts);
         setTargetProduct(targetProduct);
     }
 

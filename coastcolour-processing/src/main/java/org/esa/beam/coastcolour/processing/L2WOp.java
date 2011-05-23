@@ -57,18 +57,13 @@ public class L2WOp extends Operator {
                notEmpty = true, notNull = true)
     private String cloudIceExpression;
 
-    @Parameter(defaultValue = "false", label = "Output water leaving reflectance",
-               description = "Toggles the output of water leaving irradiance reflectance.")
-    private boolean outputReflec;
-
     @Parameter(defaultValue = "l2r_flags.INVALID",
                description = "Expression defining pixels not considered for case2r processing")
     private String invalidPixelExpression;
 
-    @Parameter(defaultValue = "false",
-               label = "Output normalised bidirectional reflectances",
-               description = "Toggles the output of normalised reflectances.")
-    private boolean outputNormReflec;
+    @Parameter(defaultValue = "false", label = "Output water leaving reflectance",
+               description = "Toggles the output of water leaving irradiance reflectance.")
+    private boolean outputReflec;
 
     @Override
     public void initialize() throws OperatorException {
@@ -83,7 +78,9 @@ public class L2WOp extends Operator {
             l2rParams.put("algorithm", algorithm);
             l2rParams.put("landExpression", landExpression);
             l2rParams.put("cloudIceExpression", cloudIceExpression);
-            l2rParams.put("outputNormReflec", outputNormReflec);
+            l2rParams.put("outputNormReflec", false);
+            l2rParams.put("outputReflecAs", "RADIANCE_REFLECTANCES");
+
             sourceProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
         }
 

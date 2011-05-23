@@ -12,8 +12,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -35,19 +33,6 @@ public class L2ROpTest {
     public void testCreateProductFromL1P() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
         source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
-        testDefaultTargetProduct(source);
-    }
-
-    @Test
-    public void testCreateProductFromL1P_withNormReflec() throws OperatorException, ParseException {
-        Product source = L1POpTest.getL1bProduct();
-        source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("outputNormReflec", true);
-        Product target = GPF.createProduct("CoastColour.L2R", params, source);
-        assertEquals(true, target.containsBand("norm_refl_1"));
-        assertEquals(true, target.containsBand("norm_refl_2"));
-        assertEquals(true, target.containsBand("norm_refl_13"));
         testDefaultTargetProduct(source);
     }
 
@@ -88,7 +73,7 @@ public class L2ROpTest {
 //        L1POpTest.dumpBands(target);
 
         String[] expectedBandNames = new String[]{
-                "reflec_1", "reflec_2", "reflec_13",
+                "reflec_1", "reflec_2", "reflec_13", "norm_refl_3", "norm_refl_7", "norm_refl_12",
         };
         for (String name : expectedBandNames) {
             assertNotNull("Target band missing: " + name, target.getBand(name));

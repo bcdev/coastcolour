@@ -58,11 +58,6 @@ public class L2ROp extends Operator {
                notEmpty = true, notNull = true)
     private String cloudIceExpression;
 
-    @Parameter(defaultValue = "false",
-               label = "Output normalised bidirectional reflectances",
-               description = "Toggles the output of normalised reflectances.")
-    private boolean outputNormReflec;
-
     @Override
     public void initialize() throws OperatorException {
         Product sourceProduct = this.sourceProduct;
@@ -80,11 +75,11 @@ public class L2ROp extends Operator {
         sourceProducts.put("merisProduct", sourceProduct);
 
         HashMap<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("doNormalization", true);
         parameters.put("doSmileCorrection", false);
         parameters.put("outputTosa", false);
         parameters.put("outputReflec", true);
-        parameters.put("outputNormReflec", outputNormReflec);
+        parameters.put("outputNormReflec", true);
+        parameters.put("outputReflecAs", "RADIANCE_REFLECTANCES");
         parameters.put("outputPath", false);
         parameters.put("outputTransmittance", false);
         parameters.put("deriveRwFromPath", false);

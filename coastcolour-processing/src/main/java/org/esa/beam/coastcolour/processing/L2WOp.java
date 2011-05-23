@@ -12,6 +12,8 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
+import org.esa.beam.meris.case2.Case2AlgorithmEnum;
+import org.esa.beam.util.ProductUtils;
 
 import java.util.HashMap;
 
@@ -83,26 +85,42 @@ public class L2WOp extends Operator {
 
             sourceProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
         }
-        Band[] l2Rbands = sourceProduct.getBands();
-        for (Band l2Rband : l2Rbands) {
-            if (l2Rband.getName().startsWith("norm_refl_")) {
-                sourceProduct.removeBand(l2Rband);
-            }
-        }
 
-        HashMap<String, Product> sourceProducts = new HashMap<String, Product>();
-        sourceProducts.put("source", sourceProduct);
-        HashMap<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("doAtmosphericCorrection", false);
-        parameters.put("outputReflec", outputReflec);
-        parameters.put("invalidPixelExpression", invalidPixelExpression);
-        Product targetProduct = GPF.createProduct("Meris.Case2Regional", parameters, sourceProducts);
+        Case2AlgorithmEnum c2rAlgorithm = Case2AlgorithmEnum.REGIONAL;
+        Operator case2Op = c2rAlgorithm.createOperatorInstance();
 
+        case2Op.setParameter("tsmConversionExponent", c2rAlgorithm.getDefaultTsmExponent());
+        case2Op.setParameter("tsmConversionFactor", c2rAlgorithm.getDefaultTsmFactor());
+        case2Op.setParameter("chlConversionExponent", c2rAlgorithm.getDefaultChlExponent());
+        case2Op.setParameter("chlConversionFactor", c2rAlgorithm.getDefaultChlFactor());
+        case2Op.setParameter("inputReflecAre", "RADIANCE_REFLECTANCES");
+        case2Op.setParameter("invalidPixelExpression", invalidPixelExpression);
+        case2Op.setSourceProduct("acProduct", sourceProduct);
+        final Product targetProduct = case2Op.getTargetProduct();
+
+
+        copyReflecBandsIfRequired(sourceProduct, targetProduct);
         changeCase2RFlags(targetProduct);
         sortFlagBands(targetProduct);
         setTargetProduct(targetProduct);
     }
 
+    private void copyReflecBandsIfRequired(Product sourceProduct, Product targetProduct) {
+        if (outputReflec) {
+            Band[] bands = sourceProduct.getBands();
+            for (Band band : bands) {
+                if (band.getName().startsWith("reflec_")) {
+                    Band targetBand = ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
+                    Band sourceBand = sourceProduct.getBand(band.getName());
+                    targetBand.setSourceImage(sourceBand.getSourceImage());
+                }
+            }
+            Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
+            String stringPattern = autoGrouping != null ? autoGrouping.toString() + ":reflec" : "reflec";
+            targetProduct.setAutoGrouping(stringPattern);
+        }
+
+    }
 
     private void changeCase2RFlags(Product targetProduct) {
         ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();

@@ -1,13 +1,13 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>coastcolour-processing</symbolicName>
-    <version>1.0</version>
+    <version>1.1</version>
     <name>BEAM CoastColour Processing</name>
 
     <description>
         <![CDATA[
 
-    ]]>
+                ]]>
     </description>
 
     <vendor>Brockmann Consult GmbH</vendor>
@@ -19,7 +19,7 @@
     <changelog>
         <![CDATA[
 
-        ]]>
+                ]]>
     </changelog>
 
     <!-- BEAM Basics -->
@@ -38,28 +38,27 @@
         <optional>true</optional>
     </dependency>
 
-     <!-- Other Operators -->
+    <!-- Other Operators -->
 
-     <dependency>
-         <module>beam-meris-radiometry</module>
-     </dependency>
+    <dependency>
+        <module>beam-meris-radiometry</module>
+    </dependency>
 
-     <dependency>
-         <module>beam-meris-glint</module>
-     </dependency>
+    <dependency>
+        <module>beam-meris-glint</module>
+    </dependency>
 
-     <dependency>
-         <module>beam-idepix</module>
-     </dependency>
+    <dependency>
+        <module>beam-idepix</module>
+    </dependency>
 
-     <dependency>
-         <module>beam-meris-qaa</module>
-     </dependency>
+    <dependency>
+        <module>beam-meris-qaa</module>
+    </dependency>
 
-     <dependency>
-         <module>beam-meris-case2-water</module>
-     </dependency>
-
+    <dependency>
+        <module>beam-meris-case2-water</module>
+    </dependency>
 
 
     <categories>Processor,MERIS</categories>
@@ -107,10 +106,10 @@
     </extension>
 
     <!--<extension point="beam-ui:helpSets">-->
-        <!--<helpSet>-->
-            <!--<parent>beam-help</parent>-->
-            <!--<path>doc/help/meris-glint.hs</path>-->
-        <!--</helpSet>-->
+    <!--<helpSet>-->
+    <!--<parent>beam-help</parent>-->
+    <!--<path>doc/help/meris-glint.hs</path>-->
+    <!--</helpSet>-->
     <!--</extension>-->
 
 </module>

@@ -2,9 +2,11 @@ package org.esa.beam.coastcolour.processing;
 
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
+import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.PixelGeoCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
@@ -26,15 +28,6 @@ public class L1POpTest {
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis();
     }
 
-    public static void dumpBands(Product target) {
-        String[] bandNames = target.getBandNames();
-        for (int i = 0, bandNamesLength = bandNames.length; i < bandNamesLength; i++) {
-            String bandName = bandNames[i];
-            System.out.println(target.getName() + ".bands[" + i + "] = " + bandName);
-        }
-    }
-
-
     @Test
     public void testCreateProduct() throws OperatorException, ParseException {
 
@@ -43,7 +36,8 @@ public class L1POpTest {
         Product target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
         assertNotNull(target);
 
-        L1POpTest.dumpBands(target);
+        // enable for debugging
+//        L1POpTest.dumpBands(target);
 
         Band[] sourceBands = source.getBands();
         for (Band sourceBand : sourceBands) {
@@ -71,6 +65,23 @@ public class L1POpTest {
         assertTrue(msg, maskGroup.contains(("F_LOW_P_P1")));
         assertTrue(msg, maskGroup.contains(("F_SNOW_ICE")));
 
+    }
+
+    @Test
+    public void testCreateProduct_WithFsgInput() throws OperatorException, ParseException {
+        Product l1bProduct = getL1bProduct();
+        Band corr_longitude = l1bProduct.addBand("corr_longitude", ProductData.TYPE_FLOAT64);
+        Band corr_latitude = l1bProduct.addBand("corr_latitude", ProductData.TYPE_FLOAT64);
+        l1bProduct.addBand("altitude", ProductData.TYPE_INT16);
+
+        GeoCoding geoCoding = new PixelGeoCoding(corr_latitude, corr_longitude, "NOT l1_flags.INVALID", 6);
+        l1bProduct.setGeoCoding(geoCoding);
+
+        Product target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
+
+        assertTrue(target.containsBand("corr_longitude"));
+        assertTrue(target.containsBand("corr_latitude"));
+        assertTrue(target.containsBand("altitude"));
     }
 
     @Test
@@ -142,6 +153,15 @@ public class L1POpTest {
         product.getMetadataRoot().addElement(sph);
 
         return product;
+    }
+
+    // used for debugging
+    public static void dumpBands(Product target) {
+        String[] bandNames = target.getBandNames();
+        for (int i = 0, bandNamesLength = bandNames.length; i < bandNamesLength; i++) {
+            String bandName = bandNames[i];
+            System.out.println(target.getName() + ".bands[" + i + "] = " + bandName);
+        }
     }
 
 }

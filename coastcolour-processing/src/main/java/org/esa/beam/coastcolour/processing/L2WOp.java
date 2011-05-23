@@ -1,6 +1,9 @@
 package org.esa.beam.coastcolour.processing;
 
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -14,6 +17,9 @@ import java.util.HashMap;
 
 @OperatorMetadata(alias = "CoastColour.L2W")
 public class L2WOp extends Operator {
+
+    private static final String L2W_FLAGS_NAME = "l2w_flags";
+    private static final String CASE2_FLAGS_NAME = "case2_flags";
 
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")
     private Product sourceProduct;
@@ -51,10 +57,18 @@ public class L2WOp extends Operator {
                notEmpty = true, notNull = true)
     private String cloudIceExpression;
 
-    @Parameter(defaultValue = "true", label = "Output water leaving reflectance",
+    @Parameter(defaultValue = "false", label = "Output water leaving reflectance",
                description = "Toggles the output of water leaving irradiance reflectance.")
     private boolean outputReflec;
 
+    @Parameter(defaultValue = "l2r_flags.INVALID",
+               description = "Expression defining pixels not considered for case2r processing")
+    private String invalidPixelExpression;
+
+    @Parameter(defaultValue = "false",
+               label = "Output normalised bidirectional reflectances",
+               description = "Toggles the output of normalised reflectances.")
+    private boolean outputNormReflec;
 
     @Override
     public void initialize() throws OperatorException {
@@ -69,6 +83,7 @@ public class L2WOp extends Operator {
             l2rParams.put("algorithm", algorithm);
             l2rParams.put("landExpression", landExpression);
             l2rParams.put("cloudIceExpression", cloudIceExpression);
+            l2rParams.put("outputNormReflec", outputNormReflec);
             sourceProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
         }
 
@@ -77,12 +92,40 @@ public class L2WOp extends Operator {
         HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("doAtmosphericCorrection", false);
         parameters.put("outputReflec", outputReflec);
+        parameters.put("invalidPixelExpression", invalidPixelExpression);
         Product targetProduct = GPF.createProduct("Meris.Case2Regional", parameters, sourceProducts);
+
+        changeCase2RFlags(targetProduct);
+        sortFlagBands(targetProduct);
         setTargetProduct(targetProduct);
     }
 
+
+    private void changeCase2RFlags(Product targetProduct) {
+        ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
+        FlagCoding agcFlags = flagCodingGroup.get(CASE2_FLAGS_NAME);
+        agcFlags.setName(L2W_FLAGS_NAME);
+        Band band = targetProduct.getBand(CASE2_FLAGS_NAME);
+        band.setName(L2W_FLAGS_NAME);
+    }
+
+    private void sortFlagBands(Product targetProduct) {
+        Band l1_flags = targetProduct.getBand("l1_flags");
+        Band l1p_flags = targetProduct.getBand("l1p_flags");
+        Band l2r_flags = targetProduct.getBand("l2r_flags");
+        Band l2w_flags = targetProduct.getBand("l2w_flags");
+        targetProduct.removeBand(l1_flags);
+        targetProduct.removeBand(l1p_flags);
+        targetProduct.removeBand(l2r_flags);
+        targetProduct.removeBand(l2w_flags);
+        targetProduct.addBand(l1_flags);
+        targetProduct.addBand(l1p_flags);
+        targetProduct.addBand(l2r_flags);
+        targetProduct.addBand(l2w_flags);
+    }
+
     private boolean isL2RSourceProduct(Product sourceProduct) {
-        return sourceProduct.containsBand("agc_flags");
+        return sourceProduct.containsBand("l2r_flags");
     }
 
     public static class Spi extends OperatorSpi {

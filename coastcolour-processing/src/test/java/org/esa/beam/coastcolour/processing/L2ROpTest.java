@@ -26,14 +26,14 @@ public class L2ROpTest {
     @Test
     public void testCreateProductFromL1B() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
-        testDefaultTargetProduct(source);
+        testDefaultTargetProduct(source, "MER_FR__CCL2R");
     }
 
     @Test
     public void testCreateProductFromL1P() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
         source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
-        testDefaultTargetProduct(source);
+        testDefaultTargetProduct(source, "MER_FR__CCL2R");
     }
 
     @Test
@@ -42,6 +42,7 @@ public class L2ROpTest {
         try {
             System.setProperty("beam.envisat.usePixelGeoCoding", "true");
             Product l1bProduct = L1POpTest.getL1bProduct();
+            l1bProduct.setProductType("MER_FSG_1P");
             Band corr_longitude = l1bProduct.addBand("corr_longitude", ProductData.TYPE_FLOAT64);
             corr_longitude.setData(corr_longitude.createCompatibleRasterData());
             Band corr_latitude = l1bProduct.addBand("corr_latitude", ProductData.TYPE_FLOAT64);
@@ -54,7 +55,7 @@ public class L2ROpTest {
             l1bProduct.setGeoCoding(geoCoding);
 
             Product l1pProduct = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
-            Product target = testDefaultTargetProduct(l1pProduct);
+            Product target = testDefaultTargetProduct(l1pProduct, "MER_FSG_CCL2R");
 
             assertTrue("Expected band 'corr_longitude'", target.containsBand("corr_longitude"));
             assertTrue("Expected band 'corr_latitude'", target.containsBand("corr_latitude"));
@@ -64,10 +65,11 @@ public class L2ROpTest {
         }
     }
 
-    private static Product testDefaultTargetProduct(Product source) {
+    private static Product testDefaultTargetProduct(Product source, String expectedProductType) {
 
         Product target = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
         assertNotNull(target);
+        assertEquals(expectedProductType, target.getProductType());
 
         // enable for debugging
 //        L1POpTest.dumpBands(target);

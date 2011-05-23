@@ -103,8 +103,8 @@ public class L1POp extends Operator {
 
         reorderBands(l1pProduct);
 
-        final String productType = l1pProduct.getProductType();
-        l1pProduct.setProductType(productType.replaceFirst("_1P", "L1P"));
+        String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL1P";
+        l1pProduct.setProductType(l1pProductType);
         setTargetProduct(l1pProduct);
     }
 

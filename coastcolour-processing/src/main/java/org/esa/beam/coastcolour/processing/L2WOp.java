@@ -102,6 +102,9 @@ public class L2WOp extends Operator {
         copyReflecBandsIfRequired(sourceProduct, targetProduct);
         changeCase2RFlags(targetProduct);
         sortFlagBands(targetProduct);
+
+        String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL2W";
+        targetProduct.setProductType(l1pProductType);
         setTargetProduct(targetProduct);
     }
 

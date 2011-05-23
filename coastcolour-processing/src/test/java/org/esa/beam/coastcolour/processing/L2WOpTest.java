@@ -28,7 +28,7 @@ public class L2WOpTest {
     public void testCreateProductFromL1B() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
         final String[] expectedBandNames = {"a_ys_443", "tsm", "chl_conc"};
-        Product target = testTargetProduct(source, expectedBandNames, GPF.NO_PARAMS);
+        Product target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
 
         String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
         for (String notExpectedBandName : notExpectedBandNames) {
@@ -42,7 +42,7 @@ public class L2WOpTest {
         Product source = L1POpTest.getL1bProduct();
         source = getL1pProduct(source);
         final String[] expectedBandNames = {"a_ys_443", "tsm", "chl_conc"};
-        Product target = testTargetProduct(source, expectedBandNames, GPF.NO_PARAMS);
+        Product target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
 
         String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
         for (String notExpectedBandName : notExpectedBandNames) {
@@ -57,7 +57,7 @@ public class L2WOpTest {
         source = getL1pProduct(source);
         source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
         final String[] expectedBandNames = {"a_ys_443", "tsm", "chl_conc"};
-        testTargetProduct(source, expectedBandNames, GPF.NO_PARAMS);
+        testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
     }
 
     @Test
@@ -68,7 +68,7 @@ public class L2WOpTest {
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("outputReflec", true);
         String[] expectedBandNames = {"reflec_1", "reflec_2", "reflec_13", "a_ys_443", "tsm", "chl_conc"};
-        testTargetProduct(source, expectedBandNames, params);
+        testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, params);
     }
 
     @Test
@@ -77,6 +77,7 @@ public class L2WOpTest {
         try {
             System.setProperty("beam.envisat.usePixelGeoCoding", "true");
             Product l1bProduct = L1POpTest.getL1bProduct();
+            l1bProduct.setProductType("MER_FSG_1P");
             Band corr_longitude = l1bProduct.addBand("corr_longitude", ProductData.TYPE_FLOAT64);
             corr_longitude.setData(corr_longitude.createCompatibleRasterData());
             Band corr_latitude = l1bProduct.addBand("corr_latitude", ProductData.TYPE_FLOAT64);
@@ -89,7 +90,8 @@ public class L2WOpTest {
             l1bProduct.setGeoCoding(geoCoding);
 
             Product l2rProduct = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, l1bProduct);
-            Product target = testTargetProduct(l2rProduct, new String[]{"corr_longitude", "corr_latitude", "altitude"},
+            Product target = testTargetProduct(l2rProduct, "MER_FSG_CCL2W",
+                                               new String[]{"corr_longitude", "corr_latitude", "altitude"},
                                                GPF.NO_PARAMS);
 
             assertTrue("Expected band 'corr_longitude'", target.containsBand("corr_longitude"));
@@ -101,11 +103,12 @@ public class L2WOpTest {
     }
 
 
-    private static Product testTargetProduct(Product source, String[] expectedBandNames,
+    private static Product testTargetProduct(Product source, String expectedProductType, String[] expectedBandNames,
                                              Map<String, Object> l2wParams) {
 
         Product target = GPF.createProduct("CoastColour.L2W", l2wParams, source);
         assertNotNull(target);
+        assertEquals(expectedProductType, target.getProductType());
 
         // enable for debugging
         L1POpTest.dumpBands(target);

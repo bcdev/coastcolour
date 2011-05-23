@@ -70,6 +70,7 @@ public class L1POpTest {
     @Test
     public void testCreateProduct_WithFsgInput() throws OperatorException, ParseException {
         Product l1bProduct = getL1bProduct();
+        l1bProduct.setProductType("MER_FSG_1P");
         Band corr_longitude = l1bProduct.addBand("corr_longitude", ProductData.TYPE_FLOAT64);
         Band corr_latitude = l1bProduct.addBand("corr_latitude", ProductData.TYPE_FLOAT64);
         l1bProduct.addBand("altitude", ProductData.TYPE_INT16);
@@ -78,7 +79,7 @@ public class L1POpTest {
         l1bProduct.setGeoCoding(geoCoding);
 
         Product target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
-
+        assertEquals("MER_FSG_CCL1P", target.getProductType());
         assertTrue(target.containsBand("corr_longitude"));
         assertTrue(target.containsBand("corr_latitude"));
         assertTrue(target.containsBand("altitude"));

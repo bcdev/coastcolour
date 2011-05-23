@@ -57,17 +57,11 @@ public class L2WOpTest {
         source = getL1pProduct(source);
         source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
         final String[] expectedBandNames = {"a_ys_443", "tsm", "chl_conc"};
-        Product target = testTargetProduct(source, expectedBandNames, GPF.NO_PARAMS);
-
-        String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
-        for (String notExpectedBandName : notExpectedBandNames) {
-            assertFalse("Product should not contain " + notExpectedBandName, target.containsBand(notExpectedBandName));
-        }
-
+        testTargetProduct(source, expectedBandNames, GPF.NO_PARAMS);
     }
 
     @Test
-    public void testCreateProductWithoutReflectances() throws OperatorException, ParseException {
+    public void testCreateProductWithReflectances() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
         source = getL1pProduct(source);
         source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
@@ -75,7 +69,6 @@ public class L2WOpTest {
         params.put("outputReflec", true);
         String[] expectedBandNames = {"reflec_1", "reflec_2", "reflec_13", "a_ys_443", "tsm", "chl_conc"};
         testTargetProduct(source, expectedBandNames, params);
-
     }
 
     @Test
@@ -115,10 +108,18 @@ public class L2WOpTest {
         assertNotNull(target);
 
         // enable for debugging
-//        L1POpTest.dumpBands(target);
+        L1POpTest.dumpBands(target);
 
         for (String name : expectedBandNames) {
             assertNotNull("Target band missing: " + name, target.getBand(name));
+        }
+
+        String[] notExpectedBandNames = new String[]{
+                "reflectance_1", "reflectance_4", "reflectance_13",
+                "norm_refl_2", "norm_refl_7", "norm_refl_12",
+        };
+        for (String name : notExpectedBandNames) {
+            assertNull("Target band not expected: " + name, target.getBand(name));
         }
 
         // Tests on generated L1P flags dataset

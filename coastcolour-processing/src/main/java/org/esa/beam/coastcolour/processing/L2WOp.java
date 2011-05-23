@@ -78,10 +78,16 @@ public class L2WOp extends Operator {
             l2rParams.put("algorithm", algorithm);
             l2rParams.put("landExpression", landExpression);
             l2rParams.put("cloudIceExpression", cloudIceExpression);
-            l2rParams.put("outputNormReflec", false);
+            l2rParams.put("outputNormReflec", true);
             l2rParams.put("outputReflecAs", "RADIANCE_REFLECTANCES");
 
             sourceProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
+        }
+        Band[] l2Rbands = sourceProduct.getBands();
+        for (Band l2Rband : l2Rbands) {
+            if (l2Rband.getName().startsWith("norm_refl_")) {
+                sourceProduct.removeBand(l2Rband);
+            }
         }
 
         HashMap<String, Product> sourceProducts = new HashMap<String, Product>();

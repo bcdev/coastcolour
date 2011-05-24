@@ -99,6 +99,7 @@ public class L2WOp extends Operator {
         final Product targetProduct = case2Op.getTargetProduct();
 
         renameIops(targetProduct);
+        renameConcentrations(targetProduct);
         copyReflecBandsIfRequired(sourceProduct, targetProduct);
         changeCase2RFlags(targetProduct);
         sortFlagBands(targetProduct);
@@ -106,6 +107,13 @@ public class L2WOp extends Operator {
         String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL2W";
         targetProduct.setProductType(l1pProductType);
         setTargetProduct(targetProduct);
+    }
+
+    private void renameConcentrations(Product targetProduct) {
+        targetProduct.getBand("tsm").setName("conc_tsm");
+        targetProduct.getBand("chl_conc").setName("conc_chl");
+        addPatternToAutoGrouping(targetProduct, "conc");
+
     }
 
     private void renameIops(Product targetProduct) {

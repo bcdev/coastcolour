@@ -27,7 +27,7 @@ public class L2WOpTest {
     @Test
     public void testCreateProductFromL1B() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
-        final String[] expectedBandNames = {"a_ys_443", "tsm", "chl_conc"};
+        final String[] expectedBandNames = {"iop_a_ys_443", "tsm", "chl_conc"};
         Product target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
 
         String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
@@ -41,7 +41,7 @@ public class L2WOpTest {
     public void testCreateProductFromL1P() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
         source = getL1pProduct(source);
-        final String[] expectedBandNames = {"a_ys_443", "tsm", "chl_conc"};
+        final String[] expectedBandNames = {"iop_a_ys_443", "tsm", "chl_conc"};
         Product target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
 
         String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
@@ -56,7 +56,10 @@ public class L2WOpTest {
         Product source = L1POpTest.getL1bProduct();
         source = getL1pProduct(source);
         source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
-        final String[] expectedBandNames = {"a_ys_443", "tsm", "chl_conc"};
+        final String[] expectedBandNames = {
+                "iop_a_ys_443", "iop_a_total_443", "iop_a_poc_443", "iop_bb_spm_443",
+                "tsm", "chl_conc"
+        };
         testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
     }
 
@@ -67,7 +70,7 @@ public class L2WOpTest {
         source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("outputReflec", true);
-        String[] expectedBandNames = {"reflec_1", "reflec_2", "reflec_13", "a_ys_443", "tsm", "chl_conc"};
+        String[] expectedBandNames = {"reflec_1", "reflec_2", "reflec_13", "iop_a_ys_443", "tsm", "chl_conc"};
         testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, params);
     }
 
@@ -111,7 +114,7 @@ public class L2WOpTest {
         assertEquals(expectedProductType, target.getProductType());
 
         // enable for debugging
-        L1POpTest.dumpBands(target);
+//        L1POpTest.dumpBands(target);
 
         for (String name : expectedBandNames) {
             assertNotNull("Target band missing: " + name, target.getBand(name));

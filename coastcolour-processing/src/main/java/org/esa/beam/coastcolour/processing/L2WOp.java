@@ -98,7 +98,7 @@ public class L2WOp extends Operator {
         case2Op.setSourceProduct("acProduct", sourceProduct);
         final Product targetProduct = case2Op.getTargetProduct();
 
-
+        renameIops(targetProduct);
         copyReflecBandsIfRequired(sourceProduct, targetProduct);
         changeCase2RFlags(targetProduct);
         sortFlagBands(targetProduct);
@@ -106,6 +106,21 @@ public class L2WOp extends Operator {
         String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL2W";
         targetProduct.setProductType(l1pProductType);
         setTargetProduct(targetProduct);
+    }
+
+    private void renameIops(Product targetProduct) {
+        String aTotal = "a_total_443";
+        String aGelbstoff = "a_ys_443";
+        String aPigment = "a_pig_443";
+        String aPoc = "a_poc_443";
+        String bbSpm = "bb_spm_443";
+        targetProduct.getBand(aTotal).setName("iop_" + aTotal);
+        targetProduct.getBand(aGelbstoff).setName("iop_" + aGelbstoff);
+        targetProduct.getBand(aPigment).setName("iop_" + aPigment);
+        targetProduct.getBand(aPoc).setName("iop_" + aPoc);
+        targetProduct.getBand(bbSpm).setName("iop_" + bbSpm);
+        addPatternToAutoGrouping(targetProduct, "iop");
+
     }
 
     private void copyReflecBandsIfRequired(Product sourceProduct, Product targetProduct) {
@@ -118,11 +133,15 @@ public class L2WOp extends Operator {
                     targetBand.setSourceImage(sourceBand.getSourceImage());
                 }
             }
-            Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
-            String stringPattern = autoGrouping != null ? autoGrouping.toString() + ":reflec" : "reflec";
-            targetProduct.setAutoGrouping(stringPattern);
+            addPatternToAutoGrouping(targetProduct, "reflec");
         }
 
+    }
+
+    private void addPatternToAutoGrouping(Product targetProduct, String groupPattern) {
+        Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
+        String stringPattern = autoGrouping != null ? autoGrouping.toString() + ":" + groupPattern : groupPattern;
+        targetProduct.setAutoGrouping(stringPattern);
     }
 
     private void changeCase2RFlags(Product targetProduct) {

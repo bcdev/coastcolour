@@ -57,7 +57,7 @@
     </dependency>
 
     <dependency>
-        <module>beam-meris-case2-water</module>
+        <module>beam-meris-case2-regional</module>
     </dependency>
 
 

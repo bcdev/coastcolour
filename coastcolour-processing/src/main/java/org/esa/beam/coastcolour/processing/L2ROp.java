@@ -35,7 +35,7 @@ public class L2ROp extends Operator {
                description = "Whether to perform MERIS Smile-effect correction.")
     private boolean doSmile;
 
-    @Parameter(defaultValue = "false",
+    @Parameter(defaultValue = "true",
                label = "Perform equalization",
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
@@ -46,17 +46,27 @@ public class L2ROp extends Operator {
     @Parameter(defaultValue = "CoastColour", valueSet = {"GlobAlbedo", "QWG", "CoastColour"})
     private CloudScreeningSelector algorithm;
 
-    @Parameter(defaultValue = "l1p_flags.F_LANDCONS",
+    @Parameter(defaultValue = "l1p_flags.CC_LAND",
                label = "Land detection expression",
                description = "The arithmetic expression used for land detection.",
                notEmpty = true, notNull = true)
     private String landExpression;
 
-    @Parameter(defaultValue = "l1p_flags.F_CLOUD || l1p_flags.F_SNOW_ICE",
+    @Parameter(defaultValue = "l1p_flags.CC_CLOUD || l1p_flags.CC_SNOW_ICE",
                label = "Cloud/Ice detection expression",
                description = "The arithmetic expression used for cloud/ice detection.",
                notEmpty = true, notNull = true)
     private String cloudIceExpression;
+    @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03")
+    private double brightTestThreshold;
+    @Parameter(label = "Bright Test Reference Wavelength [nm]", defaultValue = "865",
+               valueSet = {
+                       "412", "442", "490", "510", "560",
+                       "620", "665", "681", "705", "753",
+                       "760", "775", "865", "890", "900"
+               })
+    private int brightTestWavelength;
+
 
     @Override
     public void initialize() throws OperatorException {
@@ -68,6 +78,8 @@ public class L2ROp extends Operator {
             l1pParams.put("doEqualization", doEqualization);
             l1pParams.put("useIdepix", useIdepix);
             l1pParams.put("algorithm", algorithm);
+            l1pParams.put("brightTestThreshold", brightTestThreshold);
+            l1pParams.put("brightTestWavelength", brightTestWavelength);
             sourceProduct = GPF.createProduct("CoastColour.L1P", l1pParams, sourceProduct);
         }
 

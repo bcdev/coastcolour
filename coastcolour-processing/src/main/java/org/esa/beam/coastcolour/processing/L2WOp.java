@@ -47,13 +47,24 @@ public class L2WOp extends Operator {
     @Parameter(defaultValue = "CoastColour", valueSet = {"GlobAlbedo", "QWG", "CoastColour"})
     private CloudScreeningSelector algorithm;
 
-    @Parameter(defaultValue = "l1p_flags.F_LANDCONS",
+    @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03")
+    private double brightTestThreshold;
+    @Parameter(label = "Bright Test Reference Wavelength [nm]", defaultValue = "865",
+               valueSet = {
+                       "412", "442", "490", "510", "560",
+                       "620", "665", "681", "705", "753",
+                       "760", "775", "865", "890", "900"
+               })
+    private int brightTestWavelength;
+
+
+    @Parameter(defaultValue = "l1p_flags.CC_LAND",
                label = "Land detection expression",
                description = "The arithmetic expression used for land detection.",
                notEmpty = true, notNull = true)
     private String landExpression;
 
-    @Parameter(defaultValue = "l1p_flags.F_CLOUD || l1p_flags.F_SNOW_ICE",
+    @Parameter(defaultValue = "l1p_flags.CC_CLOUD || l1p_flags.CC_SNOW_ICE",
                label = "Cloud/Ice detection expression",
                description = "The arithmetic expression used for cloud/ice detection.",
                notEmpty = true, notNull = true)
@@ -78,6 +89,8 @@ public class L2WOp extends Operator {
             l2rParams.put("doEqualization", doEqualization);
             l2rParams.put("useIdepix", useIdepix);
             l2rParams.put("algorithm", algorithm);
+            l2rParams.put("brightTestThreshold", brightTestThreshold);
+            l2rParams.put("brightTestWavelength", brightTestWavelength);
             l2rParams.put("landExpression", landExpression);
             l2rParams.put("cloudIceExpression", cloudIceExpression);
             l2rParams.put("outputNormReflec", true);

@@ -58,12 +58,14 @@ public class L1POpTest {
         final ProductNodeGroup<Mask> maskGroup = target.getMaskGroup();
 
         final String msg = "Expected Mask does not exist";
-        assertTrue(msg, maskGroup.contains(("F_MEGLINT")));
-        assertTrue(msg, maskGroup.contains(("F_LANDCONS")));
-        assertTrue(msg, maskGroup.contains(("F_CLOUD")));
-        assertTrue(msg, maskGroup.contains(("F_BRIGHT")));
-        assertTrue(msg, maskGroup.contains(("F_LOW_P_P1")));
-        assertTrue(msg, maskGroup.contains(("F_SNOW_ICE")));
+        assertTrue(msg, maskGroup.contains(("cc_land")));
+        assertTrue(msg, maskGroup.contains(("cc_coastline")));
+        assertTrue(msg, maskGroup.contains(("cc_cloud")));
+        assertTrue(msg, maskGroup.contains(("cc_cloud_buffer")));
+        assertTrue(msg, maskGroup.contains(("cc_cloud_shadow")));
+        assertTrue(msg, maskGroup.contains(("cc_snow_ice")));
+        assertTrue(msg, maskGroup.contains(("cc_landrisk")));
+        assertTrue(msg, maskGroup.contains(("cc_glintrisk")));
 
     }
 

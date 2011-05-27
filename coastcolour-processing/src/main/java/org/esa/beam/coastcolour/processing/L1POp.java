@@ -18,7 +18,6 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
 import org.esa.beam.idepix.operators.CoastColourCloudClassificationOp;
-import org.esa.beam.meris.brr.LandClassificationOp;
 import org.esa.beam.util.BitSetter;
 import org.esa.beam.util.ProductUtils;
 
@@ -33,7 +32,6 @@ public class L1POp extends Operator {
     private static final String IDEPIX_OPERATOR_ALIAS = "idepix.ComputeChain";
     private static final String RADIOMETRY_OPERATOR_ALIAS = "Meris.CorrectRadiometry";
     private static final String CLOUD_FLAG_BAND_NAME = "cloud_classif_flags";
-    private static final String LAND_FLAG_BAND_NAME = "land_classif_flags";
     private static final String L1P_FLAG_BAND_NAME = "l1p_flags";
     private static final String CC_LAND_FLAG_NAME = "CC_LAND";
     private static final String CC_COASTLINE_FLAG_NAME = "CC_COASTLINE";
@@ -86,7 +84,6 @@ public class L1POp extends Operator {
                })
     private int brightTestWavelength;
 
-    private Band landFlagBand;
     private Band cloudFlagBand;
 
 
@@ -108,12 +105,9 @@ public class L1POp extends Operator {
             idepixParams.put("algorithm", algorithm);
             idepixParams.put("ipfQWGUserDefinedRhoToa442Threshold", brightTestThreshold);
             idepixParams.put("rhoAgReferenceWavelength", brightTestWavelength);
-            idepixParams.put("ipfOutputLandWater", true);
             Product idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, idepixParams, l1pProduct);
 
             checkForExistingFlagBand(idepixProduct, CLOUD_FLAG_BAND_NAME);
-            checkForExistingFlagBand(idepixProduct, LAND_FLAG_BAND_NAME);
-            landFlagBand = idepixProduct.getBand(LAND_FLAG_BAND_NAME);
             cloudFlagBand = idepixProduct.getBand(CLOUD_FLAG_BAND_NAME);
 
             attachFlagBandL1P(l1pProduct);
@@ -199,16 +193,15 @@ public class L1POp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         final Rectangle rectangle = targetTile.getRectangle();
-        final Tile landTile = getSourceTile(landFlagBand, rectangle);
         final Tile cloudTile = getSourceTile(cloudFlagBand, rectangle);
 
         for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
             checkForCancellation();
             for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                targetTile.setSample(x, y, LAND_BIT_INDEX, landTile.getSampleBit(x, y,
-                                                                                 LandClassificationOp.F_LANDCONS));
-//              targetTile.setSample(x,y, COASTLINE_BIT_INDEX, landTile.getSampleBit(x,y,
-//                                                                                   /*TODO*/));
+                targetTile.setSample(x, y, LAND_BIT_INDEX, cloudTile.getSampleBit(x, y,
+                                                                                  CoastColourCloudClassificationOp.F_LAND));
+                targetTile.setSample(x, y, COASTLINE_BIT_INDEX, cloudTile.getSampleBit(x, y,
+                                                                                       CoastColourCloudClassificationOp.F_COASTLINE));
                 targetTile.setSample(x, y, CLOUD_BIT_INDEX, cloudTile.getSampleBit(x, y,
                                                                                    CoastColourCloudClassificationOp.F_CLOUD));
                 targetTile.setSample(x, y, CLOUD_BUFFER_BIT_INDEX, cloudTile.getSampleBit(x, y,
@@ -217,8 +210,8 @@ public class L1POp extends Operator {
                                                                                           CoastColourCloudClassificationOp.F_CLOUD_SHADOW));
                 targetTile.setSample(x, y, SNOW_ICE_BIT_INDEX, cloudTile.getSampleBit(x, y,
                                                                                       CoastColourCloudClassificationOp.F_SNOW_ICE));
-//                targetTile.setSample(x, y, LANDRISK_BIT_INDEX, cloudTile.getSampleBit(x, y,
-//                                                                                   /*TODO*/));
+                targetTile.setSample(x, y, LANDRISK_BIT_INDEX, cloudTile.getSampleBit(x, y,
+                                                                                      CoastColourCloudClassificationOp.F_LANDRISK));
                 targetTile.setSample(x, y, GLINTRISK_BIT_INDEX, cloudTile.getSampleBit(x, y,
                                                                                        CoastColourCloudClassificationOp.F_GLINTRISK));
             }

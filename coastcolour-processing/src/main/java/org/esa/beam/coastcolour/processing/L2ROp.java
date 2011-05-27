@@ -155,6 +155,14 @@ public class L2ROp extends Operator {
         maskGroup.remove(maskGroup.get("agc_land"));
         maskGroup.remove(maskGroup.get("cloud_ice"));
         maskGroup.remove(maskGroup.get("has_flint"));
+        maskGroup.get("atc_oor").setName("l2r_cc_atc_oor");
+        maskGroup.get("toa_oor").setName("l2r_cc_toa_oor");
+        maskGroup.get("tosa_oor").setName("l2r_cc_tosa_oor");
+        maskGroup.get("solzen").setName("l2r_cc_solzen");
+        maskGroup.get("ancil").setName("l2r_cc_ancil");
+        maskGroup.get("sunglint").setName("l2r_cc_sunglint");
+        maskGroup.get("agc_invalid").setDescription("Invalid pixels");
+        maskGroup.get("agc_invalid").setName("l2r_cc_invalid");
     }
 
 

@@ -87,11 +87,11 @@ public class L2ROpTest {
         }
 
         //assert that Masks are changed according flag renaming (agc_flags --> l2r_flags)
-        Mask toaOorMask = target.getMaskGroup().get("toa_oor");
+        Mask toaOorMask = target.getMaskGroup().get("l2r_cc_toa_oor");
         assertEquals("l2r_flags.TOA_OOR", Mask.BandMathsType.getExpression(toaOorMask));
-        Mask solzenMask = target.getMaskGroup().get("solzen");
+        Mask solzenMask = target.getMaskGroup().get("l2r_cc_solzen");
         assertEquals("l2r_flags.SOLZEN", Mask.BandMathsType.getExpression(solzenMask));
-        Mask sunglintMask = target.getMaskGroup().get("sunglint");
+        Mask sunglintMask = target.getMaskGroup().get("l2r_cc_sunglint");
         assertEquals("l2r_flags.SUNGLINT", Mask.BandMathsType.getExpression(sunglintMask));
 
         // assert radiance bands are not copied to L2R

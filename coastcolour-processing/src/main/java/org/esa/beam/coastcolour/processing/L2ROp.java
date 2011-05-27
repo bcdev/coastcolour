@@ -107,11 +107,32 @@ public class L2ROp extends Operator {
         targetProduct.setAutoGrouping(glintProduct.getAutoGrouping());
         changeAgcFlags(targetProduct);
         removeFlagsAndMasks(targetProduct);
+        sortMasks(targetProduct);
         sortFlagBands(targetProduct);
         renameTauBands(targetProduct);
         String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL2R";
         targetProduct.setProductType(l1pProductType);
         setTargetProduct(targetProduct);
+    }
+
+    private void sortMasks(Product targetProduct) {
+        ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
+        String l1pMaskPrefix = "l1p_";
+        moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_LAND_FLAG_NAME.toLowerCase(), 0);
+        moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_COASTLINE_FLAG_NAME.toLowerCase(), 1);
+        moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_CLOUD_FLAG_NAME.toLowerCase(), 2);
+        moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_CLOUD_BUFFER_FLAG_NAME.toLowerCase(), 3);
+        moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_CLOUD_SHADOW_FLAG_NAME.toLowerCase(), 4);
+        moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_SNOW_ICE_FLAG_NAME.toLowerCase(), 5);
+        moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_LANDRISK_FLAG_NAME.toLowerCase(), 6);
+        moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_GLINTRISK_FLAG_NAME.toLowerCase(), 7);
+
+    }
+
+    private void moveMaskAtIndex(ProductNodeGroup<Mask> maskGroup, String maskName, int index) {
+        Mask landMask = maskGroup.get(maskName);
+        maskGroup.remove(landMask);
+        maskGroup.add(index, landMask);
     }
 
     private void renameTauBands(Product targetProduct) {
@@ -151,17 +172,28 @@ public class L2ROp extends Operator {
         l2rFlags.removeAttribute(l2rFlags.getFlag("LAND"));
         l2rFlags.removeAttribute(l2rFlags.getFlag("CLOUD_ICE"));
         l2rFlags.removeAttribute(l2rFlags.getFlag("HAS_FLINT"));
+        String invalidDescr = "Invalid pixels (" + landExpression + " || " + cloudIceExpression + " || l1_flags.INVALID)";
+        l2rFlags.getFlag("INVALID").setDescription(invalidDescr);
+        String glintDescription = "High sun glint retrieved";
+        l2rFlags.getFlag("SUNGLINT").setDescription(glintDescription);
+        String toaDescription = "TOA reflectance out of range";
+        l2rFlags.getFlag("TOA_OOR").setDescription(toaDescription);
+        String tosaDescription = "TOSA reflectance out of range";
+        l2rFlags.getFlag("TOSA_OOR").setDescription(tosaDescription);
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
         maskGroup.remove(maskGroup.get("agc_land"));
         maskGroup.remove(maskGroup.get("cloud_ice"));
         maskGroup.remove(maskGroup.get("has_flint"));
         maskGroup.get("atc_oor").setName("l2r_cc_atc_oor");
+        maskGroup.get("toa_oor").setDescription(toaDescription);
         maskGroup.get("toa_oor").setName("l2r_cc_toa_oor");
+        maskGroup.get("tosa_oor").setDescription(tosaDescription);
         maskGroup.get("tosa_oor").setName("l2r_cc_tosa_oor");
         maskGroup.get("solzen").setName("l2r_cc_solzen");
         maskGroup.get("ancil").setName("l2r_cc_ancil");
+        maskGroup.get("sunglint").setDescription(glintDescription);
         maskGroup.get("sunglint").setName("l2r_cc_sunglint");
-        maskGroup.get("agc_invalid").setDescription("Invalid pixels");
+        maskGroup.get("agc_invalid").setDescription(invalidDescr);
         maskGroup.get("agc_invalid").setName("l2r_cc_invalid");
     }
 

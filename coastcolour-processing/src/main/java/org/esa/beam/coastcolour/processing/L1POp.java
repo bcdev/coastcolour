@@ -29,18 +29,19 @@ import java.util.Map;
 @OperatorMetadata(alias = "CoastColour.L1P")
 public class L1POp extends Operator {
 
+    public static final String CC_LAND_FLAG_NAME = "CC_LAND";
+    public static final String CC_COASTLINE_FLAG_NAME = "CC_COASTLINE";
+    public static final String CC_CLOUD_FLAG_NAME = "CC_CLOUD";
+    public static final String CC_CLOUD_BUFFER_FLAG_NAME = "CC_CLOUD_BUFFER";
+    public static final String CC_CLOUD_SHADOW_FLAG_NAME = "CC_CLOUD_SHADOW";
+    public static final String CC_SNOW_ICE_FLAG_NAME = "CC_SNOW_ICE";
+    public static final String CC_LANDRISK_FLAG_NAME = "CC_LANDRISK";
+    public static final String CC_GLINTRISK_FLAG_NAME = "CC_GLINTRISK";
+
     private static final String IDEPIX_OPERATOR_ALIAS = "idepix.ComputeChain";
     private static final String RADIOMETRY_OPERATOR_ALIAS = "Meris.CorrectRadiometry";
     private static final String CLOUD_FLAG_BAND_NAME = "cloud_classif_flags";
     private static final String L1P_FLAG_BAND_NAME = "l1p_flags";
-    private static final String CC_LAND_FLAG_NAME = "CC_LAND";
-    private static final String CC_COASTLINE_FLAG_NAME = "CC_COASTLINE";
-    private static final String CC_CLOUD_FLAG_NAME = "CC_CLOUD";
-    private static final String CC_CLOUD_BUFFER_FLAG_NAME = "CC_CLOUD_BUFFER";
-    private static final String CC_CLOUD_SHADOW_FLAG_NAME = "CC_CLOUD_SHADOW";
-    private static final String CC_SNOW_ICE_FLAG_NAME = "CC_SNOW_ICE";
-    private static final String CC_LANDRISK_FLAG_NAME = "CC_LANDRISK";
-    private static final String CC_GLINTRISK_FLAG_NAME = "CC_GLINTRISK";
     private static final int LAND_BIT_INDEX = 0;
     private static final int COASTLINE_BIT_INDEX = 1;
     private static final int CLOUD_BIT_INDEX = 2;
@@ -114,11 +115,33 @@ public class L1POp extends Operator {
             sortFlagCodings(l1pProduct);
         }
 
+        updateL1BMasks(l1pProduct);
         reorderBands(l1pProduct);
 
         String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL1P";
         l1pProduct.setProductType(l1pProductType);
         setTargetProduct(l1pProduct);
+    }
+
+    private void updateL1BMasks(Product l1pProduct) {
+        ProductNodeGroup<Mask> maskGroup = l1pProduct.getMaskGroup();
+        renameMask(maskGroup, "coastline");
+        renameMask(maskGroup, "land");
+        renameMask(maskGroup, "water");
+        renameMask(maskGroup, "cosmetic");
+        renameMask(maskGroup, "duplicated");
+        renameMask(maskGroup, "glint_risk");
+        renameMask(maskGroup, "suspect");
+        renameMask(maskGroup, "bright");
+        renameMask(maskGroup, "invalid");
+        maskGroup.get("l1b_water").setDescription("Pixel is over ocean, not land");
+    }
+
+    private void renameMask(ProductNodeGroup<Mask> maskGroup, String maskName) {
+        Mask mask = maskGroup.get(maskName);
+        if (mask != null) {
+            mask.setName("l1b_" + maskName);
+        }
     }
 
     private void sortFlagCodings(Product l1pProduct) {
@@ -156,8 +179,9 @@ public class L1POp extends Operator {
         l1pFC.addFlag(CC_CLOUD_SHADOW_FLAG_NAME, BitSetter.setFlag(0, CLOUD_SHADOW_BIT_INDEX),
                       "Pixel masked as cloud shadow");
         l1pFC.addFlag(CC_SNOW_ICE_FLAG_NAME, BitSetter.setFlag(0, SNOW_ICE_BIT_INDEX), "Pixel masked as snow/ice");
-        l1pFC.addFlag(CC_LANDRISK_FLAG_NAME, BitSetter.setFlag(0, LANDRISK_BIT_INDEX), "Risk that pixel is land");
-        l1pFC.addFlag(CC_GLINTRISK_FLAG_NAME, BitSetter.setFlag(0, GLINTRISK_BIT_INDEX), "Risk of glint at pixel");
+        l1pFC.addFlag(CC_LANDRISK_FLAG_NAME, BitSetter.setFlag(0, LANDRISK_BIT_INDEX), "Potential land pixel");
+        l1pFC.addFlag(CC_GLINTRISK_FLAG_NAME, BitSetter.setFlag(0, GLINTRISK_BIT_INDEX),
+                      "Risk that pixel is under glint");
 
         l1pProduct.getFlagCodingGroup().add(l1pFC);
         final Band l1pBand = l1pProduct.addBand(L1P_FLAG_BAND_NAME, ProductData.TYPE_INT16);
@@ -192,11 +216,11 @@ public class L1POp extends Operator {
                                                              L1P_FLAG_BAND_NAME + "." + CC_SNOW_ICE_FLAG_NAME,
                                                              Color.CYAN, 0.5));
         maskGroup.add(maskIndex++, Mask.BandMathsType.create(maskPrefix + CC_LANDRISK_FLAG_NAME.toLowerCase(),
-                                                             "Risk of land flag", width, height,
+                                                             "Potential land pixel", width, height,
                                                              L1P_FLAG_BAND_NAME + "." + CC_LANDRISK_FLAG_NAME,
                                                              Color.GREEN.darker().darker(), 0.5));
         maskGroup.add(maskIndex++, Mask.BandMathsType.create(maskPrefix + CC_GLINTRISK_FLAG_NAME.toLowerCase(),
-                                                             "Risk of glint flag", width, height,
+                                                             "Risk that pixel is under glint", width, height,
                                                              L1P_FLAG_BAND_NAME + "." + CC_GLINTRISK_FLAG_NAME,
                                                              Color.pink, 0.5));
 

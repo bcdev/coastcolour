@@ -154,28 +154,31 @@ public class L1POp extends Operator {
         int width = l1pProduct.getSceneRasterWidth();
         int height = l1pProduct.getSceneRasterHeight();
         ProductNodeGroup<Mask> maskGroup = l1pProduct.getMaskGroup();
-        maskGroup.add(Mask.BandMathsType.create(CC_LAND_FLAG_NAME.toLowerCase(), "Land flag",
+        String maskPrefix = "l1p_";
+        maskGroup.add(Mask.BandMathsType.create(maskPrefix + CC_LAND_FLAG_NAME.toLowerCase(), "Land flag",
                                                 width, height, L1P_FLAG_BAND_NAME + "." + CC_LAND_FLAG_NAME,
                                                 Color.GREEN.darker(), 0.5));
-        maskGroup.add(Mask.BandMathsType.create(CC_COASTLINE_FLAG_NAME.toLowerCase(), "Coastline flag",
+        maskGroup.add(Mask.BandMathsType.create(maskPrefix + CC_COASTLINE_FLAG_NAME.toLowerCase(), "Coastline flag",
                                                 width, height, L1P_FLAG_BAND_NAME + "." + CC_COASTLINE_FLAG_NAME,
                                                 Color.GREEN, 0.5));
-        maskGroup.add(Mask.BandMathsType.create(CC_CLOUD_FLAG_NAME.toLowerCase(), "Cloud flag",
+        maskGroup.add(Mask.BandMathsType.create(maskPrefix + CC_CLOUD_FLAG_NAME.toLowerCase(), "Cloud flag",
                                                 width, height, L1P_FLAG_BAND_NAME + "." + CC_CLOUD_FLAG_NAME,
                                                 Color.YELLOW, 0.5));
-        maskGroup.add(Mask.BandMathsType.create(CC_CLOUD_BUFFER_FLAG_NAME.toLowerCase(), "Cloud buffer flag",
-                                                width, height, L1P_FLAG_BAND_NAME + "." + CC_CLOUD_BUFFER_FLAG_NAME,
-                                                Color.RED, 0.5));
-        maskGroup.add(Mask.BandMathsType.create(CC_CLOUD_SHADOW_FLAG_NAME.toLowerCase(), "Cloud shadow flag",
-                                                width, height, L1P_FLAG_BAND_NAME + "." + CC_CLOUD_SHADOW_FLAG_NAME,
-                                                Color.BLUE, 0.5));
-        maskGroup.add(Mask.BandMathsType.create(CC_SNOW_ICE_FLAG_NAME.toLowerCase(), "Snow/Ice flag",
+        maskGroup.add(
+                Mask.BandMathsType.create(maskPrefix + CC_CLOUD_BUFFER_FLAG_NAME.toLowerCase(), "Cloud buffer flag",
+                                          width, height, L1P_FLAG_BAND_NAME + "." + CC_CLOUD_BUFFER_FLAG_NAME,
+                                          Color.RED, 0.5));
+        maskGroup.add(
+                Mask.BandMathsType.create(maskPrefix + CC_CLOUD_SHADOW_FLAG_NAME.toLowerCase(), "Cloud shadow flag",
+                                          width, height, L1P_FLAG_BAND_NAME + "." + CC_CLOUD_SHADOW_FLAG_NAME,
+                                          Color.BLUE, 0.5));
+        maskGroup.add(Mask.BandMathsType.create(maskPrefix + CC_SNOW_ICE_FLAG_NAME.toLowerCase(), "Snow/Ice flag",
                                                 width, height, L1P_FLAG_BAND_NAME + "." + CC_SNOW_ICE_FLAG_NAME,
                                                 Color.CYAN, 0.5));
-        maskGroup.add(Mask.BandMathsType.create(CC_LANDRISK_FLAG_NAME.toLowerCase(), "Risk of land flag",
+        maskGroup.add(Mask.BandMathsType.create(maskPrefix + CC_LANDRISK_FLAG_NAME.toLowerCase(), "Risk of land flag",
                                                 width, height, L1P_FLAG_BAND_NAME + "." + CC_LANDRISK_FLAG_NAME,
                                                 Color.GREEN.darker().darker(), 0.5));
-        maskGroup.add(Mask.BandMathsType.create(CC_GLINTRISK_FLAG_NAME.toLowerCase(), "Risk of glint flag",
+        maskGroup.add(Mask.BandMathsType.create(maskPrefix + CC_GLINTRISK_FLAG_NAME.toLowerCase(), "Risk of glint flag",
                                                 width, height, L1P_FLAG_BAND_NAME + "." + CC_GLINTRISK_FLAG_NAME,
                                                 Color.pink, 0.5));
 

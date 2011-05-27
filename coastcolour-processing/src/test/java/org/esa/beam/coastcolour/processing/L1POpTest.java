@@ -55,17 +55,19 @@ public class L1POpTest {
         assertEquals("l1_flags", target.getBandAt(index + 1).getName());
         assertEquals("l1p_flags", target.getBandAt(index + 2).getName());
 
+        assertEquals("l1p_flags", target.getFlagCodingGroup().get(0).getName());
+        assertEquals("l1_flags", target.getFlagCodingGroup().get(1).getName());
+
         final ProductNodeGroup<Mask> maskGroup = target.getMaskGroup();
 
-        final String msg = "Expected Mask does not exist";
-        assertTrue(msg, maskGroup.contains(("cc_land")));
-        assertTrue(msg, maskGroup.contains(("cc_coastline")));
-        assertTrue(msg, maskGroup.contains(("cc_cloud")));
-        assertTrue(msg, maskGroup.contains(("cc_cloud_buffer")));
-        assertTrue(msg, maskGroup.contains(("cc_cloud_shadow")));
-        assertTrue(msg, maskGroup.contains(("cc_snow_ice")));
-        assertTrue(msg, maskGroup.contains(("cc_landrisk")));
-        assertTrue(msg, maskGroup.contains(("cc_glintrisk")));
+        assertEquals(0, maskGroup.indexOf(("l1p_cc_land")));
+        assertEquals(1, maskGroup.indexOf(("l1p_cc_coastline")));
+        assertEquals(2, maskGroup.indexOf(("l1p_cc_cloud")));
+        assertEquals(3, maskGroup.indexOf(("l1p_cc_cloud_buffer")));
+        assertEquals(4, maskGroup.indexOf(("l1p_cc_cloud_shadow")));
+        assertEquals(5, maskGroup.indexOf(("l1p_cc_snow_ice")));
+        assertEquals(6, maskGroup.indexOf(("l1p_cc_landrisk")));
+        assertEquals(7, maskGroup.indexOf(("l1p_cc_glintrisk")));
 
     }
 

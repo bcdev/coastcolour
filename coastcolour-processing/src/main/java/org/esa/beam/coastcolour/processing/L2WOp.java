@@ -116,18 +116,87 @@ public class L2WOp extends Operator {
         renameIops(targetProduct);
         renameConcentrations(targetProduct);
         copyReflecBandsIfRequired(sourceProduct, targetProduct);
-        changeCase2RFlags(targetProduct);
         sortFlagBands(targetProduct);
-//        changeL2WMasks(targetProduct); // todo
+        changeL2WMasksAndFlags(targetProduct);
         String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL2W";
         targetProduct.setProductType(l1pProductType);
         setTargetProduct(targetProduct);
     }
 
+    private void changeL2WMasksAndFlags(Product targetProduct) {
+        ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
+        FlagCoding l2wFlags = flagCodingGroup.get(CASE2_FLAGS_NAME);
+        l2wFlags.setName(L2W_FLAGS_NAME);
+        l2wFlags.removeAttribute(l2wFlags.getFlag("FIT_FAILED"));
+        Band band = targetProduct.getBand(CASE2_FLAGS_NAME);
+        band.setName(L2W_FLAGS_NAME);
+
+        ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
+        int lastL1PIndex = 0;
+        for (int i = 0; i < maskGroup.getNodeCount(); i++) {
+            Mask mask = maskGroup.get(i);
+            if (!mask.getName().startsWith("l1p")) {
+                lastL1PIndex = i;
+                break;
+            }
+        }
+
+
+        Mask fit_failed = maskGroup.get("case2_fit_failed");
+        maskGroup.remove(fit_failed);
+
+        Mask wlr_oor = maskGroup.get("case2_wlr_oor");
+        wlr_oor.setName("l2w_cc_wlr_ootr");
+        String wlrOorDescription = "Water leaving reflectance out of training range";
+        wlr_oor.setDescription(wlrOorDescription);
+        maskGroup.remove(wlr_oor);
+        maskGroup.add(lastL1PIndex, wlr_oor);
+        l2wFlags.getFlag("WLR_OOR").setDescription(wlrOorDescription);
+
+        Mask conc_oor = maskGroup.get("case2_conc_oor");
+        conc_oor.setName("l2w_cc_conc_ootr");
+        String concOorDescription = "Water constituents out of training range";
+        conc_oor.setDescription(concOorDescription);
+        maskGroup.remove(conc_oor);
+        maskGroup.add(++lastL1PIndex, conc_oor);
+        l2wFlags.getFlag("CONC_OOR").setDescription(concOorDescription);
+
+        Mask ootr = maskGroup.get("case2_ootr");
+        ootr.setName("l2w_cc_ootr");
+        String ootrDescription = "Spectrum out of training range (chiSquare threshold)";
+        ootr.setDescription(ootrDescription);
+        maskGroup.remove(ootr);
+        maskGroup.add(++lastL1PIndex, ootr);
+        l2wFlags.getFlag("OOTR").setDescription(ootrDescription);
+
+
+        Mask whitecaps = maskGroup.get("case2_whitecaps");
+        whitecaps.setName("l2w_cc_whitecaps");
+        String whitecapsDescription = "Risk for white caps";
+        whitecaps.setDescription(whitecapsDescription);
+        maskGroup.remove(whitecaps);
+        maskGroup.add(++lastL1PIndex, whitecaps);
+        l2wFlags.getFlag("WHITECAPS").setDescription(whitecapsDescription);
+
+
+        Mask invalid = maskGroup.get("case2_invalid");
+        String l2rInvalidExpr = Mask.BandMathsType.getExpression(invalid);
+        Mask.BandMathsType.setExpression(invalid, l2rInvalidExpr + " || l2w_flags.OOTR");
+        invalid.setName("l2w_cc_invalid");
+        String invalidDescription = "Invalid pixels (" + invalidPixelExpression + " || l2w_flags.OOTR)";
+        invalid.setDescription(invalidDescription);
+        maskGroup.remove(invalid);
+        maskGroup.add(++lastL1PIndex, invalid);
+        l2wFlags.getFlag("INVALID").setDescription(invalidDescription);
+    }
+
     private void copyMasks(Product sourceProduct, Product targetProduct) {
         ProductNodeGroup<Mask> maskGroup = sourceProduct.getMaskGroup();
         for (int i = 0; i < maskGroup.getNodeCount(); i++) {
-            targetProduct.getMaskGroup().add(i, maskGroup.get(i));
+            Mask mask = maskGroup.get(i);
+            if (!mask.getImageType().getName().equals(Mask.VectorDataType.TYPE_NAME)) {
+                mask.getImageType().transferMask(mask, targetProduct);
+            }
         }
     }
 
@@ -178,6 +247,7 @@ public class L2WOp extends Operator {
         ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
         FlagCoding agcFlags = flagCodingGroup.get(CASE2_FLAGS_NAME);
         agcFlags.setName(L2W_FLAGS_NAME);
+        agcFlags.removeAttribute(agcFlags.getFlag("case2_fit_failed"));
         Band band = targetProduct.getBand(CASE2_FLAGS_NAME);
         band.setName(L2W_FLAGS_NAME);
     }
@@ -186,15 +256,15 @@ public class L2WOp extends Operator {
         Band l1_flags = targetProduct.getBand("l1_flags");
         Band l1p_flags = targetProduct.getBand("l1p_flags");
         Band l2r_flags = targetProduct.getBand("l2r_flags");
-        Band l2w_flags = targetProduct.getBand("l2w_flags");
+        Band case2_flags = targetProduct.getBand("case2_flags");
         targetProduct.removeBand(l1_flags);
         targetProduct.removeBand(l1p_flags);
         targetProduct.removeBand(l2r_flags);
-        targetProduct.removeBand(l2w_flags);
+        targetProduct.removeBand(case2_flags);
         targetProduct.addBand(l1_flags);
         targetProduct.addBand(l1p_flags);
         targetProduct.addBand(l2r_flags);
-        targetProduct.addBand(l2w_flags);
+        targetProduct.addBand(case2_flags);
     }
 
     private boolean isL2RSourceProduct(Product sourceProduct) {

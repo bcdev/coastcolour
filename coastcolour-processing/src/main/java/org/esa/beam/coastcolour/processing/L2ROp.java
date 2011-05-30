@@ -110,9 +110,16 @@ public class L2ROp extends Operator {
         sortMasks(targetProduct);
         sortFlagBands(targetProduct);
         renameTauBands(targetProduct);
+        removeUnwantedBands(targetProduct);
         String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL2R";
         targetProduct.setProductType(l1pProductType);
         setTargetProduct(targetProduct);
+    }
+
+    private void removeUnwantedBands(Product targetProduct) {
+        targetProduct.removeBand(targetProduct.getBand("glint_ratio"));
+        targetProduct.removeBand(targetProduct.getBand("a_tot"));
+        targetProduct.removeBand(targetProduct.getBand("b_tsm"));
     }
 
     private void sortMasks(Product targetProduct) {
@@ -130,9 +137,9 @@ public class L2ROp extends Operator {
     }
 
     private void moveMaskAtIndex(ProductNodeGroup<Mask> maskGroup, String maskName, int index) {
-        Mask landMask = maskGroup.get(maskName);
-        maskGroup.remove(landMask);
-        maskGroup.add(index, landMask);
+        Mask mask = maskGroup.get(maskName);
+        maskGroup.remove(mask);
+        maskGroup.add(index, mask);
     }
 
     private void renameTauBands(Product targetProduct) {

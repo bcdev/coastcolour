@@ -103,6 +103,11 @@ public class L2ROpTest {
         assertNotNull(target.getBand("atm_tau_778"));
         assertNotNull(target.getBand("atm_tau_865"));
 
+        // bands not wanted to be included in L2R product
+        assertNull(target.getBand("glint_ratio"));
+        assertNull(target.getBand("b_tsm"));
+        assertNull(target.getBand("a_tot"));
+
         // Tests on copied L1 flags dataset
         L1POpTest.testFlags(target, "l1_flags");
 

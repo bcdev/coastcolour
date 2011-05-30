@@ -2,6 +2,7 @@ package org.esa.beam.coastcolour.processing;
 
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
+import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.gpf.GPF;
@@ -111,15 +112,23 @@ public class L2WOp extends Operator {
         case2Op.setSourceProduct("acProduct", sourceProduct);
         final Product targetProduct = case2Op.getTargetProduct();
 
+        copyMasks(sourceProduct, targetProduct);
         renameIops(targetProduct);
         renameConcentrations(targetProduct);
         copyReflecBandsIfRequired(sourceProduct, targetProduct);
         changeCase2RFlags(targetProduct);
         sortFlagBands(targetProduct);
-
+//        changeL2WMasks(targetProduct); // todo
         String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL2W";
         targetProduct.setProductType(l1pProductType);
         setTargetProduct(targetProduct);
+    }
+
+    private void copyMasks(Product sourceProduct, Product targetProduct) {
+        ProductNodeGroup<Mask> maskGroup = sourceProduct.getMaskGroup();
+        for (int i = 0; i < maskGroup.getNodeCount(); i++) {
+            targetProduct.getMaskGroup().add(i, maskGroup.get(i));
+        }
     }
 
     private void renameConcentrations(Product targetProduct) {

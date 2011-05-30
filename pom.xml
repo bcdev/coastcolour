@@ -85,6 +85,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.bc.calvalus</groupId>
+                <artifactId>calvalus-processing</artifactId>
+                <version>0.3-SNAPSHOT</version>
+            </dependency>
             <!-- Ceres System Level Module ############################################# -->
 
             <dependency>

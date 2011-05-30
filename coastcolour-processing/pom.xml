@@ -14,12 +14,21 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.esa.beam.coastcolour</groupId>
+            <artifactId>coastcolour-util</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-gpf</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-netcdf</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.bc.calvalus</groupId>
+            <artifactId>calvalus-processing</artifactId>
         </dependency>
 
         <!-- Operators -->

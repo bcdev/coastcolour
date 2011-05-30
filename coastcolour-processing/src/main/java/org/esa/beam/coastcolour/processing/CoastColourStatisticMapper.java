@@ -138,10 +138,11 @@ public class CoastColourStatisticMapper
         Mask invalidMask = sourceProduct.getMaskGroup().get("l1b_invalid");
         Mask cloudMask = sourceProduct.getMaskGroup().get("l1p_cc_cloud");
         Mask waterMask = Mask.BandMathsType.create("temp_water", "water", width, height,
-                                                   "!l1p_flags.CC_LAND", Color.BLUE, 0.5f);
+                                                   "!l1p_flags.CC_LAND && !l1p_flags.CC_COASTLINE", Color.BLUE, 0.5f);
         sourceProduct.getMaskGroup().add(waterMask);
         Mask cloudOverWaterMask = Mask.BandMathsType.create("temp_cloud_water", "cloud_water", width, height,
-                                                            "l1p_flags.CC_CLOUD && !l1p_flags.CC_LAND", Color.BLUE,
+                                                            "l1p_flags.CC_CLOUD && !l1p_flags.CC_LAND && !l1p_flags.CC_COASTLINE",
+                                                            Color.BLUE,
                                                             0.5f);
         sourceProduct.getMaskGroup().add(cloudOverWaterMask);
         Stx invalidStx = Stx.create(rasterWithoutInvalidMask, invalidMask, ProgressMonitor.NULL);

@@ -134,7 +134,10 @@ public class L1POp extends Operator {
         renameMask(maskGroup, "suspect");
         renameMask(maskGroup, "bright");
         renameMask(maskGroup, "invalid");
-        maskGroup.get("l1b_water").setDescription("Pixel is over ocean, not land");
+        Mask l1bWater = maskGroup.get("l1b_water");
+        if (l1bWater != null) {
+            l1bWater.setDescription("Pixel is over ocean, not land");
+        }
     }
 
     private void renameMask(ProductNodeGroup<Mask> maskGroup, String maskName) {

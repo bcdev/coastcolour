@@ -9,14 +9,12 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.ParseException;
 
 import static org.junit.Assert.*;
 
-@Ignore
 public class L2ROpTest {
 
     @BeforeClass

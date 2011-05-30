@@ -10,11 +10,11 @@ import org.esa.beam.framework.datamodel.PixelGeoCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
+import org.esa.beam.framework.datamodel.TiePointGeoCoding;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -22,7 +22,6 @@ import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
-@Ignore
 public class L1POpTest {
 
     @BeforeClass
@@ -77,9 +76,13 @@ public class L1POpTest {
     public void testCreateProduct_WithFsgInput() throws OperatorException, ParseException {
         Product l1bProduct = getL1bProduct();
         l1bProduct.setProductType("MER_FSG_1P");
+        int numElems = l1bProduct.getSceneRasterWidth() * l1bProduct.getSceneRasterHeight();
         Band corr_longitude = l1bProduct.addBand("corr_longitude", ProductData.TYPE_FLOAT64);
+        corr_longitude.setData(ProductData.createInstance(new double[numElems]));
         Band corr_latitude = l1bProduct.addBand("corr_latitude", ProductData.TYPE_FLOAT64);
+        corr_latitude.setData(ProductData.createInstance(new double[numElems]));
         l1bProduct.addBand("altitude", ProductData.TYPE_INT16);
+        l1bProduct.getBand("altitude").setDataElems(new short[numElems]);
 
         GeoCoding geoCoding = new PixelGeoCoding(corr_latitude, corr_longitude, "NOT l1_flags.INVALID", 6);
         l1bProduct.setGeoCoding(geoCoding);
@@ -126,7 +129,8 @@ public class L1POpTest {
             product.addBand(String.format("radiance_%d", (i + 1)), ProductData.TYPE_UINT16).setSpectralBandIndex(i);
 
         }
-        product.addBand("l1_flags", ProductData.TYPE_UINT8);
+        Band l1Flags = product.addBand("l1_flags", ProductData.TYPE_INT8);
+        l1Flags.setData(ProductData.createInstance(new byte[width * height]));
         product.addBand("detector_index", ProductData.TYPE_UINT16);
         float[] tiePointData = new float[width * height];
         product.addTiePointGrid(new TiePointGrid("sun_zenith", width, height, 0, 0, 1, 1, tiePointData));
@@ -156,6 +160,10 @@ public class L1POpTest {
         final MetadataAttribute sphDescriptor = new MetadataAttribute("SPH_DESCRIPTOR",
                                                                       ProductData.createInstance(
                                                                               "MER_FR__1P SPECIFIC HEADER"), true);
+
+        TiePointGeoCoding geoCoding = new TiePointGeoCoding(product.getTiePointGrid("latitude"),
+                                                            product.getTiePointGrid("longitude"));
+        product.setGeoCoding(geoCoding);
         sph.addAttribute(sphDescriptor);
         product.getMetadataRoot().addElement(sph);
 

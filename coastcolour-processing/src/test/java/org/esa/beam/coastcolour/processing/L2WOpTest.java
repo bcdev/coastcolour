@@ -8,7 +8,6 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -17,7 +16,6 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-@Ignore
 public class L2WOpTest {
 
     @BeforeClass
@@ -78,7 +76,9 @@ public class L2WOpTest {
 
     @Test
     public void testCreateProduct_WithFsgInput() throws OperatorException, ParseException {
-        String origUsePixelGeoCoding = System.getProperty("beam.envisat.usePixelGeoCoding", "false");
+        String origUsePixelGeoCoding = System.getProperty("beam.envisat.usePixelGeoCoding", "true");
+        String origPixelGeoCodingTiling = System.getProperty("beam.pixelGeoCoding.useTiling", "true");
+        String origPixelGeoCodingAccuracy = System.getProperty("beam.pixelGeoCoding.fractionAccuracy", "true");
         try {
             System.setProperty("beam.envisat.usePixelGeoCoding", "true");
             Product l1bProduct = L1POpTest.getL1bProduct();
@@ -104,6 +104,8 @@ public class L2WOpTest {
             assertTrue("Expected band 'altitude'", target.containsBand("altitude"));
         } finally {
             System.setProperty("beam.envisat.usePixelGeoCoding", origUsePixelGeoCoding);
+            System.setProperty("beam.pixelGeoCoding.useTiling", origPixelGeoCodingTiling);
+            System.setProperty("beam.pixelGeoCoding.fractionAccuracy", origPixelGeoCodingAccuracy);
         }
     }
 

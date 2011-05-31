@@ -15,6 +15,7 @@ import org.esa.beam.framework.gpf.pointop.Sample;
 import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
 import org.esa.beam.framework.gpf.pointop.WritableSample;
 
+import java.io.File;
 import java.net.URL;
 
 @SuppressWarnings({"UnusedDeclaration"})
@@ -22,7 +23,7 @@ import java.net.URL;
                   description = ".",
                   authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
                   copyright = "(c) 2010 by Brockmann Consult",
-                  version = "1.0")
+                  version = "1.1")
 public class FuzzyOp extends PixelOperator {
 
     private static final String AUXDATA_PATH = "owt16_meris_stats_101119_5band.hdf";
@@ -66,13 +67,14 @@ public class FuzzyOp extends PixelOperator {
     protected void configureSourceSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
         // general initialisation
         final URL resourceUrl = FuzzyClassification.class.getResource(AUXDATA_PATH);
-        final String filePath = resourceUrl.getFile();
         final Auxdata auxdata;
         try {
+            final String filePath = new File(resourceUrl.toURI()).getAbsolutePath();
             auxdata = new Auxdata(filePath);
         } catch (Exception e) {
-            throw new OperatorException(e);
+            throw new OperatorException("Not able to load auxdata", e);
         }
+
         fuzzyClassification = new FuzzyClassification(auxdata.getSpectralMeans(),
                                                       auxdata.getInvertedCovarianceMatrices());
         bandCount = auxdata.getSpectralMeans().length;
@@ -119,7 +121,7 @@ public class FuzzyOp extends PixelOperator {
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         if (sourceSamples.length != bandCount) {
             throw new OperatorException("Wrong number of source samples: Expected: " + bandCount +
-                                                ", Actual: " + sourceSamples.length);
+                                        ", Actual: " + sourceSamples.length);
         }
 
         if (!areSourceSamplesValid(x, y, sourceSamples)) {

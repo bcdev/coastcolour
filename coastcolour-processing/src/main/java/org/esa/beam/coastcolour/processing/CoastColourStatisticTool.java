@@ -18,6 +18,7 @@ package org.esa.beam.coastcolour.processing;
 
 import com.bc.calvalus.commons.CalvalusLogger;
 import com.bc.calvalus.processing.JobConfNames;
+import com.bc.calvalus.processing.JobUtils;
 import com.bc.calvalus.processing.beam.BeamOpProcessingType;
 import com.bc.calvalus.processing.hadoop.MultiFileSingleBlockInputFormat;
 import org.apache.commons.cli.CommandLine;
@@ -36,6 +37,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import static com.bc.calvalus.processing.hadoop.HadoopProcessingService.*;
@@ -81,7 +83,7 @@ public class CoastColourStatisticTool extends Configured implements Tool {
             configuration.set("hadoop.job.ugi", "hadoop,hadoop");  // user hadoop owns the outputs
             configuration.set("mapred.map.tasks.speculative.execution", "false");
             configuration.set("mapred.reduce.tasks.speculative.execution", "false");
-            configuration.set("mapred.child.java.opts", "-Xmx1024m");
+            configuration.set("mapred.child.java.opts", "-Xmx2000m");
             configuration.set("mapred.reduce.tasks", "1");
             configuration.setInt("mapred.max.map.failures.percent", 20);
 
@@ -89,6 +91,11 @@ public class CoastColourStatisticTool extends Configured implements Tool {
             configuration.set(JobConfNames.CALVALUS_INPUT, inputs);
             configuration.set(JobConfNames.CALVALUS_INPUT_FORMAT, "HADOOP-STREAMING");
             configuration.set(JobConfNames.CALVALUS_OUTPUT, outputs);
+
+            Properties properties = new Properties();
+            properties.setProperty("beam.pixelGeoCoding.useTiling","true");
+            String propertiesString = JobUtils.convertProperties(properties);
+            configuration.set(JobConfNames.CALVALUS_SYSTEM_PROPERTIES, propertiesString);
 
             job.setInputFormatClass(MultiFileSingleBlockInputFormat.class);
 

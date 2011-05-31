@@ -27,6 +27,8 @@
                 <include>*:coastcolour-processing*</include>
                 <include>*:coastcolour-util*</include>
                 <include>*:flint-processor*</include>
+                <include>*:calvalus-processing*</include>
+                <include>*:calvalus-commons*</include>
             </includes>
         </dependencySet>
     </dependencySets>

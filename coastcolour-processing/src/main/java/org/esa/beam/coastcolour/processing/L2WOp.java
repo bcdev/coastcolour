@@ -79,6 +79,12 @@ public class L2WOp extends Operator {
                description = "Toggles the output of water leaving irradiance reflectance.")
     private boolean outputReflec;
 
+    @Parameter(label = "Average salinity", defaultValue = "35", description = "The salinity of the water")
+    private double averageSalinity;
+
+    @Parameter(label = "Average temperature", defaultValue = "15", unit = "°C", description = "The Water temperature")
+    private double averageTemperature;
+
     @Override
     public void initialize() throws OperatorException {
 
@@ -103,6 +109,8 @@ public class L2WOp extends Operator {
         Case2AlgorithmEnum c2rAlgorithm = Case2AlgorithmEnum.REGIONAL;
         Operator case2Op = c2rAlgorithm.createOperatorInstance();
 
+        case2Op.setParameter("averageSalinity", averageSalinity);
+        case2Op.setParameter("averageTemperature", averageTemperature);
         case2Op.setParameter("tsmConversionExponent", c2rAlgorithm.getDefaultTsmExponent());
         case2Op.setParameter("tsmConversionFactor", c2rAlgorithm.getDefaultTsmFactor());
         case2Op.setParameter("chlConversionExponent", c2rAlgorithm.getDefaultChlExponent());
@@ -216,7 +224,10 @@ public class L2WOp extends Operator {
         targetProduct.getBand(aTotal).setName("iop_" + aTotal);
         targetProduct.getBand(aGelbstoff).setName("iop_" + aGelbstoff);
         targetProduct.getBand(aPigment).setName("iop_" + aPigment);
-        targetProduct.getBand(aPoc).setName("iop_" + aPoc);
+        Band aPocBand = targetProduct.getBand(aPoc);
+        aPocBand.setName("iop_" + aPoc);
+//        // todo - has no data yet
+//        targetProduct.removeBand(aPocBand);
         targetProduct.getBand(bbSpm).setName("iop_" + bbSpm);
         addPatternToAutoGrouping(targetProduct, "iop");
 
@@ -241,15 +252,6 @@ public class L2WOp extends Operator {
         Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
         String stringPattern = autoGrouping != null ? autoGrouping.toString() + ":" + groupPattern : groupPattern;
         targetProduct.setAutoGrouping(stringPattern);
-    }
-
-    private void changeCase2RFlags(Product targetProduct) {
-        ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
-        FlagCoding agcFlags = flagCodingGroup.get(CASE2_FLAGS_NAME);
-        agcFlags.setName(L2W_FLAGS_NAME);
-        agcFlags.removeAttribute(agcFlags.getFlag("case2_fit_failed"));
-        Band band = targetProduct.getBand(CASE2_FLAGS_NAME);
-        band.setName(L2W_FLAGS_NAME);
     }
 
     private void sortFlagBands(Product targetProduct) {

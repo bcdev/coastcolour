@@ -19,7 +19,6 @@ package org.esa.beam.coastcolour.processing;
 import com.bc.calvalus.commons.CalvalusLogger;
 import com.bc.calvalus.processing.JobConfNames;
 import com.bc.calvalus.processing.JobUtils;
-import com.bc.calvalus.processing.beam.BeamOpProcessingType;
 import com.bc.calvalus.processing.hadoop.MultiFileSingleBlockInputFormat;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -87,13 +86,14 @@ public class CoastColourStatisticTool extends Configured implements Tool {
             configuration.set("mapred.reduce.tasks", "1");
             configuration.setInt("mapred.max.map.failures.percent", 20);
 
-            String inputs = BeamOpProcessingType.collectInputPaths(new String[]{inputPath}, ".*\\.seq", configuration);
-            configuration.set(JobConfNames.CALVALUS_INPUT, inputs);
+            // todo fix the following line
+//            String inputs = BeamOpProcessingType.collectInputPaths(new String[]{inputPath}, ".*\\.seq", configuration);
+//            configuration.set(JobConfNames.CALVALUS_INPUT, inputs);
             configuration.set(JobConfNames.CALVALUS_INPUT_FORMAT, "HADOOP-STREAMING");
             configuration.set(JobConfNames.CALVALUS_OUTPUT, outputs);
 
             Properties properties = new Properties();
-            properties.setProperty("beam.pixelGeoCoding.useTiling","true");
+            properties.setProperty("beam.pixelGeoCoding.useTiling", "true");
             String propertiesString = JobUtils.convertProperties(properties);
             configuration.set(JobConfNames.CALVALUS_SYSTEM_PROPERTIES, propertiesString);
 
@@ -116,15 +116,18 @@ public class CoastColourStatisticTool extends Configured implements Tool {
             FileOutputFormat.setOutputPath(job, outputPath);
 
             // Add Calvalus modules to classpath of Hadoop jobs
-            addBundleToClassPath(configuration.get(JobConfNames.CALVALUS_CALVALUS_BUNDLE, DEFAULT_CALVALUS_BUNDLE), configuration);
+            addBundleToClassPath(configuration.get(JobConfNames.CALVALUS_CALVALUS_BUNDLE, DEFAULT_CALVALUS_BUNDLE),
+                                 configuration);
             // Add BEAM modules to classpath of Hadoop jobs
-            addBundleToClassPath(configuration.get(JobConfNames.CALVALUS_BEAM_BUNDLE, DEFAULT_BEAM_BUNDLE), configuration);
+            addBundleToClassPath(configuration.get(JobConfNames.CALVALUS_BEAM_BUNDLE, DEFAULT_BEAM_BUNDLE),
+                                 configuration);
             addBundleToClassPath("coastcolour-stx", configuration);
 
             int result = job.waitForCompletion(true) ? 0 : 1;
 
             long stopTime = System.nanoTime();
-            LOG.info("stop processing CC_stx " + inputPath + " to " + outputPath + " after " + ((stopTime - startTime) / 1E9) +  " sec");
+            LOG.info(
+                    "stop processing CC_stx " + inputPath + " to " + outputPath + " after " + ((stopTime - startTime) / 1E9) + " sec");
             return result;
         } catch (Exception e) {
             System.err.println("failed: " + e.getMessage());

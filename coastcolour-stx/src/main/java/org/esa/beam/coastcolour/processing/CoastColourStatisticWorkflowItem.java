@@ -81,7 +81,7 @@ class CoastColourStatisticWorkflowItem extends HadoopWorkflowItem {
 
         JobUtils.clearAndSetOutputDir(job, outputPath);
 
-        HadoopProcessingService.addBundleToClassPath("coastcolour-stx", configuration);
+        HadoopProcessingService.addBundleToClassPath("coastcolour-stx-1.2-SNAPSHOT", configuration);
 
         return job;
     }

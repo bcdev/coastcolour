@@ -79,11 +79,20 @@ public class L2WOp extends Operator {
                description = "Toggles the output of water leaving irradiance reflectance.")
     private boolean outputReflec;
 
-    @Parameter(label = "Average salinity", defaultValue = "35", description = "The salinity of the water")
+    @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU", description = "The salinity of the water")
     private double averageSalinity;
 
     @Parameter(label = "Average temperature", defaultValue = "15", unit = "°C", description = "The Water temperature")
     private double averageTemperature;
+
+    @Parameter(defaultValue = "false", label = "Output A_Poc",
+               description = "Toggles the output of absorption by particulate organic matter.")
+    private boolean outputAPoc;
+
+    @Parameter(defaultValue = "true", label = "Output Kd spectrum",
+               description = "Toggles the output of downwelling irradiance attenuation coefficients. " +
+                             "If disabled only Kd_490 is added to the output.")
+    private boolean outputKdSpectrum;
 
     @Override
     public void initialize() throws OperatorException {
@@ -115,6 +124,8 @@ public class L2WOp extends Operator {
         case2Op.setParameter("tsmConversionFactor", c2rAlgorithm.getDefaultTsmFactor());
         case2Op.setParameter("chlConversionExponent", c2rAlgorithm.getDefaultChlExponent());
         case2Op.setParameter("chlConversionFactor", c2rAlgorithm.getDefaultChlFactor());
+        case2Op.setParameter("outputKdSpectrum", outputKdSpectrum);
+        case2Op.setParameter("outputAPoc", outputAPoc);
         case2Op.setParameter("inputReflecAre", "RADIANCE_REFLECTANCES");
         case2Op.setParameter("invalidPixelExpression", invalidPixelExpression);
         case2Op.setSourceProduct("acProduct", sourceProduct);
@@ -225,9 +236,9 @@ public class L2WOp extends Operator {
         targetProduct.getBand(aGelbstoff).setName("iop_" + aGelbstoff);
         targetProduct.getBand(aPigment).setName("iop_" + aPigment);
         Band aPocBand = targetProduct.getBand(aPoc);
-        aPocBand.setName("iop_" + aPoc);
-//        // todo - has no data yet
-//        targetProduct.removeBand(aPocBand);
+        if (aPocBand != null) {
+            aPocBand.setName("iop_" + aPoc);
+        }
         targetProduct.getBand(bbSpm).setName("iop_" + bbSpm);
         addPatternToAutoGrouping(targetProduct, "iop");
 

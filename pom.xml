@@ -205,7 +205,7 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-meris-case2-regional</artifactId>
-                <version>1.6-CC-SNAPSHOT</version>
+                <version>1.6-CC2-SNAPSHOT</version>
             </dependency>
 
             <dependency>

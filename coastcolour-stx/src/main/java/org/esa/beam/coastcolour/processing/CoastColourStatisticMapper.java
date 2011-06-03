@@ -89,7 +89,7 @@ public class CoastColourStatisticMapper
         System.out.println(productName + "\t" + statisticalData);
     }
 
-    private static String createProductName(String productFileName) {
+    static String createProductName(String productFileName) {
         String inputFilename = FileUtils.getFilenameWithoutExtension(productFileName);
         inputFilename = "MER_FSG_CCL1P_" + inputFilename.substring(20);
         return inputFilename;
@@ -133,7 +133,7 @@ public class CoastColourStatisticMapper
         }
     }
 
-    private static String createStatisticalData(Product sourceProduct, OutputStream quicklookOutputStream,
+    static String createStatisticalData(Product sourceProduct, OutputStream quicklookOutputStream,
                                                 OutputStream worldMapOutputStream) throws IOException {
         String statString = doStatisticsExtraction(sourceProduct);
 

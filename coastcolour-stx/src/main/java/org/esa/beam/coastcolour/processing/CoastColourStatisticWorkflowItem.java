@@ -18,7 +18,6 @@ package org.esa.beam.coastcolour.processing;
 
 import com.bc.calvalus.processing.JobConfNames;
 import com.bc.calvalus.processing.JobUtils;
-import com.bc.calvalus.processing.beam.BeamOpProcessingType;
 import com.bc.calvalus.processing.hadoop.HadoopProcessingService;
 import com.bc.calvalus.processing.hadoop.HadoopWorkflowItem;
 import com.bc.calvalus.processing.hadoop.MultiFileSingleBlockInputFormat;
@@ -27,6 +26,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.esa.beam.util.StringUtils;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -39,12 +39,12 @@ import java.util.Properties;
  **/
 class CoastColourStatisticWorkflowItem extends HadoopWorkflowItem {
 
-    private final String inputPath;
+    private final String[] inputs;
     private final String outputPath;
 
-    CoastColourStatisticWorkflowItem(HadoopProcessingService processingService, String inputPath, String outputPath) {
+    CoastColourStatisticWorkflowItem(HadoopProcessingService processingService, String[] inputs, String outputPath) {
         super(processingService);
-        this.inputPath = inputPath;
+        this.inputs = inputs;
         this.outputPath = outputPath;
     }
 
@@ -57,8 +57,7 @@ class CoastColourStatisticWorkflowItem extends HadoopWorkflowItem {
         configuration.set("mapred.child.java.opts", "-Xmx2000m");
         configuration.setInt("mapred.max.map.failures.percent", 20);
 
-        String inputs = BeamOpProcessingType.collectInputPaths(new String[]{inputPath}, ".*\\.seq", configuration);
-        configuration.set(JobConfNames.CALVALUS_INPUT, inputs);
+        configuration.set(JobConfNames.CALVALUS_INPUT, StringUtils.join(inputs, ","));
         configuration.set(JobConfNames.CALVALUS_INPUT_FORMAT, "HADOOP-STREAMING");
         configuration.set(JobConfNames.CALVALUS_OUTPUT, outputPath);
 

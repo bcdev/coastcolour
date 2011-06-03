@@ -139,6 +139,7 @@ public class L2WOp extends Operator {
         changeL2WMasksAndFlags(targetProduct);
         String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL2W";
         targetProduct.setProductType(l1pProductType);
+        targetProduct.setDescription("MERIS CoastColour L2W");
         setTargetProduct(targetProduct);
     }
 

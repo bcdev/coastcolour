@@ -113,6 +113,7 @@ public class L2ROp extends Operator {
         removeUnwantedBands(targetProduct);
         String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL2R";
         targetProduct.setProductType(l1pProductType);
+        targetProduct.setDescription("MERIS CoastColour L2R");
         setTargetProduct(targetProduct);
     }
 

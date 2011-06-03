@@ -120,6 +120,7 @@ public class L1POp extends Operator {
 
         String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL1P";
         l1pProduct.setProductType(l1pProductType);
+        l1pProduct.setDescription("MERIS CoastColour L1P");
         setTargetProduct(l1pProduct);
     }
 

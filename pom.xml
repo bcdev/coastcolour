@@ -74,7 +74,7 @@
         <module>coastcolour-util</module>
         <module>coastcolour-fuzzy-classification</module>
         <module>coastcolour-processing</module>
-
+        <module>coastcolour-stx</module>
     </modules>
 
     <properties>

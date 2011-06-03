@@ -72,17 +72,21 @@ public class AllStatisticFactory implements WorkflowFactory{
                 }
             }
             CoastColourStatisticWorkflowFactory workflowFactory = new CoastColourStatisticWorkflowFactory();
-            WorkflowItem[] workflowItems = new WorkflowItem[inputs.size()];
-            for (int i = 0; i < workflowItems.length; i++) {
+            List<WorkflowItem> workflowItems = new ArrayList<WorkflowItem>(inputs.size());
+            for (int i = 0; i < inputs.size(); i++) {
                 String[] subArgs;
                 if (args.length == 3) {
                     subArgs = new String[]{inputs.get(i), outputs.get(i), existings.get(i)};
                 } else {
                     subArgs = new String[]{inputs.get(i), outputs.get(i)};
                 }
-                workflowItems[i] = workflowFactory.create(hps, subArgs);
+                WorkflowItem workflowItem = workflowFactory.create(hps, subArgs);
+                if (workflowItem != null) {
+                    workflowItems.add(workflowItem);
+                }
             }
-            return new Workflow.Parallel(workflowItems);
+//            return null;
+            return new Workflow.Parallel(workflowItems.toArray(new WorkflowItem[workflowItems.size()]));
         } catch (IOException e) {
             throw new WorkflowException(e);
         }

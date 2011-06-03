@@ -105,6 +105,8 @@ public class CoastColourStatisticMapper
         LOG.info(context.getTaskAttemptID() + " starts processing of split " + split);
         final long startTime = System.nanoTime();
 
+        OutputStream quicklookOutputStream = null;
+        OutputStream worldMapOutputStream = null;
         try {
             final Path inputPath = split.getPath();
 
@@ -113,19 +115,32 @@ public class CoastColourStatisticMapper
 
             // set up input reader
             Product sourceProduct = BeamUtils.readProduct(inputPath, configuration);
+
+
+            if (sourceProduct.getSceneRasterWidth() <= 12 || sourceProduct.getSceneRasterHeight() <= 12) {
+                System.out.println("product width = " + sourceProduct.getSceneRasterHeight());
+                System.out.println("product height = " + sourceProduct.getSceneRasterWidth());
+                LOG.log(Level.WARNING, "Skipping product: '" + inputPath +  "', its way too small.");
+                return;
+            }
             String productName = createProductName(inputPath.getName());
-            OutputStream quicklookOutputStream = createPngOutputStream(productName + "_QL", context);
-            OutputStream worldMapOutputStream = createPngOutputStream(productName + "_WM", context);
+            quicklookOutputStream = createPngOutputStream(productName + "_QL", context);
+            worldMapOutputStream = createPngOutputStream(productName + "_WM", context);
 
             String statString = createStatisticalData(sourceProduct, quicklookOutputStream, worldMapOutputStream);
-
             context.write(new Text(productName), new Text(statString));
-
 
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "CoastColourStatisticMapper exception: " + e.toString(), e);
             throw new ProcessorException("CoastColourStatisticMapper exception: " + e.toString(), e);
         } finally {
+            if (quicklookOutputStream != null) {
+                quicklookOutputStream.close();
+            }
+            if (worldMapOutputStream != null) {
+                worldMapOutputStream.close();
+            }
+
             // write final log entry for runtime measurements
             final long stopTime = System.nanoTime();
             LOG.info(
@@ -208,7 +223,7 @@ public class CoastColourStatisticMapper
         return fileSystem.create(outputProductPath);
     }
 
-    static RenderedImage createRGBImage(Product product, String... RGBExpressions) {
+    static BufferedImage createRGBImage(Product product, String... RGBExpressions) {
         Map<String, Object> subsetParams = new HashMap<String, Object>();
         subsetParams.put("subSamplingX", 4);
         subsetParams.put("subSamplingY", 4);

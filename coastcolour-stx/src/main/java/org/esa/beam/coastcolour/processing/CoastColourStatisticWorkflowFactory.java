@@ -28,7 +28,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.StringUtils;
 
@@ -36,7 +35,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -80,13 +78,19 @@ public class CoastColourStatisticWorkflowFactory implements WorkflowFactory {
         System.out.println("--------------------------------------------------------");
 
 
-//        debug(hps.getJobClient().getConf(), inputs);
-//        return null;
-        return new CoastColourStatisticWorkflowItem(hps, inputs, outputPath);
+        if (inputs.length == 0) {
+            return null;
+        } else {
+            return new CoastColourStatisticWorkflowItem(hps, inputs, outputPath);
+//            debug(hps.getJobClient().getConf(), inputs, new Path(inputPath).getParent().getName());
+//            return null;
+        }
     }
 
-    private void debug(Configuration conf, String[] inputs) {
+    private void debug(Configuration conf, String[] inputs, String dirName) {
         conf.set(JobConfNames.CALVALUS_INPUT_FORMAT, "HADOOP-STREAMING");
+        File cc = new File("cc", dirName);
+        cc.mkdirs();
 
         Properties properties = new Properties();
         properties.setProperty("beam.pixelGeoCoding.useTiling", "true");
@@ -103,10 +107,17 @@ public class CoastColourStatisticWorkflowFactory implements WorkflowFactory {
                 Path path = new Path(input);
                 Product product = BeamUtils.readProduct(path, conf);
 
+                if (product.getSceneRasterWidth() <= 12 || product.getSceneRasterHeight() <= 12) {
+                    System.out.println("product width = " + product.getSceneRasterHeight());
+                    System.out.println("product height = " + product.getSceneRasterWidth());
+                    System.out.println("Skipping product: '" + input +  "', its way too small.");
+                    continue;
+                }
+
                 productName = CoastColourStatisticMapper.createProductName(path.getName());
 
-                FileOutputStream quicklookOutputStream = new FileOutputStream(productName + "_QL.png");
-                FileOutputStream worldMapOutputStream = new FileOutputStream(productName + "_WM.png");
+                FileOutputStream quicklookOutputStream = new FileOutputStream(new File(cc, productName + "_QL.png"));
+                FileOutputStream worldMapOutputStream = new FileOutputStream(new File(cc, productName + "_WM.png"));
                 try {
                     statisticalData = CoastColourStatisticMapper.createStatisticalData(product, quicklookOutputStream, worldMapOutputStream);
                 } finally {

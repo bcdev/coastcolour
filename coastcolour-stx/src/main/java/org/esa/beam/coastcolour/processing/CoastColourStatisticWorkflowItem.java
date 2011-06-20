@@ -36,7 +36,7 @@ import java.util.Properties;
  * generates a RGB quicklook and a worldmap using the {@code CoastColourStatisticMapper}.
  *
  * @author MarcoZ
- **/
+ */
 class CoastColourStatisticWorkflowItem extends HadoopWorkflowItem {
 
     private final String[] inputs;
@@ -81,7 +81,7 @@ class CoastColourStatisticWorkflowItem extends HadoopWorkflowItem {
 
         JobUtils.clearAndSetOutputDir(job, outputPath);
 
-        HadoopProcessingService.addBundleToClassPath("coastcolour-stx-1.2-SNAPSHOT", configuration);
+        HadoopProcessingService.addBundleToClassPath("coastcolour-stx-1.2", configuration);
 
         return job;
     }

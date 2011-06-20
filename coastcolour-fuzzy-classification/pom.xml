@@ -7,13 +7,13 @@
     <parent>
         <groupId>org.esa.beam.coastcolour</groupId>
         <artifactId>coastcolour</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
     </parent>
 
     <name>CoastColour Fuzzy Classification</name>
     <groupId>org.esa.beam.coastcolour</groupId>
     <artifactId>coastcolour-fuzzy-classification</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
 
     <dependencies>
         <dependency>

@@ -1,5 +1,6 @@
 package org.esa.beam.coastcolour.processing;
 
+import org.esa.beam.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Mask;
@@ -15,7 +16,9 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
 import org.esa.beam.meris.case2.Case2AlgorithmEnum;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.ResourceInstaller;
 
+import java.io.File;
 import java.util.HashMap;
 
 @OperatorMetadata(alias = "CoastColour.L2W")
@@ -50,6 +53,7 @@ public class L2WOp extends Operator {
 
     @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03")
     private double brightTestThreshold;
+
     @Parameter(label = "Bright Test Reference Wavelength [nm]", defaultValue = "865",
                valueSet = {
                        "412", "442", "490", "510", "560",
@@ -57,6 +61,33 @@ public class L2WOp extends Operator {
                        "760", "775", "865", "890", "900"
                })
     private int brightTestWavelength;
+
+
+    @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU", description = "The salinity of the water")
+    private double averageSalinity;
+
+    @Parameter(label = "Average temperature", defaultValue = "15", unit = "°C", description = "The Water temperature")
+    private double averageTemperature;
+
+    @Parameter(label = "MERIS net (full path required for other than default)",
+               defaultValue = GlintCorrectionOperator.MERIS_ATMOSPHERIC_NET_NAME,
+               description = "The file of the atmospheric net to be used instead of the default neural net.",
+               notNull = false)
+    private File atmoNetMerisFile;
+
+    @Parameter(label = "Autoassociatve net (full path required for other than default)",
+               defaultValue = GlintCorrectionOperator.ATMO_AANN_NET,
+               description = "The file of the autoassociative net used for error computed instead of the default neural net.",
+               notNull = false)
+    private File autoassociativeNetFile;
+
+    @Parameter(label = "Alternative inverse water neural net (optional)",
+               description = "The file of the inverse water neural net to be used instead of the default.")
+    private File inverseWaterNnFile;
+
+    @Parameter(label = "Alternative forward water neural net (optional)",
+               description = "The file of the forward water neural net to be used instead of the default.")
+    private File forwardWaterNnFile;
 
 
     @Parameter(defaultValue = "l1p_flags.CC_LAND",
@@ -78,12 +109,6 @@ public class L2WOp extends Operator {
     @Parameter(defaultValue = "false", label = "Output water leaving reflectance",
                description = "Toggles the output of water leaving irradiance reflectance.")
     private boolean outputReflec;
-
-    @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU", description = "The salinity of the water")
-    private double averageSalinity;
-
-    @Parameter(label = "Average temperature", defaultValue = "15", unit = "°C", description = "The Water temperature")
-    private double averageTemperature;
 
     @Parameter(defaultValue = "false", label = "Output A_Poc",
                description = "Toggles the output of absorption by particulate organic matter.")
@@ -107,6 +132,10 @@ public class L2WOp extends Operator {
             l2rParams.put("algorithm", algorithm);
             l2rParams.put("brightTestThreshold", brightTestThreshold);
             l2rParams.put("brightTestWavelength", brightTestWavelength);
+            l2rParams.put("averageSalinity", averageSalinity);
+            l2rParams.put("averageTemperature", averageTemperature);
+            l2rParams.put("atmoNetMerisFile", atmoNetMerisFile);
+            l2rParams.put("autoassociativeNetFile", autoassociativeNetFile);
             l2rParams.put("landExpression", landExpression);
             l2rParams.put("cloudIceExpression", cloudIceExpression);
             l2rParams.put("outputNormReflec", true);
@@ -118,6 +147,8 @@ public class L2WOp extends Operator {
         Case2AlgorithmEnum c2rAlgorithm = Case2AlgorithmEnum.REGIONAL;
         Operator case2Op = c2rAlgorithm.createOperatorInstance();
 
+        case2Op.setParameter("forwardWaterNnFile", forwardWaterNnFile);
+        case2Op.setParameter("inverseWaterNnFile", inverseWaterNnFile);
         case2Op.setParameter("averageSalinity", averageSalinity);
         case2Op.setParameter("averageTemperature", averageTemperature);
         case2Op.setParameter("tsmConversionExponent", c2rAlgorithm.getDefaultTsmExponent());
@@ -289,6 +320,7 @@ public class L2WOp extends Operator {
 
         public Spi() {
             super(L2WOp.class);
+            AuxdataInstaller.installAuxdata(ResourceInstaller.getSourceUrl(L2WOp.class));
         }
     }
 }

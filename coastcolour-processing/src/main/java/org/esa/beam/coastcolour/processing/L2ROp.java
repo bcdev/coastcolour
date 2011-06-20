@@ -1,5 +1,6 @@
 package org.esa.beam.coastcolour.processing;
 
+import org.esa.beam.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Mask;
@@ -13,7 +14,9 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
+import org.esa.beam.util.ResourceInstaller;
 
+import java.io.File;
 import java.util.HashMap;
 
 @OperatorMetadata(alias = "CoastColour.L2R")
@@ -46,6 +49,24 @@ public class L2ROp extends Operator {
     @Parameter(defaultValue = "CoastColour", valueSet = {"GlobAlbedo", "QWG", "CoastColour"})
     private CloudScreeningSelector algorithm;
 
+    @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU", description = "The salinity of the water")
+    private double averageSalinity;
+
+    @Parameter(label = "Average temperature", defaultValue = "15", unit = "°C", description = "The Water temperature")
+    private double averageTemperature;
+
+    @Parameter(label = "MERIS net (full path required for other than default)",
+               defaultValue = GlintCorrectionOperator.MERIS_ATMOSPHERIC_NET_NAME,
+               description = "The file of the atmospheric net to be used instead of the default neural net.",
+               notNull = false)
+    private File atmoNetMerisFile;
+
+    @Parameter(label = "Autoassociatve net (full path required for other than default)",
+               defaultValue = GlintCorrectionOperator.ATMO_AANN_NET,
+               description = "The file of the autoassociative net used for error computed instead of the default neural net.",
+               notNull = false)
+    private File autoassociativeNetFile;
+
     @Parameter(defaultValue = "l1p_flags.CC_LAND",
                label = "Land detection expression",
                description = "The arithmetic expression used for land detection.",
@@ -57,8 +78,10 @@ public class L2ROp extends Operator {
                description = "The arithmetic expression used for cloud/ice detection.",
                notEmpty = true, notNull = true)
     private String cloudIceExpression;
+
     @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03")
     private double brightTestThreshold;
+
     @Parameter(label = "Bright Test Reference Wavelength [nm]", defaultValue = "865",
                valueSet = {
                        "412", "442", "490", "510", "560",
@@ -86,20 +109,24 @@ public class L2ROp extends Operator {
         HashMap<String, Product> sourceProducts = new HashMap<String, Product>();
         sourceProducts.put("merisProduct", sourceProduct);
 
-        HashMap<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("doSmileCorrection", false);
-        parameters.put("outputTosa", false);
-        parameters.put("outputReflec", true);
-        parameters.put("outputNormReflec", true);
-        parameters.put("outputReflecAs", "RADIANCE_REFLECTANCES");
-        parameters.put("outputPath", false);
-        parameters.put("outputTransmittance", false);
-        parameters.put("deriveRwFromPath", false);
-        parameters.put("landExpression", landExpression);
-        parameters.put("cloudIceExpression", cloudIceExpression);
-        parameters.put("useFlint", false);
+        HashMap<String, Object> glintParameters = new HashMap<String, Object>();
+        glintParameters.put("doSmileCorrection", false);
+        glintParameters.put("outputTosa", false);
+        glintParameters.put("outputReflec", true);
+        glintParameters.put("outputNormReflec", true);
+        glintParameters.put("outputReflecAs", "RADIANCE_REFLECTANCES");
+        glintParameters.put("outputPath", false);
+        glintParameters.put("outputTransmittance", false);
+        glintParameters.put("deriveRwFromPath", false);
+        glintParameters.put("averageSalinity", averageSalinity);
+        glintParameters.put("averageTemperature", averageTemperature);
+        glintParameters.put("atmoNetMerisFile", atmoNetMerisFile);
+        glintParameters.put("autoassociativeNetFile", autoassociativeNetFile);
+        glintParameters.put("landExpression", landExpression);
+        glintParameters.put("cloudIceExpression", cloudIceExpression);
+        glintParameters.put("useFlint", false);
 
-        Product glintProduct = GPF.createProduct("Meris.GlintCorrection", parameters, sourceProducts);
+        Product glintProduct = GPF.createProduct("Meris.GlintCorrection", glintParameters, sourceProducts);
 
         // need a copy of the product in order to make changes to flag names
         // otherwise a GlintCorrection can't handle the changed target product anymore
@@ -214,6 +241,9 @@ public class L2ROp extends Operator {
 
         public Spi() {
             super(L2ROp.class);
+            AuxdataInstaller.installAuxdata(ResourceInstaller.getSourceUrl(L2ROp.class));
         }
+
+
     }
 }

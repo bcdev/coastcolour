@@ -57,7 +57,7 @@ public class L2WOpTest {
         source = getL1pProduct(source);
         source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
         final String[] expectedBandNames = {
-                "iop_a_ys_443", "iop_a_total_443", "iop_a_poc_443", "iop_bb_spm_443",
+                "iop_a_ys_443", "iop_a_total_443", "iop_bb_spm_443",
                 "conc_tsm", "conc_chl"
         };
         testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);

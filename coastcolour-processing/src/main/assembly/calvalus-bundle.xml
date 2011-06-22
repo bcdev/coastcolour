@@ -24,6 +24,7 @@
                 <include>*:beam-meris-qaa*</include>
                 <include>*:beam-meris-radiometry*</include>
                 <include>*:beam-meris-sdr*</include>
+                <include>*:beam-netcdf*</include>
                 <include>*:coastcolour-processing*</include>
                 <include>*:coastcolour-util*</include>
                 <include>*:flint-processor*</include>

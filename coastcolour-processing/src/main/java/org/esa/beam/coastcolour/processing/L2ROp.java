@@ -90,6 +90,18 @@ public class L2ROp extends Operator {
                })
     private int brightTestWavelength;
 
+    @Parameter(defaultValue = "false", label = "Output TOSA reflectance",
+               description = "Toggles the output of Top of Standard Atmosphere reflectance.")
+    private boolean outputTosa;
+
+    @Parameter(defaultValue = "false", label = "Output path reflectance",
+               description = "Toggles the output of water leaving path reflectance.")
+    private boolean outputPath;
+
+    @Parameter(defaultValue = "false", label = "Output transmittance",
+               description = "Toggles the output of downwelling irradiance transmittance.")
+    private boolean outputTransmittance;
+
 
     @Override
     public void initialize() throws OperatorException {
@@ -111,12 +123,12 @@ public class L2ROp extends Operator {
 
         HashMap<String, Object> glintParameters = new HashMap<String, Object>();
         glintParameters.put("doSmileCorrection", false);
-        glintParameters.put("outputTosa", false);
+        glintParameters.put("outputTosa", outputTosa);
         glintParameters.put("outputReflec", true);
         glintParameters.put("outputNormReflec", true);
         glintParameters.put("outputReflecAs", "RADIANCE_REFLECTANCES");
-        glintParameters.put("outputPath", false);
-        glintParameters.put("outputTransmittance", false);
+        glintParameters.put("outputPath", outputPath);
+        glintParameters.put("outputTransmittance", outputTransmittance);
         glintParameters.put("deriveRwFromPath", false);
         glintParameters.put("averageSalinity", averageSalinity);
         glintParameters.put("averageTemperature", averageTemperature);

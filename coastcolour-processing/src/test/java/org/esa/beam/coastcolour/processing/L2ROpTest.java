@@ -12,6 +12,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -26,14 +28,28 @@ public class L2ROpTest {
     @Test
     public void testCreateProductFromL1B() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
-        testDefaultTargetProduct(source, "MER_FR__CCL2R");
+        testDefaultTargetProduct(source, GPF.NO_PARAMS, "MER_FR__CCL2R");
     }
 
     @Test
     public void testCreateProductFromL1P() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
         source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
-        testDefaultTargetProduct(source, "MER_FR__CCL2R");
+        testDefaultTargetProduct(source, GPF.NO_PARAMS, "MER_FR__CCL2R");
+    }
+
+    @Test
+    public void testCreateProduct_WithMoreOutput() throws OperatorException, ParseException {
+        Product source = L1POpTest.getL1bProduct();
+        source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
+        Map<String, Object> l2rParams = new HashMap<String, Object>();
+        l2rParams.put("outputTosa", true);
+        l2rParams.put("outputTransmittance", true);
+        l2rParams.put("outputPath", true);
+        Product l2rProduct = testDefaultTargetProduct(source, l2rParams, "MER_FR__CCL2R");
+        assertProductContainsBands(l2rProduct, "tosa_reflec_1", "tosa_reflec_8", "tosa_reflec_13");
+        assertProductContainsBands(l2rProduct, "trans_3", "trans_6", "trans_12");
+        assertProductContainsBands(l2rProduct, "path_2", "path_7", "path_10");
     }
 
     @Test
@@ -55,7 +71,7 @@ public class L2ROpTest {
             l1bProduct.setGeoCoding(geoCoding);
 
             Product l1pProduct = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
-            Product target = testDefaultTargetProduct(l1pProduct, "MER_FSG_CCL2R");
+            Product target = testDefaultTargetProduct(l1pProduct, GPF.NO_PARAMS, "MER_FSG_CCL2R");
 
             assertTrue("Expected band 'corr_longitude'", target.containsBand("corr_longitude"));
             assertTrue("Expected band 'corr_latitude'", target.containsBand("corr_latitude"));
@@ -65,9 +81,10 @@ public class L2ROpTest {
         }
     }
 
-    private static Product testDefaultTargetProduct(Product source, String expectedProductType) {
+    private static Product testDefaultTargetProduct(Product source, Map<String, Object> processingParams,
+                                                    String expectedProductType) {
 
-        Product target = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
+        Product target = GPF.createProduct("CoastColour.L2R", processingParams, source);
         assertNotNull(target);
         assertEquals(expectedProductType, target.getProductType());
 
@@ -123,5 +140,12 @@ public class L2ROpTest {
         assertEquals(l1FlagsBandIndex + 2, target.getBandIndex("l2r_flags"));
         return target;
     }
+
+    private void assertProductContainsBands(Product l2rProduct, String... expectedBandNames) {
+        for (String expectedBandName : expectedBandNames) {
+            assertTrue("Expected band '" + expectedBandName + "'", l2rProduct.containsBand(expectedBandName));
+        }
+    }
+
 
 }

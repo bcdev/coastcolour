@@ -1,15 +1,22 @@
 package org.esa.beam.coastcolour.processing;
 
+import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.atmosphere.operator.GlintCorrection;
 import org.esa.beam.atmosphere.operator.GlintCorrectionOperator;
+import org.esa.beam.atmosphere.operator.MerisFlightDirection;
+import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
+import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
@@ -18,14 +25,23 @@ import org.esa.beam.meris.case2.Case2AlgorithmEnum;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 
+import java.awt.Rectangle;
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 @OperatorMetadata(alias = "CoastColour.L2W")
 public class L2WOp extends Operator {
 
     private static final String L2W_FLAGS_NAME = "l2w_flags";
     private static final String CASE2_FLAGS_NAME = "case2_flags";
+    private static final int[] FLH_INPUT_BAND_NUMBERS = new int[]{6, 8, 10};
+    private static final String EXP_FLH_681_NAME = "exp_FLH_681";
+    private static final String EXP_FLH_681_NORM_NAME = "exp_FLH_681_norm";
+    private static final String EXP_FLH_681_ALT_NAME = "exp_FLH_681_alt";
+    private static final String EXP_FLH_NORM_OLD_681_NAME = "exp_FLH_norm_old_681";
+    private static final String EXP_FLH_ALT_OLD_681_NAME = "exp_FLH_alt_old_681";
 
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")
     private Product sourceProduct;
@@ -119,29 +135,28 @@ public class L2WOp extends Operator {
                              "If disabled only Kd_490 is added to the output.")
     private boolean outputKdSpectrum;
 
+    @Parameter(defaultValue = "false", label = "Output experimental FLH",
+               description = "Toggles the output of the experimental fluorescence line height.")
+    private boolean outputFLH;
+
+    private int nadirColumnIndex;
+    private Product l2rProduct;
+    private FLHAlgorithm flhAlgorithm;
+
     @Override
     public void initialize() throws OperatorException {
-
-        Product sourceProduct = this.sourceProduct;
-        if (!isL2RSourceProduct(sourceProduct)) {
-            HashMap<String, Object> l2rParams = new HashMap<String, Object>();
-            l2rParams.put("doCalibration", doCalibration);
-            l2rParams.put("doSmile", doSmile);
-            l2rParams.put("doEqualization", doEqualization);
-            l2rParams.put("useIdepix", useIdepix);
-            l2rParams.put("algorithm", algorithm);
-            l2rParams.put("brightTestThreshold", brightTestThreshold);
-            l2rParams.put("brightTestWavelength", brightTestWavelength);
-            l2rParams.put("averageSalinity", averageSalinity);
-            l2rParams.put("averageTemperature", averageTemperature);
-            l2rParams.put("atmoNetMerisFile", atmoNetMerisFile);
-            l2rParams.put("autoassociativeNetFile", autoassociativeNetFile);
-            l2rParams.put("landExpression", landExpression);
-            l2rParams.put("cloudIceExpression", cloudIceExpression);
-            l2rParams.put("outputNormReflec", true);
-            l2rParams.put("outputReflecAs", "RADIANCE_REFLECTANCES");
-
-            sourceProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
+        if (outputFLH && isL2RSourceProduct(sourceProduct)) {
+            throw new OperatorException("In order to compute 'FLH' the input must be L1B or L1P.");
+        }
+        l2rProduct = sourceProduct;
+        if (!isL2RSourceProduct(l2rProduct)) {
+            HashMap<String, Object> l2rParams = createDefaultL2RParameterMap();
+            if (outputFLH) {
+                l2rParams.put("outputTosa", true);
+                l2rParams.put("outputTransmittance", true);
+                l2rParams.put("outputPath", true);
+            }
+            l2rProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
         }
 
         Case2AlgorithmEnum c2rAlgorithm = Case2AlgorithmEnum.REGIONAL;
@@ -159,19 +174,191 @@ public class L2WOp extends Operator {
         case2Op.setParameter("outputAPoc", outputAPoc);
         case2Op.setParameter("inputReflecAre", "RADIANCE_REFLECTANCES");
         case2Op.setParameter("invalidPixelExpression", invalidPixelExpression);
-        case2Op.setSourceProduct("acProduct", sourceProduct);
-        final Product targetProduct = case2Op.getTargetProduct();
+        case2Op.setSourceProduct("acProduct", l2rProduct);
 
-        copyMasks(sourceProduct, targetProduct);
-        renameIops(targetProduct);
-        renameConcentrations(targetProduct);
-        copyReflecBandsIfRequired(sourceProduct, targetProduct);
-        sortFlagBands(targetProduct);
-        changeL2WMasksAndFlags(targetProduct);
-        String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL2W";
-        targetProduct.setProductType(l1pProductType);
-        targetProduct.setDescription("MERIS CoastColour L2W");
-        setTargetProduct(targetProduct);
+        final Product l2wProduct = case2Op.getTargetProduct();
+
+        if (outputFLH) {
+            Band flhBand = l2wProduct.addBand(EXP_FLH_681_NAME, ProductData.TYPE_FLOAT32);
+            flhBand.setDescription("Fluorescence line height at 681 nm");
+            flhBand.setNoDataValue(Float.NaN);
+            flhBand.setNoDataValueUsed(true);
+            flhBand = l2wProduct.addBand(EXP_FLH_681_NORM_NAME, ProductData.TYPE_FLOAT32);
+            flhBand.setNoDataValue(Float.NaN);
+            flhBand.setNoDataValueUsed(true);
+            flhBand = l2wProduct.addBand(EXP_FLH_681_ALT_NAME, ProductData.TYPE_FLOAT32);
+            flhBand.setNoDataValue(Float.NaN);
+            flhBand.setNoDataValueUsed(true);
+            flhBand = l2wProduct.addBand(EXP_FLH_NORM_OLD_681_NAME, ProductData.TYPE_FLOAT32);
+            flhBand.setDescription("Fluorescence line height at 681 nm");
+            flhBand.setNoDataValue(Float.NaN);
+            flhBand.setNoDataValueUsed(true);
+            flhBand = l2wProduct.addBand(EXP_FLH_ALT_OLD_681_NAME, ProductData.TYPE_FLOAT32);
+            flhBand.setDescription("Fluorescence line height at 681 nm");
+            flhBand.setNoDataValue(Float.NaN);
+            flhBand.setNoDataValueUsed(true);
+            addPatternToAutoGrouping(l2wProduct, "exp");
+            nadirColumnIndex = MerisFlightDirection.findNadirColumnIndex(sourceProduct);
+            float[] bandWavelengths = getWavelengths(FLH_INPUT_BAND_NUMBERS);
+            flhAlgorithm = new FLHAlgorithm(bandWavelengths[0], bandWavelengths[1], bandWavelengths[2]);
+        }
+
+        copyMasks(l2rProduct, l2wProduct);
+        renameIops(l2wProduct);
+        renameConcentrations(l2wProduct);
+        copyReflecBandsIfRequired(l2rProduct, l2wProduct);
+        sortFlagBands(l2wProduct);
+        changeL2WMasksAndFlags(l2wProduct);
+        String l1pProductType = l2rProduct.getProductType().substring(0, 8) + "CCL2W";
+        l2wProduct.setProductType(l1pProductType);
+        l2wProduct.setDescription("MERIS CoastColour L2W");
+        setTargetProduct(l2wProduct);
+    }
+
+    private float[] getWavelengths(int[] flhInputBandNumbers) {
+        float[] wavelengths = new float[flhInputBandNumbers.length];
+        for (int i = 0; i < flhInputBandNumbers.length; i++) {
+            Band band = l2rProduct.getBand("reflec_" + flhInputBandNumbers[i]);
+            wavelengths[i] = band.getSpectralWavelength();
+        }
+        return wavelengths;
+    }
+
+    @Override
+    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws
+                                                                                                             OperatorException {
+        RasterDataNode satzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME);
+        RasterDataNode solzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
+        Tile satzen = getSourceTile(satzenNode, targetRectangle);
+        Tile solzen = getSourceTile(solzenNode, targetRectangle);
+
+        final Tile[] reflecTiles = getTiles(targetRectangle, "reflec_");
+        final Tile[] tosaReflecTiles = getTiles(targetRectangle, "tosa_reflec_");
+        final Tile[] pathTiles = getTiles(targetRectangle, "path_");
+        final Tile[] transTiles = getTiles(targetRectangle, "trans_");
+        Tile flhTile = targetTiles.get(getTargetProduct().getBand(EXP_FLH_681_NAME));
+        Tile flhOldNormTile = targetTiles.get(getTargetProduct().getBand(EXP_FLH_NORM_OLD_681_NAME));
+        Tile flhOldAltTile = targetTiles.get(getTargetProduct().getBand(EXP_FLH_ALT_OLD_681_NAME));
+        Tile flhAltTile = targetTiles.get(getTargetProduct().getBand(EXP_FLH_681_ALT_NAME));
+        Tile flhNormTile = targetTiles.get(getTargetProduct().getBand(EXP_FLH_681_NORM_NAME));
+
+        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+            checkForCancellation();
+            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                double[] flhValues = new double[5];
+                if (!isSampleValid(reflecTiles[0], x, y)) {
+                    Arrays.fill(flhValues, Double.NaN);
+                } else {
+                    double cosTetaViewSurfRad = getCosTetaViewSurfRad(satzen, x, y);
+                    double cosTetaSunSurfRad = getCosTetaSunSurfRad(solzen, x, y);
+
+                    double[] reflec = getValuesAt(x, y, reflecTiles);
+                    double[] tosa = getValuesAt(x, y, tosaReflecTiles);
+                    double[] path = getValuesAt(x, y, pathTiles);
+                    double[] trans = getValuesAt(x, y, transTiles);
+                    flhValues = flhAlgorithm.computeFLH681(reflec, tosa, path, trans,
+                                                           cosTetaViewSurfRad, cosTetaSunSurfRad);
+
+                }
+                flhTile.setSample(x, y, flhValues[0]);
+                flhOldNormTile.setSample(x, y, flhValues[1]);
+                flhOldAltTile.setSample(x, y, flhValues[2]);
+                flhNormTile.setSample(x, y, flhValues[3]);
+                flhAltTile.setSample(x, y, flhValues[4]);
+            }
+        }
+    }
+
+    // this should be the real implementation of for computing FLH; but for testing we've implemented computeTileStack
+//    @Override
+//    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+//        final Rectangle rectangle = targetTile.getRectangle();
+//        RasterDataNode satzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME);
+//        RasterDataNode solzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
+//        Tile satzen = getSourceTile(satzenNode, rectangle);
+//        Tile solzen = getSourceTile(solzenNode, rectangle);
+//
+//        final Tile[] reflecTiles = getTiles(rectangle, "reflec_");
+//        final Tile[] tosaReflecTiles = getTiles(rectangle, "tosa_reflec_");
+//        final Tile[] pathTiles = getTiles(rectangle, "path_");
+//        final Tile[] transTiles = getTiles(rectangle, "trans_");
+//
+//        for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
+//            checkForCancellation();
+//            for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
+//                float flh;
+//                if(!isSampleValid(reflecTiles[0], x, y)) {
+//                    flh = Float.NaN;
+//                } else {
+//                    double cosTetaViewSurfRad = getCosTetaViewSurfRad(satzen, x, y);
+//                    double cosTetaSunSurfRad = getCosTetaSunSurfRad(solzen, x, y);
+//
+//                    double[] reflec = getValuesAt(x, y, reflecTiles);
+//                    double[] tosa = getValuesAt(x, y, tosaReflecTiles);
+//                    double[] path = getValuesAt(x, y, pathTiles);
+//                    double[] trans = getValuesAt(x, y, transTiles);
+//                    flh = (float) computeFLH681(reflec, tosa, path, trans, cosTetaViewSurfRad,
+//                                               cosTetaSunSurfRad);
+//                }
+//                targetTile.setSample(x, y, flh);
+//            }
+//        }
+//
+//    }
+
+    private boolean isSampleValid(Tile reflecTile, int x, int y) {
+        return reflecTile.isSampleValid(x, y);
+    }
+
+    private double getCosTetaViewSurfRad(Tile satzen, int x, int y) {
+        double tetaViewSurfDeg = GlintCorrection.correctViewAngle(satzen.getSampleDouble(x, y), x,
+                                                                  nadirColumnIndex, true);
+        double tetaViewSurfRad = Math.toRadians(tetaViewSurfDeg);
+        return Math.cos(tetaViewSurfRad);
+    }
+
+    private double getCosTetaSunSurfRad(Tile solzen, int x, int y) {
+        double tetaSunSurfDeg = solzen.getSampleDouble(x, y);
+        double tetaSunSurfRad = Math.toRadians(tetaSunSurfDeg);
+        return Math.cos(tetaSunSurfRad);
+    }
+
+    private double[] getValuesAt(int x, int y, Tile[] reflecTiles) {
+        double[] values = new double[reflecTiles.length];
+        for (int i = 0; i < reflecTiles.length; i++) {
+            Tile reflecTile = reflecTiles[i];
+            values[i] = reflecTile.getSampleDouble(x, y);
+        }
+        return values;
+    }
+
+    private Tile[] getTiles(Rectangle rectangle, String bandNamePrefix) {
+        Tile[] tiles = new Tile[FLH_INPUT_BAND_NUMBERS.length];
+        for (int i = 0; i < FLH_INPUT_BAND_NUMBERS.length; i++) {
+            int flhInputBandIndex = FLH_INPUT_BAND_NUMBERS[i];
+            tiles[i] = getSourceTile(l2rProduct.getBand(bandNamePrefix + flhInputBandIndex), rectangle);
+        }
+        return tiles;
+    }
+
+    private HashMap<String, Object> createDefaultL2RParameterMap() {
+        HashMap<String, Object> l2rParams = new HashMap<String, Object>();
+        l2rParams.put("doCalibration", doCalibration);
+        l2rParams.put("doSmile", doSmile);
+        l2rParams.put("doEqualization", doEqualization);
+        l2rParams.put("useIdepix", useIdepix);
+        l2rParams.put("algorithm", algorithm);
+        l2rParams.put("brightTestThreshold", brightTestThreshold);
+        l2rParams.put("brightTestWavelength", brightTestWavelength);
+        l2rParams.put("averageSalinity", averageSalinity);
+        l2rParams.put("averageTemperature", averageTemperature);
+        l2rParams.put("atmoNetMerisFile", atmoNetMerisFile);
+        l2rParams.put("autoassociativeNetFile", autoassociativeNetFile);
+        l2rParams.put("landExpression", landExpression);
+        l2rParams.put("cloudIceExpression", cloudIceExpression);
+        l2rParams.put("outputNormReflec", true);
+        l2rParams.put("outputReflecAs", "RADIANCE_REFLECTANCES");
+        return l2rParams;
     }
 
     private void changeL2WMasksAndFlags(Product targetProduct) {

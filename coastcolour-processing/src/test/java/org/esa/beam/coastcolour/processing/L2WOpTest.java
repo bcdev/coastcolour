@@ -109,6 +109,26 @@ public class L2WOpTest {
         }
     }
 
+    @Test
+    public void testCreateProduct_WithFLHOutput() throws ParseException {
+        Product source = L1POpTest.getL1bProduct();
+        source = getL1pProduct(source);
+        final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl", "exp_FLH_681"};
+        Map<String, Object> l2wParams = new HashMap<String, Object>();
+        l2wParams.put("outputFLH", true);
+        testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, l2wParams);
+    }
+
+    @Test(expected = OperatorException.class)
+    public void testCreateProduct_WithFLHOutput_FromL2RLeadsToException() throws ParseException {
+        Product l1bSource = L1POpTest.getL1bProduct();
+        Product l1pSource = getL1pProduct(l1bSource);
+        Product l2rSource = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, l1pSource);
+
+        Map<String, Object> l2wParams = new HashMap<String, Object>();
+        l2wParams.put("outputFLH", true);
+        GPF.createProduct("CoastColour.L2W", l2wParams, l2rSource);
+    }
 
     private static Product testTargetProduct(Product source, String expectedProductType, String[] expectedBandNames,
                                              Map<String, Object> l2wParams) {

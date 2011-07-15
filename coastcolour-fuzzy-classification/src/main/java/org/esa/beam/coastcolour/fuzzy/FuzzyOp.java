@@ -111,10 +111,17 @@ public class FuzzyOp extends PixelOperator {
     @Override
     protected void configureTargetSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
         Band[] bands = getTargetProduct().getBands();
-        for (int i = 0; i < bands.length; i++) {
-            Band band = bands[i];
-            sampleConfigurer.defineSample(i, band.getName());
+        int targetSampleIndex = 0;
+        for (Band band : bands) {
+            if (mustDefineTargetSample(band)) {
+                sampleConfigurer.defineSample(targetSampleIndex, band.getName());
+                targetSampleIndex++;
+            }
         }
+    }
+
+    private boolean mustDefineTargetSample(Band band) {
+        return !band.isSourceImageSet();
     }
 
     @Override

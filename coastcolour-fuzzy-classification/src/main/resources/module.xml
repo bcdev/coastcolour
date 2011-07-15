@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>coastcolour-fuzzy-classification</symbolicName>
-    <version>1.1</version>
+    <version>1.2</version>
     <name>CoastColour FuzzyClassification</name>
     <packaging>dir</packaging>
 
@@ -26,7 +26,7 @@
         <module>beam-envisat-reader</module>
     </dependency>
     <dependency>
-        <module>beam-visat</module>
+        <module>beam-visat-rcp</module>
         <optional>true</optional>
     </dependency>
 

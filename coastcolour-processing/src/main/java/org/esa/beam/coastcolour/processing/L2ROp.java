@@ -19,7 +19,8 @@ import org.esa.beam.util.ResourceInstaller;
 import java.io.File;
 import java.util.HashMap;
 
-@OperatorMetadata(alias = "CoastColour.L2R")
+@OperatorMetadata(alias = "CoastColour.L2R",
+                  version = "1.3")
 public class L2ROp extends Operator {
 
     private static final String AGC_FLAGS_NAME = "agc_flags";

@@ -26,7 +26,8 @@ import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L1P")
+@OperatorMetadata(alias = "CoastColour.L1P",
+                  version = "1.3")
 public class L1POp extends Operator {
 
     public static final String CC_LAND_FLAG_NAME = "CC_LAND";

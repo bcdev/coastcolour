@@ -31,7 +31,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L2W")
+@OperatorMetadata(alias = "CoastColour.L2W",
+                  version = "1.3")
 public class L2WOp extends Operator {
 
     private static final String L2W_FLAGS_NAME = "l2w_flags";

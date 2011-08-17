@@ -19,7 +19,6 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
 import org.esa.beam.idepix.operators.CoastColourCloudClassificationOp;
 import org.esa.beam.util.BitSetter;
-import org.esa.beam.util.ProductUtils;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -98,9 +97,6 @@ public class L1POp extends Operator {
         rcParams.put("doEqualization", doEqualization);
         rcParams.put("doRadToRefl", false);
         final Product l1pProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);
-        // TODO - cause of a bug in MerisRadiometryCorrectionOp (BEAM-1305) we need to
-        // copy the masks manually
-        ProductUtils.copyMasks(sourceProduct, l1pProduct);
 
         if (useIdepix) {
             HashMap<String, Object> idepixParams = new HashMap<String, Object>();

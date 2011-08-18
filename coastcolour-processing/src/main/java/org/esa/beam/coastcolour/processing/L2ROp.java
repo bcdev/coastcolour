@@ -14,6 +14,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
+import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 
 import java.io.File;
@@ -102,12 +103,14 @@ public class L2ROp extends Operator {
     @Parameter(defaultValue = "false", label = "Output transmittance",
                description = "Toggles the output of downwelling irradiance transmittance.")
     private boolean outputTransmittance;
+    private Product glintProduct;
+    private Product l1pProduct;
 
 
     @Override
     public void initialize() throws OperatorException {
-        Product sourceProduct = this.sourceProduct;
-        if (!isL1PSourceProduct(sourceProduct)) {
+        l1pProduct = this.sourceProduct;
+        if (!isL1PSourceProduct(l1pProduct)) {
             HashMap<String, Object> l1pParams = new HashMap<String, Object>();
             l1pParams.put("doCalibration", doCalibration);
             l1pParams.put("doSmile", doSmile);
@@ -116,11 +119,11 @@ public class L2ROp extends Operator {
             l1pParams.put("algorithm", algorithm);
             l1pParams.put("brightTestThreshold", brightTestThreshold);
             l1pParams.put("brightTestWavelength", brightTestWavelength);
-            sourceProduct = GPF.createProduct("CoastColour.L1P", l1pParams, sourceProduct);
+            l1pProduct = GPF.createProduct("CoastColour.L1P", l1pParams, l1pProduct);
         }
 
         HashMap<String, Product> sourceProducts = new HashMap<String, Product>();
-        sourceProducts.put("merisProduct", sourceProduct);
+        sourceProducts.put("merisProduct", l1pProduct);
 
         HashMap<String, Object> glintParameters = new HashMap<String, Object>();
         glintParameters.put("doSmileCorrection", false);
@@ -139,22 +142,70 @@ public class L2ROp extends Operator {
         glintParameters.put("cloudIceExpression", cloudIceExpression);
         glintParameters.put("useFlint", false);
 
-        Product glintProduct = GPF.createProduct("Meris.GlintCorrection", glintParameters, sourceProducts);
+        glintProduct = GPF.createProduct("Meris.GlintCorrection", glintParameters, sourceProducts);
 
-        // need a copy of the product in order to make changes to flag names
-        // otherwise a GlintCorrection can't handle the changed target product anymore
-        Product targetProduct = GPF.createProduct("Subset", GPF.NO_PARAMS, glintProduct);
-        targetProduct.setAutoGrouping(glintProduct.getAutoGrouping());
-        changeAgcFlags(targetProduct);
-        removeFlagsAndMasks(targetProduct);
-        sortMasks(targetProduct);
-        sortFlagBands(targetProduct);
-        renameTauBands(targetProduct);
-        removeUnwantedBands(targetProduct);
-        String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL2R";
-        targetProduct.setProductType(l1pProductType);
-        targetProduct.setDescription("MERIS CoastColour L2R");
+        Product targetProduct = createL2RProduct();
         setTargetProduct(targetProduct);
+    }
+
+    private Product createL2RProduct() {
+        String l2rProductType = l1pProduct.getProductType().substring(0, 8) + "CCL2R";
+        final int sceneWidth = l1pProduct.getSceneRasterWidth();
+        final int sceneHeight = l1pProduct.getSceneRasterHeight();
+        Product l2rProduct = new Product(l1pProduct.getName(), l2rProductType, sceneWidth, sceneHeight);
+        l2rProduct.setDescription("MERIS CoastColour L2R");
+        l2rProduct.setStartTime(glintProduct.getStartTime());
+        l2rProduct.setEndTime(glintProduct.getEndTime());
+        ProductUtils.copyMetadata(glintProduct, l2rProduct);
+        ProductUtils.copyMasks(glintProduct, l2rProduct);
+        copyBands(glintProduct, l2rProduct);
+        copyFlagBands(glintProduct, l2rProduct);
+        ProductUtils.copyTiePointGrids(glintProduct, l2rProduct);
+        ProductUtils.copyGeoCoding(glintProduct, l2rProduct);
+
+        l2rProduct.setAutoGrouping(glintProduct.getAutoGrouping());
+        changeAgcFlags(l2rProduct);
+        removeFlagsAndMasks(l2rProduct);
+        sortMasks(l2rProduct);
+        sortFlagBands(l2rProduct);
+        renameTauBands(l2rProduct);
+        removeUnwantedBands(l2rProduct);
+        return l2rProduct;
+    }
+
+    @Override
+    public void dispose() {
+        if (glintProduct != null) {
+            glintProduct.dispose();
+            glintProduct = null;
+        }
+        if (l1pProduct != null) {
+            l1pProduct.dispose();
+            l1pProduct = null;
+        }
+
+        super.dispose();
+    }
+
+    private void copyFlagBands(Product radiometryProduct, Product l1pProduct) {
+        ProductUtils.copyFlagBands(radiometryProduct, l1pProduct);
+        final Band[] radiometryBands = radiometryProduct.getBands();
+        for (Band band : radiometryBands) {
+            if (band.isFlagBand()) {
+                final Band targetBand = l1pProduct.getBand(band.getName());
+                targetBand.setSourceImage(band.getSourceImage());
+            }
+        }
+    }
+
+    private void copyBands(Product radiometryProduct, Product l1pProduct) {
+        final Band[] radiometryBands = radiometryProduct.getBands();
+        for (Band band : radiometryBands) {
+            if (!band.isFlagBand()) {
+                final Band targetBand = ProductUtils.copyBand(band.getName(), radiometryProduct, l1pProduct);
+                targetBand.setSourceImage(band.getSourceImage());
+            }
+        }
     }
 
     private void removeUnwantedBands(Product targetProduct) {

@@ -7,6 +7,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -18,17 +19,27 @@ import static org.junit.Assert.*;
 
 public class L2WOpTest {
 
+    private Product target;
+
     @BeforeClass
     public static void start() {
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis();
     }
 
+    @After
+    public void after() {
+        if (target != null) {
+            target.dispose();
+            target = null;
+        }
+        System.gc();
+    }
 
     @Test
     public void testCreateProductFromL1B() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
         final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl"};
-        Product target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
+        target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
 
         String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
         for (String notExpectedBandName : notExpectedBandNames) {
@@ -42,7 +53,7 @@ public class L2WOpTest {
         Product source = L1POpTest.getL1bProduct();
         source = getL1pProduct(source);
         final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl"};
-        Product target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
+        target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
 
         String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
         for (String notExpectedBandName : notExpectedBandNames) {
@@ -60,7 +71,8 @@ public class L2WOpTest {
                 "iop_a_ys_443", "iop_a_total_443", "iop_bb_spm_443",
                 "conc_tsm", "conc_chl"
         };
-        testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
+        target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
+        source.dispose();
     }
 
     @Test
@@ -71,7 +83,7 @@ public class L2WOpTest {
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("outputReflec", true);
         String[] expectedBandNames = {"reflec_1", "reflec_2", "reflec_13", "iop_a_ys_443", "conc_tsm", "conc_chl"};
-        testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, params);
+        target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, params);
     }
 
     @Test
@@ -87,17 +99,16 @@ public class L2WOpTest {
             corr_longitude.setData(corr_longitude.createCompatibleRasterData());
             Band corr_latitude = l1bProduct.addBand("corr_latitude", ProductData.TYPE_FLOAT64);
             corr_latitude.setData(corr_latitude.createCompatibleRasterData());
-            l1bProduct.addBand("altitude", ProductData.TYPE_INT16);
-            Band l1_flags = l1bProduct.getBand("l1_flags");
-            l1_flags.setData(l1_flags.createCompatibleRasterData());
+            final Band altitude = l1bProduct.addBand("altitude", ProductData.TYPE_INT16);
+            altitude.setData(altitude.createCompatibleRasterData());
 
             GeoCoding geoCoding = new PixelGeoCoding(corr_latitude, corr_longitude, "NOT l1_flags.INVALID", 6);
             l1bProduct.setGeoCoding(geoCoding);
 
             Product l2rProduct = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, l1bProduct);
-            Product target = testTargetProduct(l2rProduct, "MER_FSG_CCL2W",
-                                               new String[]{"corr_longitude", "corr_latitude", "altitude"},
-                                               GPF.NO_PARAMS);
+            target = testTargetProduct(l2rProduct, "MER_FSG_CCL2W",
+                                       new String[]{"corr_longitude", "corr_latitude", "altitude"},
+                                       GPF.NO_PARAMS);
 
             assertTrue("Expected band 'corr_longitude'", target.containsBand("corr_longitude"));
             assertTrue("Expected band 'corr_latitude'", target.containsBand("corr_latitude"));
@@ -116,7 +127,8 @@ public class L2WOpTest {
         final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl", "exp_FLH_681"};
         Map<String, Object> l2wParams = new HashMap<String, Object>();
         l2wParams.put("outputFLH", true);
-        testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, l2wParams);
+        target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, l2wParams);
+        source.dispose();
     }
 
     @Test(expected = OperatorException.class)

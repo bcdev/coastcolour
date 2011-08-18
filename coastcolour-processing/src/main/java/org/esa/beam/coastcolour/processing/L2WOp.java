@@ -141,8 +141,9 @@ public class L2WOp extends Operator {
     private boolean outputFLH;
 
     private int nadirColumnIndex;
-    private Product l2rProduct;
     private FLHAlgorithm flhAlgorithm;
+    private Product l2rProduct;
+    private Product case2rProduct;
 
     @Override
     public void initialize() throws OperatorException {
@@ -177,44 +178,98 @@ public class L2WOp extends Operator {
         case2Op.setParameter("invalidPixelExpression", invalidPixelExpression);
         case2Op.setSourceProduct("acProduct", l2rProduct);
 
-        final Product l2wProduct = case2Op.getTargetProduct();
+        case2rProduct = case2Op.getTargetProduct();
 
-        if (outputFLH) {
-            Band flhBand = l2wProduct.addBand(EXP_FLH_681_NAME, ProductData.TYPE_FLOAT32);
-            flhBand.setDescription("Fluorescence line height at 681 nm");
-            flhBand.setNoDataValue(Float.NaN);
-            flhBand.setNoDataValueUsed(true);
-            flhBand = l2wProduct.addBand(EXP_FLH_681_NORM_NAME, ProductData.TYPE_FLOAT32);
-            flhBand.setNoDataValue(Float.NaN);
-            flhBand.setNoDataValueUsed(true);
-            flhBand = l2wProduct.addBand(EXP_FLH_681_ALT_NAME, ProductData.TYPE_FLOAT32);
-            flhBand.setNoDataValue(Float.NaN);
-            flhBand.setNoDataValueUsed(true);
-            flhBand = l2wProduct.addBand(EXP_FLH_NORM_OLD_681_NAME, ProductData.TYPE_FLOAT32);
-            flhBand.setDescription("Fluorescence line height at 681 nm");
-            flhBand.setNoDataValue(Float.NaN);
-            flhBand.setNoDataValueUsed(true);
-            flhBand = l2wProduct.addBand(EXP_FLH_ALT_OLD_681_NAME, ProductData.TYPE_FLOAT32);
-            flhBand.setDescription("Fluorescence line height at 681 nm");
-            flhBand.setNoDataValue(Float.NaN);
-            flhBand.setNoDataValueUsed(true);
-            addPatternToAutoGrouping(l2wProduct, "exp");
-            nadirColumnIndex = MerisFlightDirection.findNadirColumnIndex(sourceProduct);
-            float[] bandWavelengths = getWavelengths(FLH_INPUT_BAND_NUMBERS);
-            flhAlgorithm = new FLHAlgorithm(bandWavelengths[0], bandWavelengths[1], bandWavelengths[2]);
+        final Product l2wProduct = createL2WProduct(l2rProduct, case2rProduct);
+        setTargetProduct(l2wProduct);
+    }
+
+    @Override
+    public void dispose() {
+        if (l2rProduct != sourceProduct) {
+            l2rProduct.dispose();
+            l2rProduct = null;
+        }
+        if (case2rProduct != null) {
+            case2rProduct.dispose();
+            case2rProduct = null;
         }
 
+        super.dispose();
+    }
+
+    private Product createL2WProduct(Product l2rProduct, Product case2rProduct) {
+        String l2wProductType = l2rProduct.getProductType().substring(0, 8) + "CCL2W";
+        final int sceneWidth = case2rProduct.getSceneRasterWidth();
+        final int sceneHeight = case2rProduct.getSceneRasterHeight();
+        final Product l2wProduct = new Product(case2rProduct.getName(), l2wProductType, sceneWidth, sceneHeight);
+        l2wProduct.setStartTime(case2rProduct.getStartTime());
+        l2wProduct.setEndTime(case2rProduct.getEndTime());
+        l2wProduct.setDescription("MERIS CoastColour L2W");
+        ProductUtils.copyMetadata(case2rProduct, l2wProduct);
+        copyMasks(case2rProduct, l2wProduct);
         copyMasks(l2rProduct, l2wProduct);
+        copyBands(case2rProduct, l2wProduct);
+        if (outputFLH) {
+            addFLHBands(l2wProduct);
+        }
+        copyFlagBands(case2rProduct, l2wProduct);
+        ProductUtils.copyTiePointGrids(case2rProduct, l2wProduct);
         renameIops(l2wProduct);
         renameConcentrations(l2wProduct);
         copyReflecBandsIfRequired(l2rProduct, l2wProduct);
         sortFlagBands(l2wProduct);
         changeL2WMasksAndFlags(l2wProduct);
-        String l1pProductType = l2rProduct.getProductType().substring(0, 8) + "CCL2W";
-        l2wProduct.setProductType(l1pProductType);
-        l2wProduct.setDescription("MERIS CoastColour L2W");
-        setTargetProduct(l2wProduct);
+        ProductUtils.copyGeoCoding(case2rProduct, l2wProduct);
+        return l2wProduct;
     }
+
+    private void addFLHBands(Product l2WProduct) {
+        Band flhBand = l2WProduct.addBand(EXP_FLH_681_NAME, ProductData.TYPE_FLOAT32);
+        flhBand.setDescription("Fluorescence line height at 681 nm");
+        flhBand.setNoDataValue(Float.NaN);
+        flhBand.setNoDataValueUsed(true);
+        flhBand = l2WProduct.addBand(EXP_FLH_681_NORM_NAME, ProductData.TYPE_FLOAT32);
+        flhBand.setNoDataValue(Float.NaN);
+        flhBand.setNoDataValueUsed(true);
+        flhBand = l2WProduct.addBand(EXP_FLH_681_ALT_NAME, ProductData.TYPE_FLOAT32);
+        flhBand.setNoDataValue(Float.NaN);
+        flhBand.setNoDataValueUsed(true);
+        flhBand = l2WProduct.addBand(EXP_FLH_NORM_OLD_681_NAME, ProductData.TYPE_FLOAT32);
+        flhBand.setDescription("Fluorescence line height at 681 nm");
+        flhBand.setNoDataValue(Float.NaN);
+        flhBand.setNoDataValueUsed(true);
+        flhBand = l2WProduct.addBand(EXP_FLH_ALT_OLD_681_NAME, ProductData.TYPE_FLOAT32);
+        flhBand.setDescription("Fluorescence line height at 681 nm");
+        flhBand.setNoDataValue(Float.NaN);
+        flhBand.setNoDataValueUsed(true);
+        addPatternToAutoGrouping(l2WProduct, "exp");
+        nadirColumnIndex = MerisFlightDirection.findNadirColumnIndex(sourceProduct);
+        float[] bandWavelengths = getWavelengths(FLH_INPUT_BAND_NUMBERS);
+        flhAlgorithm = new FLHAlgorithm(bandWavelengths[0], bandWavelengths[1], bandWavelengths[2]);
+    }
+
+    private void copyBands(Product case2rProduct, Product l2wProduct) {
+        final Band[] case2rBands = case2rProduct.getBands();
+        for (Band band : case2rBands) {
+            if (!band.isFlagBand()) {
+                final Band targetBand = ProductUtils.copyBand(band.getName(), case2rProduct, l2wProduct);
+                targetBand.setSourceImage(band.getSourceImage());
+            }
+        }
+    }
+
+    private void copyFlagBands(Product case2rProduct, Product l2wProduct) {
+        ProductUtils.copyFlagBands(case2rProduct, l2wProduct);
+        final Band[] radiometryBands = case2rProduct.getBands();
+        for (Band band : radiometryBands) {
+            if (band.isFlagBand()) {
+                final Band targetBand = l2wProduct.getBand(band.getName());
+                targetBand.setSourceImage(band.getSourceImage());
+            }
+        }
+    }
+
 
     private float[] getWavelengths(int[] flhInputBandNumbers) {
         float[] wavelengths = new float[flhInputBandNumbers.length];

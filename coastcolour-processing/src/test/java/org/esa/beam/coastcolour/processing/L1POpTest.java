@@ -14,6 +14,7 @@ import org.esa.beam.framework.datamodel.TiePointGeoCoding;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -24,9 +25,20 @@ import static org.junit.Assert.*;
 
 public class L1POpTest {
 
+    private Product target;
+
     @BeforeClass
     public static void start() {
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis();
+    }
+
+    @After
+    public void after() {
+        if (target != null) {
+            target.dispose();
+            target = null;
+        }
+        System.gc();
     }
 
     @Test
@@ -34,7 +46,7 @@ public class L1POpTest {
 
         Product source = getL1bProduct();
 
-        Product target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
+        target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
         assertNotNull(target);
 
         // enable for debugging
@@ -69,6 +81,8 @@ public class L1POpTest {
         assertEquals(5, maskGroup.indexOf(("l1p_cc_snow_ice")));
         assertEquals(6, maskGroup.indexOf(("l1p_cc_landrisk")));
         assertEquals(7, maskGroup.indexOf(("l1p_cc_glintrisk")));
+        source.dispose();
+        source = null;
 
     }
 
@@ -87,11 +101,12 @@ public class L1POpTest {
         GeoCoding geoCoding = new PixelGeoCoding(corr_latitude, corr_longitude, "NOT l1_flags.INVALID", 6);
         l1bProduct.setGeoCoding(geoCoding);
 
-        Product target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
+        target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
         assertEquals("MER_FSG_CCL1P", target.getProductType());
         assertTrue(target.containsBand("corr_longitude"));
         assertTrue(target.containsBand("corr_latitude"));
         assertTrue(target.containsBand("altitude"));
+        l1bProduct.dispose();
     }
 
     @Test
@@ -100,7 +115,7 @@ public class L1POpTest {
         Product source = getL1bProduct();
         HashMap<String, Object> l1pParams = new HashMap<String, Object>();
         l1pParams.put("useIdepix", false);
-        Product target = GPF.createProduct("CoastColour.L1P", l1pParams, source);
+        target = GPF.createProduct("CoastColour.L1P", l1pParams, source);
         assertNotNull(target);
 
         Band[] sourceBands = source.getBands();
@@ -126,12 +141,14 @@ public class L1POpTest {
         int height = 10;
         Product product = new Product("MER_FR__1P", "MER_FR__1P", width, height);
         for (int i = 0; i < 15; i++) {
-            product.addBand(String.format("radiance_%d", (i + 1)), ProductData.TYPE_UINT16).setSpectralBandIndex(i);
-
+            final Band band = product.addBand(String.format("radiance_%d", (i + 1)), ProductData.TYPE_UINT16);
+            band.setSpectralBandIndex(i);
+            band.setData(band.createCompatibleRasterData());
         }
         Band l1Flags = product.addBand("l1_flags", ProductData.TYPE_INT8);
         l1Flags.setData(ProductData.createInstance(new byte[width * height]));
-        product.addBand("detector_index", ProductData.TYPE_UINT16);
+        final Band detectorIndex = product.addBand("detector_index", ProductData.TYPE_UINT16);
+        detectorIndex.setData(detectorIndex.createCompatibleRasterData());
         float[] tiePointData = new float[width * height];
         product.addTiePointGrid(new TiePointGrid("sun_zenith", width, height, 0, 0, 1, 1, tiePointData));
         product.addTiePointGrid(new TiePointGrid("sun_azimuth", width, height, 0, 0, 1, 1, tiePointData));

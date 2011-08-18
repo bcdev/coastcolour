@@ -19,6 +19,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
 import org.esa.beam.idepix.operators.CoastColourCloudClassificationOp;
 import org.esa.beam.util.BitSetter;
+import org.esa.beam.util.ProductUtils;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -86,6 +87,8 @@ public class L1POp extends Operator {
     private int brightTestWavelength;
 
     private Band cloudFlagBand;
+    private Product idepixProduct;
+    private Product radiometryProduct;
 
 
     @Override
@@ -96,14 +99,16 @@ public class L1POp extends Operator {
         rcParams.put("doSmile", doSmile);
         rcParams.put("doEqualization", doEqualization);
         rcParams.put("doRadToRefl", false);
-        final Product l1pProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);
+        radiometryProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);
+
+        final Product l1pProduct = createL1PProduct(radiometryProduct);
 
         if (useIdepix) {
             HashMap<String, Object> idepixParams = new HashMap<String, Object>();
             idepixParams.put("algorithm", algorithm);
             idepixParams.put("ipfQWGUserDefinedRhoToa442Threshold", brightTestThreshold);
             idepixParams.put("rhoAgReferenceWavelength", brightTestWavelength);
-            Product idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, idepixParams, l1pProduct);
+            idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, idepixParams, radiometryProduct);
 
             checkForExistingFlagBand(idepixProduct, CLOUD_FLAG_BAND_NAME);
             cloudFlagBand = idepixProduct.getBand(CLOUD_FLAG_BAND_NAME);
@@ -115,10 +120,60 @@ public class L1POp extends Operator {
         updateL1BMasks(l1pProduct);
         reorderBands(l1pProduct);
 
-        String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL1P";
-        l1pProduct.setProductType(l1pProductType);
-        l1pProduct.setDescription("MERIS CoastColour L1P");
         setTargetProduct(l1pProduct);
+    }
+
+    private Product createL1PProduct(Product radiometryProduct) {
+        String l1pProductType = sourceProduct.getProductType().substring(0, 8) + "CCL1P";
+        final int sceneWidth = radiometryProduct.getSceneRasterWidth();
+        final int sceneHeight = radiometryProduct.getSceneRasterHeight();
+        final Product l1pProduct = new Product(radiometryProduct.getName(), l1pProductType, sceneWidth, sceneHeight);
+        l1pProduct.setDescription("MERIS CoastColour L1P");
+        l1pProduct.setStartTime(radiometryProduct.getStartTime());
+        l1pProduct.setEndTime(radiometryProduct.getEndTime());
+        ProductUtils.copyMetadata(radiometryProduct, l1pProduct);
+        ProductUtils.copyMasks(radiometryProduct, l1pProduct);
+        copyBands(radiometryProduct, l1pProduct);
+        copyFlagBands(radiometryProduct, l1pProduct);
+        ProductUtils.copyTiePointGrids(radiometryProduct, l1pProduct);
+        ProductUtils.copyGeoCoding(radiometryProduct, l1pProduct);
+
+        return l1pProduct;
+    }
+
+    private void copyFlagBands(Product radiometryProduct, Product l1pProduct) {
+        ProductUtils.copyFlagBands(radiometryProduct, l1pProduct);
+        final Band[] radiometryBands = radiometryProduct.getBands();
+        for (Band band : radiometryBands) {
+            if (band.isFlagBand()) {
+                final Band targetBand = l1pProduct.getBand(band.getName());
+                targetBand.setSourceImage(band.getSourceImage());
+            }
+        }
+    }
+
+    private void copyBands(Product radiometryProduct, Product l1pProduct) {
+        final Band[] radiometryBands = radiometryProduct.getBands();
+        for (Band band : radiometryBands) {
+            if (!band.isFlagBand()) {
+                final Band targetBand = ProductUtils.copyBand(band.getName(), radiometryProduct, l1pProduct);
+                targetBand.setSourceImage(band.getSourceImage());
+            }
+        }
+    }
+
+
+    @Override
+    public void dispose() {
+        if (idepixProduct != null) {
+            idepixProduct.dispose();
+            idepixProduct = null;
+        }
+        if (radiometryProduct != null) {
+            radiometryProduct.dispose();
+            radiometryProduct = null;
+        }
+        super.dispose();
     }
 
     private void updateL1BMasks(Product l1pProduct) {

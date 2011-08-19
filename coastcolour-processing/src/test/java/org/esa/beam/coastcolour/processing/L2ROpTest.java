@@ -48,6 +48,7 @@ public class L2ROpTest {
         Product source = L1POpTest.getL1bProduct();
         source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
         target = testDefaultTargetProduct(source, GPF.NO_PARAMS, "MER_FR__CCL2R");
+        source.dispose();
     }
 
     @Test
@@ -62,6 +63,7 @@ public class L2ROpTest {
         assertProductContainsBands(target, "tosa_reflec_1", "tosa_reflec_8", "tosa_reflec_13");
         assertProductContainsBands(target, "trans_3", "trans_6", "trans_12");
         assertProductContainsBands(target, "path_2", "path_7", "path_10");
+        source.dispose();
     }
 
     @Test
@@ -87,6 +89,7 @@ public class L2ROpTest {
             assertTrue("Expected band 'corr_longitude'", target.containsBand("corr_longitude"));
             assertTrue("Expected band 'corr_latitude'", target.containsBand("corr_latitude"));
             assertTrue("Expected band 'altitude'", target.containsBand("altitude"));
+            l1pProduct.dispose();
         } finally {
             System.setProperty("beam.envisat.usePixelGeoCoding", origUsePixelGeoCoding);
         }

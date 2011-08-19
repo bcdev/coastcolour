@@ -79,11 +79,13 @@ public class L2WOpTest {
     public void testCreateProductWithReflectances() throws OperatorException, ParseException {
         Product source = L1POpTest.getL1bProduct();
         source = getL1pProduct(source);
-        source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
+        Product l2rProduct = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("outputReflec", true);
         String[] expectedBandNames = {"reflec_1", "reflec_2", "reflec_13", "iop_a_ys_443", "conc_tsm", "conc_chl"};
-        target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, params);
+        target = testTargetProduct(l2rProduct, "MER_FR__CCL2W", expectedBandNames, params);
+        l2rProduct.dispose();
+        source.dispose();
     }
 
     @Test
@@ -113,6 +115,7 @@ public class L2WOpTest {
             assertTrue("Expected band 'corr_longitude'", target.containsBand("corr_longitude"));
             assertTrue("Expected band 'corr_latitude'", target.containsBand("corr_latitude"));
             assertTrue("Expected band 'altitude'", target.containsBand("altitude"));
+            l2rProduct.dispose();
         } finally {
             System.setProperty("beam.envisat.usePixelGeoCoding", origUsePixelGeoCoding);
             System.setProperty("beam.pixelGeoCoding.useTiling", origPixelGeoCodingTiling);
@@ -140,6 +143,8 @@ public class L2WOpTest {
         Map<String, Object> l2wParams = new HashMap<String, Object>();
         l2wParams.put("outputFLH", true);
         GPF.createProduct("CoastColour.L2W", l2wParams, l2rSource);
+        l1pSource.dispose();
+        l2rSource.dispose();
     }
 
     private static Product testTargetProduct(Product source, String expectedProductType, String[] expectedBandNames,

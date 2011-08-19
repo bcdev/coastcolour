@@ -9,6 +9,8 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -20,11 +22,25 @@ import static org.junit.Assert.*;
 
 public class L2ROpTest {
 
+    private static Product l1bProduct;
     private Product target;
 
     @BeforeClass
-    public static void start() {
+    public static void start() throws ParseException {
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis();
+        l1bProduct = L1POpTest.createL1bProduct();
+    }
+
+    @AfterClass
+    public static void afterClass() throws ParseException {
+        l1bProduct.dispose();
+        l1bProduct = null;
+    }
+
+
+    @Before
+    public void setUp() throws Exception {
+        System.out.println("Starting next test");
     }
 
     @After
@@ -39,22 +55,19 @@ public class L2ROpTest {
 
     @Test
     public void testCreateProductFromL1B() throws OperatorException, ParseException {
-        Product source = L1POpTest.getL1bProduct();
-        target = testDefaultTargetProduct(source, GPF.NO_PARAMS, "MER_FR__CCL2R");
+        target = testDefaultTargetProduct(l1bProduct, GPF.NO_PARAMS, "MER_FR__CCL2R");
     }
 
     @Test
     public void testCreateProductFromL1P() throws OperatorException, ParseException {
-        Product source = L1POpTest.getL1bProduct();
-        source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
+        Product source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
         target = testDefaultTargetProduct(source, GPF.NO_PARAMS, "MER_FR__CCL2R");
         source.dispose();
     }
 
     @Test
     public void testCreateProduct_WithMoreOutput() throws OperatorException, ParseException {
-        Product source = L1POpTest.getL1bProduct();
-        source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
+        Product source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
         Map<String, Object> l2rParams = new HashMap<String, Object>();
         l2rParams.put("outputTosa", true);
         l2rParams.put("outputTransmittance", true);
@@ -71,7 +84,7 @@ public class L2ROpTest {
         String origUsePixelGeoCoding = System.getProperty("beam.envisat.usePixelGeoCoding", "false");
         try {
             System.setProperty("beam.envisat.usePixelGeoCoding", "true");
-            Product l1bProduct = L1POpTest.getL1bProduct();
+            Product l1bProduct = L1POpTest.createL1bProduct();
             l1bProduct.setProductType("MER_FSG_1P");
             Band corr_longitude = l1bProduct.addBand("corr_longitude", ProductData.TYPE_FLOAT64);
             corr_longitude.setData(corr_longitude.createCompatibleRasterData());

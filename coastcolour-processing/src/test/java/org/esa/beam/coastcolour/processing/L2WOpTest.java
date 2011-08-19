@@ -8,6 +8,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -20,10 +21,18 @@ import static org.junit.Assert.*;
 public class L2WOpTest {
 
     private Product target;
+    private static Product l1bProduct;
 
     @BeforeClass
-    public static void start() {
+    public static void start() throws ParseException {
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis();
+        l1bProduct = L1POpTest.createL1bProduct();
+    }
+
+    @AfterClass
+    public static void afterClass() throws ParseException {
+        l1bProduct.dispose();
+        l1bProduct = null;
     }
 
     @After
@@ -37,9 +46,8 @@ public class L2WOpTest {
 
     @Test
     public void testCreateProductFromL1B() throws OperatorException, ParseException {
-        Product source = L1POpTest.getL1bProduct();
         final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl"};
-        target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
+        target = testTargetProduct(l1bProduct, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
 
         String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
         for (String notExpectedBandName : notExpectedBandNames) {
@@ -50,8 +58,7 @@ public class L2WOpTest {
 
     @Test
     public void testCreateProductFromL1P() throws OperatorException, ParseException {
-        Product source = L1POpTest.getL1bProduct();
-        source = getL1pProduct(source);
+        Product source = getL1pProduct(l1bProduct);
         final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl"};
         target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
 
@@ -64,8 +71,7 @@ public class L2WOpTest {
 
     @Test
     public void testCreateProductFromL2R() throws OperatorException, ParseException {
-        Product source = L1POpTest.getL1bProduct();
-        source = getL1pProduct(source);
+        Product source = getL1pProduct(l1bProduct);
         source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
         final String[] expectedBandNames = {
                 "iop_a_ys_443", "iop_a_total_443", "iop_bb_spm_443",
@@ -77,8 +83,7 @@ public class L2WOpTest {
 
     @Test
     public void testCreateProductWithReflectances() throws OperatorException, ParseException {
-        Product source = L1POpTest.getL1bProduct();
-        source = getL1pProduct(source);
+        Product source = getL1pProduct(l1bProduct);
         Product l2rProduct = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("outputReflec", true);
@@ -95,7 +100,7 @@ public class L2WOpTest {
         String origPixelGeoCodingAccuracy = System.getProperty("beam.pixelGeoCoding.fractionAccuracy", "true");
         try {
             System.setProperty("beam.envisat.usePixelGeoCoding", "true");
-            Product l1bProduct = L1POpTest.getL1bProduct();
+            Product l1bProduct = L1POpTest.createL1bProduct();
             l1bProduct.setProductType("MER_FSG_1P");
             Band corr_longitude = l1bProduct.addBand("corr_longitude", ProductData.TYPE_FLOAT64);
             corr_longitude.setData(corr_longitude.createCompatibleRasterData());
@@ -116,6 +121,7 @@ public class L2WOpTest {
             assertTrue("Expected band 'corr_latitude'", target.containsBand("corr_latitude"));
             assertTrue("Expected band 'altitude'", target.containsBand("altitude"));
             l2rProduct.dispose();
+            l1bProduct.dispose();
         } finally {
             System.setProperty("beam.envisat.usePixelGeoCoding", origUsePixelGeoCoding);
             System.setProperty("beam.pixelGeoCoding.useTiling", origPixelGeoCodingTiling);
@@ -125,8 +131,7 @@ public class L2WOpTest {
 
     @Test
     public void testCreateProduct_WithFLHOutput() throws ParseException {
-        Product source = L1POpTest.getL1bProduct();
-        source = getL1pProduct(source);
+        Product source = getL1pProduct(l1bProduct);
         final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl", "exp_FLH_681"};
         Map<String, Object> l2wParams = new HashMap<String, Object>();
         l2wParams.put("outputFLH", true);
@@ -136,8 +141,7 @@ public class L2WOpTest {
 
     @Test(expected = OperatorException.class)
     public void testCreateProduct_WithFLHOutput_FromL2RLeadsToException() throws ParseException {
-        Product l1bSource = L1POpTest.getL1bProduct();
-        Product l1pSource = getL1pProduct(l1bSource);
+        Product l1pSource = getL1pProduct(l1bProduct);
         Product l2rSource = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, l1pSource);
 
         Map<String, Object> l2wParams = new HashMap<String, Object>();

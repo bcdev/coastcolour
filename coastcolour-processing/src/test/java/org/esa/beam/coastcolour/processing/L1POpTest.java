@@ -15,6 +15,7 @@ import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -26,10 +27,18 @@ import static org.junit.Assert.*;
 public class L1POpTest {
 
     private Product target;
+    private static Product l1bProduct;
 
     @BeforeClass
-    public static void start() {
+    public static void beforeClass() throws ParseException {
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis();
+        l1bProduct = createL1bProduct();
+    }
+
+    @AfterClass
+    public static void afterClass() throws ParseException {
+        l1bProduct.dispose();
+        l1bProduct = null;
     }
 
     @After
@@ -44,15 +53,13 @@ public class L1POpTest {
     @Test
     public void testCreateProduct() throws OperatorException, ParseException {
 
-        Product source = getL1bProduct();
-
-        target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
+        target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
         assertNotNull(target);
 
         // enable for debugging
 //        L1POpTest.dumpBands(target);
 
-        Band[] sourceBands = source.getBands();
+        Band[] sourceBands = l1bProduct.getBands();
         for (Band sourceBand : sourceBands) {
             assertNotNull("Target band missing: " + sourceBand.getName(), target.getBand(sourceBand.getName()));
         }
@@ -81,14 +88,11 @@ public class L1POpTest {
         assertEquals(5, maskGroup.indexOf(("l1p_cc_snow_ice")));
         assertEquals(6, maskGroup.indexOf(("l1p_cc_landrisk")));
         assertEquals(7, maskGroup.indexOf(("l1p_cc_glintrisk")));
-        source.dispose();
-        source = null;
-
     }
 
     @Test
     public void testCreateProduct_WithFsgInput() throws OperatorException, ParseException {
-        Product l1bProduct = getL1bProduct();
+        Product l1bProduct = createL1bProduct();
         l1bProduct.setProductType("MER_FSG_1P");
         int numElems = l1bProduct.getSceneRasterWidth() * l1bProduct.getSceneRasterHeight();
         Band corr_longitude = l1bProduct.addBand("corr_longitude", ProductData.TYPE_FLOAT64);
@@ -106,13 +110,12 @@ public class L1POpTest {
         assertTrue(target.containsBand("corr_longitude"));
         assertTrue(target.containsBand("corr_latitude"));
         assertTrue(target.containsBand("altitude"));
-        l1bProduct.dispose();
     }
 
     @Test
     public void testCreateProductWithoutIdepix() throws OperatorException, ParseException {
 
-        Product source = getL1bProduct();
+        Product source = createL1bProduct();
         HashMap<String, Object> l1pParams = new HashMap<String, Object>();
         l1pParams.put("useIdepix", false);
         target = GPF.createProduct("CoastColour.L1P", l1pParams, source);
@@ -136,7 +139,7 @@ public class L1POpTest {
         assertSame(flagCodingGroup.get(flagsName), target.getBand(flagsName).getFlagCoding());
     }
 
-    public static Product getL1bProduct() throws ParseException {
+    public static Product createL1bProduct() throws ParseException {
         int width = 10;
         int height = 10;
         Product product = new Product("MER_FR__1P", "MER_FR__1P", width, height);

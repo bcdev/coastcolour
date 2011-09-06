@@ -217,6 +217,7 @@ public class L2WOp extends Operator {
         ProductUtils.copyTiePointGrids(case2rProduct, l2wProduct);
         renameIops(l2wProduct);
         renameConcentrations(l2wProduct);
+        renameTurbidityBand(l2wProduct);
         copyReflecBandsIfRequired(l2rProduct, l2wProduct);
         sortFlagBands(l2wProduct);
         changeL2WMasksAndFlags(l2wProduct);
@@ -498,7 +499,10 @@ public class L2WOp extends Operator {
         targetProduct.getBand("tsm").setName("conc_tsm");
         targetProduct.getBand("chl_conc").setName("conc_chl");
         addPatternToAutoGrouping(targetProduct, "conc");
+    }
 
+    private void renameTurbidityBand(Product targetProduct) {
+        targetProduct.getBand("turbidity_index").setName("turbidity");
     }
 
     private void renameIops(Product targetProduct) {

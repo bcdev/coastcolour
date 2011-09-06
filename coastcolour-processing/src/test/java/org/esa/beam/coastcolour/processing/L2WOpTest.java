@@ -46,7 +46,7 @@ public class L2WOpTest {
 
     @Test
     public void testCreateProductFromL1B() throws OperatorException, ParseException {
-        final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl"};
+        final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl", "turbidity"};
         target = testTargetProduct(l1bProduct, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
 
         String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
@@ -59,7 +59,7 @@ public class L2WOpTest {
     @Test
     public void testCreateProductFromL1P() throws OperatorException, ParseException {
         Product source = getL1pProduct(l1bProduct);
-        final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl"};
+        final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl", "turbidity"};
         target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
 
         String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
@@ -75,7 +75,7 @@ public class L2WOpTest {
         source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
         final String[] expectedBandNames = {
                 "iop_a_ys_443", "iop_a_total_443", "iop_bb_spm_443",
-                "conc_tsm", "conc_chl"
+                "conc_tsm", "conc_chl", "turbidity"
         };
         target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
         source.dispose();
@@ -87,7 +87,10 @@ public class L2WOpTest {
         Product l2rProduct = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("outputReflec", true);
-        String[] expectedBandNames = {"reflec_1", "reflec_2", "reflec_13", "iop_a_ys_443", "conc_tsm", "conc_chl"};
+        String[] expectedBandNames = {
+                "reflec_1", "reflec_2", "reflec_13", "iop_a_ys_443",
+                "conc_tsm", "conc_chl", "turbidity"
+        };
         target = testTargetProduct(l2rProduct, "MER_FR__CCL2W", expectedBandNames, params);
         l2rProduct.dispose();
         source.dispose();
@@ -114,7 +117,7 @@ public class L2WOpTest {
 
             Product l2rProduct = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, l1bProduct);
             target = testTargetProduct(l2rProduct, "MER_FSG_CCL2W",
-                                       new String[]{"corr_longitude", "corr_latitude", "altitude"},
+                                       new String[]{"corr_longitude", "corr_latitude", "altitude", "turbidity"},
                                        GPF.NO_PARAMS);
 
             assertTrue("Expected band 'corr_longitude'", target.containsBand("corr_longitude"));
@@ -132,7 +135,7 @@ public class L2WOpTest {
     @Test
     public void testCreateProduct_WithFLHOutput() throws ParseException {
         Product source = getL1pProduct(l1bProduct);
-        final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl", "exp_FLH_681"};
+        final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl", "exp_FLH_681", "turbidity"};
         Map<String, Object> l2wParams = new HashMap<String, Object>();
         l2wParams.put("outputFLH", true);
         target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, l2wParams);

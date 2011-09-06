@@ -94,20 +94,13 @@ public class L1POp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        final Map<String, Object> rcParams = new HashMap<String, Object>();
-        rcParams.put("doCalibration", doCalibration);
-        rcParams.put("doSmile", doSmile);
-        rcParams.put("doEqualization", doEqualization);
-        rcParams.put("doRadToRefl", false);
+        final Map<String, Object> rcParams = createRadiometryParameterMap();
         radiometryProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);
 
         final Product l1pProduct = createL1PProduct(radiometryProduct);
 
         if (useIdepix) {
-            HashMap<String, Object> idepixParams = new HashMap<String, Object>();
-            idepixParams.put("algorithm", algorithm);
-            idepixParams.put("ipfQWGUserDefinedRhoToa442Threshold", brightTestThreshold);
-            idepixParams.put("rhoAgReferenceWavelength", brightTestWavelength);
+            HashMap<String, Object> idepixParams = createIdepixParameterMap();
             idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, idepixParams, radiometryProduct);
 
             checkForExistingFlagBand(idepixProduct, CLOUD_FLAG_BAND_NAME);
@@ -121,6 +114,23 @@ public class L1POp extends Operator {
         reorderBands(l1pProduct);
 
         setTargetProduct(l1pProduct);
+    }
+
+    private HashMap<String, Object> createIdepixParameterMap() {
+        HashMap<String, Object> idepixParams = new HashMap<String, Object>();
+        idepixParams.put("algorithm", algorithm);
+        idepixParams.put("ipfQWGUserDefinedRhoToa442Threshold", brightTestThreshold);
+        idepixParams.put("rhoAgReferenceWavelength", brightTestWavelength);
+        return idepixParams;
+    }
+
+    private Map<String, Object> createRadiometryParameterMap() {
+        final Map<String, Object> rcParams = new HashMap<String, Object>();
+        rcParams.put("doCalibration", doCalibration);
+        rcParams.put("doSmile", doSmile);
+        rcParams.put("doEqualization", doEqualization);
+        rcParams.put("doRadToRefl", false);
+        return rcParams;
     }
 
     private Product createL1PProduct(Product radiometryProduct) {

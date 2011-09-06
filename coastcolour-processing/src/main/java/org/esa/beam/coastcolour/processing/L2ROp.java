@@ -111,20 +111,21 @@ public class L2ROp extends Operator {
     public void initialize() throws OperatorException {
         l1pProduct = this.sourceProduct;
         if (!isL1PSourceProduct(l1pProduct)) {
-            HashMap<String, Object> l1pParams = new HashMap<String, Object>();
-            l1pParams.put("doCalibration", doCalibration);
-            l1pParams.put("doSmile", doSmile);
-            l1pParams.put("doEqualization", doEqualization);
-            l1pParams.put("useIdepix", useIdepix);
-            l1pParams.put("algorithm", algorithm);
-            l1pParams.put("brightTestThreshold", brightTestThreshold);
-            l1pParams.put("brightTestWavelength", brightTestWavelength);
+            HashMap<String, Object> l1pParams = createL1pParameterMap();
             l1pProduct = GPF.createProduct("CoastColour.L1P", l1pParams, l1pProduct);
         }
 
         HashMap<String, Product> sourceProducts = new HashMap<String, Product>();
         sourceProducts.put("merisProduct", l1pProduct);
 
+        HashMap<String, Object> glintParameters = createGlintAcParameterMap();
+        glintProduct = GPF.createProduct("Meris.GlintCorrection", glintParameters, sourceProducts);
+
+        Product targetProduct = createL2RProduct();
+        setTargetProduct(targetProduct);
+    }
+
+    private HashMap<String, Object> createGlintAcParameterMap() {
         HashMap<String, Object> glintParameters = new HashMap<String, Object>();
         glintParameters.put("doSmileCorrection", false);
         glintParameters.put("outputTosa", outputTosa);
@@ -141,11 +142,19 @@ public class L2ROp extends Operator {
         glintParameters.put("landExpression", landExpression);
         glintParameters.put("cloudIceExpression", cloudIceExpression);
         glintParameters.put("useFlint", false);
+        return glintParameters;
+    }
 
-        glintProduct = GPF.createProduct("Meris.GlintCorrection", glintParameters, sourceProducts);
-
-        Product targetProduct = createL2RProduct();
-        setTargetProduct(targetProduct);
+    private HashMap<String, Object> createL1pParameterMap() {
+        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+        l1pParams.put("doCalibration", doCalibration);
+        l1pParams.put("doSmile", doSmile);
+        l1pParams.put("doEqualization", doEqualization);
+        l1pParams.put("useIdepix", useIdepix);
+        l1pParams.put("algorithm", algorithm);
+        l1pParams.put("brightTestThreshold", brightTestThreshold);
+        l1pParams.put("brightTestWavelength", brightTestWavelength);
+        return l1pParams;
     }
 
     private Product createL2RProduct() {

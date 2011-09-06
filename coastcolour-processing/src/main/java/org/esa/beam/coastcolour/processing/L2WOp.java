@@ -152,31 +152,14 @@ public class L2WOp extends Operator {
         }
         l2rProduct = sourceProduct;
         if (!isL2RSourceProduct(l2rProduct)) {
-            HashMap<String, Object> l2rParams = createDefaultL2RParameterMap();
-            if (outputFLH) {
-                l2rParams.put("outputTosa", true);
-                l2rParams.put("outputTransmittance", true);
-                l2rParams.put("outputPath", true);
-            }
+            HashMap<String, Object> l2rParams = createL2RParameterMap();
             l2rProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
         }
 
         Case2AlgorithmEnum c2rAlgorithm = Case2AlgorithmEnum.REGIONAL;
         Operator case2Op = c2rAlgorithm.createOperatorInstance();
 
-        case2Op.setParameter("forwardWaterNnFile", forwardWaterNnFile);
-        case2Op.setParameter("inverseWaterNnFile", inverseWaterNnFile);
-        case2Op.setParameter("averageSalinity", averageSalinity);
-        case2Op.setParameter("averageTemperature", averageTemperature);
-        case2Op.setParameter("tsmConversionExponent", c2rAlgorithm.getDefaultTsmExponent());
-        case2Op.setParameter("tsmConversionFactor", c2rAlgorithm.getDefaultTsmFactor());
-        case2Op.setParameter("chlConversionExponent", c2rAlgorithm.getDefaultChlExponent());
-        case2Op.setParameter("chlConversionFactor", c2rAlgorithm.getDefaultChlFactor());
-        case2Op.setParameter("outputKdSpectrum", outputKdSpectrum);
-        case2Op.setParameter("outputAPoc", outputAPoc);
-        case2Op.setParameter("inputReflecAre", "RADIANCE_REFLECTANCES");
-        case2Op.setParameter("invalidPixelExpression", invalidPixelExpression);
-        case2Op.setSourceProduct("acProduct", l2rProduct);
+        setCase2rParameters(case2Op, c2rAlgorithm);
 
         case2rProduct = case2Op.getTargetProduct();
 
@@ -398,7 +381,33 @@ public class L2WOp extends Operator {
         return tiles;
     }
 
-    private HashMap<String, Object> createDefaultL2RParameterMap() {
+    private void setCase2rParameters(Operator case2Op, Case2AlgorithmEnum c2rAlgorithm) {
+        case2Op.setParameter("forwardWaterNnFile", forwardWaterNnFile);
+        case2Op.setParameter("inverseWaterNnFile", inverseWaterNnFile);
+        case2Op.setParameter("averageSalinity", averageSalinity);
+        case2Op.setParameter("averageTemperature", averageTemperature);
+        case2Op.setParameter("tsmConversionExponent", c2rAlgorithm.getDefaultTsmExponent());
+        case2Op.setParameter("tsmConversionFactor", c2rAlgorithm.getDefaultTsmFactor());
+        case2Op.setParameter("chlConversionExponent", c2rAlgorithm.getDefaultChlExponent());
+        case2Op.setParameter("chlConversionFactor", c2rAlgorithm.getDefaultChlFactor());
+        case2Op.setParameter("outputKdSpectrum", outputKdSpectrum);
+        case2Op.setParameter("outputAPoc", outputAPoc);
+        case2Op.setParameter("inputReflecAre", "RADIANCE_REFLECTANCES");
+        case2Op.setParameter("invalidPixelExpression", invalidPixelExpression);
+        case2Op.setSourceProduct("acProduct", l2rProduct);
+    }
+
+    private HashMap<String, Object> createL2RParameterMap() {
+        HashMap<String, Object> l2rParams = createBaseL2RParameterMap();
+        if (outputFLH) {
+            l2rParams.put("outputTosa", true);
+            l2rParams.put("outputTransmittance", true);
+            l2rParams.put("outputPath", true);
+        }
+        return l2rParams;
+    }
+
+    private HashMap<String, Object> createBaseL2RParameterMap() {
         HashMap<String, Object> l2rParams = new HashMap<String, Object>();
         l2rParams.put("doCalibration", doCalibration);
         l2rParams.put("doSmile", doSmile);
@@ -440,49 +449,45 @@ public class L2WOp extends Operator {
         Mask fit_failed = maskGroup.get("case2_fit_failed");
         maskGroup.remove(fit_failed);
 
-        Mask wlr_oor = maskGroup.get("case2_wlr_oor");
-        wlr_oor.setName("l2w_cc_wlr_ootr");
         String wlrOorDescription = "Water leaving reflectance out of training range";
-        wlr_oor.setDescription(wlrOorDescription);
-        maskGroup.remove(wlr_oor);
-        maskGroup.add(lastL1PIndex, wlr_oor);
+        Mask wlr_oor = updateMask(maskGroup, "case2_wlr_oor", "l2w_cc_wlr_ootr", wlrOorDescription);
+        reorderMask(maskGroup, wlr_oor, lastL1PIndex);
         l2wFlags.getFlag("WLR_OOR").setDescription(wlrOorDescription);
 
-        Mask conc_oor = maskGroup.get("case2_conc_oor");
-        conc_oor.setName("l2w_cc_conc_ootr");
         String concOorDescription = "Water constituents out of training range";
-        conc_oor.setDescription(concOorDescription);
-        maskGroup.remove(conc_oor);
-        maskGroup.add(++lastL1PIndex, conc_oor);
+        Mask conc_oor = updateMask(maskGroup, "case2_conc_oor", "l2w_cc_conc_ootr", concOorDescription);
+        reorderMask(maskGroup, conc_oor, ++lastL1PIndex);
         l2wFlags.getFlag("CONC_OOR").setDescription(concOorDescription);
 
-        Mask ootr = maskGroup.get("case2_ootr");
-        ootr.setName("l2w_cc_ootr");
         String ootrDescription = "Spectrum out of training range (chiSquare threshold)";
-        ootr.setDescription(ootrDescription);
-        maskGroup.remove(ootr);
-        maskGroup.add(++lastL1PIndex, ootr);
+        Mask ootr = updateMask(maskGroup, "case2_ootr", "l2w_cc_ootr", ootrDescription);
+        reorderMask(maskGroup, ootr, ++lastL1PIndex);
         l2wFlags.getFlag("OOTR").setDescription(ootrDescription);
 
-
-        Mask whitecaps = maskGroup.get("case2_whitecaps");
-        whitecaps.setName("l2w_cc_whitecaps");
         String whitecapsDescription = "Risk for white caps";
-        whitecaps.setDescription(whitecapsDescription);
-        maskGroup.remove(whitecaps);
-        maskGroup.add(++lastL1PIndex, whitecaps);
+        Mask whitecaps = updateMask(maskGroup, "case2_whitecaps", "l2w_cc_whitecaps", whitecapsDescription);
+        reorderMask(maskGroup, whitecaps, ++lastL1PIndex);
         l2wFlags.getFlag("WHITECAPS").setDescription(whitecapsDescription);
 
-
-        Mask invalid = maskGroup.get("case2_invalid");
+        String invalidDescription = "Invalid pixels (" + invalidPixelExpression + " || l2w_flags.OOTR)";
+        Mask invalid = updateMask(maskGroup, "case2_invalid", "l2w_cc_invalid", invalidDescription);
+        reorderMask(maskGroup, invalid, ++lastL1PIndex);
         String l2rInvalidExpr = Mask.BandMathsType.getExpression(invalid);
         Mask.BandMathsType.setExpression(invalid, l2rInvalidExpr + " || l2w_flags.OOTR");
-        invalid.setName("l2w_cc_invalid");
-        String invalidDescription = "Invalid pixels (" + invalidPixelExpression + " || l2w_flags.OOTR)";
-        invalid.setDescription(invalidDescription);
-        maskGroup.remove(invalid);
-        maskGroup.add(++lastL1PIndex, invalid);
         l2wFlags.getFlag("INVALID").setDescription(invalidDescription);
+    }
+
+    private void reorderMask(ProductNodeGroup<Mask> maskGroup, Mask wlr_oor, int newIndex) {
+        maskGroup.remove(wlr_oor);
+        maskGroup.add(newIndex, wlr_oor);
+    }
+
+    private Mask updateMask(ProductNodeGroup<Mask> maskGroup, String oldMaskName, String newMaskName,
+                            String description) {
+        Mask mask = maskGroup.get(oldMaskName);
+        mask.setName(newMaskName);
+        mask.setDescription(description);
+        return mask;
     }
 
     private void copyMasks(Product sourceProduct, Product targetProduct) {

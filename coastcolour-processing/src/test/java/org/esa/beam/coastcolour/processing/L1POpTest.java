@@ -83,11 +83,12 @@ public class L1POpTest {
         assertEquals(0, maskGroup.indexOf(("l1p_cc_land")));
         assertEquals(1, maskGroup.indexOf(("l1p_cc_coastline")));
         assertEquals(2, maskGroup.indexOf(("l1p_cc_cloud")));
-        assertEquals(3, maskGroup.indexOf(("l1p_cc_cloud_buffer")));
-        assertEquals(4, maskGroup.indexOf(("l1p_cc_cloud_shadow")));
-        assertEquals(5, maskGroup.indexOf(("l1p_cc_snow_ice")));
-        assertEquals(6, maskGroup.indexOf(("l1p_cc_landrisk")));
-        assertEquals(7, maskGroup.indexOf(("l1p_cc_glintrisk")));
+        assertEquals(3, maskGroup.indexOf(("l1p_cc_cloud_spatial")));
+        assertEquals(4, maskGroup.indexOf(("l1p_cc_cloud_buffer")));
+        assertEquals(5, maskGroup.indexOf(("l1p_cc_cloud_shadow")));
+        assertEquals(6, maskGroup.indexOf(("l1p_cc_snow_ice")));
+        assertEquals(7, maskGroup.indexOf(("l1p_cc_landrisk")));
+        assertEquals(8, maskGroup.indexOf(("l1p_cc_glintrisk")));
     }
 
     @Test

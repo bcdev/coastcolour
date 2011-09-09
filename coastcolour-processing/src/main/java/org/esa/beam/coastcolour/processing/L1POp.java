@@ -33,6 +33,7 @@ public class L1POp extends Operator {
     public static final String CC_LAND_FLAG_NAME = "CC_LAND";
     public static final String CC_COASTLINE_FLAG_NAME = "CC_COASTLINE";
     public static final String CC_CLOUD_FLAG_NAME = "CC_CLOUD";
+    public static final String CC_CLOUD_SPATIAL_FLAG_NAME = "CC_CLOUD_SPATIAL";
     public static final String CC_CLOUD_BUFFER_FLAG_NAME = "CC_CLOUD_BUFFER";
     public static final String CC_CLOUD_SHADOW_FLAG_NAME = "CC_CLOUD_SHADOW";
     public static final String CC_SNOW_ICE_FLAG_NAME = "CC_SNOW_ICE";
@@ -46,11 +47,12 @@ public class L1POp extends Operator {
     private static final int LAND_BIT_INDEX = 0;
     private static final int COASTLINE_BIT_INDEX = 1;
     private static final int CLOUD_BIT_INDEX = 2;
-    private static final int CLOUD_BUFFER_BIT_INDEX = 3;
-    private static final int CLOUD_SHADOW_BIT_INDEX = 4;
-    private static final int SNOW_ICE_BIT_INDEX = 5;
-    private static final int LANDRISK_BIT_INDEX = 6;
-    private static final int GLINTRISK_BIT_INDEX = 7;
+    private static final int CLOUD_SPATIAL_BIT_INDEX = 3;
+    private static final int CLOUD_BUFFER_BIT_INDEX = 4;
+    private static final int CLOUD_SHADOW_BIT_INDEX = 5;
+    private static final int SNOW_ICE_BIT_INDEX = 6;
+    private static final int LANDRISK_BIT_INDEX = 7;
+    private static final int GLINTRISK_BIT_INDEX = 8;
 
     @SourceProduct(alias = "l1b", description = "MERIS L1b (N1) product")
     private Product sourceProduct;
@@ -121,6 +123,7 @@ public class L1POp extends Operator {
         idepixParams.put("algorithm", algorithm);
         idepixParams.put("ipfQWGUserDefinedRhoToa442Threshold", brightTestThreshold);
         idepixParams.put("rhoAgReferenceWavelength", brightTestWavelength);
+        idepixParams.put("ccSpatialCloudTest", true);
         return idepixParams;
     }
 
@@ -240,6 +243,8 @@ public class L1POp extends Operator {
         l1pFC.addFlag(CC_LAND_FLAG_NAME, BitSetter.setFlag(0, LAND_BIT_INDEX), "Pixel masked as land");
         l1pFC.addFlag(CC_COASTLINE_FLAG_NAME, BitSetter.setFlag(0, COASTLINE_BIT_INDEX), "Pixel masked as coastline");
         l1pFC.addFlag(CC_CLOUD_FLAG_NAME, BitSetter.setFlag(0, CLOUD_BIT_INDEX), "Pixel masked as cloud");
+        l1pFC.addFlag(CC_CLOUD_SPATIAL_FLAG_NAME, BitSetter.setFlag(0, CLOUD_SPATIAL_BIT_INDEX),
+                      "Pixel masked by spatial cloud filter");
         l1pFC.addFlag(CC_CLOUD_BUFFER_FLAG_NAME, BitSetter.setFlag(0, CLOUD_BUFFER_BIT_INDEX),
                       "Pixel masked as cloud buffer");
         l1pFC.addFlag(CC_CLOUD_SHADOW_FLAG_NAME, BitSetter.setFlag(0, CLOUD_SHADOW_BIT_INDEX),
@@ -269,6 +274,10 @@ public class L1POp extends Operator {
                       Mask.BandMathsType.create(maskPrefix + CC_CLOUD_FLAG_NAME.toLowerCase(), "Cloud flag",
                                                 width, height, L1P_FLAG_BAND_NAME + "." + CC_CLOUD_FLAG_NAME,
                                                 Color.YELLOW, 0.5));
+        maskGroup.add(maskIndex++, Mask.BandMathsType.create(maskPrefix + CC_CLOUD_SPATIAL_FLAG_NAME.toLowerCase(),
+                                                             "Spatial Cloud flag", width, height,
+                                                             L1P_FLAG_BAND_NAME + "." + CC_CLOUD_SPATIAL_FLAG_NAME,
+                                                             Color.YELLOW.darker(), 0.5));
         maskGroup.add(maskIndex++, Mask.BandMathsType.create(maskPrefix + CC_CLOUD_BUFFER_FLAG_NAME.toLowerCase(),
                                                              "Cloud buffer flag", width, height,
                                                              L1P_FLAG_BAND_NAME + "." + CC_CLOUD_BUFFER_FLAG_NAME,
@@ -315,6 +324,8 @@ public class L1POp extends Operator {
                                                                                        CoastColourCloudClassificationOp.F_COASTLINE));
                 targetTile.setSample(x, y, CLOUD_BIT_INDEX, cloudTile.getSampleBit(x, y,
                                                                                    CoastColourCloudClassificationOp.F_CLOUD));
+                targetTile.setSample(x, y, CLOUD_SPATIAL_BIT_INDEX, cloudTile.getSampleBit(x, y,
+                                                                                           CoastColourCloudClassificationOp.F_CLOUD_SPATIAL));
                 targetTile.setSample(x, y, CLOUD_BUFFER_BIT_INDEX, cloudTile.getSampleBit(x, y,
                                                                                           CoastColourCloudClassificationOp.F_CLOUD_BUFFER));
                 targetTile.setSample(x, y, CLOUD_SHADOW_BIT_INDEX, cloudTile.getSampleBit(x, y,

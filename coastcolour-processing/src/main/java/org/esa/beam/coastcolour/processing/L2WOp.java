@@ -196,6 +196,7 @@ public class L2WOp extends Operator {
         if (outputFLH) {
             addFLHBands(l2wProduct);
         }
+        copyFlagBands(l2rProduct, l2wProduct);
         copyFlagBands(case2rProduct, l2wProduct);
         ProductUtils.copyTiePointGrids(case2rProduct, l2wProduct);
         renameIops(l2wProduct);
@@ -436,42 +437,34 @@ public class L2WOp extends Operator {
         band.setName(L2W_FLAGS_NAME);
 
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
-        int lastL1PIndex = 0;
-        for (int i = 0; i < maskGroup.getNodeCount(); i++) {
-            Mask mask = maskGroup.get(i);
-            if (!mask.getName().startsWith("l1p")) {
-                lastL1PIndex = i;
-                break;
-            }
-        }
-
 
         Mask fit_failed = maskGroup.get("case2_fit_failed");
         maskGroup.remove(fit_failed);
 
+        int insertIndex = 0;
         String wlrOorDescription = "Water leaving reflectance out of training range";
         Mask wlr_oor = updateMask(maskGroup, "case2_wlr_oor", "l2w_cc_wlr_ootr", wlrOorDescription);
-        reorderMask(maskGroup, wlr_oor, lastL1PIndex);
+        reorderMask(maskGroup, wlr_oor, insertIndex);
         l2wFlags.getFlag("WLR_OOR").setDescription(wlrOorDescription);
 
         String concOorDescription = "Water constituents out of training range";
         Mask conc_oor = updateMask(maskGroup, "case2_conc_oor", "l2w_cc_conc_ootr", concOorDescription);
-        reorderMask(maskGroup, conc_oor, ++lastL1PIndex);
+        reorderMask(maskGroup, conc_oor, ++insertIndex);
         l2wFlags.getFlag("CONC_OOR").setDescription(concOorDescription);
 
         String ootrDescription = "Spectrum out of training range (chiSquare threshold)";
         Mask ootr = updateMask(maskGroup, "case2_ootr", "l2w_cc_ootr", ootrDescription);
-        reorderMask(maskGroup, ootr, ++lastL1PIndex);
+        reorderMask(maskGroup, ootr, ++insertIndex);
         l2wFlags.getFlag("OOTR").setDescription(ootrDescription);
 
         String whitecapsDescription = "Risk for white caps";
         Mask whitecaps = updateMask(maskGroup, "case2_whitecaps", "l2w_cc_whitecaps", whitecapsDescription);
-        reorderMask(maskGroup, whitecaps, ++lastL1PIndex);
+        reorderMask(maskGroup, whitecaps, ++insertIndex);
         l2wFlags.getFlag("WHITECAPS").setDescription(whitecapsDescription);
 
         String invalidDescription = "Invalid pixels (" + invalidPixelExpression + " || l2w_flags.OOTR)";
         Mask invalid = updateMask(maskGroup, "case2_invalid", "l2w_cc_invalid", invalidDescription);
-        reorderMask(maskGroup, invalid, ++lastL1PIndex);
+        reorderMask(maskGroup, invalid, ++insertIndex);
         Mask.BandMathsType.setExpression(invalid, invalidPixelExpression + " || l2w_flags.OOTR");
         l2wFlags.getFlag("INVALID").setDescription(invalidDescription);
     }

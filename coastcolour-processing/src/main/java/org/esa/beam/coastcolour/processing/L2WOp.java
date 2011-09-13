@@ -472,8 +472,7 @@ public class L2WOp extends Operator {
         String invalidDescription = "Invalid pixels (" + invalidPixelExpression + " || l2w_flags.OOTR)";
         Mask invalid = updateMask(maskGroup, "case2_invalid", "l2w_cc_invalid", invalidDescription);
         reorderMask(maskGroup, invalid, ++lastL1PIndex);
-        String l2rInvalidExpr = Mask.BandMathsType.getExpression(invalid);
-        Mask.BandMathsType.setExpression(invalid, l2rInvalidExpr + " || l2w_flags.OOTR");
+        Mask.BandMathsType.setExpression(invalid, invalidPixelExpression + " || l2w_flags.OOTR");
         l2wFlags.getFlag("INVALID").setDescription(invalidDescription);
     }
 

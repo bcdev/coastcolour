@@ -45,16 +45,12 @@ public class L2ROp extends Operator {
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
 
-    @Parameter(defaultValue = "true")
-    private boolean useIdepix;
-
-    @Parameter(defaultValue = "CoastColour", valueSet = {"GlobAlbedo", "QWG", "CoastColour"})
-    private CloudScreeningSelector algorithm;
-
-    @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU", description = "The salinity of the water")
+    @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU",
+               description = "The average salinity of the water in the region to be processed.")
     private double averageSalinity;
 
-    @Parameter(label = "Average temperature", defaultValue = "15", unit = "°C", description = "The Water temperature")
+    @Parameter(label = "Average temperature", defaultValue = "15", unit = "°C",
+               description = "The average temperature of the water in the region to be processed.")
     private double averageTemperature;
 
     @Parameter(label = "MERIS net (full path required for other than default)",
@@ -63,7 +59,7 @@ public class L2ROp extends Operator {
                notNull = false)
     private File atmoNetMerisFile;
 
-    @Parameter(label = "Autoassociatve net (full path required for other than default)",
+    @Parameter(label = "Autoassociative net (full path required for other than default)",
                defaultValue = GlintCorrectionOperator.ATMO_AANN_NET,
                description = "The file of the autoassociative net used for error computed instead of the default neural net.",
                notNull = false)
@@ -103,6 +99,7 @@ public class L2ROp extends Operator {
     @Parameter(defaultValue = "false", label = "Output transmittance",
                description = "Toggles the output of downwelling irradiance transmittance.")
     private boolean outputTransmittance;
+
     private Product glintProduct;
     private Product l1pProduct;
 
@@ -150,8 +147,8 @@ public class L2ROp extends Operator {
         l1pParams.put("doCalibration", doCalibration);
         l1pParams.put("doSmile", doSmile);
         l1pParams.put("doEqualization", doEqualization);
-        l1pParams.put("useIdepix", useIdepix);
-        l1pParams.put("algorithm", algorithm);
+        l1pParams.put("useIdepix", true);
+        l1pParams.put("algorithm", CloudScreeningSelector.CoastColour);
         l1pParams.put("brightTestThreshold", brightTestThreshold);
         l1pParams.put("brightTestWavelength", brightTestWavelength);
         return l1pParams;

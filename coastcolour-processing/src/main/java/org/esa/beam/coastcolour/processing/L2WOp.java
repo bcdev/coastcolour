@@ -70,12 +70,6 @@ public class L2WOp extends Operator {
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
 
-    @Parameter(defaultValue = "true")
-    private boolean useIdepix;
-
-    @Parameter(defaultValue = "CoastColour", valueSet = {"GlobAlbedo", "QWG", "CoastColour"})
-    private CloudScreeningSelector algorithm;
-
     @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03")
     private double brightTestThreshold;
 
@@ -88,10 +82,12 @@ public class L2WOp extends Operator {
     private int brightTestWavelength;
 
 
-    @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU", description = "The salinity of the water")
+    @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU",
+               description = "The average salinity of the water in the region to be processed.")
     private double averageSalinity;
 
-    @Parameter(label = "Average temperature", defaultValue = "15", unit = "°C", description = "The Water temperature")
+    @Parameter(label = "Average temperature", defaultValue = "15", unit = "°C",
+               description = "The average temperature of the water in the region to be processed.")
     private double averageTemperature;
 
     @Parameter(label = "MERIS net (full path required for other than default)",
@@ -113,7 +109,6 @@ public class L2WOp extends Operator {
     @Parameter(label = "Alternative forward water neural net (optional)",
                description = "The file of the forward water neural net to be used instead of the default.")
     private File forwardWaterNnFile;
-
 
     @Parameter(defaultValue = "l1p_flags.CC_LAND",
                label = "Land detection expression",
@@ -149,7 +144,8 @@ public class L2WOp extends Operator {
     private boolean outputFLH;
 
     @Parameter(defaultValue = "false", label = "Use QAA for IOP and concentration computation",
-               description = "If enabled IOPs are computed by QAA instead of Case-2-Regional.")
+               description = "If enabled IOPs are computed by QAA instead of Case-2-Regional. " +
+                             "Concentrations of chlorophyll and total suspended matter will be derived from the IOPs.")
     private boolean useQaaForIops;
 
     private int nadirColumnIndex;
@@ -480,8 +476,8 @@ public class L2WOp extends Operator {
         l2rParams.put("doCalibration", doCalibration);
         l2rParams.put("doSmile", doSmile);
         l2rParams.put("doEqualization", doEqualization);
-        l2rParams.put("useIdepix", useIdepix);
-        l2rParams.put("algorithm", algorithm);
+        l2rParams.put("useIdepix", true);
+        l2rParams.put("algorithm", CloudScreeningSelector.CoastColour);
         l2rParams.put("brightTestThreshold", brightTestThreshold);
         l2rParams.put("brightTestWavelength", brightTestWavelength);
         l2rParams.put("averageSalinity", averageSalinity);

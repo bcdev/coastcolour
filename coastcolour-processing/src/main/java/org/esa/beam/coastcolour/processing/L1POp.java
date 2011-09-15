@@ -72,15 +72,19 @@ public class L1POp extends Operator {
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
 
-    @Parameter(defaultValue = "true")
+    @Parameter(defaultValue = "true",
+               description = "Performs pixel classification if enabled.")
     private boolean useIdepix;
 
-    @Parameter(defaultValue = "CoastColour", valueSet = {"GlobAlbedo", "QWG", "CoastColour"})
+    @Parameter(defaultValue = "CoastColour", valueSet = {"GlobAlbedo", "QWG", "CoastColour"},
+               description = "Specifies the name of the cloud screening algorithm used by the pixel classification.")
     private CloudScreeningSelector algorithm;
 
-    @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03")
+    @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03",
+               description = "Threshold used by the brightness test in the CoastColour cloud screening.")
     private double brightTestThreshold;
     @Parameter(label = "Bright Test Reference Wavelength [nm]", defaultValue = "865",
+               description = "Wavelength of the band used by the brightness test in the CoastColour cloud screening.",
                valueSet = {
                        "412", "442", "490", "510", "560",
                        "620", "665", "681", "705", "753",

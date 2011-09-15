@@ -174,7 +174,7 @@ public class L2WOp extends Operator {
 
         if (useQaaForIops) {
             HashMap<String, Object> qaaParams = createQaaParameterMap();
-            qaaProduct = GPF.createProduct("Meris.QaaIOP", qaaParams, sourceProduct);
+            qaaProduct = GPF.createProduct("Meris.QaaIOP", qaaParams, l2rProduct);
         }
 
         final Product l2wProduct = createL2WProduct(l2rProduct, case2rProduct, qaaProduct);

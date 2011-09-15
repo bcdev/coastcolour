@@ -21,6 +21,8 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
+import org.esa.beam.jai.ResolutionLevel;
+import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.meris.case2.Case2AlgorithmEnum;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
@@ -43,6 +45,12 @@ public class L2WOp extends Operator {
     private static final String EXP_FLH_681_ALT_NAME = "exp_FLH_681_alt";
     private static final String EXP_FLH_NORM_OLD_681_NAME = "exp_FLH_norm_old_681";
     private static final String EXP_FLH_ALT_OLD_681_NAME = "exp_FLH_alt_old_681";
+    private static final String[] IOP_SOURCE_BAND_NAMES = new String[]{
+            "a_total_443",
+            "a_ys_443",
+            "a_pig_443",
+            "bb_spm_443"
+    };
 
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")
     private Product sourceProduct;
@@ -140,9 +148,14 @@ public class L2WOp extends Operator {
                description = "Toggles the output of the experimental fluorescence line height.")
     private boolean outputFLH;
 
+    @Parameter(defaultValue = "false", label = "Use QAA for IOP and concentration computation",
+               description = "If enabled IOPs are computed by QAA instead of Case-2-Regional.")
+    private boolean useQaaForIops;
+
     private int nadirColumnIndex;
     private FLHAlgorithm flhAlgorithm;
     private Product l2rProduct;
+    private Product qaaProduct;
     private Product case2rProduct;
 
     @Override
@@ -163,7 +176,12 @@ public class L2WOp extends Operator {
 
         case2rProduct = case2Op.getTargetProduct();
 
-        final Product l2wProduct = createL2WProduct(l2rProduct, case2rProduct);
+        if (useQaaForIops) {
+            HashMap<String, Object> qaaParams = createQaaParameterMap();
+            qaaProduct = GPF.createProduct("Meris.QaaIOP", qaaParams, sourceProduct);
+        }
+
+        final Product l2wProduct = createL2WProduct(l2rProduct, case2rProduct, qaaProduct);
         setTargetProduct(l2wProduct);
     }
 
@@ -173,6 +191,10 @@ public class L2WOp extends Operator {
             l2rProduct.dispose();
             l2rProduct = null;
         }
+        if (qaaProduct != null) {
+            qaaProduct.dispose();
+            qaaProduct = null;
+        }
         if (case2rProduct != null) {
             case2rProduct.dispose();
             case2rProduct = null;
@@ -181,7 +203,7 @@ public class L2WOp extends Operator {
         super.dispose();
     }
 
-    private Product createL2WProduct(Product l2rProduct, Product case2rProduct) {
+    private Product createL2WProduct(Product l2rProduct, Product case2rProduct, Product qaaProduct) {
         String l2wProductType = l2rProduct.getProductType().substring(0, 8) + "CCL2W";
         final int sceneWidth = case2rProduct.getSceneRasterWidth();
         final int sceneHeight = case2rProduct.getSceneRasterHeight();
@@ -192,6 +214,13 @@ public class L2WOp extends Operator {
         ProductUtils.copyMetadata(case2rProduct, l2wProduct);
         copyMasks(case2rProduct, l2wProduct);
         copyMasks(l2rProduct, l2wProduct);
+        if (qaaProduct == null) {
+            copyIOPBands(case2rProduct, l2wProduct);
+        } else {
+            copyIOPBands(qaaProduct, l2wProduct);
+            addChlAndTsmBands(l2wProduct);
+        }
+
         copyBands(case2rProduct, l2wProduct);
         if (outputFLH) {
             addFLHBands(l2wProduct);
@@ -206,7 +235,38 @@ public class L2WOp extends Operator {
         sortFlagBands(l2wProduct);
         changeL2WMasksAndFlags(l2wProduct);
         ProductUtils.copyGeoCoding(case2rProduct, l2wProduct);
+
         return l2wProduct;
+    }
+
+    private void addChlAndTsmBands(Product l2wProduct) {
+        final Band tsm = l2wProduct.addBand("tsm", ProductData.TYPE_FLOAT32);
+        tsm.setDescription("Total suspended matter dry weight concentration.");
+        tsm.setUnit("g m^-3");
+        tsm.setValidPixelExpression("!l2w_flags.INVALID");
+        final VirtualBandOpImage tsmImage = VirtualBandOpImage.create("1.73 * pow((bb_spm_443 / 0.01), 1.0)",
+                                                                      ProductData.TYPE_FLOAT32, Double.NaN,
+                                                                      qaaProduct, ResolutionLevel.MAXRES);
+
+        tsm.setSourceImage(tsmImage);
+
+        final Band conc_chl = l2wProduct.addBand("chl_conc", ProductData.TYPE_FLOAT32);
+        conc_chl.setDescription("Chlorophyll concentration.");
+        conc_chl.setUnit("mg m^-3");
+        conc_chl.setValidPixelExpression("!l2w_flags.INVALID");
+        final VirtualBandOpImage chlConcImage = VirtualBandOpImage.create("21.0 * pow(a_pig_443, 1.04)",
+                                                                          ProductData.TYPE_FLOAT32, Double.NaN,
+                                                                          qaaProduct, ResolutionLevel.MAXRES);
+        conc_chl.setSourceImage(chlConcImage);
+
+    }
+
+    private void copyIOPBands(Product iopProduct, Product l2wProduct) {
+        for (String iopSourceBandName : IOP_SOURCE_BAND_NAMES) {
+            final Band targetBand = ProductUtils.copyBand(iopSourceBandName, iopProduct, l2wProduct);
+            targetBand.setSourceImage(iopProduct.getBand(iopSourceBandName).getSourceImage());
+            targetBand.setValidPixelExpression("!l2w_flags.INVALID");
+        }
     }
 
     private void addFLHBands(Product l2WProduct) {
@@ -237,7 +297,7 @@ public class L2WOp extends Operator {
     private void copyBands(Product case2rProduct, Product l2wProduct) {
         final Band[] case2rBands = case2rProduct.getBands();
         for (Band band : case2rBands) {
-            if (!band.isFlagBand()) {
+            if (!band.isFlagBand() && !l2wProduct.containsBand(band.getName())) {
                 final Band targetBand = ProductUtils.copyBand(band.getName(), case2rProduct, l2wProduct);
                 targetBand.setSourceImage(band.getSourceImage());
             }
@@ -396,6 +456,13 @@ public class L2WOp extends Operator {
         case2Op.setParameter("inputReflecAre", "RADIANCE_REFLECTANCES");
         case2Op.setParameter("invalidPixelExpression", invalidPixelExpression);
         case2Op.setSourceProduct("acProduct", l2rProduct);
+    }
+
+    private HashMap<String, Object> createQaaParameterMap() {
+        HashMap<String, Object> qaaParams = new HashMap<String, Object>();
+        qaaParams.put("invalidPixelExpression", invalidPixelExpression);
+        qaaParams.put("divideByPI", false); // L2R are already radiance reflectances; not need to divide by PI
+        return qaaParams;
     }
 
     private HashMap<String, Object> createL2RParameterMap() {

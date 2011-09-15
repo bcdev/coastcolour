@@ -27,7 +27,6 @@
             <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
-                            <h3>CoastColour L1P Processor</h3>
                             This processor performs radiometric correction and pixel classification. It has been
                             developed in the frame of the CoastColour project.</p>
                             ]]>
@@ -159,7 +158,7 @@
             <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
-                            <h3>CoastColour L2R Processor</h3>This processor performs an atmospheric correction. It has been developed in the frame of the CoastColour project.</p>]]></descriptionHtml>
+                            This processor performs an atmospheric correction. It has been developed in the frame of the CoastColour project.</p>]]></descriptionHtml>
             <inputProductTypes>MER_RR__1P,MER_FR__1P,MER_FSG_1P,MER_FSG_CCL1P</inputProductTypes>
             <validMaskExpression>!l2r_flags.INVALID</validMaskExpression>
 
@@ -358,7 +357,7 @@
             <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
-                            <h3>CoastColour L2W Processor</h3>This processor computes water IOPs and concentration optimized for coastal zones. It has been developed in the frame of the CoastColour project.</p>]]></descriptionHtml>
+                            This processor computes water IOPs and concentration optimized for coastal zones. It has been developed in the frame of the CoastColour project.</p>]]></descriptionHtml>
             <inputProductTypes>MER_RR__1P,MER_FR__1P,MER_FSG_1P,MER_FSG_CCL1P,MER_FSG_CCL2R</inputProductTypes>
             <validMaskExpression>!l2w_flags.INVALID</validMaskExpression>
             <outputVariables>
@@ -499,8 +498,9 @@
 </parameters>]]></defaultParameters>
             <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
             <descriptionHtml>
-                <![CDATA[<p>
-                            <h3>Meris QAA IOP Processor</h3>This processor computes water IOPs.</p>]]></descriptionHtml>
+                <![CDATA[<p>The Quasi-Analytical Algorithm (QAA) was developed to derive the
+absorption and backscattering coefficients by inverting the spectral remote-sensing reflectance (R<sub>rs</sub>(λ)).
+</p>]]></descriptionHtml>
             <inputProductTypes>MER_FSG_CCL2R</inputProductTypes>
             <validMaskExpression>analytical_flags.normal</validMaskExpression>
             <outputVariables>

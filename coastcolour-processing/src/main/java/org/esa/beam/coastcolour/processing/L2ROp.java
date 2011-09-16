@@ -270,6 +270,7 @@ public class L2ROp extends Operator {
         agcFlags.setName(L2R_FLAGS_NAME);
         Band band = targetProduct.getBand(AGC_FLAGS_NAME);
         band.setName(L2R_FLAGS_NAME);
+        band.setDescription("CC L2R atmospheric correction quality flags.");
     }
 
     private void removeFlagsAndMasks(Product targetProduct) {

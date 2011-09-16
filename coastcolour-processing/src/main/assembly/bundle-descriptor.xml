@@ -158,7 +158,21 @@
             <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
-                            This processor performs an atmospheric correction. It has been developed in the frame of the CoastColour project.</p>]]></descriptionHtml>
+                    This processor performs an atmospheric correction.
+                    It has been developed in the frame of the CoastColour project.
+                    <b>Output bands:</b>
+                    <ul>
+                    <li>reflec_&lt;#&gt; - Water leaving radiance reflectance, where &lt;#&gt is one of 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12 and 13.</li>
+                    <li>norm_refl_&lt;#&gt; - Normalised water leaving radiance reflectance, where &lt;#&gt is one of 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12 and 13.</li>
+                    <li>atm_tau_&lt;λ&gt; - Spectral aerosol optical depth at &lt;λ&gt;, where &lt;λ&gt; is one of 550, 778 and 865.</li>
+                    <li>ang_443_865 - Aerosol Angstrom coefficient at spectral wavelength 865.</li>
+                    <li>detector_index - MERIS L1B detector index.</li>
+                    <li>altitude - DEM altitude.</li>
+                    <li>l1_flags - Level 1b classification and quality flags.</li>
+                    <li>l1p_flags - CoastColour L1P pixel classification.</li>
+                    <li>l2r_flags - CoastColour L2R atmospheric correction quality flags.</li>
+                    </ul>
+                </p>]]></descriptionHtml>
             <inputProductTypes>MER_RR__1P,MER_FR__1P,MER_FSG_1P,MER_FSG_CCL1P</inputProductTypes>
             <validMaskExpression>!l2r_flags.INVALID</validMaskExpression>
 
@@ -373,7 +387,28 @@
             <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
-                            This processor computes water IOPs and concentration optimized for coastal zones. It has been developed in the frame of the CoastColour project.</p>]]></descriptionHtml>
+                This processor computes water constituents and IOPs optimized for coastal zones.
+                It has been developed in the frame of the CoastColour project.
+                <b>Output bands:</b>
+                <ul>
+                <li>iop_a_total_443 - Total absorption coefficient of all water constituents at 443 nm.</li>
+                <li>iop_a_ys_443 - Yellow substance absorption coefficient at 443 nm.</li>
+                <li>iop_a_pig_443 - Pigment absorption coefficient at 443 nm.</li>
+                <li>iop_bb_spm_443 -Backscattering of suspended particulate matter at 443 nm.</li>
+                <li>conc_tsm - Total suspended matter dry weight concentration.</li>
+                <li>conc_chl - Chlorophyll concentration.</li>
+                <li>chiSquare - Chi Square Out of Scope.</li>
+                <li>K_min - Minimum downwelling irradiance attenuation coefficient.</li>
+                <li>Kd_&lt;λ&gt; - Downwelling irradiance attenuation coefficient at &lt;λ&gt;, where &lt;λ&gt; is one of 412, 443, 490, 510, 560, 620, 664 and 680</li>
+                <li>Z90_max - Maximum signal depth.</li>
+                <li>turbidity - Turbidity in FNU (Formazine Nephelometric Unit).</li>
+                <li>altitude - DEM altitude.</li>
+                <li>l1_flags - Level 1b classification and quality flags.</li>
+                <li>l1p_flags - CoastColour L1P pixel classification.</li>
+                <li>l2r_flags - CoastColour L2R atmospheric correction quality flags.</li>
+                <li>l2w_flags - CoastColour L2W water constituents and IOPs retrieval quality flags.</li>
+                </ul>
+                </p>]]></descriptionHtml>
             <inputProductTypes>MER_RR__1P,MER_FR__1P,MER_FSG_1P,MER_FSG_CCL1P,MER_FSG_CCL2R</inputProductTypes>
             <validMaskExpression>!l2w_flags.INVALID</validMaskExpression>
             <outputVariables>
@@ -515,8 +550,26 @@
             <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>The Quasi-Analytical Algorithm (QAA) was developed to derive the
-absorption and backscattering coefficients by inverting the spectral remote-sensing reflectance (R<sub>rs</sub>(λ)).
-</p>]]></descriptionHtml>
+                absorption and backscattering coefficients by inverting the spectral remote-sensing reflectance (R<sub>rs</sub>(λ)).
+                <b>Output bands:</b>
+                <ul>
+                <li>a_total_&lt;λ&gt; - Total absorption coefficient in band &lt;λ&gt; (1/m), where &lt;λ&gt; is one of the spectral wavelengths 412, 443, 490, 510, 560, 620 nm</li>
+                <li>bb_spm_&lt;λ&gt; - Backscattering coefficient bb in band &lt;λ&gt; (1/m), where &lt;λ&gt; is one of the spectral wavelengths 412, 443, 490, 510, 560, 620 nm</li>
+                <li>apig_&lt;λ&gt; - Absorption coefficient aph of phytoplankton in band &lt;λ&gt; (1/m), where &lt;λ&gt; is one of the spectral wavelengths 412, 443, 490, 510, 560, 620 nm</li>
+                <li>ays_&lt;λ&gt; - Absorption coefficient adg of detritus and gelbstoff in band &lt;λ&gt; (1/m), where &lt;λ&gt; is one of the spectral wavelengths 412, 443, 490, 510, 560, 620 nm</li>
+                <li>analytical_flags - Quality flags dataset. Description provided below.</li>
+                </ul>
+                <b>Flag coding of analytical_flags:</b>
+                <ol>
+                <li>NORMAL - A valid water pixel.</li>
+                <li>IMAGINARY - Classified as water, but an imaginary number would have been produced.</li>
+                <li>NEGATIVE_ADG - Classified as water, but one or more of the bands contain a negative adg value.</li>
+                <li>NON_WATER - Not classified as a water pixel (land/cloud).</li>
+                </ol>
+                The QAA BEAM module has been developed by the U.S. Naval Research Center and Winona State University:
+                - Prof. Zhongping Lee - QAA algorithm
+                - Prof. Mingrui Zhang - QAA BEAM module coding
+            </p>]]></descriptionHtml>
             <inputProductTypes>MER_FSG_CCL2R</inputProductTypes>
             <validMaskExpression>analytical_flags.normal</validMaskExpression>
             <outputVariables>

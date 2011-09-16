@@ -529,7 +529,7 @@ public class L2WOp extends Operator {
         l2wFlags.removeAttribute(l2wFlags.getFlag("FIT_FAILED"));
         Band band = targetProduct.getBand(CASE2_FLAGS_NAME);
         band.setName(L2W_FLAGS_NAME);
-
+        band.setDescription("CC L2W water constituents and IOPs retrieval quality flags.");
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
 
         Mask fit_failed = maskGroup.get("case2_fit_failed");

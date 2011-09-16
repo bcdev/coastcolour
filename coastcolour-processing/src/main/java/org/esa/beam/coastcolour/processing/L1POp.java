@@ -260,6 +260,7 @@ public class L1POp extends Operator {
 
         l1pProduct.getFlagCodingGroup().add(l1pFC);
         final Band l1pBand = l1pProduct.addBand(L1P_FLAG_BAND_NAME, ProductData.TYPE_INT16);
+        l1pBand.setDescription("CC L1P pixel classification");
         l1pBand.setSampleCoding(l1pFC);
         int width = l1pProduct.getSceneRasterWidth();
         int height = l1pProduct.getSceneRasterHeight();

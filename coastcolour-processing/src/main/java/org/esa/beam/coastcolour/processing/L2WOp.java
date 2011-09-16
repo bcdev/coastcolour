@@ -148,6 +148,31 @@ public class L2WOp extends Operator {
                              "Concentrations of chlorophyll and total suspended matter will be derived from the IOPs.")
     private boolean useQaaForIops;
 
+    @Parameter(alias = "qaa.aLowerBound", defaultValue = "-0.02", label = "'A' Lower Bound",
+               description = "The lower bound of the valid value range.")
+    private float a_lower;
+    @Parameter(alias = "qaa.aUpperBound", defaultValue = "5.0", label = "'A' Upper Bound",
+               description = "The upper bound of the valid value range.")
+    private float a_upper;
+    @Parameter(alias = "qaa.bbLowerBound", defaultValue = "-0.2", label = "'BB' Lower Bound",
+               description = "The lower bound of the valid value range.")
+    private float bb_lower;
+    @Parameter(alias = "qaa.bbUpperBound", defaultValue = "5.0", label = "'BB' Upper Bound",
+               description = "The upper bound of the valid value range.")
+    private float bb_upper;
+    @Parameter(alias = "qaa.aphLowerBound", defaultValue = "-0.02", label = "'APH' Lower Bound",
+               description = "The lower bound of the valid value range.")
+    private float aph_lower;
+    @Parameter(alias = "qaa.aphUpperBound", defaultValue = "3.0", label = "'APH' Upper Bound",
+               description = "The upper bound of the valid value range.")
+    private float aph_upper;
+    @Parameter(alias = "qaa.adgUpperBound", defaultValue = "1.0", label = "'ADG' Upper Bound",
+               description = "The upper bound of the valid value range. The lower bound is always 0.")
+    private float adg_upper;
+    @Parameter(alias = "qaa.divideByPI", defaultValue = "true", label = "Divide source Rrs by PI(3.14)",
+               description = "If selected the source remote reflectances are divided by PI.")
+    private boolean divideByPI;
+
     private int nadirColumnIndex;
     private FLHAlgorithm flhAlgorithm;
     private Product l2rProduct;
@@ -457,7 +482,13 @@ public class L2WOp extends Operator {
     private HashMap<String, Object> createQaaParameterMap() {
         HashMap<String, Object> qaaParams = new HashMap<String, Object>();
         qaaParams.put("invalidPixelExpression", invalidPixelExpression);
-        qaaParams.put("divideByPI", false); // L2R are already radiance reflectances; not need to divide by PI
+        qaaParams.put("a_lower", a_lower);
+        qaaParams.put("a_upper", a_upper);
+        qaaParams.put("bb_lower", bb_lower);
+        qaaParams.put("bb_upper", bb_upper);
+        qaaParams.put("aph_lower", aph_lower);
+        qaaParams.put("adg_upper", adg_upper);
+        qaaParams.put("divideByPI", divideByPI);
         return qaaParams;
     }
 

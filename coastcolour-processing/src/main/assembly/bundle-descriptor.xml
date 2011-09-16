@@ -342,9 +342,6 @@
     <averageSalinity>35.0</averageSalinity>
     <!-- The average temperature of the water in the region to be processed. -->
     <averageTemperature>15.0</averageTemperature>
-    <!-- If enabled IOPs are computed by QAA instead of Case-2-Regional. Concentrations of chlorophyll and
-    total suspended matter will be derived from the IOPs. -->
-    <useQaaForIops>false</useQaaForIops>
     <!-- The arithmetic expression used for land detection. -->
     <landExpression>l1p_flags.CC_LAND</landExpression>
     <!-- The arithmetic expression used for cloud/ice detection. -->
@@ -353,6 +350,25 @@
     <outputReflec>true</outputReflec>
     <!-- The arithmetic expression defining pixels not considered for water processing -->
     <invalidPixelExpression>l2r_flags.INVALID</invalidPixelExpression>
+    <!-- If enabled IOPs are computed by QAA instead of Case-2-Regional. Concentrations of chlorophyll and
+    total suspended matter will be derived from the IOPs. -->
+    <useQaaForIops>false</useQaaForIops>
+    <!-- The lower bound of the valid value range of 'A'. -->
+    <qaa.aLowerBound>-0.2</qaa.aLowerBound>
+    <!-- The upper bound of the valid value range of 'A'. -->
+    <qaa.aUpperBound>5.0</qaa.aUpperBound>
+    <!-- The lower bound of the valid value range of 'BB'. -->
+    <qaa.bbLowerBound>-0.2</qaa.bbLowerBound>
+    <!-- The upper bound of the valid value range of 'BB'. -->
+    <qaa.bbUpperBound>5.0</qaa.bbUpperBound>
+    <!-- The lower bound of the valid value range of 'APH'. -->
+    <qaa.aphLowerBound>-0.02</qaa.aphLowerBound>
+    <!-- The upper bound of the valid value range of 'APH'. -->
+    <qaa.aphUpperBound>3.0</qaa.aphUpperBound>
+    <!-- The upper bound of the valid value range of 'ADG'. The lower bound is always 0.-->
+    <qaa.adgUpperBound>1.0</qaa.adgUpperBound>
+    <!-- If selected the source remote reflectances are divided by PI. -->
+    <qaa.divideByPI>true</qaa.divideByPI>
 </parameters>]]></defaultParameters>
             <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
             <descriptionHtml>

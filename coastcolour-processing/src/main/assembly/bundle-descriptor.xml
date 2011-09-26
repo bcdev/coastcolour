@@ -361,7 +361,7 @@
     <!-- The arithmetic expression used for cloud/ice detection. -->
     <cloudIceExpression>l1p_flags.CC_CLOUD || l1p_flags.CC_SNOW_ICE</cloudIceExpression>
     <!-- Toggles the output of water leaving radiance reflectance. -->
-    <outputReflec>true</outputReflec>
+    <outputReflec>false</outputReflec>
     <!-- The arithmetic expression defining pixels not considered for water processing -->
     <invalidPixelExpression>l2r_flags.INVALID</invalidPixelExpression>
     <!-- If enabled IOPs are computed by QAA instead of Case-2-Regional. Concentrations of chlorophyll and
@@ -394,7 +394,7 @@
                 <li>iop_a_total_443 - Total absorption coefficient of all water constituents at 443 nm.</li>
                 <li>iop_a_ys_443 - Yellow substance absorption coefficient at 443 nm.</li>
                 <li>iop_a_pig_443 - Pigment absorption coefficient at 443 nm.</li>
-                <li>iop_bb_spm_443 -Backscattering of suspended particulate matter at 443 nm.</li>
+                <li>iop_bb_spm_443 - Backscattering of suspended particulate matter at 443 nm.</li>
                 <li>conc_tsm - Total suspended matter dry weight concentration.</li>
                 <li>conc_chl - Chlorophyll concentration.</li>
                 <li>chiSquare - Chi Square Out of Scope.</li>

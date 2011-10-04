@@ -237,8 +237,10 @@ public class L2ROp extends Operator {
 
     private void moveMaskAtIndex(ProductNodeGroup<Mask> maskGroup, String maskName, int index) {
         Mask mask = maskGroup.get(maskName);
-        maskGroup.remove(mask);
-        maskGroup.add(index, mask);
+        if (mask != null) {
+            maskGroup.remove(mask);
+            maskGroup.add(index, mask);
+        }
     }
 
     private void renameTauBands(Product targetProduct) {

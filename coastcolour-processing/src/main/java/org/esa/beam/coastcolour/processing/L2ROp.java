@@ -193,22 +193,22 @@ public class L2ROp extends Operator {
         super.dispose();
     }
 
-    private void copyFlagBands(Product radiometryProduct, Product l1pProduct) {
-        ProductUtils.copyFlagBands(radiometryProduct, l1pProduct);
-        final Band[] radiometryBands = radiometryProduct.getBands();
+    private void copyFlagBands(Product glintProduct, Product l2rProduct) {
+        ProductUtils.copyFlagBands(glintProduct, l2rProduct);
+        final Band[] radiometryBands = glintProduct.getBands();
         for (Band band : radiometryBands) {
             if (band.isFlagBand()) {
-                final Band targetBand = l1pProduct.getBand(band.getName());
+                final Band targetBand = l2rProduct.getBand(band.getName());
                 targetBand.setSourceImage(band.getSourceImage());
             }
         }
     }
 
-    private void copyBands(Product radiometryProduct, Product l1pProduct) {
-        final Band[] radiometryBands = radiometryProduct.getBands();
+    private void copyBands(Product glintProduct, Product l2rProduct) {
+        final Band[] radiometryBands = glintProduct.getBands();
         for (Band band : radiometryBands) {
             if (!band.isFlagBand()) {
-                final Band targetBand = ProductUtils.copyBand(band.getName(), radiometryProduct, l1pProduct);
+                final Band targetBand = ProductUtils.copyBand(band.getName(), glintProduct, l2rProduct);
                 targetBand.setSourceImage(band.getSourceImage());
             }
         }

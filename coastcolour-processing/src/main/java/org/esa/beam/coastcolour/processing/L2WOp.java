@@ -208,10 +208,6 @@ public class L2WOp extends Operator {
 
     @Override
     public void dispose() {
-        if (l2rProduct != sourceProduct) {
-            l2rProduct.dispose();
-            l2rProduct = null;
-        }
         if (qaaProduct != null) {
             qaaProduct.dispose();
             qaaProduct = null;

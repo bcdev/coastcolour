@@ -106,10 +106,11 @@ public class L2ROp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        l1pProduct = this.sourceProduct;
-        if (!isL1PSourceProduct(l1pProduct)) {
+        if (!isL1PSourceProduct(sourceProduct)) {
             HashMap<String, Object> l1pParams = createL1pParameterMap();
-            l1pProduct = GPF.createProduct("CoastColour.L1P", l1pParams, l1pProduct);
+            l1pProduct = GPF.createProduct("CoastColour.L1P", l1pParams, sourceProduct);
+        } else {
+            l1pProduct = sourceProduct;
         }
 
         HashMap<String, Product> sourceProducts = new HashMap<String, Product>();
@@ -185,7 +186,7 @@ public class L2ROp extends Operator {
             glintProduct.dispose();
             glintProduct = null;
         }
-        if (l1pProduct != null) {
+        if (l1pProduct != sourceProduct) {
             l1pProduct.dispose();
             l1pProduct = null;
         }

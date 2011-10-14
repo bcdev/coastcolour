@@ -239,6 +239,9 @@ public class L2WOp extends Operator {
         }
 
         copyBands(case2rProduct, l2wProduct);
+        if (outputKdSpectrum) {
+            addPatternToAutoGrouping(l2wProduct, "Kd");
+        }
         if (outputFLH) {
             addFLHBands(l2wProduct);
         }

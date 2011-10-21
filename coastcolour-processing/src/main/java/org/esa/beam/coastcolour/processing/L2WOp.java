@@ -653,6 +653,7 @@ public class L2WOp extends Operator {
         return sourceProduct.containsBand("l2r_flags");
     }
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public static class Spi extends OperatorSpi {
 
         public Spi() {

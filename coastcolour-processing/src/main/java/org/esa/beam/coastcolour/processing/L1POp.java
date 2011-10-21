@@ -26,8 +26,11 @@ import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L1P",
-                  version = "1.3")
+@OperatorMetadata(alias = "CoastColour.L1P", version = "1.3",
+                  authors = "Marco Peters, Norman Fomferra",
+                  copyright = "(c) 2011 Brockmann Consult",
+                  description = "Computes a refinement of top of atmosphere radiance and " +
+                                "pixel characterization information.")
 public class L1POp extends Operator {
 
     public static final String CC_LAND_FLAG_NAME = "CC_LAND";
@@ -299,10 +302,10 @@ public class L1POp extends Operator {
                                                              "Potential land pixel", width, height,
                                                              L1P_FLAG_BAND_NAME + "." + CC_LANDRISK_FLAG_NAME,
                                                              Color.GREEN.darker().darker(), 0.5));
-        maskGroup.add(maskIndex++, Mask.BandMathsType.create(maskPrefix + CC_GLINTRISK_FLAG_NAME.toLowerCase(),
-                                                             "Risk that pixel is under glint", width, height,
-                                                             L1P_FLAG_BAND_NAME + "." + CC_GLINTRISK_FLAG_NAME,
-                                                             Color.pink, 0.5));
+        maskGroup.add(maskIndex, Mask.BandMathsType.create(maskPrefix + CC_GLINTRISK_FLAG_NAME.toLowerCase(),
+                                                           "Risk that pixel is under glint", width, height,
+                                                           L1P_FLAG_BAND_NAME + "." + CC_GLINTRISK_FLAG_NAME,
+                                                           Color.pink, 0.5));
 
     }
 
@@ -346,6 +349,7 @@ public class L1POp extends Operator {
 
     }
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public static class Spi extends OperatorSpi {
 
         public Spi() {

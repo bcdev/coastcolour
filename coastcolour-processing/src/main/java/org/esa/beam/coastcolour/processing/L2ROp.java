@@ -20,8 +20,11 @@ import org.esa.beam.util.ResourceInstaller;
 import java.io.File;
 import java.util.HashMap;
 
-@OperatorMetadata(alias = "CoastColour.L2R",
-                  version = "1.3")
+@OperatorMetadata(alias = "CoastColour.L2R", version = "1.4-SNAPSHOT",
+                  authors = "Marco Peters, Norman Fomferra",
+                  copyright = "(c) 2011 Brockmann Consult",
+                  description = "Performs a atmospheric correction. The result contains (normalised) water leaving " +
+                                "reflectance and information about atmospheric properties")
 public class L2ROp extends Operator {
 
     private static final String AGC_FLAGS_NAME = "agc_flags";

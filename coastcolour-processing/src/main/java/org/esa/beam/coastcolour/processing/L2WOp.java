@@ -33,8 +33,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L2W",
-                  version = "1.3")
+@OperatorMetadata(alias = "CoastColour.L2W", version = "1.4-SNAPSHOT",
+                  authors = "Marco Peters, Norman Fomferra",
+                  copyright = "(c) 2011 Brockmann Consult",
+                  description = "Computes information about water properties such as IOPs, concentrations and " +
+                                "other variables")
 public class L2WOp extends Operator {
 
     private static final String L2W_FLAGS_NAME = "l2w_flags";

@@ -1,12 +1,12 @@
 <bundleDescriptor>
     <bundleName>coastcolour-processing</bundleName>
-    <bundleVersion>1.3</bundleVersion>
+    <bundleVersion>1.4-SNAPSHOT</bundleVersion>
 
     <processorDescriptors>
         <processorDescriptor>
             <executableName>CoastColour.L1P</executableName>
             <processorName>MERIS CoastColour L1P</processorName>
-            <processorVersion>1.3</processorVersion>
+            <processorVersion>1.4-SNAPSHOT</processorVersion>
             <defaultParameters><![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->
     <doCalibration>true</doCalibration>
@@ -128,7 +128,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2R</executableName>
             <processorName>MERIS CoastColour L2R</processorName>
-            <processorVersion>1.3</processorVersion>
+            <processorVersion>1.4-SNAPSHOT</processorVersion>
             <defaultParameters><![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->
     <doCalibration>true</doCalibration>
@@ -339,7 +339,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2W</executableName>
             <processorName>MERIS CoastColour L2W</processorName>
-            <processorVersion>1.3</processorVersion>
+            <processorVersion>1.4-SNAPSHOT</processorVersion>
             <defaultParameters>
                 <![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->

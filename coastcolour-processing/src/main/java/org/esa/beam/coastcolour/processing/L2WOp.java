@@ -172,7 +172,7 @@ public class L2WOp extends Operator {
     @Parameter(alias = "qaa.adgUpperBound", defaultValue = "1.0", label = "'ADG' Upper Bound",
                description = "The upper bound of the valid value range. The lower bound is always 0.")
     private float adg_upper;
-    @Parameter(alias = "qaa.divideByPI", defaultValue = "true", label = "Divide source Rrs by PI(3.14)",
+    @Parameter(alias = "qaa.divideByPI", defaultValue = "false", label = "Divide source Rrs by PI(3.14)",
                description = "If selected the source remote reflectances are divided by PI.")
     private boolean divideByPI;
 

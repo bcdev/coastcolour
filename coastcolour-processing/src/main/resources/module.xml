@@ -19,7 +19,12 @@
     <changelog>
         <![CDATA[
            Changes in 1.4<br/>
-           - Changed default value of 'qaa.divideByPI' to false<br/>
+           [CC-8] Change default value of 'qaa.divideByPI' to false<br/>
+           Changes in 1.3<br/>
+           [CC-7] Integrate QAA in L2W processor<br/>
+           [CC-6] Above 60° North the L1P land/water mask is calculated wrong<br/>
+           [CC-5] Cloud shadow flag is dependent of the configured tile size<br/>
+           [CC-4] Cloud shadows are to far away from cloud<br/>
         ]]>
     </changelog>
 

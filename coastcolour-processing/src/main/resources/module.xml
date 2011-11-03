@@ -18,8 +18,9 @@
 
     <changelog>
         <![CDATA[
-
-                ]]>
+           Changes in 1.4<br/>
+           - Changed default value of 'qaa.divideByPI' to false<br/>
+        ]]>
     </changelog>
 
     <!-- BEAM Basics -->

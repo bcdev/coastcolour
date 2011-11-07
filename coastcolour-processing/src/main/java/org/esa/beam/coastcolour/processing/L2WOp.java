@@ -6,11 +6,7 @@ import org.esa.beam.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.atmosphere.operator.MerisFlightDirection;
 import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.FlagCoding;
-import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
@@ -21,10 +17,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
-import org.esa.beam.jai.ResolutionLevel;
-import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.meris.case2.Case2AlgorithmEnum;
-import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 
 import java.awt.Rectangle;
@@ -40,20 +33,7 @@ import java.util.Map;
                                 "other variables")
 public class L2WOp extends Operator {
 
-    private static final String L2W_FLAGS_NAME = "l2w_flags";
-    private static final String CASE2_FLAGS_NAME = "case2_flags";
     private static final int[] FLH_INPUT_BAND_NUMBERS = new int[]{6, 8, 10};
-    private static final String EXP_FLH_681_NAME = "exp_FLH_681";
-    private static final String EXP_FLH_681_NORM_NAME = "exp_FLH_681_norm";
-    private static final String EXP_FLH_681_ALT_NAME = "exp_FLH_681_alt";
-    private static final String EXP_FLH_NORM_OLD_681_NAME = "exp_FLH_norm_old_681";
-    private static final String EXP_FLH_ALT_OLD_681_NAME = "exp_FLH_alt_old_681";
-    private static final String[] IOP_SOURCE_BAND_NAMES = new String[]{
-            "a_total_443",
-            "a_ys_443",
-            "a_pig_443",
-            "bb_spm_443"
-    };
 
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")
     private Product sourceProduct;
@@ -187,11 +167,18 @@ public class L2WOp extends Operator {
         if (outputFLH && isL2RSourceProduct(sourceProduct)) {
             throw new OperatorException("In order to compute 'FLH' the input must be L1B or L1P.");
         }
+        nadirColumnIndex = MerisFlightDirection.findNadirColumnIndex(sourceProduct);
+        if (outputFLH) {
+            float[] bandWavelengths = getWavelengths(FLH_INPUT_BAND_NUMBERS);
+            flhAlgorithm = new FLHAlgorithm(bandWavelengths[0], bandWavelengths[1], bandWavelengths[2]);
+        }
+
         l2rProduct = sourceProduct;
         if (!isL2RSourceProduct(l2rProduct)) {
             HashMap<String, Object> l2rParams = createL2RParameterMap();
             l2rProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
         }
+
 
         Case2AlgorithmEnum c2rAlgorithm = Case2AlgorithmEnum.REGIONAL;
         Operator case2Op = c2rAlgorithm.createOperatorInstance();
@@ -200,12 +187,21 @@ public class L2WOp extends Operator {
 
         case2rProduct = case2Op.getTargetProduct();
 
+        final L2WProductFactory l2WProductFactory;
         if (useQaaForIops) {
             HashMap<String, Object> qaaParams = createQaaParameterMap();
             qaaProduct = GPF.createProduct("Meris.QaaIOP", qaaParams, l2rProduct);
+            l2WProductFactory = new QaaL2WProductFactory(l2rProduct, case2rProduct, qaaProduct);
+        } else {
+            l2WProductFactory = new Case2rL2WProductFactory(l2rProduct, case2rProduct);
         }
 
-        final Product l2wProduct = createL2WProduct(l2rProduct, case2rProduct, qaaProduct);
+        l2WProductFactory.setOutputFLH(outputFLH);
+        l2WProductFactory.setOutputKdSpectrum(outputKdSpectrum);
+        l2WProductFactory.setOutputReflectance(outputReflec);
+
+        final Product l2wProduct;
+        l2wProduct = l2WProductFactory.createL2WProduct();
         setTargetProduct(l2wProduct);
     }
 
@@ -223,130 +219,6 @@ public class L2WOp extends Operator {
         super.dispose();
     }
 
-    private Product createL2WProduct(Product l2rProduct, Product case2rProduct, Product qaaProduct) {
-        String l2wProductType = l2rProduct.getProductType().substring(0, 8) + "CCL2W";
-        final int sceneWidth = case2rProduct.getSceneRasterWidth();
-        final int sceneHeight = case2rProduct.getSceneRasterHeight();
-        final Product l2wProduct = new Product(case2rProduct.getName(), l2wProductType, sceneWidth, sceneHeight);
-        l2wProduct.setStartTime(case2rProduct.getStartTime());
-        l2wProduct.setEndTime(case2rProduct.getEndTime());
-        l2wProduct.setDescription("MERIS CoastColour L2W");
-        ProductUtils.copyMetadata(case2rProduct, l2wProduct);
-        copyMasks(case2rProduct, l2wProduct);
-        copyMasks(l2rProduct, l2wProduct);
-        if (qaaProduct == null) {
-            copyIOPBands(case2rProduct, l2wProduct);
-        } else {
-            copyIOPBands(qaaProduct, l2wProduct);
-            addChlAndTsmBands(l2wProduct);
-        }
-
-        copyBands(case2rProduct, l2wProduct);
-        if (outputKdSpectrum) {
-            addPatternToAutoGrouping(l2wProduct, "Kd");
-        }
-        if (outputFLH) {
-            addFLHBands(l2wProduct);
-        }
-        copyFlagBands(l2rProduct, l2wProduct);
-        copyFlagBands(case2rProduct, l2wProduct);
-        ProductUtils.copyTiePointGrids(case2rProduct, l2wProduct);
-        renameIops(l2wProduct);
-        renameConcentrations(l2wProduct);
-        renameTurbidityBand(l2wProduct);
-        copyReflecBandsIfRequired(l2rProduct, l2wProduct);
-        sortFlagBands(l2wProduct);
-        changeL2WMasksAndFlags(l2wProduct);
-        ProductUtils.copyGeoCoding(case2rProduct, l2wProduct);
-
-        return l2wProduct;
-    }
-
-    private void addChlAndTsmBands(Product l2wProduct) {
-        final Band tsm = l2wProduct.addBand("tsm", ProductData.TYPE_FLOAT32);
-        tsm.setDescription("Total suspended matter dry weight concentration.");
-        tsm.setUnit("g m^-3");
-        tsm.setValidPixelExpression("!l2w_flags.INVALID");
-        final VirtualBandOpImage tsmImage = VirtualBandOpImage.create("1.73 * pow((bb_spm_443 / 0.01), 1.0)",
-                                                                      ProductData.TYPE_FLOAT32, Double.NaN,
-                                                                      qaaProduct, ResolutionLevel.MAXRES);
-
-        tsm.setSourceImage(tsmImage);
-
-        final Band conc_chl = l2wProduct.addBand("chl_conc", ProductData.TYPE_FLOAT32);
-        conc_chl.setDescription("Chlorophyll concentration.");
-        conc_chl.setUnit("mg m^-3");
-        conc_chl.setValidPixelExpression("!l2w_flags.INVALID");
-        final VirtualBandOpImage chlConcImage = VirtualBandOpImage.create("21.0 * pow(a_pig_443, 1.04)",
-                                                                          ProductData.TYPE_FLOAT32, Double.NaN,
-                                                                          qaaProduct, ResolutionLevel.MAXRES);
-        conc_chl.setSourceImage(chlConcImage);
-
-    }
-
-    private void copyIOPBands(Product iopProduct, Product l2wProduct) {
-        for (String iopSourceBandName : IOP_SOURCE_BAND_NAMES) {
-            final Band targetBand = ProductUtils.copyBand(iopSourceBandName, iopProduct, l2wProduct);
-            targetBand.setSourceImage(iopProduct.getBand(iopSourceBandName).getSourceImage());
-            targetBand.setValidPixelExpression("!l2w_flags.INVALID");
-        }
-    }
-
-    private void addFLHBands(Product l2WProduct) {
-        Band flhBand = l2WProduct.addBand(EXP_FLH_681_NAME, ProductData.TYPE_FLOAT32);
-        flhBand.setDescription("Fluorescence line height at 681 nm");
-        flhBand.setNoDataValue(Float.NaN);
-        flhBand.setNoDataValueUsed(true);
-        flhBand = l2WProduct.addBand(EXP_FLH_681_NORM_NAME, ProductData.TYPE_FLOAT32);
-        flhBand.setNoDataValue(Float.NaN);
-        flhBand.setNoDataValueUsed(true);
-        flhBand = l2WProduct.addBand(EXP_FLH_681_ALT_NAME, ProductData.TYPE_FLOAT32);
-        flhBand.setNoDataValue(Float.NaN);
-        flhBand.setNoDataValueUsed(true);
-        flhBand = l2WProduct.addBand(EXP_FLH_NORM_OLD_681_NAME, ProductData.TYPE_FLOAT32);
-        flhBand.setDescription("Fluorescence line height at 681 nm");
-        flhBand.setNoDataValue(Float.NaN);
-        flhBand.setNoDataValueUsed(true);
-        flhBand = l2WProduct.addBand(EXP_FLH_ALT_OLD_681_NAME, ProductData.TYPE_FLOAT32);
-        flhBand.setDescription("Fluorescence line height at 681 nm");
-        flhBand.setNoDataValue(Float.NaN);
-        flhBand.setNoDataValueUsed(true);
-        addPatternToAutoGrouping(l2WProduct, "exp");
-        nadirColumnIndex = MerisFlightDirection.findNadirColumnIndex(sourceProduct);
-        float[] bandWavelengths = getWavelengths(FLH_INPUT_BAND_NUMBERS);
-        flhAlgorithm = new FLHAlgorithm(bandWavelengths[0], bandWavelengths[1], bandWavelengths[2]);
-    }
-
-    private void copyBands(Product case2rProduct, Product l2wProduct) {
-        final Band[] case2rBands = case2rProduct.getBands();
-        for (Band band : case2rBands) {
-            if (!band.isFlagBand() && !l2wProduct.containsBand(band.getName())) {
-                final Band targetBand = ProductUtils.copyBand(band.getName(), case2rProduct, l2wProduct);
-                targetBand.setSourceImage(band.getSourceImage());
-            }
-        }
-    }
-
-    private void copyFlagBands(Product case2rProduct, Product l2wProduct) {
-        ProductUtils.copyFlagBands(case2rProduct, l2wProduct);
-        final Band[] radiometryBands = case2rProduct.getBands();
-        for (Band band : radiometryBands) {
-            if (band.isFlagBand()) {
-                final Band targetBand = l2wProduct.getBand(band.getName());
-                targetBand.setSourceImage(band.getSourceImage());
-            }
-        }
-    }
-
-
-    private float[] getWavelengths(int[] flhInputBandNumbers) {
-        float[] wavelengths = new float[flhInputBandNumbers.length];
-        for (int i = 0; i < flhInputBandNumbers.length; i++) {
-            Band band = l2rProduct.getBand("reflec_" + flhInputBandNumbers[i]);
-            wavelengths[i] = band.getSpectralWavelength();
-        }
-        return wavelengths;
-    }
 
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws
@@ -360,11 +232,11 @@ public class L2WOp extends Operator {
         final Tile[] tosaReflecTiles = getTiles(targetRectangle, "tosa_reflec_");
         final Tile[] pathTiles = getTiles(targetRectangle, "path_");
         final Tile[] transTiles = getTiles(targetRectangle, "trans_");
-        Tile flhTile = targetTiles.get(getTargetProduct().getBand(EXP_FLH_681_NAME));
-        Tile flhOldNormTile = targetTiles.get(getTargetProduct().getBand(EXP_FLH_NORM_OLD_681_NAME));
-        Tile flhOldAltTile = targetTiles.get(getTargetProduct().getBand(EXP_FLH_ALT_OLD_681_NAME));
-        Tile flhAltTile = targetTiles.get(getTargetProduct().getBand(EXP_FLH_681_ALT_NAME));
-        Tile flhNormTile = targetTiles.get(getTargetProduct().getBand(EXP_FLH_681_NORM_NAME));
+        Tile flhTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_681_NAME));
+        Tile flhOldNormTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_NORM_OLD_681_NAME));
+        Tile flhOldAltTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_ALT_OLD_681_NAME));
+        Tile flhAltTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_681_ALT_NAME));
+        Tile flhNormTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_681_NORM_NAME));
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
@@ -429,6 +301,15 @@ public class L2WOp extends Operator {
 //        }
 //
 //    }
+
+    private float[] getWavelengths(int[] flhInputBandNumbers) {
+        float[] wavelengths = new float[flhInputBandNumbers.length];
+        for (int i = 0; i < flhInputBandNumbers.length; i++) {
+            Band band = l2rProduct.getBand("reflec_" + flhInputBandNumbers[i]);
+            wavelengths[i] = band.getSpectralWavelength();
+        }
+        return wavelengths;
+    }
 
     private boolean isSampleValid(Tile reflecTile, int x, int y) {
         return reflecTile.isSampleValid(x, y);
@@ -522,134 +403,6 @@ public class L2WOp extends Operator {
         l2rParams.put("outputNormReflec", true);
         l2rParams.put("outputReflecAs", "RADIANCE_REFLECTANCES");
         return l2rParams;
-    }
-
-    private void changeL2WMasksAndFlags(Product targetProduct) {
-        ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
-        FlagCoding l2wFlags = flagCodingGroup.get(CASE2_FLAGS_NAME);
-        l2wFlags.setName(L2W_FLAGS_NAME);
-        l2wFlags.removeAttribute(l2wFlags.getFlag("FIT_FAILED"));
-        Band band = targetProduct.getBand(CASE2_FLAGS_NAME);
-        band.setName(L2W_FLAGS_NAME);
-        band.setDescription("CC L2W water constituents and IOPs retrieval quality flags.");
-        ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
-
-        Mask fit_failed = maskGroup.get("case2_fit_failed");
-        maskGroup.remove(fit_failed);
-
-        int insertIndex = 0;
-        String wlrOorDescription = "Water leaving reflectance out of training range";
-        Mask wlr_oor = updateMask(maskGroup, "case2_wlr_oor", "l2w_cc_wlr_ootr", wlrOorDescription);
-        reorderMask(maskGroup, wlr_oor, insertIndex);
-        l2wFlags.getFlag("WLR_OOR").setDescription(wlrOorDescription);
-
-        String concOorDescription = "Water constituents out of training range";
-        Mask conc_oor = updateMask(maskGroup, "case2_conc_oor", "l2w_cc_conc_ootr", concOorDescription);
-        reorderMask(maskGroup, conc_oor, ++insertIndex);
-        l2wFlags.getFlag("CONC_OOR").setDescription(concOorDescription);
-
-        String ootrDescription = "Spectrum out of training range (chiSquare threshold)";
-        Mask ootr = updateMask(maskGroup, "case2_ootr", "l2w_cc_ootr", ootrDescription);
-        reorderMask(maskGroup, ootr, ++insertIndex);
-        l2wFlags.getFlag("OOTR").setDescription(ootrDescription);
-
-        String whitecapsDescription = "Risk for white caps";
-        Mask whitecaps = updateMask(maskGroup, "case2_whitecaps", "l2w_cc_whitecaps", whitecapsDescription);
-        reorderMask(maskGroup, whitecaps, ++insertIndex);
-        l2wFlags.getFlag("WHITECAPS").setDescription(whitecapsDescription);
-
-        String invalidDescription = "Invalid pixels (" + invalidPixelExpression + " || l2w_flags.OOTR)";
-        Mask invalid = updateMask(maskGroup, "case2_invalid", "l2w_cc_invalid", invalidDescription);
-        reorderMask(maskGroup, invalid, ++insertIndex);
-        Mask.BandMathsType.setExpression(invalid, invalidPixelExpression + " || l2w_flags.OOTR");
-        l2wFlags.getFlag("INVALID").setDescription(invalidDescription);
-    }
-
-    private void reorderMask(ProductNodeGroup<Mask> maskGroup, Mask wlr_oor, int newIndex) {
-        maskGroup.remove(wlr_oor);
-        maskGroup.add(newIndex, wlr_oor);
-    }
-
-    private Mask updateMask(ProductNodeGroup<Mask> maskGroup, String oldMaskName, String newMaskName,
-                            String description) {
-        Mask mask = maskGroup.get(oldMaskName);
-        mask.setName(newMaskName);
-        mask.setDescription(description);
-        return mask;
-    }
-
-    private void copyMasks(Product sourceProduct, Product targetProduct) {
-        ProductNodeGroup<Mask> maskGroup = sourceProduct.getMaskGroup();
-        for (int i = 0; i < maskGroup.getNodeCount(); i++) {
-            Mask mask = maskGroup.get(i);
-            if (!mask.getImageType().getName().equals(Mask.VectorDataType.TYPE_NAME)) {
-                mask.getImageType().transferMask(mask, targetProduct);
-            }
-        }
-    }
-
-    private void renameConcentrations(Product targetProduct) {
-        targetProduct.getBand("tsm").setName("conc_tsm");
-        targetProduct.getBand("chl_conc").setName("conc_chl");
-        addPatternToAutoGrouping(targetProduct, "conc");
-    }
-
-    private void renameTurbidityBand(Product targetProduct) {
-        targetProduct.getBand("turbidity_index").setName("turbidity");
-    }
-
-    private void renameIops(Product targetProduct) {
-        String aTotal = "a_total_443";
-        String aGelbstoff = "a_ys_443";
-        String aPigment = "a_pig_443";
-        String aPoc = "a_poc_443";
-        String bbSpm = "bb_spm_443";
-        targetProduct.getBand(aTotal).setName("iop_" + aTotal);
-        targetProduct.getBand(aGelbstoff).setName("iop_" + aGelbstoff);
-        targetProduct.getBand(aPigment).setName("iop_" + aPigment);
-        Band aPocBand = targetProduct.getBand(aPoc);
-        if (aPocBand != null) {
-            aPocBand.setName("iop_" + aPoc);
-        }
-        targetProduct.getBand(bbSpm).setName("iop_" + bbSpm);
-        addPatternToAutoGrouping(targetProduct, "iop");
-
-    }
-
-    private void copyReflecBandsIfRequired(Product sourceProduct, Product targetProduct) {
-        if (outputReflec) {
-            Band[] bands = sourceProduct.getBands();
-            for (Band band : bands) {
-                if (band.getName().startsWith("reflec_")) {
-                    Band targetBand = ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
-                    Band sourceBand = sourceProduct.getBand(band.getName());
-                    targetBand.setSourceImage(sourceBand.getSourceImage());
-                }
-            }
-            addPatternToAutoGrouping(targetProduct, "reflec");
-        }
-
-    }
-
-    private void addPatternToAutoGrouping(Product targetProduct, String groupPattern) {
-        Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
-        String stringPattern = autoGrouping != null ? autoGrouping.toString() + ":" + groupPattern : groupPattern;
-        targetProduct.setAutoGrouping(stringPattern);
-    }
-
-    private void sortFlagBands(Product targetProduct) {
-        Band l1_flags = targetProduct.getBand("l1_flags");
-        Band l1p_flags = targetProduct.getBand("l1p_flags");
-        Band l2r_flags = targetProduct.getBand("l2r_flags");
-        Band case2_flags = targetProduct.getBand("case2_flags");
-        targetProduct.removeBand(l1_flags);
-        targetProduct.removeBand(l1p_flags);
-        targetProduct.removeBand(l2r_flags);
-        targetProduct.removeBand(case2_flags);
-        targetProduct.addBand(l1_flags);
-        targetProduct.addBand(l1p_flags);
-        targetProduct.addBand(l2r_flags);
-        targetProduct.addBand(case2_flags);
     }
 
     private boolean isL2RSourceProduct(Product sourceProduct) {

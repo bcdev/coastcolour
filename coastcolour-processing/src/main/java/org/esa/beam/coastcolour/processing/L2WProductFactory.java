@@ -16,6 +16,9 @@ abstract class L2WProductFactory {
 
     private static final String L2W_FLAGS_NAME = "l2w_flags";
     private static final String CASE2_FLAGS_NAME = "case2_flags";
+    protected static final String IOP_QUALITY_BAND_NAME = "iop_quality";
+    protected static final String IOP_QUALITY_DESCRIPTION = "Quality indicator for IOPs";
+
 
     private static final String[] IOP_SOURCE_BAND_NAMES = new String[]{
             "a_total_443",
@@ -34,7 +37,6 @@ abstract class L2WProductFactory {
     private boolean outputFLH;
     private boolean outputReflectance;
     private String invalidPixelExpression;
-    private FLHAlgorithm flhAlgorithm;
 
 
     abstract Product createL2WProduct();
@@ -71,14 +73,6 @@ abstract class L2WProductFactory {
         this.invalidPixelExpression = invalidPixelExpression;
     }
 
-    public FLHAlgorithm getFlhAlgorithm() {
-        return flhAlgorithm;
-    }
-
-    public void setFlhAlgorithm(FLHAlgorithm flhAlgorithm) {
-        this.flhAlgorithm = flhAlgorithm;
-    }
-
     protected void copyFlagBands(Product source, Product target) {
         ProductUtils.copyFlagBands(source, target);
         final Band[] radiometryBands = source.getBands();
@@ -93,11 +87,15 @@ abstract class L2WProductFactory {
     protected void copyBands(Product source, Product target) {
         final Band[] case2rBands = source.getBands();
         for (Band band : case2rBands) {
-            if (!band.isFlagBand() && !target.containsBand(band.getName())) {
+            if (considerBandInGeneralBandCopy(band, target)) {
                 final Band targetBand = ProductUtils.copyBand(band.getName(), source, target);
                 targetBand.setSourceImage(band.getSourceImage());
             }
         }
+    }
+
+    protected boolean considerBandInGeneralBandCopy(Band band, Product target) {
+        return !band.isFlagBand() && !target.containsBand(band.getName());
     }
 
     protected void copyIOPBands(Product source, Product target) {

@@ -1,5 +1,6 @@
 package org.esa.beam.coastcolour.processing;
 
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.ProductUtils;
 
@@ -43,6 +44,7 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         copyFlagBands(case2rProduct, l2wProduct);
         ProductUtils.copyTiePointGrids(case2rProduct, l2wProduct);
         renameIops(l2wProduct);
+        renameChiSquare(l2wProduct);
         renameConcentrations(l2wProduct);
         renameTurbidityBand(l2wProduct);
         copyReflecBandsIfRequired(l2rProduct, l2wProduct);
@@ -51,6 +53,14 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         ProductUtils.copyGeoCoding(case2rProduct, l2wProduct);
 
         return l2wProduct;
+
+    }
+
+    private void renameChiSquare(Product l2wProduct) {
+        final Band iopQualityBand = l2wProduct.getBand("chiSquare");
+        iopQualityBand.setName(IOP_QUALITY_BAND_NAME);
+        iopQualityBand.setUnit("1");
+        iopQualityBand.setDescription(IOP_QUALITY_DESCRIPTION);
 
     }
 

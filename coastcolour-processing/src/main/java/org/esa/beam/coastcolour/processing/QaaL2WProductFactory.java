@@ -7,6 +7,9 @@ import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.util.ProductUtils;
 
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.ConstantDescriptor;
+
 /**
  * @author Marco Peters
  */
@@ -37,6 +40,7 @@ class QaaL2WProductFactory extends L2WProductFactory {
         copyMasks(l2rProduct, l2wProduct);
 
         copyIOPBands(qaaProduct, l2wProduct);
+        addIOPQualityBand(l2wProduct);
         addChlAndTsmBands(l2wProduct);
 
         copyBands(case2rProduct, l2wProduct);
@@ -59,6 +63,27 @@ class QaaL2WProductFactory extends L2WProductFactory {
         ProductUtils.copyGeoCoding(case2rProduct, l2wProduct);
 
         return l2wProduct;
+    }
+
+
+    @Override
+    protected boolean considerBandInGeneralBandCopy(Band band, Product target) {
+        if (super.considerBandInGeneralBandCopy(band, target)) {
+            return !"chiSquare".equals(band.getName());
+        } else {
+            return false;
+        }
+    }
+
+    private void addIOPQualityBand(Product l2wProduct) {
+        final Band iopQualityBand = l2wProduct.addBand(IOP_QUALITY_BAND_NAME, ProductData.TYPE_FLOAT32);
+        iopQualityBand.setUnit("1");
+        iopQualityBand.setDescription(IOP_QUALITY_DESCRIPTION);
+        final RenderedOp nanImage = ConstantDescriptor.create((float) l2wProduct.getSceneRasterWidth(),
+                                                              (float) l2wProduct.getSceneRasterHeight(),
+                                                              new Float[]{Float.NaN}, null);
+        iopQualityBand.setValidPixelExpression("!NaN");
+        iopQualityBand.setSourceImage(nanImage);
     }
 
     private void addChlAndTsmBands(Product l2wProduct) {

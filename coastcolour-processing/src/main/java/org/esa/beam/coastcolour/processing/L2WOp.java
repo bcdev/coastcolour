@@ -168,10 +168,6 @@ public class L2WOp extends Operator {
             throw new OperatorException("In order to compute 'FLH' the input must be L1B or L1P.");
         }
         nadirColumnIndex = MerisFlightDirection.findNadirColumnIndex(sourceProduct);
-        if (outputFLH) {
-            float[] bandWavelengths = getWavelengths(FLH_INPUT_BAND_NUMBERS);
-            flhAlgorithm = new FLHAlgorithm(bandWavelengths[0], bandWavelengths[1], bandWavelengths[2]);
-        }
 
         l2rProduct = sourceProduct;
         if (!isL2RSourceProduct(l2rProduct)) {
@@ -179,6 +175,10 @@ public class L2WOp extends Operator {
             l2rProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
         }
 
+        if (outputFLH) {
+            float[] bandWavelengths = getWavelengths(l2rProduct, FLH_INPUT_BAND_NUMBERS);
+            flhAlgorithm = new FLHAlgorithm(bandWavelengths[0], bandWavelengths[1], bandWavelengths[2]);
+        }
 
         Case2AlgorithmEnum c2rAlgorithm = Case2AlgorithmEnum.REGIONAL;
         Operator case2Op = c2rAlgorithm.createOperatorInstance();
@@ -303,7 +303,7 @@ public class L2WOp extends Operator {
 //
 //    }
 
-    private float[] getWavelengths(int[] flhInputBandNumbers) {
+    private float[] getWavelengths(Product l2rProduct, int[] flhInputBandNumbers) {
         float[] wavelengths = new float[flhInputBandNumbers.length];
         for (int i = 0; i < flhInputBandNumbers.length; i++) {
             Band band = l2rProduct.getBand("reflec_" + flhInputBandNumbers[i]);

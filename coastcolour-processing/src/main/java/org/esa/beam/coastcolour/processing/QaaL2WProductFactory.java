@@ -5,10 +5,13 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VirtualBandOpImage;
+import org.esa.beam.meris.qaa.QaaConstants;
 import org.esa.beam.util.ProductUtils;
 
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.ConstantDescriptor;
+import javax.media.jai.operator.SubtractDescriptor;
+import java.awt.image.RenderedImage;
 
 /**
  * @author Marco Peters
@@ -73,6 +76,28 @@ class QaaL2WProductFactory extends L2WProductFactory {
         } else {
             return false;
         }
+    }
+
+    protected void copyIOPBands(Product source, Product target) {
+        for (String iopSourceBandName : IOP_SOURCE_BAND_NAMES) {
+            final Band targetBand = ProductUtils.copyBand(iopSourceBandName, source, target);
+            final Band sourceBand = source.getBand(iopSourceBandName);
+            RenderedImage sourceImage = getSourceImage(sourceBand);
+            targetBand.setSourceImage(sourceImage);
+            targetBand.setValidPixelExpression("!l2w_flags.INVALID");
+        }
+    }
+
+    private RenderedImage getSourceImage(Band sourceBand) {
+        RenderedImage sourceImage = sourceBand.getSourceImage();
+        if (IOP_SOURCE_BAND_NAMES[0].equals(sourceBand.getName())) {
+            final RenderedOp awCoeffImage = ConstantDescriptor.create((float) sourceBand.getSceneRasterWidth(),
+                                                                      (float) sourceBand.getSceneRasterHeight(),
+                                                                      new Float[]{(float) QaaConstants.AW_COEFS[1]},
+                                                                      null);
+            sourceImage = SubtractDescriptor.create(sourceImage, awCoeffImage, null);
+        }
+        return sourceImage;
     }
 
     private void addIOPQualityBand(Product l2wProduct) {

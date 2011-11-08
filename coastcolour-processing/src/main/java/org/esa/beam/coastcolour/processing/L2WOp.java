@@ -106,11 +106,11 @@ public class L2WOp extends Operator {
     private String cloudIceExpression;
 
     @Parameter(defaultValue = "l2r_flags.INVALID",
-               description = "Expression defining pixels not considered for case2r processing")
+               description = "Expression defining pixels not considered for L2W processing")
     private String invalidPixelExpression;
 
     @Parameter(defaultValue = "false", label = "Output water leaving reflectance",
-               description = "Toggles the output of water leaving irradiance reflectance.")
+               description = "Toggles the output of water leaving reflectance.")
     private boolean outputReflec;
 
     @Parameter(defaultValue = "false", label = "Output A_Poc",
@@ -187,21 +187,22 @@ public class L2WOp extends Operator {
 
         case2rProduct = case2Op.getTargetProduct();
 
-        final L2WProductFactory l2WProductFactory;
+        final L2WProductFactory l2wProductFactory;
         if (useQaaForIops) {
             HashMap<String, Object> qaaParams = createQaaParameterMap();
             qaaProduct = GPF.createProduct("Meris.QaaIOP", qaaParams, l2rProduct);
-            l2WProductFactory = new QaaL2WProductFactory(l2rProduct, case2rProduct, qaaProduct);
+            l2wProductFactory = new QaaL2WProductFactory(l2rProduct, case2rProduct, qaaProduct);
         } else {
-            l2WProductFactory = new Case2rL2WProductFactory(l2rProduct, case2rProduct);
+            l2wProductFactory = new Case2rL2WProductFactory(l2rProduct, case2rProduct);
         }
 
-        l2WProductFactory.setOutputFLH(outputFLH);
-        l2WProductFactory.setOutputKdSpectrum(outputKdSpectrum);
-        l2WProductFactory.setOutputReflectance(outputReflec);
+        l2wProductFactory.setInvalidPixelExpression(invalidPixelExpression);
+        l2wProductFactory.setOutputFLH(outputFLH);
+        l2wProductFactory.setOutputKdSpectrum(outputKdSpectrum);
+        l2wProductFactory.setOutputReflectance(outputReflec);
 
         final Product l2wProduct;
-        l2wProduct = l2WProductFactory.createL2WProduct();
+        l2wProduct = l2wProductFactory.createL2WProduct();
         setTargetProduct(l2wProduct);
     }
 

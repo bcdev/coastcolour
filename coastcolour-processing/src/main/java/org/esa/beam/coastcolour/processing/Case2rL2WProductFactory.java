@@ -56,6 +56,14 @@ class Case2rL2WProductFactory extends L2WProductFactory {
 
     }
 
+    protected void copyIOPBands(Product source, Product target) {
+        for (String iopSourceBandName : IOP_SOURCE_BAND_NAMES) {
+            final Band targetBand = ProductUtils.copyBand(iopSourceBandName, source, target);
+            targetBand.setSourceImage(source.getBand(iopSourceBandName).getSourceImage());
+            targetBand.setValidPixelExpression("!l2w_flags.INVALID");
+        }
+    }
+
     private void renameChiSquare(Product l2wProduct) {
         final Band iopQualityBand = l2wProduct.getBand("chiSquare");
         iopQualityBand.setName(IOP_QUALITY_BAND_NAME);

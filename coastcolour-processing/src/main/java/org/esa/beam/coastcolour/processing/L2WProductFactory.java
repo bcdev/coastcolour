@@ -19,13 +19,13 @@ abstract class L2WProductFactory {
     protected static final String IOP_QUALITY_BAND_NAME = "iop_quality";
     protected static final String IOP_QUALITY_DESCRIPTION = "Quality indicator for IOPs";
 
-
-    private static final String[] IOP_SOURCE_BAND_NAMES = new String[]{
+    protected static final String[] IOP_SOURCE_BAND_NAMES = new String[]{
             "a_total_443",
             "a_ys_443",
             "a_pig_443",
             "bb_spm_443"
     };
+
     static final String EXP_FLH_681_NAME = "exp_FLH_681";
     static final String EXP_FLH_681_NORM_NAME = "exp_FLH_681_norm";
     static final String EXP_FLH_681_ALT_NAME = "exp_FLH_681_alt";
@@ -96,14 +96,6 @@ abstract class L2WProductFactory {
 
     protected boolean considerBandInGeneralBandCopy(Band band, Product target) {
         return !band.isFlagBand() && !target.containsBand(band.getName());
-    }
-
-    protected void copyIOPBands(Product source, Product target) {
-        for (String iopSourceBandName : IOP_SOURCE_BAND_NAMES) {
-            final Band targetBand = ProductUtils.copyBand(iopSourceBandName, source, target);
-            targetBand.setSourceImage(source.getBand(iopSourceBandName).getSourceImage());
-            targetBand.setValidPixelExpression("!l2w_flags.INVALID");
-        }
     }
 
     protected void copyMasks(Product sourceProduct, Product targetProduct) {

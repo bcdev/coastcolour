@@ -17,6 +17,8 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
+import org.esa.beam.jai.ResolutionLevel;
+import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.meris.case2.Case2AlgorithmEnum;
 import org.esa.beam.util.ResourceInstaller;
 
@@ -161,6 +163,7 @@ public class L2WOp extends Operator {
     private Product l2rProduct;
     private Product qaaProduct;
     private Product case2rProduct;
+    private VirtualBandOpImage invalidOpImage;
 
     @Override
     public void initialize() throws OperatorException {
@@ -186,6 +189,10 @@ public class L2WOp extends Operator {
         setCase2rParameters(case2Op, c2rAlgorithm);
 
         case2rProduct = case2Op.getTargetProduct();
+
+        invalidOpImage = VirtualBandOpImage.createMask(invalidPixelExpression,
+                                                       l2rProduct,
+                                                       ResolutionLevel.MAXRES);
 
         final L2WProductFactory l2wProductFactory;
         if (useQaaForIops) {
@@ -224,46 +231,100 @@ public class L2WOp extends Operator {
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws
                                                                                                              OperatorException {
-        RasterDataNode satzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME);
-        RasterDataNode solzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
-        Tile satzen = getSourceTile(satzenNode, targetRectangle);
-        Tile solzen = getSourceTile(solzenNode, targetRectangle);
+        Tile satzen = null;
+        Tile solzen = null;
+        Tile[] reflecTiles = null;
+        Tile[] tosaReflecTiles = null;
+        Tile[] pathTiles = null;
+        Tile[] transTiles = null;
+        Tile flhTile = null;
+        Tile flhOldNormTile = null;
+        Tile flhOldAltTile = null;
+        Tile flhAltTile = null;
+        Tile flhNormTile = null;
+        if (outputFLH) {
+            RasterDataNode satzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME);
+            RasterDataNode solzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
+            satzen = getSourceTile(satzenNode, targetRectangle);
+            solzen = getSourceTile(solzenNode, targetRectangle);
 
-        final Tile[] reflecTiles = getTiles(targetRectangle, "reflec_");
-        final Tile[] tosaReflecTiles = getTiles(targetRectangle, "tosa_reflec_");
-        final Tile[] pathTiles = getTiles(targetRectangle, "path_");
-        final Tile[] transTiles = getTiles(targetRectangle, "trans_");
-        Tile flhTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_681_NAME));
-        Tile flhOldNormTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_NORM_OLD_681_NAME));
-        Tile flhOldAltTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_ALT_OLD_681_NAME));
-        Tile flhAltTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_681_ALT_NAME));
-        Tile flhNormTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_681_NORM_NAME));
+            reflecTiles = getTiles(targetRectangle, "reflec_");
+            tosaReflecTiles = getTiles(targetRectangle, "tosa_reflec_");
+            pathTiles = getTiles(targetRectangle, "path_");
+            transTiles = getTiles(targetRectangle, "trans_");
+            flhTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_681_NAME));
+            flhOldNormTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_NORM_OLD_681_NAME));
+            flhOldAltTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_ALT_OLD_681_NAME));
+            flhAltTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_681_ALT_NAME));
+            flhNormTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_681_NORM_NAME));
+        }
+
+        Tile l2wFlagTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.L2W_FLAGS_NAME));
+        Tile c2rFlags = null;
+        Tile qaaFlags = null;
+        if (qaaProduct != null) {
+            qaaFlags = getSourceTile(qaaProduct.getRasterDataNode("analytical_flags"), targetRectangle);
+        } else {
+            c2rFlags = getSourceTile(case2rProduct.getRasterDataNode("case2_flags"), targetRectangle);
+        }
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                double[] flhValues = new double[5];
-                if (!isSampleValid(reflecTiles[0], x, y)) {
-                    Arrays.fill(flhValues, Double.NaN);
-                } else {
-                    double cosTetaViewSurfRad = getCosTetaViewSurfRad(satzen, x, y);
-                    double cosTetaSunSurfRad = getCosTetaSunSurfRad(solzen, x, y);
-
-                    double[] reflec = getValuesAt(x, y, reflecTiles);
-                    double[] tosa = getValuesAt(x, y, tosaReflecTiles);
-                    double[] path = getValuesAt(x, y, pathTiles);
-                    double[] trans = getValuesAt(x, y, transTiles);
-                    flhValues = flhAlgorithm.computeFLH681(reflec, tosa, path, trans,
-                                                           cosTetaViewSurfRad, cosTetaSunSurfRad);
-
+                if (outputFLH) {
+                    computeFLHValues(satzen, solzen, reflecTiles, tosaReflecTiles, pathTiles, transTiles, flhTile,
+                                     flhOldNormTile, flhOldAltTile, flhAltTile, flhNormTile, x, y);
                 }
-                flhTile.setSample(x, y, flhValues[0]);
-                flhOldNormTile.setSample(x, y, flhValues[1]);
-                flhOldAltTile.setSample(x, y, flhValues[2]);
-                flhNormTile.setSample(x, y, flhValues[3]);
-                flhAltTile.setSample(x, y, flhValues[4]);
+
+                final int invalidFlagValue = isSampleInvalid(x, y) ? 1 : 0;
+                int l2wFlag = computeL2wFlags(x, y, c2rFlags, qaaFlags, invalidFlagValue);
+                l2wFlagTile.setSample(x, y, l2wFlag);
             }
         }
+    }
+
+    private int computeL2wFlags(int x, int y, Tile c2rFlags, Tile qaaFlags, int invalidFlagValue) {
+        int l2wFlag = 0;
+        if (c2rFlags != null) {
+            final int sampleInt = c2rFlags.getSampleInt(x, y);
+            l2wFlag = sampleInt & 0x0F;
+        }
+        if (qaaFlags != null) {
+            l2wFlag = qaaFlags.getSampleInt(x, y) & 0x30;
+        }
+
+        l2wFlag = l2wFlag | (invalidFlagValue << 7);
+
+        return l2wFlag;
+    }
+
+    private boolean isSampleInvalid(int x, int y) {
+        return invalidOpImage.getData(new Rectangle(x, y, 1, 1)).getSample(x, y, 0) != 0;
+    }
+
+    private void computeFLHValues(Tile satzen, Tile solzen, Tile[] reflecTiles, Tile[] tosaReflecTiles,
+                                  Tile[] pathTiles, Tile[] transTiles, Tile flhTile, Tile flhOldNormTile,
+                                  Tile flhOldAltTile, Tile flhAltTile, Tile flhNormTile, int x, int y) {
+        double[] flhValues = new double[5];
+        if (!isSampleValid(reflecTiles[0], x, y)) {
+            Arrays.fill(flhValues, Double.NaN);
+        } else {
+            double cosTetaViewSurfRad = getCosTetaViewSurfRad(satzen, x, y);
+            double cosTetaSunSurfRad = getCosTetaSunSurfRad(solzen, x, y);
+
+            double[] reflec = getValuesAt(x, y, reflecTiles);
+            double[] tosa = getValuesAt(x, y, tosaReflecTiles);
+            double[] path = getValuesAt(x, y, pathTiles);
+            double[] trans = getValuesAt(x, y, transTiles);
+            flhValues = flhAlgorithm.computeFLH681(reflec, tosa, path, trans,
+                                                   cosTetaViewSurfRad, cosTetaSunSurfRad);
+
+        }
+        flhTile.setSample(x, y, flhValues[0]);
+        flhOldNormTile.setSample(x, y, flhValues[1]);
+        flhOldAltTile.setSample(x, y, flhValues[2]);
+        flhNormTile.setSample(x, y, flhValues[3]);
+        flhAltTile.setSample(x, y, flhValues[4]);
     }
 
     // this should be the real implementation of for computing FLH; but for testing we've implemented computeTileStack

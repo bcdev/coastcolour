@@ -41,7 +41,7 @@ class Case2rL2WProductFactory extends L2WProductFactory {
             addFLHBands(l2wProduct);
         }
         copyFlagBands(l2rProduct, l2wProduct);
-        copyFlagBands(case2rProduct, l2wProduct);
+//        copyFlagBands(case2rProduct, l2wProduct);
         ProductUtils.copyTiePointGrids(case2rProduct, l2wProduct);
         renameIops(l2wProduct);
         renameChiSquare(l2wProduct);
@@ -49,7 +49,7 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         renameTurbidityBand(l2wProduct);
         copyReflecBandsIfRequired(l2rProduct, l2wProduct);
         sortFlagBands(l2wProduct);
-        changeL2WMasksAndFlags(l2wProduct);
+        addL2WMasksAndFlags(l2wProduct);
         ProductUtils.copyGeoCoding(case2rProduct, l2wProduct);
 
         return l2wProduct;

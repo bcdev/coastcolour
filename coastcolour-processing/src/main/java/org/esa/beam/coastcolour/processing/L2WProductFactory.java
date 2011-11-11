@@ -8,17 +8,23 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.util.ProductUtils;
 
+import java.awt.Color;
+
 /**
  * @author Marco Peters
  * @since 1.4
  */
 abstract class L2WProductFactory {
 
-    private static final String L2W_FLAGS_NAME = "l2w_flags";
-    private static final String CASE2_FLAGS_NAME = "case2_flags";
+    static final String L2W_FLAGS_NAME = "l2w_flags";
+    static final String EXP_FLH_681_NAME = "exp_FLH_681";
+    static final String EXP_FLH_681_NORM_NAME = "exp_FLH_681_norm";
+    static final String EXP_FLH_681_ALT_NAME = "exp_FLH_681_alt";
+    static final String EXP_FLH_NORM_OLD_681_NAME = "exp_FLH_norm_old_681";
+    static final String EXP_FLH_ALT_OLD_681_NAME = "exp_FLH_alt_old_681";
+
     protected static final String IOP_QUALITY_BAND_NAME = "iop_quality";
     protected static final String IOP_QUALITY_DESCRIPTION = "Quality indicator for IOPs";
-
     protected static final String[] IOP_SOURCE_BAND_NAMES = new String[]{
             "a_total_443",
             "a_ys_443",
@@ -26,11 +32,13 @@ abstract class L2WProductFactory {
             "bb_spm_443"
     };
 
-    static final String EXP_FLH_681_NAME = "exp_FLH_681";
-    static final String EXP_FLH_681_NORM_NAME = "exp_FLH_681_norm";
-    static final String EXP_FLH_681_ALT_NAME = "exp_FLH_681_alt";
-    static final String EXP_FLH_NORM_OLD_681_NAME = "exp_FLH_norm_old_681";
-    static final String EXP_FLH_ALT_OLD_681_NAME = "exp_FLH_alt_old_681";
+    private static final String WLR_OOR_DESCRIPTION = "Water leaving reflectance out of training range";
+    private static final String CONC_OOR_DESCRIPTION = "Water constituents out of training range";
+    private static final String OOTR_DESCRIPTION = "Spectrum out of training range (chiSquare threshold)";
+    private static final String WHITE_CAPS_DESCRIPTION = "Risk for white caps";
+    private static final String INVALID_DESCRIPTION_FORMAT = "Invalid pixels (%s)";
+    private static final String IMAGINARY_NUMBER_DESCRIPTION = "An imaginary number would have been produced";
+    private static final String NEGATIVE_AYS_DESCRIPTION = "Negative value in a_ys spectrum";
 
 
     private boolean outputKdSpectrum;
@@ -127,69 +135,63 @@ abstract class L2WProductFactory {
         Band l1_flags = targetProduct.getBand("l1_flags");
         Band l1p_flags = targetProduct.getBand("l1p_flags");
         Band l2r_flags = targetProduct.getBand("l2r_flags");
-        Band case2_flags = targetProduct.getBand("case2_flags");
+//        Band case2_flags = targetProduct.getBand("case2_flags");
         targetProduct.removeBand(l1_flags);
         targetProduct.removeBand(l1p_flags);
         targetProduct.removeBand(l2r_flags);
-        targetProduct.removeBand(case2_flags);
+//        targetProduct.removeBand(case2_flags);
         targetProduct.addBand(l1_flags);
         targetProduct.addBand(l1p_flags);
         targetProduct.addBand(l2r_flags);
-        targetProduct.addBand(case2_flags);
+//        targetProduct.addBand(case2_flags);
     }
 
-    protected void changeL2WMasksAndFlags(Product targetProduct) {
+    protected void addL2WMasksAndFlags(Product targetProduct) {
         ProductNodeGroup<FlagCoding> flagCodingGroup = targetProduct.getFlagCodingGroup();
-        FlagCoding l2wFlags = flagCodingGroup.get(CASE2_FLAGS_NAME);
-        l2wFlags.setName(L2W_FLAGS_NAME);
-        l2wFlags.removeAttribute(l2wFlags.getFlag("FIT_FAILED"));
-        Band band = targetProduct.getBand(CASE2_FLAGS_NAME);
-        band.setName(L2W_FLAGS_NAME);
-        band.setDescription("CC L2W water constituents and IOPs retrieval quality flags.");
+
+        FlagCoding l2wFlagCoding = new FlagCoding(L2W_FLAGS_NAME);
+        flagCodingGroup.add(l2wFlagCoding);
+        l2wFlagCoding.addFlag("C2R_WLR_OOR", 1, WLR_OOR_DESCRIPTION);
+        l2wFlagCoding.addFlag("C2R_CONC_OOR", 2, CONC_OOR_DESCRIPTION);
+        l2wFlagCoding.addFlag("C2R_OOTR", 4, OOTR_DESCRIPTION);
+        l2wFlagCoding.addFlag("C2R_WHITECAPS", 8, WHITE_CAPS_DESCRIPTION);
+        l2wFlagCoding.addFlag("QAA_IMAGINARY_NUMBER", 16, IMAGINARY_NUMBER_DESCRIPTION);
+        l2wFlagCoding.addFlag("QAA_NEGATIVE_AYS", 32, NEGATIVE_AYS_DESCRIPTION);
+        final String invalidDescription = String.format(INVALID_DESCRIPTION_FORMAT, getInvalidPixelExpression());
+        l2wFlagCoding.addFlag("INVALID", 128, invalidDescription);
+
+        Band l2wFlagsBand = targetProduct.addBand(L2W_FLAGS_NAME, ProductData.TYPE_UINT8);
+        l2wFlagsBand.setSampleCoding(l2wFlagCoding);
+        l2wFlagsBand.setDescription("CC L2W water constituents and IOPs retrieval quality flags.");
+
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
 
-        Mask fit_failed = maskGroup.get("case2_fit_failed");
-        maskGroup.remove(fit_failed);
-
-        int insertIndex = 0;
-        String wlrOorDescription = "Water leaving reflectance out of training range";
-        Mask wlr_oor = updateMask(maskGroup, "case2_wlr_oor", "l2w_cc_wlr_ootr", wlrOorDescription);
-        reorderMask(maskGroup, wlr_oor, insertIndex);
-        l2wFlags.getFlag("WLR_OOR").setDescription(wlrOorDescription);
-
-        String concOorDescription = "Water constituents out of training range";
-        Mask conc_oor = updateMask(maskGroup, "case2_conc_oor", "l2w_cc_conc_ootr", concOorDescription);
-        reorderMask(maskGroup, conc_oor, ++insertIndex);
-        l2wFlags.getFlag("CONC_OOR").setDescription(concOorDescription);
-
-        String ootrDescription = "Spectrum out of training range (chiSquare threshold)";
-        Mask ootr = updateMask(maskGroup, "case2_ootr", "l2w_cc_ootr", ootrDescription);
-        reorderMask(maskGroup, ootr, ++insertIndex);
-        l2wFlags.getFlag("OOTR").setDescription(ootrDescription);
-
-        String whitecapsDescription = "Risk for white caps";
-        Mask whitecaps = updateMask(maskGroup, "case2_whitecaps", "l2w_cc_whitecaps", whitecapsDescription);
-        reorderMask(maskGroup, whitecaps, ++insertIndex);
-        l2wFlags.getFlag("WHITECAPS").setDescription(whitecapsDescription);
-
-        String invalidDescription = "Invalid pixels (" + getInvalidPixelExpression() + " || l2w_flags.OOTR)";
-        Mask invalid = updateMask(maskGroup, "case2_invalid", "l2w_cc_invalid", invalidDescription);
-        reorderMask(maskGroup, invalid, ++insertIndex);
-        Mask.BandMathsType.setExpression(invalid, getInvalidPixelExpression() + " || l2w_flags.OOTR");
-        l2wFlags.getFlag("INVALID").setDescription(invalidDescription);
+        addMask(maskGroup, 0, "l2w_cc_c2r_wlr_ootr", WLR_OOR_DESCRIPTION, L2W_FLAGS_NAME + ".C2R_WLR_OOR",
+                Color.CYAN, 0.5f);
+        addMask(maskGroup, 1, "l2w_cc_c2r_conc_ootr", CONC_OOR_DESCRIPTION, L2W_FLAGS_NAME + ".C2R_CONC_OOR",
+                Color.DARK_GRAY, 0.5f);
+        addMask(maskGroup, 2, "l2w_cc_c2r_ootr", OOTR_DESCRIPTION, L2W_FLAGS_NAME + ".C2R_OOTR",
+                Color.ORANGE, 0.5f);
+        addMask(maskGroup, 3, "l2w_cc_c2r_whitecaps", WHITE_CAPS_DESCRIPTION, L2W_FLAGS_NAME + ".C2R_WHITECAPS",
+                Color.CYAN, 0.5f);
+        addMask(maskGroup, 4, "l2w_cc_qaa_imaginary_number", IMAGINARY_NUMBER_DESCRIPTION,
+                L2W_FLAGS_NAME + ".QAA_IMAGINARY_NUMBER",
+                Color.MAGENTA, 0.5f);
+        addMask(maskGroup, 5, "l2w_cc_qaa_negative_ays", NEGATIVE_AYS_DESCRIPTION, L2W_FLAGS_NAME + ".QAA_NEGATIVE_AYS",
+                Color.YELLOW, 0.5f);
+        final String invalidMaskDescription = String.format(INVALID_DESCRIPTION_FORMAT, getInvalidMaskExpression());
+        addMask(maskGroup, 6, "l2w_cc_invalid", invalidMaskDescription, getInvalidMaskExpression(),
+                Color.RED, 0.0f);
     }
 
-    private void reorderMask(ProductNodeGroup<Mask> maskGroup, Mask wlr_oor, int newIndex) {
-        maskGroup.remove(wlr_oor);
-        maskGroup.add(newIndex, wlr_oor);
-    }
 
-    private Mask updateMask(ProductNodeGroup<Mask> maskGroup, String oldMaskName, String newMaskName,
-                            String description) {
-        Mask mask = maskGroup.get(oldMaskName);
-        mask.setName(newMaskName);
-        mask.setDescription(description);
-        return mask;
+    private void addMask(ProductNodeGroup<Mask> maskGroup, int index, String maskName, String maskDescription,
+                         String maskExpression, Color maskColor, float transparency) {
+        final int width = maskGroup.getProduct().getSceneRasterWidth();
+        final int height = maskGroup.getProduct().getSceneRasterHeight();
+        Mask mask = Mask.BandMathsType.create(maskName, maskDescription, width, height,
+                                              maskExpression, maskColor, transparency);
+        maskGroup.add(index, mask);
     }
 
     protected void renameIops(Product targetProduct) {
@@ -220,7 +222,6 @@ abstract class L2WProductFactory {
         targetProduct.getBand("turbidity_index").setName("turbidity");
     }
 
-
     protected void addFLHBands(Product target) {
         Band flhBand = target.addBand(EXP_FLH_681_NAME, ProductData.TYPE_FLOAT32);
         flhBand.setDescription("Fluorescence line height at 681 nm");
@@ -247,6 +248,10 @@ abstract class L2WProductFactory {
         Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
         String stringPattern = autoGrouping != null ? autoGrouping.toString() + ":" + groupPattern : groupPattern;
         targetProduct.setAutoGrouping(stringPattern);
+    }
+
+    private String getInvalidMaskExpression() {
+        return getInvalidPixelExpression() + " || l2w_flags.C2R_OOTR || l2w_flags.QAA_IMAGINARY_NUMBER || l2w_flags.QAA_NEGATIVE_AYS";
     }
 
 }

@@ -55,14 +55,15 @@ class QaaL2WProductFactory extends L2WProductFactory {
             addFLHBands(l2wProduct);
         }
         copyFlagBands(l2rProduct, l2wProduct);
-        copyFlagBands(case2rProduct, l2wProduct);
+//        copyFlagBands(case2rProduct, l2wProduct);
+
         ProductUtils.copyTiePointGrids(case2rProduct, l2wProduct);
         renameIops(l2wProduct);
         renameConcentrations(l2wProduct);
         renameTurbidityBand(l2wProduct);
         copyReflecBandsIfRequired(l2rProduct, l2wProduct);
         sortFlagBands(l2wProduct);
-        changeL2WMasksAndFlags(l2wProduct);
+        addL2WMasksAndFlags(l2wProduct);
         ProductUtils.copyGeoCoding(case2rProduct, l2wProduct);
 
         return l2wProduct;

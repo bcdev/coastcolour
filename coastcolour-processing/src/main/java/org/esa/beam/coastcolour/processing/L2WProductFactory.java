@@ -135,15 +135,12 @@ abstract class L2WProductFactory {
         Band l1_flags = targetProduct.getBand("l1_flags");
         Band l1p_flags = targetProduct.getBand("l1p_flags");
         Band l2r_flags = targetProduct.getBand("l2r_flags");
-//        Band case2_flags = targetProduct.getBand("case2_flags");
         targetProduct.removeBand(l1_flags);
         targetProduct.removeBand(l1p_flags);
         targetProduct.removeBand(l2r_flags);
-//        targetProduct.removeBand(case2_flags);
         targetProduct.addBand(l1_flags);
         targetProduct.addBand(l1p_flags);
         targetProduct.addBand(l2r_flags);
-//        targetProduct.addBand(case2_flags);
     }
 
     protected void addL2WMasksAndFlags(Product targetProduct) {

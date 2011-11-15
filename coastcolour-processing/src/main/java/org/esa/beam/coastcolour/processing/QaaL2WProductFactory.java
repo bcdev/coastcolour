@@ -8,9 +8,13 @@ import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.meris.qaa.QaaConstants;
 import org.esa.beam.util.ProductUtils;
 
+import javax.media.jai.ImageLayout;
+import javax.media.jai.JAI;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.ConstantDescriptor;
+import javax.media.jai.operator.DivideDescriptor;
 import javax.media.jai.operator.SubtractDescriptor;
+import java.awt.RenderingHints;
 import java.awt.image.RenderedImage;
 
 /**
@@ -45,13 +49,15 @@ class QaaL2WProductFactory extends L2WProductFactory {
         copyIOPBands(qaaProduct, l2wProduct);
         addIOPQualityBand(l2wProduct);
         addChlAndTsmBands(l2wProduct);
-        addKMinBand(l2wProduct);
+        final Band kMin = addKMinBand(l2wProduct);
         if (isOutputKdSpectrum()) {
             addKdSpectrum(l2wProduct);
             addPatternToAutoGrouping(l2wProduct, "Kd");
         } else {
             addKdBand(l2wProduct, -1, KD_LAMBDAS[2]); // Kd_490
         }
+
+        addZ90Band(l2wProduct, kMin);
 
         copyBands(case2rProduct, l2wProduct);
 
@@ -72,6 +78,15 @@ class QaaL2WProductFactory extends L2WProductFactory {
         return l2wProduct;
     }
 
+    private void addZ90Band(Product l2wProduct, Band kMin) {
+        float sceneWidth = l2wProduct.getSceneRasterWidth();
+        float sceneHeight = l2wProduct.getSceneRasterHeight();
+        final Band z90 = addBand(l2wProduct, Z90_MAX_NAME, "Maximum signal depth.", "m", L2W_VALID_EXPRESSION);
+        final RenderingHints hints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, new ImageLayout(kMin.getSourceImage()));
+        final RenderedOp negOneImage = ConstantDescriptor.create(sceneWidth, sceneHeight, new Float[]{-1.0f}, hints);
+        z90.setSourceImage(DivideDescriptor.create(negOneImage, kMin.getGeophysicalImage(), hints));
+    }
+
     private void addKdSpectrum(Product l2wProduct) {
         for (int i = 0; i < KD_LAMBDAS.length; i++) {
             int wavelength = KD_LAMBDAS[i];
@@ -80,22 +95,25 @@ class QaaL2WProductFactory extends L2WProductFactory {
     }
 
     private void addKdBand(Product l2wProduct, int i, int wavelength) {
-        final Band kdBand = l2wProduct.addBand("Kd_" + wavelength, ProductData.TYPE_FLOAT32);
         final String descriptionFormat = "Downwelling irradiance attenuation coefficient at wavelength %s.";
-        kdBand.setDescription(String.format(descriptionFormat, wavelength));
-        kdBand.setUnit("m^-1");
-        kdBand.setValidPixelExpression(L2W_VALID_EXPRESSION);
+        final Band kdBand = addBand(l2wProduct, "Kd_" + wavelength, String.format(descriptionFormat, wavelength),
+                                    "m^-1", L2W_VALID_EXPRESSION);
         kdBand.setSpectralBandIndex(i);
         kdBand.setSpectralWavelength(wavelength);
     }
 
-    private void addKMinBand(Product l2wProduct) {
-        final Band band = l2wProduct.addBand(K_MIN_BAND_NAME, ProductData.TYPE_FLOAT32);
-        band.setDescription("Minimum downwelling irradiance attenuation coefficient.");
-        band.setUnit("m^-1");
-        band.setValidPixelExpression(L2W_VALID_EXPRESSION);
+    private Band addKMinBand(Product l2wProduct) {
+        return addBand(l2wProduct, K_MIN_NAME, "Minimum downwelling irradiance attenuation coefficient.",
+                       "m^-1", L2W_VALID_EXPRESSION);
     }
 
+    private Band addBand(Product l2wProduct, String name, String description, String unit, String validExpression) {
+        final Band band = l2wProduct.addBand(name, ProductData.TYPE_FLOAT32);
+        band.setDescription(description);
+        band.setUnit(unit);
+        band.setValidPixelExpression(validExpression);
+        return band;
+    }
 
     @Override
     protected boolean considerBandInGeneralBandCopy(Band band, Product target) {
@@ -129,9 +147,11 @@ class QaaL2WProductFactory extends L2WProductFactory {
         final Band iopQualityBand = l2wProduct.addBand(IOP_QUALITY_BAND_NAME, ProductData.TYPE_FLOAT32);
         iopQualityBand.setUnit("1");
         iopQualityBand.setDescription(IOP_QUALITY_DESCRIPTION);
+        final RenderingHints hints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT,
+                                                        new ImageLayout(iopQualityBand.getSourceImage()));
         final RenderedOp nanImage = ConstantDescriptor.create((float) l2wProduct.getSceneRasterWidth(),
                                                               (float) l2wProduct.getSceneRasterHeight(),
-                                                              new Float[]{Float.NaN}, null);
+                                                              new Float[]{Float.NaN}, hints);
         iopQualityBand.setValidPixelExpression("!NaN");
         iopQualityBand.setSourceImage(nanImage);
     }

@@ -20,15 +20,18 @@ abstract class L2WProductFactory {
     static final String A_YS_443_SOURCE_BAND_NAME = "a_ys_443";
     static final String A_PIG_443_SOURCE_BAND_NAME = "a_pig_443";
     static final String BB_SPM_443_SOURCE_BAND_NAME = "bb_spm_443";
+
+    static final String IOP_PREFIX_TARGET_BAND_NAME = "iop_";
     static final String L2W_FLAGS_NAME = "l2w_flags";
     static final String EXP_FLH_681_NAME = "exp_FLH_681";
     static final String EXP_FLH_681_NORM_NAME = "exp_FLH_681_norm";
     static final String EXP_FLH_681_ALT_NAME = "exp_FLH_681_alt";
     static final String EXP_FLH_NORM_OLD_681_NAME = "exp_FLH_norm_old_681";
     static final String EXP_FLH_ALT_OLD_681_NAME = "exp_FLH_alt_old_681";
-    static final String K_MIN_BAND_NAME = "K_min";
+    static final String K_MIN_NAME = "K_min";
     static final int[] KD_LAMBDAS = new int[]{412, 443, 490, 510, 560, 620, 664, 680};
-    static final String IOP_PREFIX_TARGET_BAND_NAME = "iop_";
+    static final String Z90_MAX_NAME = "Z90_max";
+
     static final String L2W_VALID_EXPRESSION = "!l2w_flags.INVALID";
 
     protected static final String[] IOP_SOURCE_BAND_NAMES = new String[]{

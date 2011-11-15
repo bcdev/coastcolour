@@ -279,7 +279,7 @@ public class L2WOp extends Operator {
         final String aYs443BandName = L2WProductFactory.IOP_PREFIX_TARGET_BAND_NAME + L2WProductFactory.A_YS_443_SOURCE_BAND_NAME;
         final Tile aYs443Tile = getSourceTile(targetProduct.getBand(aYs443BandName), targetRectangle);
 
-        final Tile kMinTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.K_MIN_BAND_NAME));
+        final Tile kMinTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.K_MIN_NAME));
         Tile[] kdTiles = new Tile[L2WProductFactory.KD_LAMBDAS.length];
         for (int i = 0; i < L2WProductFactory.KD_LAMBDAS.length; i++) {
             kdTiles[i] = targetTiles.get(targetProduct.getBand("Kd_" + L2WProductFactory.KD_LAMBDAS[i]));
@@ -297,20 +297,23 @@ public class L2WOp extends Operator {
                 final double aPig443 = aPig443Tile.getSampleDouble(x, y);
                 final double aYs443 = aYs443Tile.getSampleDouble(x, y);
 
-                KMin kMin = new KMin(bTsm443, aPig443, aYs443);
-                kMinTile.setSample(x, y, isSampleInvalid ? Double.NaN : kMin.computeKMinValue());
-                if (outputKdSpectrum) {
-                    double[] kds = new double[kdTiles.length];
-                    if (isSampleInvalid) {
-                        Arrays.fill(kds, Double.NaN);
+                if (useQaaForIops) {
+                    KMin kMin = new KMin(bTsm443, aPig443, aYs443);
+                    final double kMinValue = kMin.computeKMinValue();
+                    kMinTile.setSample(x, y, isSampleInvalid ? Double.NaN : kMinValue);
+                    if (outputKdSpectrum) {
+                        double[] kds = new double[kdTiles.length];
+                        if (isSampleInvalid) {
+                            Arrays.fill(kds, Double.NaN);
+                        } else {
+                            kds = kMin.computeKdSpectrum();
+                        }
+                        for (int i = 0; i < kds.length; i++) {
+                            kdTiles[i].setSample(x, y, kds[i]);
+                        }
                     } else {
-                        kds = kMin.computeKdSpectrum();
+                        kdTiles[2].setSample(x, y, isSampleInvalid ? Double.NaN : kMin.computeKd490());
                     }
-                    for (int i = 0; i < kds.length; i++) {
-                        kdTiles[i].setSample(x, y, kds[i]);
-                    }
-                } else {
-                    kdTiles[2].setSample(x, y, isSampleInvalid ? Double.NaN : kMin.computeKd490());
                 }
                 final int invalidFlagValue = isSampleInvalid ? 1 : 0;
                 int l2wFlag = computeL2wFlags(x, y, c2rFlags, qaaFlags, invalidFlagValue);

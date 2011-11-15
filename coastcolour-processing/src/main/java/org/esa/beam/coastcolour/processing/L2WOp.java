@@ -38,6 +38,12 @@ import java.util.Map;
 public class L2WOp extends Operator {
 
     private static final int[] FLH_INPUT_BAND_NUMBERS = new int[]{6, 8, 10};
+    private static final double TURBIDITY_RLW620_MAX = 0.03823;
+    private static final double TURBIDITY_AT = 174.41;
+    private static final double TURBIDITY_BT = 0.39;
+    private static final double TURBIDITY_C = 0.1533;
+    public static final int RHO_620_INDEX = 5;
+
 
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")
     private Product sourceProduct;
@@ -200,7 +206,7 @@ public class L2WOp extends Operator {
         if (useQaaForIops) {
             HashMap<String, Object> qaaParams = createQaaParameterMap();
             qaaProduct = GPF.createProduct("Meris.QaaIOP", qaaParams, l2rProduct);
-            l2wProductFactory = new QaaL2WProductFactory(l2rProduct, case2rProduct, qaaProduct);
+            l2wProductFactory = new QaaL2WProductFactory(l2rProduct, qaaProduct);
         } else {
             l2wProductFactory = new Case2rL2WProductFactory(l2rProduct, case2rProduct);
         }
@@ -270,20 +276,24 @@ public class L2WOp extends Operator {
         } else {
             c2rFlags = getSourceTile(case2rProduct.getRasterDataNode("case2_flags"), targetRectangle);
         }
+        final Tile rho620Tile = getSourceTile(l2rProduct.getBand("reflec_6"), targetRectangle);
 
         // Maybe problematic: get a source tile from the target product. Weird.
-        final String bbSPM443BandName = L2WProductFactory.IOP_PREFIX_TARGET_BAND_NAME + L2WProductFactory.BB_SPM_443_SOURCE_BAND_NAME;
-        final Tile bbSPM443Tile = getSourceTile(targetProduct.getBand(bbSPM443BandName), targetRectangle);
-        final String aPig443BandName = L2WProductFactory.IOP_PREFIX_TARGET_BAND_NAME + L2WProductFactory.A_PIG_443_SOURCE_BAND_NAME;
-        final Tile aPig443Tile = getSourceTile(targetProduct.getBand(aPig443BandName), targetRectangle);
-        final String aYs443BandName = L2WProductFactory.IOP_PREFIX_TARGET_BAND_NAME + L2WProductFactory.A_YS_443_SOURCE_BAND_NAME;
-        final Tile aYs443Tile = getSourceTile(targetProduct.getBand(aYs443BandName), targetRectangle);
+        final Tile bbSPM443Tile = getSourceTile(targetProduct.getBand(L2WProductFactory.IOP_BB_SPM_443_NAME),
+                                                targetRectangle);
+        final Tile aPig443Tile = getSourceTile(targetProduct.getBand(L2WProductFactory.IOP_A_PIG_443_NAME),
+                                               targetRectangle);
+        final Tile aYs443Tile = getSourceTile(targetProduct.getBand(L2WProductFactory.IOP_A_YS_443_NAME),
+                                              targetRectangle);
 
         final Tile kMinTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.K_MIN_NAME));
         Tile[] kdTiles = new Tile[L2WProductFactory.KD_LAMBDAS.length];
         for (int i = 0; i < L2WProductFactory.KD_LAMBDAS.length; i++) {
             kdTiles[i] = targetTiles.get(targetProduct.getBand("Kd_" + L2WProductFactory.KD_LAMBDAS[i]));
         }
+
+        final Tile z90Tile = targetTiles.get(targetProduct.getBand(L2WProductFactory.Z90_MAX_NAME));
+        final Tile turbidityTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.TURBIDITY_NAME));
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
@@ -293,11 +303,11 @@ public class L2WOp extends Operator {
                     computeFLHValues(x, y, satzen, solzen, reflecTiles, tosaReflecTiles, pathTiles, transTiles, flhTile,
                                      flhOldNormTile, flhOldAltTile, flhAltTile, flhNormTile, isSampleInvalid);
                 }
-                final double bTsm443 = bbSPM443Tile.getSampleDouble(x, y) / WaterAlgorithm.BTSM_TO_SPM_FACTOR;
-                final double aPig443 = aPig443Tile.getSampleDouble(x, y);
-                final double aYs443 = aYs443Tile.getSampleDouble(x, y);
 
                 if (useQaaForIops) {
+                    final double bTsm443 = bbSPM443Tile.getSampleDouble(x, y) / WaterAlgorithm.BTSM_TO_SPM_FACTOR;
+                    final double aPig443 = aPig443Tile.getSampleDouble(x, y);
+                    final double aYs443 = aYs443Tile.getSampleDouble(x, y);
                     KMin kMin = new KMin(bTsm443, aPig443, aYs443);
                     final double kMinValue = kMin.computeKMinValue();
                     kMinTile.setSample(x, y, isSampleInvalid ? Double.NaN : kMinValue);
@@ -314,6 +324,9 @@ public class L2WOp extends Operator {
                     } else {
                         kdTiles[2].setSample(x, y, isSampleInvalid ? Double.NaN : kMin.computeKd490());
                     }
+                    z90Tile.setSample(x, y, isSampleInvalid ? Double.NaN : -1 / kMinValue);
+                    final double turbidityValue = computeTurbidity(rho620Tile.getSampleDouble(x, y));
+                    turbidityTile.setSample(x, y, isSampleInvalid ? Double.NaN : turbidityValue);
                 }
                 final int invalidFlagValue = isSampleInvalid ? 1 : 0;
                 int l2wFlag = computeL2wFlags(x, y, c2rFlags, qaaFlags, invalidFlagValue);
@@ -335,6 +348,14 @@ public class L2WOp extends Operator {
         l2wFlag = l2wFlag | (invalidFlagValue << 7);
 
         return l2wFlag;
+    }
+
+    private double computeTurbidity(double rlw620) {
+        if (rlw620 > TURBIDITY_RLW620_MAX) {  // maximum value for computing the turbidity Index
+            rlw620 = TURBIDITY_RLW620_MAX;
+        }
+        double rho = rlw620 * Math.PI;
+        return TURBIDITY_AT * rho / (1 - rho / TURBIDITY_C) + TURBIDITY_BT;
     }
 
     private boolean isSampleInvalid(int x, int y) {

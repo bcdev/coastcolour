@@ -12,7 +12,6 @@ import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.ConstantDescriptor;
-import javax.media.jai.operator.DivideDescriptor;
 import javax.media.jai.operator.SubtractDescriptor;
 import java.awt.RenderingHints;
 import java.awt.image.RenderedImage;
@@ -23,12 +22,10 @@ import java.awt.image.RenderedImage;
 class QaaL2WProductFactory extends L2WProductFactory {
 
     private Product l2rProduct;
-    private Product case2rProduct;
     private Product qaaProduct;
 
-    public QaaL2WProductFactory(Product l2rProduct, Product case2rProduct, Product qaaProduct) {
+    public QaaL2WProductFactory(Product l2rProduct, Product qaaProduct) {
         this.l2rProduct = l2rProduct;
-        this.case2rProduct = case2rProduct;
         this.qaaProduct = qaaProduct;
     }
 
@@ -36,20 +33,20 @@ class QaaL2WProductFactory extends L2WProductFactory {
     @Override
     Product createL2WProduct() {
         String l2wProductType = l2rProduct.getProductType().substring(0, 8) + "CCL2W";
-        final int sceneWidth = case2rProduct.getSceneRasterWidth();
-        final int sceneHeight = case2rProduct.getSceneRasterHeight();
-        final Product l2wProduct = new Product(case2rProduct.getName(), l2wProductType, sceneWidth, sceneHeight);
-        l2wProduct.setStartTime(case2rProduct.getStartTime());
-        l2wProduct.setEndTime(case2rProduct.getEndTime());
+        final int sceneWidth = qaaProduct.getSceneRasterWidth();
+        final int sceneHeight = qaaProduct.getSceneRasterHeight();
+        final Product l2wProduct = new Product(qaaProduct.getName(), l2wProductType, sceneWidth, sceneHeight);
+        l2wProduct.setStartTime(qaaProduct.getStartTime());
+        l2wProduct.setEndTime(qaaProduct.getEndTime());
         l2wProduct.setDescription("MERIS CoastColour L2W");
-        ProductUtils.copyMetadata(case2rProduct, l2wProduct);
-        copyMasks(case2rProduct, l2wProduct);
+        ProductUtils.copyMetadata(l2rProduct, l2wProduct);
         copyMasks(l2rProduct, l2wProduct);
 
         copyIOPBands(qaaProduct, l2wProduct);
+
         addIOPQualityBand(l2wProduct);
         addChlAndTsmBands(l2wProduct);
-        final Band kMin = addKMinBand(l2wProduct);
+        addKMinBand(l2wProduct);
         if (isOutputKdSpectrum()) {
             addKdSpectrum(l2wProduct);
             addPatternToAutoGrouping(l2wProduct, "Kd");
@@ -57,34 +54,32 @@ class QaaL2WProductFactory extends L2WProductFactory {
             addKdBand(l2wProduct, -1, KD_LAMBDAS[2]); // Kd_490
         }
 
-        addZ90Band(l2wProduct, kMin);
-
-        copyBands(case2rProduct, l2wProduct);
+        addZ90Band(l2wProduct);
+        addTurbidityBand(l2wProduct);
 
         if (isOutputFLH()) {
             addFLHBands(l2wProduct);
         }
         copyFlagBands(l2rProduct, l2wProduct);
 
-        ProductUtils.copyTiePointGrids(case2rProduct, l2wProduct);
+        ProductUtils.copyTiePointGrids(qaaProduct, l2wProduct);
         renameIops(l2wProduct);
-        renameConcentrations(l2wProduct);
-        renameTurbidityBand(l2wProduct);
         copyReflecBandsIfRequired(l2rProduct, l2wProduct);
         sortFlagBands(l2wProduct);
         addL2WMasksAndFlags(l2wProduct);
-        ProductUtils.copyGeoCoding(case2rProduct, l2wProduct);
+        ProductUtils.copyGeoCoding(qaaProduct, l2wProduct);
 
         return l2wProduct;
     }
 
-    private void addZ90Band(Product l2wProduct, Band kMin) {
-        float sceneWidth = l2wProduct.getSceneRasterWidth();
-        float sceneHeight = l2wProduct.getSceneRasterHeight();
-        final Band z90 = addBand(l2wProduct, Z90_MAX_NAME, "Maximum signal depth.", "m", L2W_VALID_EXPRESSION);
-        final RenderingHints hints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, new ImageLayout(kMin.getSourceImage()));
-        final RenderedOp negOneImage = ConstantDescriptor.create(sceneWidth, sceneHeight, new Float[]{-1.0f}, hints);
-        z90.setSourceImage(DivideDescriptor.create(negOneImage, kMin.getGeophysicalImage(), hints));
+    private void addTurbidityBand(Product l2wProduct) {
+        addBand(l2wProduct, TURBIDITY_NAME, "Turbidity index in FNU (Formazine Nephelometric Unit)",
+                "FNU", L2W_VALID_EXPRESSION);
+
+    }
+
+    private void addZ90Band(Product l2wProduct) {
+        addBand(l2wProduct, Z90_MAX_NAME, "Maximum signal depth.", "m", L2W_VALID_EXPRESSION);
     }
 
     private void addKdSpectrum(Product l2wProduct) {
@@ -113,12 +108,6 @@ class QaaL2WProductFactory extends L2WProductFactory {
         band.setUnit(unit);
         band.setValidPixelExpression(validExpression);
         return band;
-    }
-
-    @Override
-    protected boolean considerBandInGeneralBandCopy(Band band, Product target) {
-        return super.considerBandInGeneralBandCopy(band, target) && !("chiSquare".equals(
-                band.getName()) || band.getName().toLowerCase().startsWith("k"));
     }
 
     protected void copyIOPBands(Product source, Product target) {
@@ -157,7 +146,7 @@ class QaaL2WProductFactory extends L2WProductFactory {
     }
 
     private void addChlAndTsmBands(Product l2wProduct) {
-        final Band tsm = l2wProduct.addBand("tsm", ProductData.TYPE_FLOAT32);
+        final Band tsm = l2wProduct.addBand(CONC_TSM_NAME, ProductData.TYPE_FLOAT32);
         tsm.setDescription("Total suspended matter dry weight concentration.");
         tsm.setUnit("g m^-3");
         tsm.setValidPixelExpression(L2W_VALID_EXPRESSION);
@@ -167,7 +156,7 @@ class QaaL2WProductFactory extends L2WProductFactory {
 
         tsm.setSourceImage(tsmImage);
 
-        final Band conc_chl = l2wProduct.addBand("chl_conc", ProductData.TYPE_FLOAT32);
+        final Band conc_chl = l2wProduct.addBand(CONC_CHL_NAME, ProductData.TYPE_FLOAT32);
         conc_chl.setDescription("Chlorophyll concentration.");
         conc_chl.setUnit("mg m^-3");
         conc_chl.setValidPixelExpression(L2W_VALID_EXPRESSION);
@@ -175,6 +164,6 @@ class QaaL2WProductFactory extends L2WProductFactory {
                                                                           ProductData.TYPE_FLOAT32, Double.NaN,
                                                                           qaaProduct, ResolutionLevel.MAXRES);
         conc_chl.setSourceImage(chlConcImage);
-
+        addPatternToAutoGrouping(l2wProduct, CONC_GROUPING_PATTERN);
     }
 }

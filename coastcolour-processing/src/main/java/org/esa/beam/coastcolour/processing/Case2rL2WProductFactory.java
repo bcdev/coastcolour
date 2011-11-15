@@ -28,7 +28,6 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         l2wProduct.setEndTime(case2rProduct.getEndTime());
         l2wProduct.setDescription("MERIS CoastColour L2W");
         ProductUtils.copyMetadata(case2rProduct, l2wProduct);
-        copyMasks(case2rProduct, l2wProduct);
         copyMasks(l2rProduct, l2wProduct);
         copyIOPBands(case2rProduct, l2wProduct);
 
@@ -41,7 +40,6 @@ class Case2rL2WProductFactory extends L2WProductFactory {
             addFLHBands(l2wProduct);
         }
         copyFlagBands(l2rProduct, l2wProduct);
-//        copyFlagBands(case2rProduct, l2wProduct);
         ProductUtils.copyTiePointGrids(case2rProduct, l2wProduct);
         renameIops(l2wProduct);
         renameChiSquare(l2wProduct);
@@ -54,6 +52,21 @@ class Case2rL2WProductFactory extends L2WProductFactory {
 
         return l2wProduct;
 
+    }
+
+    private void copyBands(Product source, Product target) {
+        final Band[] case2rBands = source.getBands();
+        for (Band band : case2rBands) {
+            if (considerBandInBandCopy(band, target)) {
+                final Band targetBand = ProductUtils.copyBand(band.getName(), source, target);
+                targetBand.setSourceImage(band.getSourceImage());
+                targetBand.setValidPixelExpression(L2W_VALID_EXPRESSION);
+            }
+        }
+    }
+
+    private boolean considerBandInBandCopy(Band band, Product target) {
+        return !band.isFlagBand() && !target.containsBand(band.getName());
     }
 
     protected void copyIOPBands(Product source, Product target) {

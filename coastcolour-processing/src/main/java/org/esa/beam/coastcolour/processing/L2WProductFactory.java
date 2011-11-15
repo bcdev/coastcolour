@@ -16,12 +16,25 @@ import java.awt.Color;
  */
 abstract class L2WProductFactory {
 
-    static final String A_TOTAL_443_SOURCE_BAND_NAME = "a_total_443";
-    static final String A_YS_443_SOURCE_BAND_NAME = "a_ys_443";
-    static final String A_PIG_443_SOURCE_BAND_NAME = "a_pig_443";
-    static final String BB_SPM_443_SOURCE_BAND_NAME = "bb_spm_443";
+    static final String A_TOTAL_443_SOURCE_NAME = "a_total_443";
+
+    static final String A_YS_443_SOURCE_NAME = "a_ys_443";
+    static final String A_PIG_443_SOURCE_NAME = "a_pig_443";
+    static final String BB_SPM_443_SOURCE_NAME = "bb_spm_443";
+    static final String A_POC_443_SOURCE_NAME = "a_poc_443";
+    static final String TSM_SOURCE_NAME = "tsm";
+    static final String CHL_CONC_SOURCE_NAME = "chl_conc";
+
 
     static final String IOP_PREFIX_TARGET_BAND_NAME = "iop_";
+    public static final String IOP_A_TOTAL_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_TOTAL_443_SOURCE_NAME;
+    public static final String IOP_A_YS_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_YS_443_SOURCE_NAME;
+    public static final String IOP_A_PIG_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_PIG_443_SOURCE_NAME;
+    public static final String IOP_BB_SPM_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + BB_SPM_443_SOURCE_NAME;
+    public static final String IOP_A_POC_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_POC_443_SOURCE_NAME;
+    public static final String CONC_TSM_NAME = "conc_tsm";
+    public static final String CONC_CHL_NAME = "conc_chl";
+
     static final String L2W_FLAGS_NAME = "l2w_flags";
     static final String EXP_FLH_681_NAME = "exp_FLH_681";
     static final String EXP_FLH_681_NORM_NAME = "exp_FLH_681_norm";
@@ -35,8 +48,8 @@ abstract class L2WProductFactory {
     static final String L2W_VALID_EXPRESSION = "!l2w_flags.INVALID";
 
     protected static final String[] IOP_SOURCE_BAND_NAMES = new String[]{
-            A_TOTAL_443_SOURCE_BAND_NAME, A_YS_443_SOURCE_BAND_NAME,
-            A_PIG_443_SOURCE_BAND_NAME, BB_SPM_443_SOURCE_BAND_NAME
+            A_TOTAL_443_SOURCE_NAME, A_YS_443_SOURCE_NAME,
+            A_PIG_443_SOURCE_NAME, BB_SPM_443_SOURCE_NAME
     };
     protected static final String IOP_QUALITY_BAND_NAME = "iop_quality";
     protected static final String IOP_QUALITY_DESCRIPTION = "Quality indicator for IOPs";
@@ -48,6 +61,9 @@ abstract class L2WProductFactory {
     private static final String INVALID_DESCRIPTION_FORMAT = "Invalid pixels (%s)";
     private static final String IMAGINARY_NUMBER_DESCRIPTION = "An imaginary number would have been produced";
     private static final String NEGATIVE_AYS_DESCRIPTION = "Negative value in a_ys spectrum";
+    public static final String TURBIDITY_NAME = "turbidity";
+    public static final String TURBIDITY_INDEXSOURCE_NAME = "turbidity_index";
+    public static final String CONC_GROUPING_PATTERN = "conc";
 
 
     private boolean outputKdSpectrum;
@@ -101,20 +117,6 @@ abstract class L2WProductFactory {
         }
     }
 
-    protected void copyBands(Product source, Product target) {
-        final Band[] case2rBands = source.getBands();
-        for (Band band : case2rBands) {
-            if (considerBandInGeneralBandCopy(band, target)) {
-                final Band targetBand = ProductUtils.copyBand(band.getName(), source, target);
-                targetBand.setSourceImage(band.getSourceImage());
-            }
-        }
-    }
-
-    protected boolean considerBandInGeneralBandCopy(Band band, Product target) {
-        return !band.isFlagBand() && !target.containsBand(band.getName());
-    }
-
     protected void copyMasks(Product sourceProduct, Product targetProduct) {
         ProductNodeGroup<Mask> maskGroup = sourceProduct.getMaskGroup();
         for (int i = 0; i < maskGroup.getNodeCount(); i++) {
@@ -138,6 +140,19 @@ abstract class L2WProductFactory {
             addPatternToAutoGrouping(targetProduct, "reflec");
         }
 
+    }
+
+    protected void renameIops(Product targetProduct) {
+        targetProduct.getBand(A_TOTAL_443_SOURCE_NAME).setName(IOP_A_TOTAL_443_NAME);
+        targetProduct.getBand(A_YS_443_SOURCE_NAME).setName(IOP_A_YS_443_NAME);
+        targetProduct.getBand(A_PIG_443_SOURCE_NAME).setName(IOP_A_PIG_443_NAME);
+        Band aPocBand = targetProduct.getBand(A_POC_443_SOURCE_NAME);
+        if (aPocBand != null) {
+            aPocBand.setName(IOP_A_POC_443_NAME);
+        }
+        targetProduct.getBand(BB_SPM_443_SOURCE_NAME).setName(IOP_BB_SPM_443_NAME);
+        String groupPattern = IOP_PREFIX_TARGET_BAND_NAME.substring(0, IOP_PREFIX_TARGET_BAND_NAME.length() - 1);
+        addPatternToAutoGrouping(targetProduct, groupPattern);
     }
 
     protected void sortFlagBands(Product targetProduct) {
@@ -193,39 +208,22 @@ abstract class L2WProductFactory {
 
     private void addMask(ProductNodeGroup<Mask> maskGroup, int index, String maskName, String maskDescription,
                          String maskExpression, Color maskColor, float transparency) {
-        final int width = maskGroup.getProduct().getSceneRasterWidth();
-        final int height = maskGroup.getProduct().getSceneRasterHeight();
+        int width = maskGroup.getProduct().getSceneRasterWidth();
+        int height = maskGroup.getProduct().getSceneRasterHeight();
         Mask mask = Mask.BandMathsType.create(maskName, maskDescription, width, height,
                                               maskExpression, maskColor, transparency);
         maskGroup.add(index, mask);
     }
 
-    protected void renameIops(Product targetProduct) {
-        String aTotal = A_TOTAL_443_SOURCE_BAND_NAME;
-        String aGelbstoff = A_YS_443_SOURCE_BAND_NAME;
-        String aPigment = A_PIG_443_SOURCE_BAND_NAME;
-        String aPoc = "a_poc_443";
-        String bbSpm = BB_SPM_443_SOURCE_BAND_NAME;
-        targetProduct.getBand(aTotal).setName(IOP_PREFIX_TARGET_BAND_NAME + aTotal);
-        targetProduct.getBand(aGelbstoff).setName("iop_" + aGelbstoff);
-        targetProduct.getBand(aPigment).setName("iop_" + aPigment);
-        Band aPocBand = targetProduct.getBand(aPoc);
-        if (aPocBand != null) {
-            aPocBand.setName("iop_" + aPoc);
-        }
-        targetProduct.getBand(bbSpm).setName("iop_" + bbSpm);
-        addPatternToAutoGrouping(targetProduct, "iop");
-    }
-
     protected void renameConcentrations(Product targetProduct) {
-        targetProduct.getBand("tsm").setName("conc_tsm");
-        targetProduct.getBand("chl_conc").setName("conc_chl");
-        addPatternToAutoGrouping(targetProduct, "conc");
+        targetProduct.getBand(TSM_SOURCE_NAME).setName(CONC_TSM_NAME);
+        targetProduct.getBand(CHL_CONC_SOURCE_NAME).setName(CONC_CHL_NAME);
+        addPatternToAutoGrouping(targetProduct, CONC_GROUPING_PATTERN);
     }
 
 
     protected void renameTurbidityBand(Product targetProduct) {
-        targetProduct.getBand("turbidity_index").setName("turbidity");
+        targetProduct.getBand(TURBIDITY_INDEXSOURCE_NAME).setName(TURBIDITY_NAME);
     }
 
     protected void addFLHBands(Product target) {

@@ -20,6 +20,8 @@ import org.esa.beam.idepix.operators.CloudScreeningSelector;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.meris.case2.Case2AlgorithmEnum;
+import org.esa.beam.meris.case2.algorithm.KMin;
+import org.esa.beam.meris.case2.water.WaterAlgorithm;
 import org.esa.beam.util.ResourceInstaller;
 
 import java.awt.Rectangle;
@@ -242,6 +244,7 @@ public class L2WOp extends Operator {
         Tile flhOldAltTile = null;
         Tile flhAltTile = null;
         Tile flhNormTile = null;
+        final Product targetProduct = getTargetProduct();
         if (outputFLH) {
             RasterDataNode satzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME);
             RasterDataNode solzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
@@ -252,14 +255,14 @@ public class L2WOp extends Operator {
             tosaReflecTiles = getTiles(targetRectangle, "tosa_reflec_");
             pathTiles = getTiles(targetRectangle, "path_");
             transTiles = getTiles(targetRectangle, "trans_");
-            flhTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_681_NAME));
-            flhOldNormTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_NORM_OLD_681_NAME));
-            flhOldAltTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_ALT_OLD_681_NAME));
-            flhAltTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_681_ALT_NAME));
-            flhNormTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.EXP_FLH_681_NORM_NAME));
+            flhTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_681_NAME));
+            flhOldNormTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_NORM_OLD_681_NAME));
+            flhOldAltTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_ALT_OLD_681_NAME));
+            flhAltTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_681_ALT_NAME));
+            flhNormTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_681_NORM_NAME));
         }
 
-        Tile l2wFlagTile = targetTiles.get(getTargetProduct().getBand(L2WProductFactory.L2W_FLAGS_NAME));
+        Tile l2wFlagTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.L2W_FLAGS_NAME));
         Tile c2rFlags = null;
         Tile qaaFlags = null;
         if (qaaProduct != null) {
@@ -268,15 +271,48 @@ public class L2WOp extends Operator {
             c2rFlags = getSourceTile(case2rProduct.getRasterDataNode("case2_flags"), targetRectangle);
         }
 
+        // Maybe problematic: get a source tile from the target product. Weird.
+        final String bbSPM443BandName = L2WProductFactory.IOP_PREFIX_TARGET_BAND_NAME + L2WProductFactory.BB_SPM_443_SOURCE_BAND_NAME;
+        final Tile bbSPM443Tile = getSourceTile(targetProduct.getBand(bbSPM443BandName), targetRectangle);
+        final String aPig443BandName = L2WProductFactory.IOP_PREFIX_TARGET_BAND_NAME + L2WProductFactory.A_PIG_443_SOURCE_BAND_NAME;
+        final Tile aPig443Tile = getSourceTile(targetProduct.getBand(aPig443BandName), targetRectangle);
+        final String aYs443BandName = L2WProductFactory.IOP_PREFIX_TARGET_BAND_NAME + L2WProductFactory.A_YS_443_SOURCE_BAND_NAME;
+        final Tile aYs443Tile = getSourceTile(targetProduct.getBand(aYs443BandName), targetRectangle);
+
+        final Tile kMinTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.K_MIN_BAND_NAME));
+        Tile[] kdTiles = new Tile[L2WProductFactory.KD_LAMBDAS.length];
+        for (int i = 0; i < L2WProductFactory.KD_LAMBDAS.length; i++) {
+            kdTiles[i] = targetTiles.get(targetProduct.getBand("Kd_" + L2WProductFactory.KD_LAMBDAS[i]));
+        }
+
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                if (outputFLH) {
-                    computeFLHValues(satzen, solzen, reflecTiles, tosaReflecTiles, pathTiles, transTiles, flhTile,
-                                     flhOldNormTile, flhOldAltTile, flhAltTile, flhNormTile, x, y);
+                final boolean isSampleInvalid = isSampleInvalid(x, y);
+                if (outputFLH && !isSampleInvalid) {
+                    computeFLHValues(x, y, satzen, solzen, reflecTiles, tosaReflecTiles, pathTiles, transTiles, flhTile,
+                                     flhOldNormTile, flhOldAltTile, flhAltTile, flhNormTile, isSampleInvalid);
                 }
+                final double bTsm443 = bbSPM443Tile.getSampleDouble(x, y) / WaterAlgorithm.BTSM_TO_SPM_FACTOR;
+                final double aPig443 = aPig443Tile.getSampleDouble(x, y);
+                final double aYs443 = aYs443Tile.getSampleDouble(x, y);
 
-                final int invalidFlagValue = isSampleInvalid(x, y) ? 1 : 0;
+                KMin kMin = new KMin(bTsm443, aPig443, aYs443);
+                kMinTile.setSample(x, y, isSampleInvalid ? Double.NaN : kMin.computeKMinValue());
+                if (outputKdSpectrum) {
+                    double[] kds = new double[kdTiles.length];
+                    if (isSampleInvalid) {
+                        Arrays.fill(kds, Double.NaN);
+                    } else {
+                        kds = kMin.computeKdSpectrum();
+                    }
+                    for (int i = 0; i < kds.length; i++) {
+                        kdTiles[i].setSample(x, y, kds[i]);
+                    }
+                } else {
+                    kdTiles[2].setSample(x, y, isSampleInvalid ? Double.NaN : kMin.computeKd490());
+                }
+                final int invalidFlagValue = isSampleInvalid ? 1 : 0;
                 int l2wFlag = computeL2wFlags(x, y, c2rFlags, qaaFlags, invalidFlagValue);
                 l2wFlagTile.setSample(x, y, l2wFlag);
             }
@@ -302,11 +338,11 @@ public class L2WOp extends Operator {
         return invalidOpImage.getData(new Rectangle(x, y, 1, 1)).getSample(x, y, 0) != 0;
     }
 
-    private void computeFLHValues(Tile satzen, Tile solzen, Tile[] reflecTiles, Tile[] tosaReflecTiles,
+    private void computeFLHValues(int x, int y, Tile satzen, Tile solzen, Tile[] reflecTiles, Tile[] tosaReflecTiles,
                                   Tile[] pathTiles, Tile[] transTiles, Tile flhTile, Tile flhOldNormTile,
-                                  Tile flhOldAltTile, Tile flhAltTile, Tile flhNormTile, int x, int y) {
+                                  Tile flhOldAltTile, Tile flhAltTile, Tile flhNormTile, boolean sampleInvalid) {
         double[] flhValues = new double[5];
-        if (!isSampleValid(reflecTiles[0], x, y)) {
+        if (sampleInvalid) {
             Arrays.fill(flhValues, Double.NaN);
         } else {
             double cosTetaViewSurfRad = getCosTetaViewSurfRad(satzen, x, y);
@@ -371,10 +407,6 @@ public class L2WOp extends Operator {
             wavelengths[i] = band.getSpectralWavelength();
         }
         return wavelengths;
-    }
-
-    private boolean isSampleValid(Tile reflecTile, int x, int y) {
-        return reflecTile.isSampleValid(x, y);
     }
 
     private double getCosTetaViewSurfRad(Tile satzen, int x, int y) {

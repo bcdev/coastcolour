@@ -45,17 +45,20 @@ class QaaL2WProductFactory extends L2WProductFactory {
         copyIOPBands(qaaProduct, l2wProduct);
         addIOPQualityBand(l2wProduct);
         addChlAndTsmBands(l2wProduct);
+        addKMinBand(l2wProduct);
+        if (isOutputKdSpectrum()) {
+            addKdSpectrum(l2wProduct);
+            addPatternToAutoGrouping(l2wProduct, "Kd");
+        } else {
+            addKdBand(l2wProduct, -1, KD_LAMBDAS[2]); // Kd_490
+        }
 
         copyBands(case2rProduct, l2wProduct);
 
-        if (isOutputKdSpectrum()) {
-            addPatternToAutoGrouping(l2wProduct, "Kd");
-        }
         if (isOutputFLH()) {
             addFLHBands(l2wProduct);
         }
         copyFlagBands(l2rProduct, l2wProduct);
-//        copyFlagBands(case2rProduct, l2wProduct);
 
         ProductUtils.copyTiePointGrids(case2rProduct, l2wProduct);
         renameIops(l2wProduct);
@@ -69,27 +72,48 @@ class QaaL2WProductFactory extends L2WProductFactory {
         return l2wProduct;
     }
 
+    private void addKdSpectrum(Product l2wProduct) {
+        for (int i = 0; i < KD_LAMBDAS.length; i++) {
+            int wavelength = KD_LAMBDAS[i];
+            addKdBand(l2wProduct, i, wavelength);
+        }
+    }
+
+    private void addKdBand(Product l2wProduct, int i, int wavelength) {
+        final Band kdBand = l2wProduct.addBand("Kd_" + wavelength, ProductData.TYPE_FLOAT32);
+        final String descriptionFormat = "Downwelling irradiance attenuation coefficient at wavelength %s.";
+        kdBand.setDescription(String.format(descriptionFormat, wavelength));
+        kdBand.setUnit("m^-1");
+        kdBand.setValidPixelExpression(L2W_VALID_EXPRESSION);
+        kdBand.setSpectralBandIndex(i);
+        kdBand.setSpectralWavelength(wavelength);
+    }
+
+    private void addKMinBand(Product l2wProduct) {
+        final Band band = l2wProduct.addBand(K_MIN_BAND_NAME, ProductData.TYPE_FLOAT32);
+        band.setDescription("Minimum downwelling irradiance attenuation coefficient.");
+        band.setUnit("m^-1");
+        band.setValidPixelExpression(L2W_VALID_EXPRESSION);
+    }
+
 
     @Override
     protected boolean considerBandInGeneralBandCopy(Band band, Product target) {
-        if (super.considerBandInGeneralBandCopy(band, target)) {
-            return !"chiSquare".equals(band.getName());
-        } else {
-            return false;
-        }
+        return super.considerBandInGeneralBandCopy(band, target) && !("chiSquare".equals(
+                band.getName()) || band.getName().toLowerCase().startsWith("k"));
     }
 
     protected void copyIOPBands(Product source, Product target) {
         for (String iopSourceBandName : IOP_SOURCE_BAND_NAMES) {
             final Band targetBand = ProductUtils.copyBand(iopSourceBandName, source, target);
             final Band sourceBand = source.getBand(iopSourceBandName);
-            RenderedImage sourceImage = getSourceImage(sourceBand);
+            RenderedImage sourceImage = getIOPSourceImage(sourceBand);
             targetBand.setSourceImage(sourceImage);
-            targetBand.setValidPixelExpression("!l2w_flags.INVALID");
+            targetBand.setValidPixelExpression(L2W_VALID_EXPRESSION);
         }
     }
 
-    private RenderedImage getSourceImage(Band sourceBand) {
+    private RenderedImage getIOPSourceImage(Band sourceBand) {
         RenderedImage sourceImage = sourceBand.getSourceImage();
         if (IOP_SOURCE_BAND_NAMES[0].equals(sourceBand.getName())) {
             final RenderedOp awCoeffImage = ConstantDescriptor.create((float) sourceBand.getSceneRasterWidth(),
@@ -116,7 +140,7 @@ class QaaL2WProductFactory extends L2WProductFactory {
         final Band tsm = l2wProduct.addBand("tsm", ProductData.TYPE_FLOAT32);
         tsm.setDescription("Total suspended matter dry weight concentration.");
         tsm.setUnit("g m^-3");
-        tsm.setValidPixelExpression("!l2w_flags.INVALID");
+        tsm.setValidPixelExpression(L2W_VALID_EXPRESSION);
         final VirtualBandOpImage tsmImage = VirtualBandOpImage.create("1.73 * pow((bb_spm_443 / 0.01), 1.0)",
                                                                       ProductData.TYPE_FLOAT32, Double.NaN,
                                                                       qaaProduct, ResolutionLevel.MAXRES);
@@ -126,7 +150,7 @@ class QaaL2WProductFactory extends L2WProductFactory {
         final Band conc_chl = l2wProduct.addBand("chl_conc", ProductData.TYPE_FLOAT32);
         conc_chl.setDescription("Chlorophyll concentration.");
         conc_chl.setUnit("mg m^-3");
-        conc_chl.setValidPixelExpression("!l2w_flags.INVALID");
+        conc_chl.setValidPixelExpression(L2W_VALID_EXPRESSION);
         final VirtualBandOpImage chlConcImage = VirtualBandOpImage.create("21.0 * pow(a_pig_443, 1.04)",
                                                                           ProductData.TYPE_FLOAT32, Double.NaN,
                                                                           qaaProduct, ResolutionLevel.MAXRES);

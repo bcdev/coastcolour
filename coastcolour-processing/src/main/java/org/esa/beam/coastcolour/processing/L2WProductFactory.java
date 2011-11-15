@@ -16,21 +16,27 @@ import java.awt.Color;
  */
 abstract class L2WProductFactory {
 
+    static final String A_TOTAL_443_SOURCE_BAND_NAME = "a_total_443";
+    static final String A_YS_443_SOURCE_BAND_NAME = "a_ys_443";
+    static final String A_PIG_443_SOURCE_BAND_NAME = "a_pig_443";
+    static final String BB_SPM_443_SOURCE_BAND_NAME = "bb_spm_443";
     static final String L2W_FLAGS_NAME = "l2w_flags";
     static final String EXP_FLH_681_NAME = "exp_FLH_681";
     static final String EXP_FLH_681_NORM_NAME = "exp_FLH_681_norm";
     static final String EXP_FLH_681_ALT_NAME = "exp_FLH_681_alt";
     static final String EXP_FLH_NORM_OLD_681_NAME = "exp_FLH_norm_old_681";
     static final String EXP_FLH_ALT_OLD_681_NAME = "exp_FLH_alt_old_681";
+    static final String K_MIN_BAND_NAME = "K_min";
+    static final int[] KD_LAMBDAS = new int[]{412, 443, 490, 510, 560, 620, 664, 680};
+    static final String IOP_PREFIX_TARGET_BAND_NAME = "iop_";
+    static final String L2W_VALID_EXPRESSION = "!l2w_flags.INVALID";
 
+    protected static final String[] IOP_SOURCE_BAND_NAMES = new String[]{
+            A_TOTAL_443_SOURCE_BAND_NAME, A_YS_443_SOURCE_BAND_NAME,
+            A_PIG_443_SOURCE_BAND_NAME, BB_SPM_443_SOURCE_BAND_NAME
+    };
     protected static final String IOP_QUALITY_BAND_NAME = "iop_quality";
     protected static final String IOP_QUALITY_DESCRIPTION = "Quality indicator for IOPs";
-    protected static final String[] IOP_SOURCE_BAND_NAMES = new String[]{
-            "a_total_443",
-            "a_ys_443",
-            "a_pig_443",
-            "bb_spm_443"
-    };
 
     private static final String WLR_OOR_DESCRIPTION = "Water leaving reflectance out of training range";
     private static final String CONC_OOR_DESCRIPTION = "Water constituents out of training range";
@@ -192,12 +198,12 @@ abstract class L2WProductFactory {
     }
 
     protected void renameIops(Product targetProduct) {
-        String aTotal = "a_total_443";
-        String aGelbstoff = "a_ys_443";
-        String aPigment = "a_pig_443";
+        String aTotal = A_TOTAL_443_SOURCE_BAND_NAME;
+        String aGelbstoff = A_YS_443_SOURCE_BAND_NAME;
+        String aPigment = A_PIG_443_SOURCE_BAND_NAME;
         String aPoc = "a_poc_443";
-        String bbSpm = "bb_spm_443";
-        targetProduct.getBand(aTotal).setName("iop_" + aTotal);
+        String bbSpm = BB_SPM_443_SOURCE_BAND_NAME;
+        targetProduct.getBand(aTotal).setName(IOP_PREFIX_TARGET_BAND_NAME + aTotal);
         targetProduct.getBand(aGelbstoff).setName("iop_" + aGelbstoff);
         targetProduct.getBand(aPigment).setName("iop_" + aPigment);
         Band aPocBand = targetProduct.getBand(aPoc);

@@ -42,7 +42,6 @@ public class L2WOp extends Operator {
     private static final double TURBIDITY_AT = 174.41;
     private static final double TURBIDITY_BT = 0.39;
     private static final double TURBIDITY_C = 0.1533;
-    public static final int RHO_620_INDEX = 5;
 
 
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")

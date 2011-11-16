@@ -103,17 +103,7 @@ public class L2WOpTest {
         String origPixelGeoCodingAccuracy = System.getProperty("beam.pixelGeoCoding.fractionAccuracy", "true");
         try {
             System.setProperty("beam.envisat.usePixelGeoCoding", "true");
-            Product l1bProduct = L1POpTest.createL1bProduct();
-            l1bProduct.setProductType("MER_FSG_1P");
-            Band corr_longitude = l1bProduct.addBand("corr_longitude", ProductData.TYPE_FLOAT64);
-            corr_longitude.setData(corr_longitude.createCompatibleRasterData());
-            Band corr_latitude = l1bProduct.addBand("corr_latitude", ProductData.TYPE_FLOAT64);
-            corr_latitude.setData(corr_latitude.createCompatibleRasterData());
-            final Band altitude = l1bProduct.addBand("altitude", ProductData.TYPE_INT16);
-            altitude.setData(altitude.createCompatibleRasterData());
-
-            GeoCoding geoCoding = new PixelGeoCoding(corr_latitude, corr_longitude, "NOT l1_flags.INVALID", 6);
-            l1bProduct.setGeoCoding(geoCoding);
+            Product l1bProduct = createFsgL1bProduct();
 
             Product l2rProduct = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, l1bProduct);
             target = testTargetProduct(l2rProduct, "MER_FSG_CCL2W",
@@ -131,6 +121,50 @@ public class L2WOpTest {
             System.setProperty("beam.pixelGeoCoding.fractionAccuracy", origPixelGeoCodingAccuracy);
         }
     }
+
+    @Test
+    public void testCreateProduct_WithQAA_And_FsgInput() throws OperatorException, ParseException {
+        String origUsePixelGeoCoding = System.getProperty("beam.envisat.usePixelGeoCoding", "true");
+        String origPixelGeoCodingTiling = System.getProperty("beam.pixelGeoCoding.useTiling", "true");
+        String origPixelGeoCodingAccuracy = System.getProperty("beam.pixelGeoCoding.fractionAccuracy", "true");
+        try {
+            System.setProperty("beam.envisat.usePixelGeoCoding", "true");
+            Product l1bProduct = createFsgL1bProduct();
+
+            Product l2rProduct = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, l1bProduct);
+            HashMap<String, Object> l2wParams = new HashMap<String, Object>();
+            l2wParams.put("useQaaForIops", true);
+            target = testTargetProduct(l2rProduct, "MER_FSG_CCL2W",
+                                       new String[]{"corr_longitude", "corr_latitude", "altitude", "turbidity"},
+                                       l2wParams);
+
+            assertTrue("Expected band 'corr_longitude'", target.containsBand("corr_longitude"));
+            assertTrue("Expected band 'corr_latitude'", target.containsBand("corr_latitude"));
+            assertTrue("Expected band 'altitude'", target.containsBand("altitude"));
+            l2rProduct.dispose();
+            l1bProduct.dispose();
+        } finally {
+            System.setProperty("beam.envisat.usePixelGeoCoding", origUsePixelGeoCoding);
+            System.setProperty("beam.pixelGeoCoding.useTiling", origPixelGeoCodingTiling);
+            System.setProperty("beam.pixelGeoCoding.fractionAccuracy", origPixelGeoCodingAccuracy);
+        }
+    }
+
+    private Product createFsgL1bProduct() throws ParseException {
+        Product l1bProduct = L1POpTest.createL1bProduct();
+        l1bProduct.setProductType("MER_FSG_1P");
+        Band corr_longitude = l1bProduct.addBand("corr_longitude", ProductData.TYPE_FLOAT64);
+        corr_longitude.setData(corr_longitude.createCompatibleRasterData());
+        Band corr_latitude = l1bProduct.addBand("corr_latitude", ProductData.TYPE_FLOAT64);
+        corr_latitude.setData(corr_latitude.createCompatibleRasterData());
+        final Band altitude = l1bProduct.addBand("altitude", ProductData.TYPE_INT16);
+        altitude.setData(altitude.createCompatibleRasterData());
+
+        GeoCoding geoCoding = new PixelGeoCoding(corr_latitude, corr_longitude, "NOT l1_flags.INVALID", 6);
+        l1bProduct.setGeoCoding(geoCoding);
+        return l1bProduct;
+    }
+
 
     @Test
     public void testCreateProduct_WithFLHOutput() throws ParseException {

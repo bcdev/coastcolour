@@ -17,13 +17,13 @@ import java.awt.Color;
 abstract class L2WProductFactory {
 
     static final String A_TOTAL_443_SOURCE_NAME = "a_total_443";
-
     static final String A_YS_443_SOURCE_NAME = "a_ys_443";
     static final String A_PIG_443_SOURCE_NAME = "a_pig_443";
     static final String BB_SPM_443_SOURCE_NAME = "bb_spm_443";
     static final String A_POC_443_SOURCE_NAME = "a_poc_443";
     static final String TSM_SOURCE_NAME = "tsm";
     static final String CHL_CONC_SOURCE_NAME = "chl_conc";
+    static final String ALTITUDE_SOURCE_NAME = "altitude";
 
 
     static final String IOP_PREFIX_TARGET_BAND_NAME = "iop_";

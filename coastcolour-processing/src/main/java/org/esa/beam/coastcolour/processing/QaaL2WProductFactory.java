@@ -68,6 +68,7 @@ class QaaL2WProductFactory extends L2WProductFactory {
         sortFlagBands(l2wProduct);
         addL2WMasksAndFlags(l2wProduct);
         ProductUtils.copyGeoCoding(qaaProduct, l2wProduct);
+        copyAltitudeBand(l2rProduct, l2wProduct);
 
         return l2wProduct;
     }
@@ -166,4 +167,16 @@ class QaaL2WProductFactory extends L2WProductFactory {
         conc_chl.setSourceImage(chlConcImage);
         addPatternToAutoGrouping(l2wProduct, CONC_GROUPING_PATTERN);
     }
+
+    protected void copyAltitudeBand(Product sourceProduct, Product targetProduct) {
+        Band band = sourceProduct.getBand(ALTITUDE_SOURCE_NAME);
+        if (band != null) { // altitude does not exist for RR and FR only for FSG
+            Band targetBand = ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
+            Band sourceBand = sourceProduct.getBand(band.getName());
+            targetBand.setSourceImage(sourceBand.getSourceImage());
+        }
+
+    }
+
+
 }

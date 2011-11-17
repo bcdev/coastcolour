@@ -18,7 +18,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-public class L2WOpTest {
+public class L2WOpTest_2 {
 
     private Product target;
     private static Product l1bProduct;
@@ -42,58 +42,6 @@ public class L2WOpTest {
             target = null;
         }
         System.gc();
-    }
-
-    @Test
-    public void testCreateProductFromL1B() throws OperatorException, ParseException {
-        final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl", "turbidity"};
-        target = testTargetProduct(l1bProduct, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
-
-        String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
-        for (String notExpectedBandName : notExpectedBandNames) {
-            assertFalse("Product should not contain " + notExpectedBandName, target.containsBand(notExpectedBandName));
-        }
-
-    }
-
-    @Test
-    public void testCreateProductFromL1P() throws OperatorException, ParseException {
-        Product source = getL1pProduct(l1bProduct);
-        final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl", "turbidity"};
-        target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
-
-        String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
-        for (String notExpectedBandName : notExpectedBandNames) {
-            assertFalse("Product should not contain " + notExpectedBandName, target.containsBand(notExpectedBandName));
-        }
-
-    }
-
-    @Test
-    public void testCreateProductFromL2R() throws OperatorException, ParseException {
-        Product source = getL1pProduct(l1bProduct);
-        source = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
-        final String[] expectedBandNames = {
-                "iop_a_ys_443", "iop_a_total_443", "iop_bb_spm_443",
-                "conc_tsm", "conc_chl", "turbidity"
-        };
-        target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
-        source.dispose();
-    }
-
-    @Test
-    public void testCreateProductWithReflectances() throws OperatorException, ParseException {
-        Product source = getL1pProduct(l1bProduct);
-        Product l2rProduct = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, source);
-        final Map<String, Object> params = new HashMap<String, Object>();
-        params.put("outputReflec", true);
-        String[] expectedBandNames = {
-                "reflec_1", "reflec_2", "reflec_13", "iop_a_ys_443",
-                "conc_tsm", "conc_chl", "turbidity"
-        };
-        target = testTargetProduct(l2rProduct, "MER_FR__CCL2W", expectedBandNames, params);
-        l2rProduct.dispose();
-        source.dispose();
     }
 
     @Test

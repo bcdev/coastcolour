@@ -18,7 +18,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-public class L2WOpTest_2 {
+public class L2WOpSecondTest {
 
     private Product target;
     private static Product l1bProduct;

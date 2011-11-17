@@ -326,24 +326,24 @@ public class L1POp extends Operator {
         for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
             checkForCancellation();
             for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                targetTile.setSample(x, y, LAND_BIT_INDEX, cloudTile.getSampleBit(x, y,
-                                                                                  CoastColourCloudClassificationOp.F_LAND));
-                targetTile.setSample(x, y, COASTLINE_BIT_INDEX, cloudTile.getSampleBit(x, y,
-                                                                                       CoastColourCloudClassificationOp.F_COASTLINE));
-                targetTile.setSample(x, y, CLOUD_BIT_INDEX, cloudTile.getSampleBit(x, y,
-                                                                                   CoastColourCloudClassificationOp.F_CLOUD));
-                targetTile.setSample(x, y, CLOUD_SPATIAL_BIT_INDEX, cloudTile.getSampleBit(x, y,
-                                                                                           CoastColourCloudClassificationOp.F_CLOUD_SPATIAL));
-                targetTile.setSample(x, y, CLOUD_BUFFER_BIT_INDEX, cloudTile.getSampleBit(x, y,
-                                                                                          CoastColourCloudClassificationOp.F_CLOUD_BUFFER));
-                targetTile.setSample(x, y, CLOUD_SHADOW_BIT_INDEX, cloudTile.getSampleBit(x, y,
-                                                                                          CoastColourCloudClassificationOp.F_CLOUD_SHADOW));
-                targetTile.setSample(x, y, SNOW_ICE_BIT_INDEX, cloudTile.getSampleBit(x, y,
-                                                                                      CoastColourCloudClassificationOp.F_SNOW_ICE));
-                targetTile.setSample(x, y, LANDRISK_BIT_INDEX, cloudTile.getSampleBit(x, y,
-                                                                                      CoastColourCloudClassificationOp.F_LANDRISK));
-                targetTile.setSample(x, y, GLINTRISK_BIT_INDEX, cloudTile.getSampleBit(x, y,
-                                                                                       CoastColourCloudClassificationOp.F_GLINTRISK));
+                targetTile.setSample(x, y, LAND_BIT_INDEX,
+                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_LAND));
+                targetTile.setSample(x, y, COASTLINE_BIT_INDEX,
+                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_COASTLINE));
+                targetTile.setSample(x, y, CLOUD_BIT_INDEX,
+                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD));
+                targetTile.setSample(x, y, CLOUD_SPATIAL_BIT_INDEX,
+                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD_SPATIAL));
+                targetTile.setSample(x, y, CLOUD_BUFFER_BIT_INDEX,
+                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD_BUFFER));
+                targetTile.setSample(x, y, CLOUD_SHADOW_BIT_INDEX,
+                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD_SHADOW));
+                targetTile.setSample(x, y, SNOW_ICE_BIT_INDEX,
+                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_SNOW_ICE));
+                targetTile.setSample(x, y, LANDRISK_BIT_INDEX,
+                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_LANDRISK));
+                targetTile.setSample(x, y, GLINTRISK_BIT_INDEX,
+                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_GLINTRISK));
             }
         }
 

@@ -59,7 +59,8 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         for (Band band : case2rBands) {
             if (considerBandInBandCopy(band, target)) {
                 final Band targetBand = ProductUtils.copyBand(band.getName(), source, target);
-                targetBand.setSourceImage(band.getSourceImage());
+                targetBand.setLog10Scaled(false);
+                targetBand.setSourceImage(band.getGeophysicalImage());
                 targetBand.setValidPixelExpression(L2W_VALID_EXPRESSION);
             }
         }
@@ -72,8 +73,9 @@ class Case2rL2WProductFactory extends L2WProductFactory {
     protected void copyIOPBands(Product source, Product target) {
         for (String iopSourceBandName : IOP_SOURCE_BAND_NAMES) {
             final Band targetBand = ProductUtils.copyBand(iopSourceBandName, source, target);
-            targetBand.setSourceImage(source.getBand(iopSourceBandName).getSourceImage());
-            targetBand.setValidPixelExpression("!l2w_flags.INVALID");
+            targetBand.setLog10Scaled(false);
+            targetBand.setSourceImage(source.getBand(iopSourceBandName).getGeophysicalImage());
+            targetBand.setValidPixelExpression(L2W_VALID_EXPRESSION);
         }
     }
 

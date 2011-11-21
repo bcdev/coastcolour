@@ -158,6 +158,12 @@ public class L2WOpSecondTest {
             assertNull("Target band not expected: " + name, target.getBand(name));
         }
 
+        assertFalse(target.getBand("iop_a_pig_443").isLog10Scaled());
+        assertFalse(target.getBand("iop_a_total_443").isLog10Scaled());
+        assertFalse(target.getBand("iop_quality").isLog10Scaled());
+        assertFalse(target.getBand("conc_tsm").isLog10Scaled());
+        assertFalse(target.getBand("conc_chl").isLog10Scaled());
+
         // Tests on generated L1P flags dataset
         L1POpTest.testFlags(target, "l1p_flags");
 

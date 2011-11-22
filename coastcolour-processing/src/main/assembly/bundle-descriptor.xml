@@ -1,12 +1,12 @@
 <bundleDescriptor>
     <bundleName>coastcolour-processing</bundleName>
-    <bundleVersion>1.4-SNAPSHOT</bundleVersion>
+    <bundleVersion>1.4</bundleVersion>
 
     <processorDescriptors>
         <processorDescriptor>
             <executableName>CoastColour.L1P</executableName>
             <processorName>MERIS CoastColour L1P</processorName>
-            <processorVersion>1.4-SNAPSHOT</processorVersion>
+            <processorVersion>1.4</processorVersion>
             <defaultParameters><![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->
     <doCalibration>true</doCalibration>
@@ -31,8 +31,9 @@
                             developed in the frame of the CoastColour project.</p>
                             ]]>
             </descriptionHtml>
-            <inputProductTypes>MER_RR__1P,MER_FR__1P,MER_FSG_1P</inputProductTypes>
-            <validMaskExpression>!l1P_flags.INVALID</validMaskExpression>
+            <inputProductTypes>MERIS_L1B</inputProductTypes>
+            <outputProductType>MERIS_CC_L1P</outputProductType>
+            <validMaskExpression>!l1p_flags.INVALID</validMaskExpression>
 
             <outputVariables>
                 <outputVariable>
@@ -128,7 +129,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2R</executableName>
             <processorName>MERIS CoastColour L2R</processorName>
-            <processorVersion>1.4-SNAPSHOT</processorVersion>
+            <processorVersion>1.4</processorVersion>
             <defaultParameters><![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->
     <doCalibration>true</doCalibration>
@@ -173,7 +174,8 @@
                     <li>l2r_flags - CoastColour L2R atmospheric correction quality flags.</li>
                     </ul>
                 </p>]]></descriptionHtml>
-            <inputProductTypes>MER_RR__1P,MER_FR__1P,MER_FSG_1P,MER_FSG_CCL1P</inputProductTypes>
+            <inputProductTypes>MERIS_L1B,MERIS_CC_L1P</inputProductTypes>
+            <outputProductType>MERIS_CC_L2R</outputProductType>
             <validMaskExpression>!l2r_flags.INVALID</validMaskExpression>
 
             <outputVariables>
@@ -339,7 +341,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2W</executableName>
             <processorName>MERIS CoastColour L2W</processorName>
-            <processorVersion>1.4-SNAPSHOT</processorVersion>
+            <processorVersion>1.4</processorVersion>
             <defaultParameters>
                 <![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->
@@ -367,20 +369,20 @@
     <!-- If enabled IOPs are computed by QAA instead of Case-2-Regional. Concentrations of chlorophyll and
     total suspended matter will be derived from the IOPs. -->
     <useQaaForIops>false</useQaaForIops>
-    <!-- The lower bound of the valid value range of 'A'. -->
-    <qaa.aLowerBound>-0.2</qaa.aLowerBound>
-    <!-- The upper bound of the valid value range of 'A'. -->
-    <qaa.aUpperBound>5.0</qaa.aUpperBound>
-    <!-- The lower bound of the valid value range of 'BB'. -->
-    <qaa.bbLowerBound>-0.2</qaa.bbLowerBound>
-    <!-- The upper bound of the valid value range of 'BB'. -->
-    <qaa.bbUpperBound>5.0</qaa.bbUpperBound>
-    <!-- The lower bound of the valid value range of 'APH'. -->
-    <qaa.aphLowerBound>-0.02</qaa.aphLowerBound>
-    <!-- The upper bound of the valid value range of 'APH'. -->
-    <qaa.aphUpperBound>3.0</qaa.aphUpperBound>
-    <!-- The upper bound of the valid value range of 'ADG'. The lower bound is always 0.-->
-    <qaa.adgUpperBound>1.0</qaa.adgUpperBound>
+    <!-- The lower bound of the valid value range of 'A_TOTAL'. -->
+    <qaaATotalLower>-0.2</qaaATotalLower>
+    <!-- The upper bound of the valid value range of 'A_TOTAL'. -->
+    <qaaATotalUpper>5.0</qaaATotalUpper>
+    <!-- The lower bound of the valid value range of 'BB_SPM'. -->
+    <qaaBbSpmLower>-0.2</qaaBbSpmLower>
+    <!-- The upper bound of the valid value range of 'BB_SPM'. -->
+    <qaaBbSpmUpper>5.0</qaaBbSpmUpper>
+    <!-- The lower bound of the valid value range of 'A_PIG'. -->
+    <qaaAPigLower>-0.02</qaaAPigLower>
+    <!-- The upper bound of the valid value range of 'A_PIG'. -->
+    <qaaAPigUpper>3.0</qaaAPigUpper>
+    <!-- The upper bound of the valid value range of 'A_YS'. The lower bound is always 0.-->
+    <aYsUpper>1.0</aYsUpper>
     <!-- If selected the source remote reflectances are divided by PI. -->
     <qaa.divideByPI>true</qaa.divideByPI>
 </parameters>]]></defaultParameters>
@@ -409,7 +411,8 @@
                 <li>l2w_flags - CoastColour L2W water constituents and IOPs retrieval quality flags.</li>
                 </ul>
                 </p>]]></descriptionHtml>
-            <inputProductTypes>MER_RR__1P,MER_FR__1P,MER_FSG_1P,MER_FSG_CCL1P,MER_FSG_CCL2R</inputProductTypes>
+            <inputProductTypes>MERIS_L1B,MERIS_CC_L1P,MERIS_CC_L2R</inputProductTypes>
+            <outputProductType>MERIS_CC_L2W</outputProductType>
             <validMaskExpression>!l2w_flags.INVALID</validMaskExpression>
             <outputVariables>
                 <outputVariable>

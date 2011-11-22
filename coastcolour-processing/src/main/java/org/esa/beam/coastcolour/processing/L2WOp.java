@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L2W", version = "1.4-SNAPSHOT",
+@OperatorMetadata(alias = "CoastColour.L2W", version = "1.4",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +
@@ -142,28 +142,28 @@ public class L2WOp extends Operator {
 
     @Parameter(defaultValue = "-0.02", label = "'A_TOTAL' lower bound",
                description = "The lower bound of the valid value range.")
-    private float aTotalLower;
+    private float qaaATotalLower;
     @Parameter(defaultValue = "5.0", label = "'A_TOTAL' upper bound",
                description = "The upper bound of the valid value range.")
-    private float aTotalUpper;
+    private float qaaATotalUpper;
     @Parameter(defaultValue = "-0.2", label = "'BB_SPM' lower bound",
                description = "The lower bound of the valid value range.")
-    private float bbSpmLower;
+    private float qaaBbSpmLower;
     @Parameter(defaultValue = "5.0", label = "'BB_SPM' upper bound",
                description = "The upper bound of the valid value range.")
-    private float bbSpmUpper;
+    private float qaaBbSpmUpper;
     @Parameter(defaultValue = "-0.02", label = "'A_PIG' lower bound",
                description = "The lower bound of the valid value range.")
-    private float aPigLower;
+    private float qaaAPigLower;
     @Parameter(defaultValue = "3.0", label = "'A_PIG' upper bound",
                description = "The upper bound of the valid value range.")
-    private float aPigUpper;
+    private float qaaAPigUpper;
     @Parameter(defaultValue = "1.0", label = "'A_YS' upper bound",
                description = "The upper bound of the valid value range. The lower bound is always 0.")
     private float aYsUpper;
     @Parameter(defaultValue = "false", label = "Divide source Rrs by PI(3.14)",
                description = "If selected the source remote reflectances are divided by PI.")
-    private boolean qaa_divideByPI;
+    private boolean qaaDivideByPI;
 
     private int nadirColumnIndex;
     private FLHAlgorithm flhAlgorithm;
@@ -480,13 +480,13 @@ public class L2WOp extends Operator {
     private HashMap<String, Object> createQaaParameterMap() {
         HashMap<String, Object> qaaParams = new HashMap<String, Object>();
         qaaParams.put("invalidPixelExpression", invalidPixelExpression);
-        qaaParams.put("aTotalLower", aTotalLower);
-        qaaParams.put("aTotalUpper", aTotalUpper);
-        qaaParams.put("bbSpmLower", bbSpmLower);
-        qaaParams.put("bbSpmUpper", bbSpmUpper);
-        qaaParams.put("aPigLower", aPigLower);
-        qaaParams.put("aPigUpper", aPigUpper);
-        qaaParams.put("qaa_divideByPI", qaa_divideByPI);
+        qaaParams.put("aTotalLower", qaaATotalLower);
+        qaaParams.put("aTotalUpper", qaaATotalUpper);
+        qaaParams.put("bbSpmLower", qaaBbSpmLower);
+        qaaParams.put("bbSpmUpper", qaaBbSpmUpper);
+        qaaParams.put("aPigLower", qaaAPigLower);
+        qaaParams.put("aPigUpper", qaaAPigUpper);
+        qaaParams.put("divideByPI", qaaDivideByPI);
         return qaaParams;
     }
 

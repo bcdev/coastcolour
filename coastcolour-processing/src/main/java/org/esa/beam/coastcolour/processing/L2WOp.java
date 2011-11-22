@@ -140,30 +140,30 @@ public class L2WOp extends Operator {
                              "Concentrations of chlorophyll and total suspended matter will be derived from the IOPs.")
     private boolean useQaaForIops;
 
-    @Parameter(alias = "qaa.aLowerBound", defaultValue = "-0.02", label = "'A' Lower Bound",
+    @Parameter(defaultValue = "-0.02", label = "'A_TOTAL' lower bound",
                description = "The lower bound of the valid value range.")
-    private float a_lower;
-    @Parameter(alias = "qaa.aUpperBound", defaultValue = "5.0", label = "'A' Upper Bound",
+    private float aTotalLower;
+    @Parameter(defaultValue = "5.0", label = "'A_TOTAL' upper bound",
                description = "The upper bound of the valid value range.")
-    private float a_upper;
-    @Parameter(alias = "qaa.bbLowerBound", defaultValue = "-0.2", label = "'BB' Lower Bound",
+    private float aTotalUpper;
+    @Parameter(defaultValue = "-0.2", label = "'BB_SPM' lower bound",
                description = "The lower bound of the valid value range.")
-    private float bb_lower;
-    @Parameter(alias = "qaa.bbUpperBound", defaultValue = "5.0", label = "'BB' Upper Bound",
+    private float bbSpmLower;
+    @Parameter(defaultValue = "5.0", label = "'BB_SPM' upper bound",
                description = "The upper bound of the valid value range.")
-    private float bb_upper;
-    @Parameter(alias = "qaa.aphLowerBound", defaultValue = "-0.02", label = "'APH' Lower Bound",
+    private float bbSpmUpper;
+    @Parameter(defaultValue = "-0.02", label = "'A_PIG' lower bound",
                description = "The lower bound of the valid value range.")
-    private float aph_lower;
-    @Parameter(alias = "qaa.aphUpperBound", defaultValue = "3.0", label = "'APH' Upper Bound",
+    private float aPigLower;
+    @Parameter(defaultValue = "3.0", label = "'A_PIG' upper bound",
                description = "The upper bound of the valid value range.")
-    private float aph_upper;
-    @Parameter(alias = "qaa.adgUpperBound", defaultValue = "1.0", label = "'ADG' Upper Bound",
+    private float aPigUpper;
+    @Parameter(defaultValue = "1.0", label = "'A_YS' upper bound",
                description = "The upper bound of the valid value range. The lower bound is always 0.")
-    private float adg_upper;
-    @Parameter(alias = "qaa.divideByPI", defaultValue = "false", label = "Divide source Rrs by PI(3.14)",
+    private float aYsUpper;
+    @Parameter(defaultValue = "false", label = "Divide source Rrs by PI(3.14)",
                description = "If selected the source remote reflectances are divided by PI.")
-    private boolean divideByPI;
+    private boolean qaa_divideByPI;
 
     private int nadirColumnIndex;
     private FLHAlgorithm flhAlgorithm;
@@ -215,9 +215,7 @@ public class L2WOp extends Operator {
         l2wProductFactory.setOutputKdSpectrum(outputKdSpectrum);
         l2wProductFactory.setOutputReflectance(outputReflec);
 
-        final Product l2wProduct;
-        l2wProduct = l2wProductFactory.createL2WProduct();
-        setTargetProduct(l2wProduct);
+        setTargetProduct(l2wProductFactory.createL2WProduct());
     }
 
     @Override
@@ -482,13 +480,13 @@ public class L2WOp extends Operator {
     private HashMap<String, Object> createQaaParameterMap() {
         HashMap<String, Object> qaaParams = new HashMap<String, Object>();
         qaaParams.put("invalidPixelExpression", invalidPixelExpression);
-        qaaParams.put("a_lower", a_lower);
-        qaaParams.put("a_upper", a_upper);
-        qaaParams.put("bb_lower", bb_lower);
-        qaaParams.put("bb_upper", bb_upper);
-        qaaParams.put("aph_lower", aph_lower);
-        qaaParams.put("adg_upper", adg_upper);
-        qaaParams.put("divideByPI", divideByPI);
+        qaaParams.put("aTotalLower", aTotalLower);
+        qaaParams.put("aTotalUpper", aTotalUpper);
+        qaaParams.put("bbSpmLower", bbSpmLower);
+        qaaParams.put("bbSpmUpper", bbSpmUpper);
+        qaaParams.put("aPigLower", aPigLower);
+        qaaParams.put("aPigUpper", aPigUpper);
+        qaaParams.put("qaa_divideByPI", qaa_divideByPI);
         return qaaParams;
     }
 

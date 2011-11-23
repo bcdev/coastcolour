@@ -196,7 +196,9 @@ public class L1POpTest {
         String[] bandNames = target.getBandNames();
         for (int i = 0, bandNamesLength = bandNames.length; i < bandNamesLength; i++) {
             String bandName = bandNames[i];
-            System.out.println(target.getName() + ".bands[" + i + "] = " + bandName);
+            System.out.printf("%s.bands[%d].bandName = %s%n", target.getName(), i, bandName);
+            System.out.printf("%s.bands[%d].bandType = %s%n", target.getName(), i,
+                              ProductData.getTypeString(target.getBand(bandName).getDataType()));
         }
     }
 

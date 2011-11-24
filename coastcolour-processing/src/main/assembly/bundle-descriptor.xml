@@ -382,9 +382,9 @@
     <!-- The upper bound of the valid value range of 'A_PIG'. -->
     <qaaAPigUpper>3.0</qaaAPigUpper>
     <!-- The upper bound of the valid value range of 'A_YS'. The lower bound is always 0.-->
-    <aYsUpper>1.0</aYsUpper>
+    <qaaAYsUpper>1.0</qaaAYsUpper>
     <!-- If selected the source remote reflectances are divided by PI. -->
-    <qaa.divideByPI>true</qaa.divideByPI>
+    <qaaDivideByPI>true</qaaDivideByPI>
 </parameters>]]></defaultParameters>
             <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
             <descriptionHtml>

@@ -160,7 +160,7 @@ public class L2WOp extends Operator {
     private float qaaAPigUpper;
     @Parameter(defaultValue = "1.0", label = "'A_YS' upper bound",
                description = "The upper bound of the valid value range. The lower bound is always 0.")
-    private float aYsUpper;
+    private float qaaAYsUpper;
     @Parameter(defaultValue = "false", label = "Divide source Rrs by PI(3.14)",
                description = "If selected the source remote reflectances are divided by PI.")
     private boolean qaaDivideByPI;

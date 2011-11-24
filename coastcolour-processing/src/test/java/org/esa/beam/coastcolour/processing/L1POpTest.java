@@ -196,9 +196,13 @@ public class L1POpTest {
         String[] bandNames = target.getBandNames();
         for (int i = 0, bandNamesLength = bandNames.length; i < bandNamesLength; i++) {
             String bandName = bandNames[i];
-            System.out.printf("%s.bands[%d].bandName = %s%n", target.getName(), i, bandName);
-            System.out.printf("%s.bands[%d].bandType = %s%n", target.getName(), i,
-                              ProductData.getTypeString(target.getBand(bandName).getDataType()));
+            String productName = target.getName();
+            Band targetBand = target.getBand(bandName);
+            System.out.printf("%s.bands[%d].bandName = %s%n", productName, i, bandName);
+            System.out.printf("%s.bands[%d].dataType = %s%n", productName, i,
+                              ProductData.getTypeString(targetBand.getDataType()));
+            System.out.printf("%s.bands[%d].geoDataType = %s%n", productName, i,
+                              ProductData.getTypeString(targetBand.getGeophysicalDataType()));
         }
     }
 

@@ -1,12 +1,12 @@
 <bundleDescriptor>
     <bundleName>coastcolour-processing</bundleName>
-    <bundleVersion>1.4.1</bundleVersion>
+    <bundleVersion>1.4.1-SNAPSHOT</bundleVersion>
 
     <processorDescriptors>
         <processorDescriptor>
             <executableName>CoastColour.L1P</executableName>
             <processorName>MERIS CoastColour L1P</processorName>
-            <processorVersion>1.4.1</processorVersion>
+            <processorVersion>1.4.1-SNAPSHOT</processorVersion>
             <defaultParameters><![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->
     <doCalibration>true</doCalibration>
@@ -129,7 +129,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2R</executableName>
             <processorName>MERIS CoastColour L2R</processorName>
-            <processorVersion>1.4.1</processorVersion>
+            <processorVersion>1.4.1-SNAPSHOT</processorVersion>
             <defaultParameters><![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->
     <doCalibration>true</doCalibration>
@@ -341,7 +341,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2W</executableName>
             <processorName>MERIS CoastColour L2W</processorName>
-            <processorVersion>1.4.1</processorVersion>
+            <processorVersion>1.4.1-SNAPSHOT</processorVersion>
             <defaultParameters>
                 <![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->
@@ -397,9 +397,9 @@
                 <li>iop_a_ys_443 - Yellow substance absorption coefficient at 443 nm.</li>
                 <li>iop_a_pig_443 - Pigment absorption coefficient at 443 nm.</li>
                 <li>iop_bb_spm_443 - Backscattering of suspended particulate matter at 443 nm.</li>
+                <li>iop_quality - Quality indicator for IOPs.</li>
                 <li>conc_tsm - Total suspended matter dry weight concentration.</li>
                 <li>conc_chl - Chlorophyll concentration.</li>
-                <li>chiSquare - Chi Square Out of Scope.</li>
                 <li>K_min - Minimum downwelling irradiance attenuation coefficient.</li>
                 <li>Kd_&lt;λ&gt; - Downwelling irradiance attenuation coefficient at &lt;λ&gt;, where &lt;λ&gt; is one of 412, 443, 490, 510, 560, 620, 664 and 680</li>
                 <li>Z90_max - Maximum signal depth.</li>
@@ -436,17 +436,17 @@
                     <defaultWeightCoeff>1.0</defaultWeightCoeff>
                 </outputVariable>
                 <outputVariable>
+                    <name>iop_quality</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
                     <name>conc_tsm</name>
                     <defaultAggregator>AVG</defaultAggregator>
                     <defaultWeightCoeff>1.0</defaultWeightCoeff>
                 </outputVariable>
                 <outputVariable>
                     <name>conc_chl</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>chiSquare</name>
                     <defaultAggregator>AVG</defaultAggregator>
                     <defaultWeightCoeff>1.0</defaultWeightCoeff>
                 </outputVariable>

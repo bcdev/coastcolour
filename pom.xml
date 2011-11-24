@@ -180,7 +180,7 @@
             <dependency>
                 <groupId>org.esa.beam.coastcolour</groupId>
                 <artifactId>coastcolour-fuzzy-classification</artifactId>
-                <version>1.0</version>
+                <version>1.2-SNAPSHOT</version>
             </dependency>
 
             <!-- Case2R Libraries ############################################# -->

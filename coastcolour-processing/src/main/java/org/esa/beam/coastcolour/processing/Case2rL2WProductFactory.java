@@ -55,13 +55,18 @@ class Case2rL2WProductFactory extends L2WProductFactory {
     }
 
     private void copyBands(Product source, Product target) {
-        final Band[] case2rBands = source.getBands();
-        for (Band band : case2rBands) {
+        final Band[] sourceBands = source.getBands();
+        for (Band band : sourceBands) {
             if (considerBandInBandCopy(band, target)) {
-                final Band targetBand = ProductUtils.copyBand(band.getName(), source, target);
+                Band targetBand = new Band(band.getName(),
+                                           band.getGeophysicalDataType(),
+                                           band.getRasterWidth(),
+                                           band.getRasterHeight());
+                ProductUtils.copyRasterDataNodeProperties(band, targetBand);
                 targetBand.setLog10Scaled(false);
                 targetBand.setSourceImage(band.getGeophysicalImage());
                 targetBand.setValidPixelExpression(L2W_VALID_EXPRESSION);
+                target.addBand(targetBand);
             }
         }
     }

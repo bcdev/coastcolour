@@ -384,7 +384,7 @@
     <!-- The upper bound of the valid value range of 'A_YS'. The lower bound is always 0.-->
     <qaaAYsUpper>1.0</qaaAYsUpper>
     <!-- If selected the source remote reflectances are divided by PI. -->
-    <qaaDivideByPI>true</qaaDivideByPI>
+    <qaaDivideByPI>false</qaaDivideByPI>
 </parameters>]]></defaultParameters>
             <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
             <descriptionHtml>

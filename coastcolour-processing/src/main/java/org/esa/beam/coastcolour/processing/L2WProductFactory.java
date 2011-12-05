@@ -62,7 +62,6 @@ abstract class L2WProductFactory {
     private static final String IMAGINARY_NUMBER_DESCRIPTION = "An imaginary number would have been produced";
     private static final String NEGATIVE_AYS_DESCRIPTION = "Negative value in a_ys spectrum";
     public static final String TURBIDITY_NAME = "turbidity";
-    public static final String TURBIDITY_INDEXSOURCE_NAME = "turbidity_index";
     public static final String CONC_GROUPING_PATTERN = "conc";
 
 
@@ -221,10 +220,6 @@ abstract class L2WProductFactory {
         addPatternToAutoGrouping(targetProduct, CONC_GROUPING_PATTERN);
     }
 
-
-    protected void renameTurbidityBand(Product targetProduct) {
-        targetProduct.getBand(TURBIDITY_INDEXSOURCE_NAME).setName(TURBIDITY_NAME);
-    }
 
     protected void addFLHBands(Product target) {
         Band flhBand = target.addBand(EXP_FLH_681_NAME, ProductData.TYPE_FLOAT32);

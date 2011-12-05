@@ -22,6 +22,7 @@
            [CC-11] Remove log-scaling from iop bands in cas2r mode<br/>
            [CC-8] Change default value of 'qaa.divideByPI' to false<br/>
            Changes in 1.3<br/>
+           [CC-12] Rename 'turbidity_index' band to 'turbidity'<br/>
            [CC-7] Integrate QAA in L2W processor<br/>
            [CC-6] Above 60° North the L1P land/water mask is calculated wrong<br/>
            [CC-5] Cloud shadow flag is dependent of the configured tile size<br/>

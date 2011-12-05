@@ -10,6 +10,9 @@ import org.esa.beam.util.ProductUtils;
  */
 class Case2rL2WProductFactory extends L2WProductFactory {
 
+    private static final String TURBIDITY_INDEX_SOURCE_NAME = "turbidity_index";
+
+
     private Product l2rProduct;
     private Product case2rProduct;
 
@@ -92,5 +95,8 @@ class Case2rL2WProductFactory extends L2WProductFactory {
 
     }
 
+    private void renameTurbidityBand(Product targetProduct) {
+        targetProduct.getBand(TURBIDITY_INDEX_SOURCE_NAME).setName(TURBIDITY_NAME);
+    }
 
 }

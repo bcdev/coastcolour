@@ -42,7 +42,7 @@
         <wps:Input>
             <ows:Identifier>inputPath</ows:Identifier>
             <wps:Data>
-                <wps:LiteralData>outputs/coastcolour/TSchroeder/southindia/l2r</wps:LiteralData>
+                <wps:LiteralData>outputs/coastcolour/TSchroeder/southindia/l2r/.*.seq$</wps:LiteralData>
             </wps:Data>
         </wps:Input>
 

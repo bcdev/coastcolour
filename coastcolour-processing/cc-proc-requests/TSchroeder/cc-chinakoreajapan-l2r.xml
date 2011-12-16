@@ -42,7 +42,7 @@
         <wps:Input>
             <ows:Identifier>inputPath</ows:Identifier>
             <wps:Data>
-                <wps:LiteralData>outputs/coastcolour/TSchroeder/chinakoreajapan/l1p</wps:LiteralData>
+                <wps:LiteralData>outputs/coastcolour/TSchroeder/chinakoreajapan/l1p/.*.seq$</wps:LiteralData>
             </wps:Data>
         </wps:Input>
 

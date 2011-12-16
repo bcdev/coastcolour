@@ -28,6 +28,7 @@
                 <include>*:beam-meris-l2auxdata*</include>
                 <include>*:beam-meris-qaa*</include>
                 <include>*:beam-meris-radiometry*</include>
+                <include>*:beam-waterradiance-auxdata*</include>
                 <include>*:beam-flhmci*</include>
                 <include>*:beam-meris-sdr*</include>
                 <include>*:beam-netcdf*</include>

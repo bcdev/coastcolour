@@ -7,7 +7,7 @@
     <name>CoastColour</name>
     <groupId>org.esa.beam.coastcolour</groupId>
     <artifactId>coastcolour</artifactId>
-    <version>1.4.1</version>
+    <version>1.5-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -194,7 +194,7 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-meris-glint</artifactId>
-                <version>1.3-CC-SNAPSHOT</version>
+                <version>1.4-CC-SNAPSHOT</version>
             </dependency>
 
             <dependency>
@@ -206,7 +206,7 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-meris-case2-regional</artifactId>
-                <version>1.6-CC3-SNAPSHOT</version>
+                <version>1.7-CC-SNAPSHOT</version>
             </dependency>
 
             <dependency>

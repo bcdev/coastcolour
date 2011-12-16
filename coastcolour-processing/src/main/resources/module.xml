@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>coastcolour-processing</symbolicName>
-    <version>1.4.1</version>
+    <version>1.5</version>
     <name>BEAM CoastColour Processing</name>
 
     <description>
@@ -18,6 +18,8 @@
 
     <changelog>
         <![CDATA[
+           Changes in 1.5<br/>
+           [CC-14] Integrate C2R and Glint-AC which consider salinity and temperature maps<br/>
            Changes in 1.4<br/>
            [CC-11] Remove log-scaling from iop bands in cas2r mode<br/>
            [CC-8] Change default value of 'qaa.divideByPI' to false<br/>

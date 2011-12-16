@@ -19,7 +19,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VirtualBandOpImage;
-import org.esa.beam.meris.case2.Case2AlgorithmEnum;
+import org.esa.beam.meris.case2.RegionalWaterOp;
 import org.esa.beam.meris.case2.algorithm.KMin;
 import org.esa.beam.meris.case2.water.WaterAlgorithm;
 import org.esa.beam.util.ResourceInstaller;
@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L2W", version = "1.4.1",
+@OperatorMetadata(alias = "CoastColour.L2W", version = "1.5",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +
@@ -73,6 +73,11 @@ public class L2WOp extends Operator {
                })
     private int brightTestWavelength;
 
+
+    @Parameter(label = "Use climatology map for salinity and temperature", defaultValue = "true",
+               description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
+                             "for the whole scene.")
+    private boolean useSnTMap;
 
     @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU",
                description = "The average salinity of the water in the region to be processed.")
@@ -190,11 +195,8 @@ public class L2WOp extends Operator {
             flhAlgorithm = new FLHAlgorithm(bandWavelengths[0], bandWavelengths[1], bandWavelengths[2]);
         }
 
-        Case2AlgorithmEnum c2rAlgorithm = Case2AlgorithmEnum.REGIONAL;
-        Operator case2Op = c2rAlgorithm.createOperatorInstance();
-
-        setCase2rParameters(case2Op, c2rAlgorithm);
-
+        Operator case2Op = new RegionalWaterOp.Spi().createOperator();
+        setCase2rParameters(case2Op);
         case2rProduct = case2Op.getTargetProduct();
 
         invalidOpImage = VirtualBandOpImage.createMask(invalidPixelExpression,
@@ -461,20 +463,17 @@ public class L2WOp extends Operator {
         return tiles;
     }
 
-    private void setCase2rParameters(Operator case2Op, Case2AlgorithmEnum c2rAlgorithm) {
-        case2Op.setParameter("forwardWaterNnFile", forwardWaterNnFile);
-        case2Op.setParameter("inverseWaterNnFile", inverseWaterNnFile);
-        case2Op.setParameter("averageSalinity", averageSalinity);
-        case2Op.setParameter("averageTemperature", averageTemperature);
-        case2Op.setParameter("tsmConversionExponent", c2rAlgorithm.getDefaultTsmExponent());
-        case2Op.setParameter("tsmConversionFactor", c2rAlgorithm.getDefaultTsmFactor());
-        case2Op.setParameter("chlConversionExponent", c2rAlgorithm.getDefaultChlExponent());
-        case2Op.setParameter("chlConversionFactor", c2rAlgorithm.getDefaultChlFactor());
-        case2Op.setParameter("outputKdSpectrum", outputKdSpectrum);
-        case2Op.setParameter("outputAPoc", outputAPoc);
-        case2Op.setParameter("inputReflecAre", "RADIANCE_REFLECTANCES");
-        case2Op.setParameter("invalidPixelExpression", invalidPixelExpression);
-        case2Op.setSourceProduct("acProduct", l2rProduct);
+    private void setCase2rParameters(Operator regionalWaterOp) {
+        regionalWaterOp.setParameter("forwardWaterNnFile", forwardWaterNnFile);
+        regionalWaterOp.setParameter("inverseWaterNnFile", inverseWaterNnFile);
+        regionalWaterOp.setParameter("useSnTMap", useSnTMap);
+        regionalWaterOp.setParameter("averageSalinity", averageSalinity);
+        regionalWaterOp.setParameter("averageTemperature", averageTemperature);
+        regionalWaterOp.setParameter("outputKdSpectrum", outputKdSpectrum);
+        regionalWaterOp.setParameter("outputAPoc", outputAPoc);
+        regionalWaterOp.setParameter("inputReflecAre", "RADIANCE_REFLECTANCES");
+        regionalWaterOp.setParameter("invalidPixelExpression", invalidPixelExpression);
+        regionalWaterOp.setSourceProduct("acProduct", l2rProduct);
     }
 
     private HashMap<String, Object> createQaaParameterMap() {
@@ -509,6 +508,7 @@ public class L2WOp extends Operator {
         l2rParams.put("algorithm", CloudScreeningSelector.CoastColour);
         l2rParams.put("brightTestThreshold", brightTestThreshold);
         l2rParams.put("brightTestWavelength", brightTestWavelength);
+        l2rParams.put("useSnTMap", useSnTMap);
         l2rParams.put("averageSalinity", averageSalinity);
         l2rParams.put("averageTemperature", averageTemperature);
         l2rParams.put("atmoNetMerisFile", atmoNetMerisFile);

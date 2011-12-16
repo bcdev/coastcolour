@@ -20,7 +20,7 @@ import org.esa.beam.util.ResourceInstaller;
 import java.io.File;
 import java.util.HashMap;
 
-@OperatorMetadata(alias = "CoastColour.L2R", version = "1.4.1",
+@OperatorMetadata(alias = "CoastColour.L2R", version = "1.5",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Performs a atmospheric correction. The result contains (normalised) water leaving " +
@@ -47,6 +47,11 @@ public class L2ROp extends Operator {
                label = "Perform equalization",
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
+
+    @Parameter(label = "Use climatology map for salinity and temperature", defaultValue = "true",
+               description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
+                             "for the whole scene.")
+    private boolean useSnTMap;
 
     @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU",
                description = "The average salinity of the water in the region to be processed.")
@@ -136,6 +141,7 @@ public class L2ROp extends Operator {
         glintParameters.put("outputPath", outputPath);
         glintParameters.put("outputTransmittance", outputTransmittance);
         glintParameters.put("deriveRwFromPath", false);
+        glintParameters.put("useSnTMap", useSnTMap);
         glintParameters.put("averageSalinity", averageSalinity);
         glintParameters.put("averageTemperature", averageTemperature);
         glintParameters.put("atmoNetMerisFile", atmoNetMerisFile);

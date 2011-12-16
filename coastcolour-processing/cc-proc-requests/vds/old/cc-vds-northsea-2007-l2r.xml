@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<wps:Execute service="WPS"
+             version="1.0.0"
+             xmlns:wps="http://www.opengis.net/wps/1.0.0"
+             xmlns:ows="http://www.opengis.net/ows/1.1"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ogc/wps/1.0.0/wpsExecute_request.xsd">
+
+    <ows:Identifier>L2</ows:Identifier>
+
+    <wps:DataInputs>
+
+        <wps:Input>
+            <ows:Identifier>calvalus.hadoop.mapred.job.priority</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>HIGH</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>calvalus.input.format</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>HADOOP-STREAMING</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>autoStaging</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>false</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>inputPath</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>outputs/coastcolour/vds/northsea/l1p/2007/.*.seq</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>outputPath</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>outputs/coastcolour/vds/northsea/l2r/2007</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+
+        <wps:Input>
+            <ows:Identifier>processorBundleName</ows:Identifier>
+            <ows:Title>The processor's bundle name</ows:Title>
+            <wps:Data>
+                <wps:LiteralData>coastcolour-processing</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>processorBundleVersion</ows:Identifier>
+            <ows:Title>The processor's bundle version</ows:Title>
+            <wps:Data>
+                <wps:LiteralData>1.3-SNAPSHOT</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>processorName</ows:Identifier>
+            <ows:Title>The name of the GPF operator</ows:Title>
+            <wps:Data>
+                <wps:LiteralData>CoastColour.L2R</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>calvalus.system.beam.reader.tileHeight</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>32</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.system.beam.reader.tileWidth</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>*</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.system.beam.pixelGeoCoding.useTiling</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>true</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.system.beam.envisat.usePixelGeoCoding</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>true</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.system.beam.pixelGeoCoding.fractionAccuracy</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>true</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+    </wps:DataInputs>
+
+</wps:Execute>

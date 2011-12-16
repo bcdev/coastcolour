@@ -42,7 +42,7 @@
         <wps:Input>
             <ows:Identifier>inputPath</ows:Identifier>
             <wps:Data>
-                <wps:LiteralData>outputs/coastcolour/TSchroeder/greatbarrierreef/l1p/.*.seq$</wps:LiteralData>
+                <wps:LiteralData>outputs/coastcolour/TSchroeder/${region}/l1p/.*.seq$</wps:LiteralData>
             </wps:Data>
         </wps:Input>
 
@@ -50,6 +50,13 @@
             <ows:Identifier>outputPath</ows:Identifier>
             <wps:Data>
                 <wps:LiteralData>outputs/coastcolour/TSchroeder/greatbarrierreef/l2r</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>regionName</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>greatbarrierreef</wps:LiteralData>
             </wps:Data>
         </wps:Input>
 

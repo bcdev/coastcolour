@@ -49,7 +49,7 @@
         <wps:Input>
             <ows:Identifier>inputPath</ows:Identifier>
             <wps:Data>
-                <wps:LiteralData>outputs/coastcolour/TSchroeder/northsea/l1p/.*.seq$</wps:LiteralData>
+                <wps:LiteralData>outputs/coastcolour/TSchroeder/${region}/l1p/.*.seq$</wps:LiteralData>
             </wps:Data>
         </wps:Input>
 
@@ -57,6 +57,13 @@
             <ows:Identifier>outputPath</ows:Identifier>
             <wps:Data>
                 <wps:LiteralData>outputs/coastcolour/TSchroeder/northsea/l2r</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>regionName</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>northsea</wps:LiteralData>
             </wps:Data>
         </wps:Input>
 

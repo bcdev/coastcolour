@@ -42,7 +42,7 @@
         <wps:Input>
             <ows:Identifier>inputPath</ows:Identifier>
             <wps:Data>
-                <wps:LiteralData>outputs/coastcolour/TSchroeder/southindia/l2r/.*.seq$</wps:LiteralData>
+                <wps:LiteralData>outputs/coastcolour/TSchroeder/${region}/l2r/.*.seq$</wps:LiteralData>
             </wps:Data>
         </wps:Input>
 
@@ -50,6 +50,13 @@
             <ows:Identifier>outputPath</ows:Identifier>
             <wps:Data>
                 <wps:LiteralData>outputs/coastcolour/TSchroeder/southindia/l2w</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>regionName</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>southindia</wps:LiteralData>
             </wps:Data>
         </wps:Input>
 

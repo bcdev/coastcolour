@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<wps:Execute service="WPS"
+             version="1.0.0"
+             xmlns:wps="http://www.opengis.net/wps/1.0.0"
+             xmlns:ows="http://www.opengis.net/ows/1.1"
+             xmlns:xlink="http://www.w3.org/1999/xlink"
+        >
+
+    <ows:Identifier>L2F</ows:Identifier>
+
+    <wps:DataInputs>
+
+        <wps:Input>
+            <ows:Identifier>calvalus.output.dir</ows:Identifier>
+            <ows:Title>output directory</ows:Title>
+            <wps:Data>
+                <wps:Reference
+                        xlink:href="hdfs://cvmaster00:9000/calvalus/outputs/coastcolour/TSchroeder/nc/northsea/l2w/"/>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>inputPath</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>outputs/coastcolour/TSchroeder/northsea/l2w/.*.seq</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.input.format</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>HADOOP-STREAMING</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+
+        <wps:Input>
+            <ows:Identifier>calvalus.resume</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>true</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.output.compression</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>gz</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.output.regex</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>L2_of_L2_of_L2_of_(MER_..._)1.....(.+)</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.output.replacement</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>$1CCL2W_$2</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+        <wps:Input>
+            <ows:Identifier>calvalus.system.beam.reader.tileHeight</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>32</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.system.beam.reader.tileWidth</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>*</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.system.beam.pixelGeoCoding.useTiling</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>true</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.system.beam.envisat.usePixelGeoCoding</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>true</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+        <wps:Input>
+            <ows:Identifier>calvalus.system.beam.pixelGeoCoding.fractionAccuracy</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>true</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+
+
+    </wps:DataInputs>
+
+</wps:Execute>

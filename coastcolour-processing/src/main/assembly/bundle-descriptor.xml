@@ -2,7 +2,117 @@
     <bundleName>coastcolour-processing</bundleName>
     <bundleVersion>1.4.1</bundleVersion>
 
-    <processorDescriptors>
+     <processorDescriptors>
+        <processorDescriptor>
+            <executableName>Meris.CorrectRadiometry</executableName>
+            <processorName>MERIS Radiometric Corrections</processorName>
+            <processorVersion>1.4.1</processorVersion>
+            <defaultParameters><![CDATA[<parameters>
+    <!-- Whether to perform the calibration. -->
+    <doCalibration>true</doCalibration>
+    <!-- Whether to perform MERIS Smile-effect correction. -->
+    <doSmile>true</doSmile>
+    <!-- Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products. -->
+    <doEqualization>true</doEqualization>
+    <!-- Perform radiance-to-reflectance conversion. -->
+    <doRadToRefl>false</doRadToRefl>
+    </parameters>]]></defaultParameters>
+            <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
+            <descriptionHtml>
+                <![CDATA[<p>
+                            Performs radiometric corrections on MERIS L1b data products.</p>
+                            ]]>
+            </descriptionHtml>
+            <inputProductTypes>MERIS_L1B</inputProductTypes>
+            <outputProductType>MERIS_L1P</outputProductType>
+            <validMaskExpression>!l1p_flags.INVALID</validMaskExpression>
+            <outputVariables>
+                <outputVariable>
+                    <name>radiance_1</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_2</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_3</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_4</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_5</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+              <outputVariable>
+                    <name>radiance_6</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_7</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_8</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_9</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_10</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_11</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_12</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_13</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+              <outputVariable>
+                    <name>radiance_14</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_15</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>detector_index</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>l1_flags</name>
+                </outputVariable>
+            </outputVariables>
+        </processorDescriptor>
+
         <processorDescriptor>
             <executableName>CoastColour.L1P</executableName>
             <processorName>MERIS CoastColour L1P</processorName>

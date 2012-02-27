@@ -218,8 +218,7 @@ public class L2ROp extends Operator {
         final Band[] radiometryBands = glintProduct.getBands();
         for (Band band : radiometryBands) {
             if (!band.isFlagBand()) {
-                final Band targetBand = ProductUtils.copyBand(band.getName(), glintProduct, l2rProduct);
-                targetBand.setSourceImage(band.getSourceImage());
+                ProductUtils.copyBand(band.getName(), glintProduct, l2rProduct);
             }
         }
     }

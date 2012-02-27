@@ -176,8 +176,7 @@ public class L1POp extends Operator {
         final Band[] radiometryBands = radiometryProduct.getBands();
         for (Band band : radiometryBands) {
             if (!band.isFlagBand()) {
-                final Band targetBand = ProductUtils.copyBand(band.getName(), radiometryProduct, l1pProduct);
-                targetBand.setSourceImage(band.getSourceImage());
+                ProductUtils.copyBand(band.getName(), radiometryProduct, l1pProduct);
             }
         }
     }

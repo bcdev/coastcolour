@@ -131,9 +131,7 @@ abstract class L2WProductFactory {
             Band[] bands = sourceProduct.getBands();
             for (Band band : bands) {
                 if (band.getName().startsWith("reflec_")) {
-                    Band targetBand = ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
-                    Band sourceBand = sourceProduct.getBand(band.getName());
-                    targetBand.setSourceImage(sourceBand.getSourceImage());
+                    ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
                 }
             }
             addPatternToAutoGrouping(targetProduct, "reflec");

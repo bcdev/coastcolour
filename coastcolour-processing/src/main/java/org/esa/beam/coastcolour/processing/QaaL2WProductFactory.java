@@ -171,9 +171,7 @@ class QaaL2WProductFactory extends L2WProductFactory {
     protected void copyAltitudeBand(Product sourceProduct, Product targetProduct) {
         Band band = sourceProduct.getBand(ALTITUDE_SOURCE_NAME);
         if (band != null) { // altitude does not exist for RR and FR only for FSG
-            Band targetBand = ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
-            Band sourceBand = sourceProduct.getBand(band.getName());
-            targetBand.setSourceImage(sourceBand.getSourceImage());
+            ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
         }
 
     }

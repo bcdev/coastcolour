@@ -42,7 +42,7 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         if (isOutputFLH()) {
             addFLHBands(l2wProduct);
         }
-        copyFlagBands(l2rProduct, l2wProduct);
+        ProductUtils.copyFlagBands(l2rProduct, l2wProduct, true);
         ProductUtils.copyTiePointGrids(case2rProduct, l2wProduct);
         renameIops(l2wProduct);
         renameChiSquare(l2wProduct);
@@ -80,7 +80,7 @@ class Case2rL2WProductFactory extends L2WProductFactory {
 
     protected void copyIOPBands(Product source, Product target) {
         for (String iopSourceBandName : IOP_SOURCE_BAND_NAMES) {
-            final Band targetBand = ProductUtils.copyBand(iopSourceBandName, source, target);
+            final Band targetBand = ProductUtils.copyBand(iopSourceBandName, source, target, false);
             targetBand.setLog10Scaled(false);
             targetBand.setSourceImage(source.getBand(iopSourceBandName).getGeophysicalImage());
             targetBand.setValidPixelExpression(L2W_VALID_EXPRESSION);

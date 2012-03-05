@@ -105,17 +105,6 @@ abstract class L2WProductFactory {
         this.invalidPixelExpression = invalidPixelExpression;
     }
 
-    protected void copyFlagBands(Product source, Product target) {
-        ProductUtils.copyFlagBands(source, target);
-        final Band[] radiometryBands = source.getBands();
-        for (Band band : radiometryBands) {
-            if (band.isFlagBand()) {
-                final Band targetBand = target.getBand(band.getName());
-                targetBand.setSourceImage(band.getSourceImage());
-            }
-        }
-    }
-
     protected void copyMasks(Product sourceProduct, Product targetProduct) {
         ProductNodeGroup<Mask> maskGroup = sourceProduct.getMaskGroup();
         for (int i = 0; i < maskGroup.getNodeCount(); i++) {
@@ -131,7 +120,7 @@ abstract class L2WProductFactory {
             Band[] bands = sourceProduct.getBands();
             for (Band band : bands) {
                 if (band.getName().startsWith("reflec_")) {
-                    ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
+                    ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, true);
                 }
             }
             addPatternToAutoGrouping(targetProduct, "reflec");

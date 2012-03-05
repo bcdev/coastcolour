@@ -175,7 +175,7 @@ public class L2ROp extends Operator {
         ProductUtils.copyMetadata(glintProduct, l2rProduct);
         ProductUtils.copyMasks(glintProduct, l2rProduct);
         copyBands(glintProduct, l2rProduct);
-        copyFlagBands(glintProduct, l2rProduct);
+        ProductUtils.copyFlagBands(glintProduct, l2rProduct, true);
         ProductUtils.copyTiePointGrids(glintProduct, l2rProduct);
         ProductUtils.copyGeoCoding(glintProduct, l2rProduct);
 
@@ -203,22 +203,11 @@ public class L2ROp extends Operator {
         super.dispose();
     }
 
-    private void copyFlagBands(Product glintProduct, Product l2rProduct) {
-        ProductUtils.copyFlagBands(glintProduct, l2rProduct);
-        final Band[] radiometryBands = glintProduct.getBands();
-        for (Band band : radiometryBands) {
-            if (band.isFlagBand()) {
-                final Band targetBand = l2rProduct.getBand(band.getName());
-                targetBand.setSourceImage(band.getSourceImage());
-            }
-        }
-    }
-
     private void copyBands(Product glintProduct, Product l2rProduct) {
         final Band[] radiometryBands = glintProduct.getBands();
         for (Band band : radiometryBands) {
             if (!band.isFlagBand()) {
-                ProductUtils.copyBand(band.getName(), glintProduct, l2rProduct);
+                ProductUtils.copyBand(band.getName(), glintProduct, l2rProduct, true);
             }
         }
     }

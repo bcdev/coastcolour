@@ -154,29 +154,18 @@ public class L1POp extends Operator {
         ProductUtils.copyMetadata(radiometryProduct, l1pProduct);
         ProductUtils.copyMasks(radiometryProduct, l1pProduct);
         copyBands(radiometryProduct, l1pProduct);
-        copyFlagBands(radiometryProduct, l1pProduct);
+        ProductUtils.copyFlagBands(radiometryProduct, l1pProduct, true);
         ProductUtils.copyTiePointGrids(radiometryProduct, l1pProduct);
         ProductUtils.copyGeoCoding(radiometryProduct, l1pProduct);
 
         return l1pProduct;
     }
 
-    private void copyFlagBands(Product radiometryProduct, Product l1pProduct) {
-        ProductUtils.copyFlagBands(radiometryProduct, l1pProduct);
-        final Band[] radiometryBands = radiometryProduct.getBands();
-        for (Band band : radiometryBands) {
-            if (band.isFlagBand()) {
-                final Band targetBand = l1pProduct.getBand(band.getName());
-                targetBand.setSourceImage(band.getSourceImage());
-            }
-        }
-    }
-
     private void copyBands(Product radiometryProduct, Product l1pProduct) {
         final Band[] radiometryBands = radiometryProduct.getBands();
         for (Band band : radiometryBands) {
             if (!band.isFlagBand()) {
-                ProductUtils.copyBand(band.getName(), radiometryProduct, l1pProduct);
+                ProductUtils.copyBand(band.getName(), radiometryProduct, l1pProduct, true);
             }
         }
     }

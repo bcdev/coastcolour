@@ -66,7 +66,6 @@ public class L1POpTest {
 
         final ProductNodeGroup<FlagCoding> flagCodingGroup = target.getFlagCodingGroup();
         assertEquals(2, flagCodingGroup.getNodeCount());
-
         // Tests on generated flags dataset
         testFlags(target, "l1p_flags");
 
@@ -132,12 +131,13 @@ public class L1POpTest {
                     target.containsBand("l1p_flags"));
     }
 
-    public static void testFlags(Product target, String flagsName) {
-        assertNotNull("Target band missing: " + flagsName, target.getBand(flagsName));
-        assertNotNull(target.getBand(flagsName).getFlagCoding());
-        assertEquals(flagsName, target.getBand(flagsName).getFlagCoding().getName());
+    public static void testFlags(Product target, String flagsBandName) {
+        Band flagsBand = target.getBand(flagsBandName);
+        assertNotNull("Target band missing: " + flagsBandName, flagsBand);
+        assertNotNull(flagsBand.getFlagCoding());
+        assertEquals(flagsBandName, flagsBand.getFlagCoding().getName());
         final ProductNodeGroup<FlagCoding> flagCodingGroup = target.getFlagCodingGroup();
-        assertSame(flagCodingGroup.get(flagsName), target.getBand(flagsName).getFlagCoding());
+        assertSame(flagCodingGroup.get(flagsBandName), flagsBand.getFlagCoding());
     }
 
     public static Product createL1bProduct() throws ParseException {
@@ -192,6 +192,7 @@ public class L1POpTest {
     }
 
     // used for debugging
+    @SuppressWarnings("UnusedDeclaration")
     public static void dumpBands(Product target) {
         String[] bandNames = target.getBandNames();
         for (int i = 0, bandNamesLength = bandNames.length; i < bandNamesLength; i++) {

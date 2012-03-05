@@ -60,7 +60,7 @@ class QaaL2WProductFactory extends L2WProductFactory {
         if (isOutputFLH()) {
             addFLHBands(l2wProduct);
         }
-        copyFlagBands(l2rProduct, l2wProduct);
+        ProductUtils.copyFlagBands(l2rProduct, l2wProduct, true);
 
         ProductUtils.copyTiePointGrids(qaaProduct, l2wProduct);
         renameIops(l2wProduct);
@@ -113,7 +113,7 @@ class QaaL2WProductFactory extends L2WProductFactory {
 
     protected void copyIOPBands(Product source, Product target) {
         for (String iopSourceBandName : IOP_SOURCE_BAND_NAMES) {
-            final Band targetBand = ProductUtils.copyBand(iopSourceBandName, source, target);
+            final Band targetBand = ProductUtils.copyBand(iopSourceBandName, source, target, false);
             final Band sourceBand = source.getBand(iopSourceBandName);
             RenderedImage sourceImage = getIOPSourceImage(sourceBand);
             targetBand.setSourceImage(sourceImage);
@@ -171,7 +171,7 @@ class QaaL2WProductFactory extends L2WProductFactory {
     protected void copyAltitudeBand(Product sourceProduct, Product targetProduct) {
         Band band = sourceProduct.getBand(ALTITUDE_SOURCE_NAME);
         if (band != null) { // altitude does not exist for RR and FR only for FSG
-            ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
+            ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, true);
         }
 
     }

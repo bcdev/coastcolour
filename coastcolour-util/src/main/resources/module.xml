@@ -22,6 +22,12 @@
     <dependency>
         <module>beam-core</module>
     </dependency>
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-csv-dataio</module>
+    </dependency>
 
     <extension point="ceres-core:applications">
         <application id="RgbQuickLookGeneratorMain" class="org.esa.beam.coastcolour.util.RgbQuickLookGeneratorMain"/>

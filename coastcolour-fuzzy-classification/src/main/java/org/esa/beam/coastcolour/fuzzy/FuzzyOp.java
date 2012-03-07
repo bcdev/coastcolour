@@ -51,14 +51,26 @@ public class FuzzyOp extends PixelOperator {
     @Parameter(defaultValue = "reflec")
     private String reflectancesPrefix;
 
+    @Parameter(defaultValue = "false")
+    private boolean writeInputReflectances;
+
     private FuzzyClassification fuzzyClassification;
     private int bandCount;
+    private Auxdata auxdata;
 
     @Override
     protected void configureTargetProduct(ProductConfigurer productConfigurer) {
         super.configureTargetProduct(productConfigurer);
 
+        final URL resourceUrl = FuzzyClassification.class.getResource(AUXDATA_PATH);
+        try {
+            auxdata = new Auxdata(resourceUrl.toURI());
+        } catch (Exception e) {
+            throw new OperatorException("Unable to load auxdata", e);
+        }
+
         Product targetProduct = productConfigurer.getTargetProduct();
+
         for (int i = 1; i <= CLASS_COUNT; i++) {
             final Band classBand = targetProduct.addBand("class_" + i, ProductData.TYPE_FLOAT32);
             classBand.setValidPixelExpression(classBand.getName() + " > 0.0");
@@ -81,18 +93,19 @@ public class FuzzyOp extends PixelOperator {
 
         final Band sumBand = targetProduct.addBand("class_sum", ProductData.TYPE_FLOAT32);
         sumBand.setValidPixelExpression(sumBand.getName() + " > 0.0");
+
+        if (writeInputReflectances) {
+            bandCount = auxdata.getSpectralMeans().length;
+            for (int i = 0; i < bandCount; i++) {
+                final String bandName = getSourceBandName(reflectancesPrefix, BAND_WAVELENGTHS[i]);
+                final int bandDataType = sourceProduct.getBand(bandName).getDataType();
+                final Band reflecBand = targetProduct.addBand(bandName, bandDataType);
+            }
+        }
     }
 
     @Override
     protected void configureSourceSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
-        final URL resourceUrl = FuzzyClassification.class.getResource(AUXDATA_PATH);
-        final Auxdata auxdata;
-        try {
-            auxdata = new Auxdata(resourceUrl.toURI());
-        } catch (Exception e) {
-            throw new OperatorException("Unable to load auxdata", e);
-        }
-
         fuzzyClassification = new FuzzyClassification(auxdata.getSpectralMeans(),
                                                       auxdata.getInvertedCovarianceMatrices());
         bandCount = auxdata.getSpectralMeans().length;
@@ -103,25 +116,29 @@ public class FuzzyOp extends PixelOperator {
     }
 
     private String getSourceBandName(String reflectancesPrefix, float wavelength) {
-        final double maxDistance = 10.0;
-        final String[] bandNames = sourceProduct.getBandNames();
-        String bestBandName = null;
-        double wavelengthDist = Double.MAX_VALUE;
-        for (String bandName : bandNames) {
-            final Band band = sourceProduct.getBand(bandName);
-            final boolean isSpectralBand = band.getSpectralBandIndex() > -1;
-            if (isSpectralBand && bandName.startsWith(reflectancesPrefix)) {
-                final float currentWavelengthDist = Math.abs(band.getSpectralWavelength() - wavelength);
-                if (currentWavelengthDist < wavelengthDist && currentWavelengthDist < maxDistance) {
-                    wavelengthDist = currentWavelengthDist;
-                    bestBandName = bandName;
-                }
-            }
-        }
+        final Band[] bands = sourceProduct.getBands();
+        String bestBandName = getBestBandName(reflectancesPrefix, wavelength, bands);
         if (bestBandName == null) {
             throw new OperatorException(
                     String.format("Not able to find band with prefix '%s' and wavelength '%4.3f'.",
                                   reflectancesPrefix, wavelength));
+        }
+        return bestBandName;
+    }
+
+    static String getBestBandName(String reflectancesPrefix, float wavelength, Band[] bands) {
+        String bestBandName = null;
+        final double maxDistance = 10.0;
+        double wavelengthDist = Double.MAX_VALUE;
+        for (Band band : bands) {
+            final boolean isSpectralBand = band.getSpectralBandIndex() > -1;
+            if (isSpectralBand && band.getName().startsWith(reflectancesPrefix)) {
+                final float currentWavelengthDist = Math.abs(band.getSpectralWavelength() - wavelength);
+                if (currentWavelengthDist < wavelengthDist && currentWavelengthDist < maxDistance) {
+                    wavelengthDist = currentWavelengthDist;
+                    bestBandName = band.getName();
+                }
+            }
         }
         return bestBandName;
     }
@@ -193,6 +210,14 @@ public class FuzzyOp extends PixelOperator {
         }
         targetSamples[CLASS_COUNT].set(dominantClass);
         targetSamples[CLASS_COUNT + 1].set(classSum);
+
+        if (writeInputReflectances) {
+            final int targetSampleOffset = CLASS_COUNT + 2;
+            for (int i = targetSampleOffset; i < targetSampleOffset+bandCount; i++) {
+                final double reflectance = sourceSamples[i - targetSampleOffset].getDouble();
+                targetSamples[i].set(reflectance);
+            }
+        }
     }
 
     private boolean areSourceSamplesValid(int x, int y, Sample[] sourceSamples) {

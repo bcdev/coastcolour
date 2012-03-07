@@ -10,6 +10,7 @@ import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 public class Auxdata {
@@ -17,8 +18,8 @@ public class Auxdata {
     private double[][] spectralMeans;
     private double[][][] invCovarianceMatrices;
 
-    public Auxdata(String filePath) throws IOException, InvalidRangeException {
-        final NetcdfFile netcdfFile = NetcdfFile.open(filePath);
+    public Auxdata(URI filePath) throws IOException, InvalidRangeException {
+        final NetcdfFile netcdfFile = NetcdfFile.openInMemory(filePath);
         try {
             final Group rootGroup = netcdfFile.getRootGroup();
             final List<Variable> variableList = rootGroup.getVariables();

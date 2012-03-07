@@ -2,9 +2,7 @@ package org.esa.beam.coastcolour.fuzzy;
 
 import org.junit.Before;
 import org.junit.Test;
-import ucar.ma2.InvalidRangeException;
 
-import java.io.IOException;
 import java.net.URL;
 
 import static junit.framework.Assert.*;
@@ -14,10 +12,9 @@ public class FuzzyClassificationTest {
     private Auxdata auxdata;
 
     @Before
-    public void setup() throws IOException, InvalidRangeException {
+    public void setup() throws Exception {
         final URL resourceUrl = FuzzyClassification.class.getResource("owt16_meris_stats_101119_5band.hdf");
-        final String filePath = resourceUrl.getFile();
-        auxdata = new Auxdata(filePath);
+        auxdata = new Auxdata(resourceUrl.toURI());
     }
 
     @Test

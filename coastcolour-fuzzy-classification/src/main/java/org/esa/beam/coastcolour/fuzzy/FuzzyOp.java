@@ -18,7 +18,6 @@ import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
 import org.esa.beam.framework.gpf.pointop.WritableSample;
 
 import java.awt.Color;
-import java.io.File;
 import java.net.URL;
 
 @SuppressWarnings({"UnusedDeclaration"})
@@ -86,14 +85,12 @@ public class FuzzyOp extends PixelOperator {
 
     @Override
     protected void configureSourceSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
-        // general initialisation
         final URL resourceUrl = FuzzyClassification.class.getResource(AUXDATA_PATH);
         final Auxdata auxdata;
         try {
-            final String filePath = new File(resourceUrl.toURI()).getAbsolutePath();
-            auxdata = new Auxdata(filePath);
+            auxdata = new Auxdata(resourceUrl.toURI());
         } catch (Exception e) {
-            throw new OperatorException("Not able to load auxdata", e);
+            throw new OperatorException("Unable to load auxdata", e);
         }
 
         fuzzyClassification = new FuzzyClassification(auxdata.getSpectralMeans(),

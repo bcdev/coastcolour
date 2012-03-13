@@ -57,6 +57,8 @@ public class ProductStitcherMain {
                                 DefaultErrorHandler handler,
                                 PrintWriterProgressMonitor pm) {
         // todo: implement
+        // todo: check products for unique orbit number
+        // todo: sort products by start time?
         BeamLogManager.getSystemLogger().log(Level.INFO, "'\n" + "configFile: '" + configFile.getName() + "'\n" +
                                                          "sourceProductDir: '" + sourceProductDir.getAbsolutePath() + "'\n" +
                                                          "stitchProductFile: '" + stitchProductFile.getAbsolutePath() + "'\n");

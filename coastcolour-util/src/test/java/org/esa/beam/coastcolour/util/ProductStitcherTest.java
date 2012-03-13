@@ -3,16 +3,10 @@ package org.esa.beam.coastcolour.util;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import ucar.ma2.Array;
-import ucar.ma2.DataType;
-import ucar.ma2.InvalidRangeException;
-import ucar.ma2.Section;
-import ucar.nc2.Group;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
+import ucar.nc2.*;
 
-import java.awt.*;
-import java.io.IOException;
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +28,16 @@ public class ProductStitcherTest {
     private NetcdfFile ncFile1;
     private NetcdfFile ncFile2;
     private NetcdfFile ncFile3;
-    private List<List<Variable>> variableListAll;
+    private List<List<Variable>> allBandVariablesLists;
+    private List<List<Variable>> allTpVariablesLists;
+    private List<Variable> bandVariableList1;
+    private List<Variable> bandVariableList2;
+    private List<Variable> bandVariableList3;
+    private List<Variable> tpVariableList1;
+    private List<Variable> tpVariableList2;
+    private List<Variable> tpVariableList3;
+    private List<List<Dimension>> allDimensionsLists;
+    private List<List<Attribute>> allAttributesLists;
 
     @Before
     public void setUp() throws Exception {
@@ -45,17 +48,41 @@ public class ProductStitcherTest {
         ncFile2 = NetcdfFile.openInMemory(ncFilename2);
         ncFile3 = NetcdfFile.openInMemory(ncFilename3);
 
-        final Group rootGroup1 = ncFile1.getRootGroup();
-        final Group rootGroup2 = ncFile2.getRootGroup();
-        final Group rootGroup3 = ncFile3.getRootGroup();
+        final List<Attribute> attributes1 = ncFile1.getGlobalAttributes();
+        final List<Attribute> attributes2 = ncFile2.getGlobalAttributes();
+        final List<Attribute> attributes3 = ncFile3.getGlobalAttributes();
+        allAttributesLists = new ArrayList<List<Attribute>>();
+        allAttributesLists.add(attributes1);
+        allAttributesLists.add(attributes2);
+        allAttributesLists.add(attributes3);
 
-        final List<Variable> variableList1 = rootGroup1.getVariables();
-        final List<Variable> variableList2 = rootGroup2.getVariables();
-        final List<Variable> variableList3 = rootGroup3.getVariables();
-        variableListAll = new ArrayList<List<Variable>>();
-        variableListAll.add(variableList1);
-        variableListAll.add(variableList2);
-        variableListAll.add(variableList3);
+        final List<Dimension> dimensions1 = ncFile1.getDimensions();
+        final List<Dimension> dimensions2 = ncFile2.getDimensions();
+        final List<Dimension> dimensions3 = ncFile3.getDimensions();
+        allDimensionsLists = new ArrayList<List<Dimension>>();
+        allDimensionsLists.add(dimensions1);
+        allDimensionsLists.add(dimensions2);
+        allDimensionsLists.add(dimensions3);
+
+        List<Variable> variableList1 = ncFile1.getVariables();
+        List<Variable> variableList2 = ncFile2.getVariables();
+        List<Variable> variableList3 = ncFile3.getVariables();
+
+        bandVariableList1 = getBandVariablesList(variableList1);
+        bandVariableList2 = getBandVariablesList(variableList2);
+        bandVariableList3 = getBandVariablesList(variableList3);
+        allBandVariablesLists = new ArrayList<List<Variable>>();
+        allBandVariablesLists.add(bandVariableList1);
+        allBandVariablesLists.add(bandVariableList2);
+        allBandVariablesLists.add(bandVariableList3);
+
+        tpVariableList1 = getTpVariablesList(variableList1);
+        tpVariableList2 = getTpVariablesList(variableList2);
+        tpVariableList3 = getTpVariablesList(variableList3);
+        allTpVariablesLists = new ArrayList<List<Variable>>();
+        allTpVariablesLists.add(tpVariableList1);
+        allTpVariablesLists.add(tpVariableList2);
+        allTpVariablesLists.add(tpVariableList3);
     }
 
     @After
@@ -66,9 +93,50 @@ public class ProductStitcherTest {
     }
 
     @Test
+    public void testGetBandVariablesList() throws Exception {
+        final List<Variable> bandVariablesList = ProductStitcher.getBandVariablesList(bandVariableList1);
+        assertNotNull(bandVariablesList);
+        assertEquals(34, bandVariablesList.size());
+        assertEquals("y", bandVariablesList.get(0).getDimension(0).getName());
+        assertEquals("x", bandVariablesList.get(0).getDimension(1).getName());
+        assertEquals("y", bandVariablesList.get(13).getDimension(0).getName());
+        assertEquals("x", bandVariablesList.get(13).getDimension(1).getName());
+        assertEquals("y", bandVariablesList.get(33).getDimension(0).getName());
+        assertEquals("x", bandVariablesList.get(33).getDimension(1).getName());
+    }
+
+    @Test
+    public void testGetTpVariablesList() throws Exception {
+        final List<Variable> tpVariablesList = ProductStitcher.getTpVariablesList(tpVariableList1);
+        assertNotNull(tpVariablesList);
+        assertEquals(15, tpVariablesList.size());
+        assertEquals("tp_y", tpVariablesList.get(0).getDimension(0).getName());
+        assertEquals("tp_x", tpVariablesList.get(0).getDimension(1).getName());
+        assertEquals("tp_y", tpVariablesList.get(3).getDimension(0).getName());
+        assertEquals("tp_x", tpVariablesList.get(3).getDimension(1).getName());
+        assertEquals("tp_y", tpVariablesList.get(14).getDimension(0).getName());
+        assertEquals("tp_x", tpVariablesList.get(14).getDimension(1).getName());
+    }
+
+    @Test
+    public void testGetNetcdfVariableFloat2DDataFromSingleProducts() throws Exception {
+        Vector<float[][]> dataVector = ProductStitcher.getNetcdfVariableFloat2DDataFromSingleProducts(allBandVariablesLists, "reflec_8");
+        assertEquals(3, dataVector.size());
+        assertEquals(12, dataVector.get(0).length);
+        assertEquals(12, dataVector.get(1).length);
+        assertEquals(12, dataVector.get(2).length);
+        assertEquals(10, dataVector.get(0)[0].length);
+        assertEquals(0.0007733037f, dataVector.get(0)[0][0], 1.E-6);
+        assertEquals(0.0008143207f, dataVector.get(0)[3][7], 1.E-6);
+        assertEquals(0.000782416f, dataVector.get(1)[4][9], 1.E-6);
+        assertEquals(0.0008488487f, dataVector.get(2)[11][1], 1.E-6);
+        assertEquals(0.0008642305f, dataVector.get(2)[8][5], 1.E-6);
+    }
+
+    @Test
     public void testGetL2RVariablesFromNetcdf() throws Exception {
-        final Group rootGroup = ncFile1.getRootGroup();
-        final List<Variable> variableList = rootGroup.getVariables();
+        // todo: remove this test later (no own functionality tested)
+        final List<Variable> variableList = ncFile1.getVariables();
         assertNotNull(variableList);
         assertEquals(75, variableList.size()); // netcdf variables contain metadata, bands, tiepoints and masks!
 
@@ -91,6 +159,8 @@ public class ProductStitcherTest {
         assertEquals(2, reflec8.getDimensions().size());
         assertEquals(12, reflec8.getDimension(0).getLength());
         assertEquals(10, reflec8.getDimension(1).getLength());
+        assertEquals("y", reflec8.getDimension(0).getName());
+        assertEquals("x", reflec8.getDimension(1).getName());
         assertEquals(2, reflec8.getRanges().size());
         assertEquals(2, reflec8.getShape().length);
         assertEquals(12, reflec8.getShape()[0]);
@@ -98,168 +168,78 @@ public class ProductStitcherTest {
     }
 
     @Test
-    public void testGetRowToProductIndexMap() throws Exception {
-        Vector<float[][]> latVector = new Vector<float[][]>();
-        Vector<float[][]> lonVector = new Vector<float[][]>();
-        Map<Integer, Integer> rowToProductIndexMap = getRowToProductIndexTestMap(variableListAll, latVector, lonVector);
+    public void testGetBandRowToProductIndexMap() throws Exception {
+        Map<Integer, Integer> bandRowToProductIndexMap = ProductStitcher.getBandRowToProductIndexMap(allBandVariablesLists);
 
-        assertNotNull(rowToProductIndexMap);
-        assertEquals(30, rowToProductIndexMap.size());
-        assertEquals(0, rowToProductIndexMap.get(new Integer(0)).intValue());
-        assertEquals(0, rowToProductIndexMap.get(new Integer(4)).intValue());
-        assertEquals(1, rowToProductIndexMap.get(new Integer(12)).intValue());
-        assertEquals(1, rowToProductIndexMap.get(new Integer(15)).intValue());
-        assertEquals(2, rowToProductIndexMap.get(new Integer(21)).intValue());
-        assertEquals(2, rowToProductIndexMap.get(new Integer(29)).intValue());
-
-        lonVector.remove(2);
-        try {
-            rowToProductIndexMap = ProductStitcherUtils.getRowToProductIndexMap(latVector, lonVector);
-        } catch (Exception e) {
-            assertEquals(IllegalStateException.class, e.getClass());
-            assertEquals(e.getMessage(), "Cannot stitch products - mismatch in latitude and longitude array sizes.");
-        }
+        assertNotNull(bandRowToProductIndexMap);
+        assertEquals(30, bandRowToProductIndexMap.size());
+        assertEquals(0, bandRowToProductIndexMap.get(new Integer(0)).intValue());
+        assertEquals(0, bandRowToProductIndexMap.get(new Integer(4)).intValue());
+        assertEquals(1, bandRowToProductIndexMap.get(new Integer(12)).intValue());
+        assertEquals(1, bandRowToProductIndexMap.get(new Integer(15)).intValue());
+        assertEquals(2, bandRowToProductIndexMap.get(new Integer(21)).intValue());
+        assertEquals(2, bandRowToProductIndexMap.get(new Integer(29)).intValue());
     }
+
+    @Test
+    public void testGetTpRowToProductIndexMap() throws Exception {
+        Map<Integer, Integer> tpRowToProductIndexMap = ProductStitcher.getTpRowToProductIndexMap(allTpVariablesLists);
+
+        assertNotNull(tpRowToProductIndexMap);
+        assertEquals(3, tpRowToProductIndexMap.size());
+        assertEquals(2, tpRowToProductIndexMap.get(new Integer(0)).intValue());
+    }
+
 
     @Test
     public void testGetStitchedProductHeight() throws Exception {
-        List<List<Variable>> overallVariableList = variableListAll;
-        Vector<float[][]> latVector = new Vector<float[][]>();
-        Vector<float[][]> lonVector = new Vector<float[][]>();
-        Map<Integer, Integer> rowToProductIndexMap = getRowToProductIndexTestMap(overallVariableList, latVector, lonVector);
+        Map<Integer, Integer> rowToProductIndexMap = ProductStitcher.getBandRowToProductIndexMap(allBandVariablesLists);
         assertEquals(30, rowToProductIndexMap.size());
     }
 
-    @Test
+//    @Test
     public void testWriteStitchedProduct() throws Exception {
-        Vector<float[][]> latVector = new Vector<float[][]>();
-        Vector<float[][]> lonVector = new Vector<float[][]>();
-        Map<Integer, Integer> rowToProductIndexMap = getRowToProductIndexTestMap(variableListAll, latVector, lonVector);
+        Map<Integer, Integer> bandRowToProductIndexMap = ProductStitcher.getBandRowToProductIndexMap(allBandVariablesLists);
+        Map<Integer, Integer> tpRowToProductIndexMap = ProductStitcher.getTpRowToProductIndexMap(allTpVariablesLists);
 
-//        final String ncResultFilename = getClass().getResource("stitch_test_l2r_small_result.nc").getFile();
-//        ProductStitcherUtils.writeStitchedProduct(ncResultFilename, variableListAll);
+//        final File resultFile = File.createTempFile("stitch_test_l2r_small_result", ".nc");
+        // todo change this path!
+        final File resultFile = new File("C:/Users/olafd/coastcolour/stitch/testdata/stitch_test_l2r_small_result.nc");
+        ProductStitcher.writeStitchedProduct(resultFile,
+                                             allAttributesLists,
+                                             allDimensionsLists,
+                                             allBandVariablesLists,
+                                             allTpVariablesLists,
+                                             bandRowToProductIndexMap,
+                                             tpRowToProductIndexMap);
+        // todo continue
 
-//            final int NLAT = 6;
-//            final int NLON = 12;
-//            final float SAMPLE_PRESSURE = 900.0f;
-//            final float SAMPLE_TEMP = 9.0f;
-//            final float START_LAT = 25.0f;
-//            final float START_LON = -125.0f;
-//
-//
-//            // Create the file.
-//            String filename = "sfc_pres_temp.nc";
-//            NetcdfFileWriteable dataFile = null;
-//
-//            try {
-//                //Create new netcdf-3 file with the given filename
-//                dataFile = NetcdfFileWriteable.createNew(filename, false);
-//
-//                // In addition to the latitude and longitude dimensions, we will
-//                // also create latitude and longitude netCDF variables which will
-//                // hold the actual latitudes and longitudes. Since they hold data
-//                // about the coordinate system, the netCDF term for these is:
-//                // "coordinate variables."
-//                Dimension latDim = dataFile.addDimension("latitude", NLAT );
-//                Dimension lonDim = dataFile.addDimension("longitude", NLON );
-//                ArrayList dims =  null;
-//
-//
-//                dataFile.addVariable("latitude", DataType.FLOAT, new Dimension[] {latDim});
-//                dataFile.addVariable("longitude", DataType.FLOAT, new Dimension[] {lonDim});
-//
-//                // Define units attributes for coordinate vars. This attaches a
-//                // text attribute to each of the coordinate variables, containing
-//                // the units.
-//
-//                dataFile.addVariableAttribute("longitude", "units", "degrees_east");
-//                dataFile.addVariableAttribute("latitude", "units", "degrees_north");
-//
-//                // Define the netCDF data variables.
-//                dims =  new ArrayList();
-//                dims.add(latDim);
-//                dims.add(lonDim);
-//                dataFile.addVariable("pressure", DataType.FLOAT, dims);
-//                dataFile.addVariable("temperature", DataType.FLOAT, dims);
-//
-//                // Define units attributes for variables.
-//                dataFile.addVariableAttribute("pressure", "units", "hPa");
-//                dataFile.addVariableAttribute("temperature", "units", "celsius");
-//
-//                // Write the coordinate variable data. This will put the latitudes
-//                // and longitudes of our data grid into the netCDF file.
-//                dataFile.create();
-//
-//
-//                ArrayFloat.D1 dataLat = new ArrayFloat.D1(latDim.getLength());
-//                ArrayFloat.D1 dataLon = new ArrayFloat.D1(lonDim.getLength());
-//
-//                // Create some pretend data. If this wasn't an example program, we
-//                // would have some real data to write, for example, model
-//                // output.
-//                int i,j;
-//
-//
-//                for (i=0; i<latDim.getLength(); i++) {
-//                    dataLat.set(i,  START_LAT + 5.f * i );
-//                }
-//
-//                for (j=0; j<lonDim.getLength(); j++) {
-//                    dataLon.set(j,  START_LON + 5.f * j );
-//                }
-//
-//
-//                dataFile.write("latitude", dataLat);
-//                dataFile.write("longitude", dataLon);
-//
-//                // Create the pretend data. This will write our surface pressure and
-//                // surface temperature data.
-//
-//                ArrayFloat.D2 dataTemp = new ArrayFloat.D2(latDim.getLength(), lonDim.getLength());
-//                ArrayFloat.D2 dataPres = new ArrayFloat.D2(latDim.getLength(), lonDim.getLength());
-//
-//                for (i=0; i<latDim.getLength(); i++) {
-//                    for (j=0; j<lonDim.getLength(); j++) {
-//                        dataTemp.set(i,j,  SAMPLE_TEMP + .25f * (j * NLAT + i));
-//                        dataPres.set(i,j,  SAMPLE_PRESSURE + (j * NLAT + i));
-//                    }
-//                }
-//
-//                int[] origin = new int[2];
-//
-//                dataFile.write("pressure", origin, dataPres);
-//                dataFile.write("temperature", origin, dataTemp);
-//
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            } catch (InvalidRangeException e) {
-//                e.printStackTrace();
-//            } finally {
-//                if (null != dataFile)
-//                    try {
-//                        dataFile.close();
-//                    } catch (IOException ioe) {
-//                        ioe.printStackTrace();
-//                    }
-//            }
-//            System.out.println( "*** SUCCESS writing example file sfc_pres_temp.nc!" );
-//        }
-//
+
     }
 
-    private Map<Integer, Integer> getRowToProductIndexTestMap(List<List<Variable>> overallVariableList, Vector<float[][]> latVector, Vector<float[][]> lonVector) {
-        for (List<Variable> variableList : overallVariableList) {
-            for (Variable variable : variableList) {
-                if ("lat".equals(variable.getName())) {
-                    latVector.add(ProductStitcherUtils.getFloat2DArrayFromNetcdfVariable(variable));
-                }
-                if ("lon".equals(variable.getName())) {
-                    lonVector.add(ProductStitcherUtils.getFloat2DArrayFromNetcdfVariable(variable));
-                }
+
+
+    private List<Variable> getBandVariablesList(List<Variable> allVariablesList) {
+        List<Variable> bandVariableList = new ArrayList<Variable>();
+        for (Variable variable : allVariablesList) {
+            if (variable.getDimensions().size() == 2 &&
+                    variable.getDimension(0).getName().equals("y") && variable.getDimension(1).getName().equals("x")) {
+                bandVariableList.add(variable);
             }
         }
-        return ProductStitcherUtils.getRowToProductIndexMap(latVector, lonVector);
+        return bandVariableList;
     }
+
+    private List<Variable> getTpVariablesList(List<Variable> allVariablesList) {
+        List<Variable> bandVariableList = new ArrayList<Variable>();
+        for (Variable variable : allVariablesList) {
+            if (variable.getDimensions().size() == 2 &&
+                    variable.getDimension(0).getName().equals("tp_y") && variable.getDimension(1).getName().equals("tp_x")) {
+                bandVariableList.add(variable);
+            }
+        }
+        return bandVariableList;
+    }
+
 
 }

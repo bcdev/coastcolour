@@ -44,9 +44,9 @@ public class ProductStitcherTest {
         final String ncFilename1 = getClass().getResource("stitch_test_l2r_small_part1.nc").getFile();
         final String ncFilename2 = getClass().getResource("stitch_test_l2r_small_part2.nc").getFile();
         final String ncFilename3 = getClass().getResource("stitch_test_l2r_small_part3.nc").getFile();
-        ncFile1 = NetcdfFile.openInMemory(ncFilename1);
-        ncFile2 = NetcdfFile.openInMemory(ncFilename2);
-        ncFile3 = NetcdfFile.openInMemory(ncFilename3);
+        ncFile1 = NetcdfFile.open(ncFilename1);
+        ncFile2 = NetcdfFile.open(ncFilename2);
+        ncFile3 = NetcdfFile.open(ncFilename3);
 
         final List<Attribute> attributes1 = ncFile1.getGlobalAttributes();
         final List<Attribute> attributes2 = ncFile2.getGlobalAttributes();
@@ -68,17 +68,17 @@ public class ProductStitcherTest {
         List<Variable> variableList2 = ncFile2.getVariables();
         List<Variable> variableList3 = ncFile3.getVariables();
 
-        bandVariableList1 = getBandVariablesList(variableList1);
-        bandVariableList2 = getBandVariablesList(variableList2);
-        bandVariableList3 = getBandVariablesList(variableList3);
+        bandVariableList1 = ProductStitcher.getBandVariablesList(variableList1);
+        bandVariableList2 = ProductStitcher.getBandVariablesList(variableList2);
+        bandVariableList3 = ProductStitcher.getBandVariablesList(variableList3);
         allBandVariablesLists = new ArrayList<List<Variable>>();
         allBandVariablesLists.add(bandVariableList1);
         allBandVariablesLists.add(bandVariableList2);
         allBandVariablesLists.add(bandVariableList3);
 
-        tpVariableList1 = getTpVariablesList(variableList1);
-        tpVariableList2 = getTpVariablesList(variableList2);
-        tpVariableList3 = getTpVariablesList(variableList3);
+        tpVariableList1 = ProductStitcher.getTpVariablesList(variableList1);
+        tpVariableList2 = ProductStitcher.getTpVariablesList(variableList2);
+        tpVariableList3 = ProductStitcher.getTpVariablesList(variableList3);
         allTpVariablesLists = new ArrayList<List<Variable>>();
         allTpVariablesLists.add(tpVariableList1);
         allTpVariablesLists.add(tpVariableList2);
@@ -96,13 +96,25 @@ public class ProductStitcherTest {
     public void testGetBandVariablesList() throws Exception {
         final List<Variable> bandVariablesList = ProductStitcher.getBandVariablesList(bandVariableList1);
         assertNotNull(bandVariablesList);
-        assertEquals(34, bandVariablesList.size());
+        assertEquals(33, bandVariablesList.size());
+        assertEquals("reflec_1", bandVariablesList.get(0).getName());
         assertEquals("y", bandVariablesList.get(0).getDimension(0).getName());
         assertEquals("x", bandVariablesList.get(0).getDimension(1).getName());
+        assertEquals("norm_refl_2", bandVariablesList.get(13).getName());
         assertEquals("y", bandVariablesList.get(13).getDimension(0).getName());
         assertEquals("x", bandVariablesList.get(13).getDimension(1).getName());
-        assertEquals("y", bandVariablesList.get(33).getDimension(0).getName());
-        assertEquals("x", bandVariablesList.get(33).getDimension(1).getName());
+        assertEquals("l1p_flags", bandVariablesList.get(29).getName());
+        assertEquals("y", bandVariablesList.get(29).getDimension(0).getName());
+        assertEquals("x", bandVariablesList.get(29).getDimension(1).getName());
+        assertEquals("l2r_flags", bandVariablesList.get(30).getName());
+        assertEquals("y", bandVariablesList.get(30).getDimension(0).getName());
+        assertEquals("x", bandVariablesList.get(30).getDimension(1).getName());
+        assertEquals("lat", bandVariablesList.get(31).getName());
+        assertEquals("y", bandVariablesList.get(31).getDimension(0).getName());
+        assertEquals("x", bandVariablesList.get(31).getDimension(1).getName());
+        assertEquals("lon", bandVariablesList.get(32).getName());
+        assertEquals("y", bandVariablesList.get(32).getDimension(0).getName());
+        assertEquals("x", bandVariablesList.get(32).getDimension(1).getName());
     }
 
     @Test
@@ -110,10 +122,13 @@ public class ProductStitcherTest {
         final List<Variable> tpVariablesList = ProductStitcher.getTpVariablesList(tpVariableList1);
         assertNotNull(tpVariablesList);
         assertEquals(15, tpVariablesList.size());
+        assertEquals("latitude", tpVariablesList.get(0).getName());
         assertEquals("tp_y", tpVariablesList.get(0).getDimension(0).getName());
         assertEquals("tp_x", tpVariablesList.get(0).getDimension(1).getName());
         assertEquals("tp_y", tpVariablesList.get(3).getDimension(0).getName());
+        assertEquals("dem_rough", tpVariablesList.get(3).getName());
         assertEquals("tp_x", tpVariablesList.get(3).getDimension(1).getName());
+        assertEquals("rel_hum", tpVariablesList.get(14).getName());
         assertEquals("tp_y", tpVariablesList.get(14).getDimension(0).getName());
         assertEquals("tp_x", tpVariablesList.get(14).getDimension(1).getName());
     }
@@ -190,56 +205,9 @@ public class ProductStitcherTest {
         assertEquals(2, tpRowToProductIndexMap.get(new Integer(0)).intValue());
     }
 
-
     @Test
     public void testGetStitchedProductHeight() throws Exception {
         Map<Integer, Integer> rowToProductIndexMap = ProductStitcher.getBandRowToProductIndexMap(allBandVariablesLists);
         assertEquals(30, rowToProductIndexMap.size());
     }
-
-//    @Test
-    public void testWriteStitchedProduct() throws Exception {
-        Map<Integer, Integer> bandRowToProductIndexMap = ProductStitcher.getBandRowToProductIndexMap(allBandVariablesLists);
-        Map<Integer, Integer> tpRowToProductIndexMap = ProductStitcher.getTpRowToProductIndexMap(allTpVariablesLists);
-
-//        final File resultFile = File.createTempFile("stitch_test_l2r_small_result", ".nc");
-        // todo change this path!
-        final File resultFile = new File("C:/Users/olafd/coastcolour/stitch/testdata/stitch_test_l2r_small_result.nc");
-        ProductStitcher.writeStitchedProduct(resultFile,
-                                             allAttributesLists,
-                                             allDimensionsLists,
-                                             allBandVariablesLists,
-                                             allTpVariablesLists,
-                                             bandRowToProductIndexMap,
-                                             tpRowToProductIndexMap);
-        // todo continue
-
-
-    }
-
-
-
-    private List<Variable> getBandVariablesList(List<Variable> allVariablesList) {
-        List<Variable> bandVariableList = new ArrayList<Variable>();
-        for (Variable variable : allVariablesList) {
-            if (variable.getDimensions().size() == 2 &&
-                    variable.getDimension(0).getName().equals("y") && variable.getDimension(1).getName().equals("x")) {
-                bandVariableList.add(variable);
-            }
-        }
-        return bandVariableList;
-    }
-
-    private List<Variable> getTpVariablesList(List<Variable> allVariablesList) {
-        List<Variable> bandVariableList = new ArrayList<Variable>();
-        for (Variable variable : allVariablesList) {
-            if (variable.getDimensions().size() == 2 &&
-                    variable.getDimension(0).getName().equals("tp_y") && variable.getDimension(1).getName().equals("tp_x")) {
-                bandVariableList.add(variable);
-            }
-        }
-        return bandVariableList;
-    }
-
-
 }

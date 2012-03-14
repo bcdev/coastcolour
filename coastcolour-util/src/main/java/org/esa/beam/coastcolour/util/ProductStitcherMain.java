@@ -2,9 +2,11 @@ package org.esa.beam.coastcolour.util;
 
 import com.bc.ceres.core.PrintWriterProgressMonitor;
 import org.esa.beam.util.logging.BeamLogManager;
+import ucar.nc2.NetcdfFile;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -57,10 +59,12 @@ public class ProductStitcherMain {
                                 DefaultErrorHandler handler,
                                 PrintWriterProgressMonitor pm) {
         // todo: implement
-        // todo: check products for unique orbit number
-        // todo: sort products by start time?
         BeamLogManager.getSystemLogger().log(Level.INFO, "'\n" + "configFile: '" + configFile.getName() + "'\n" +
                                                          "sourceProductDir: '" + sourceProductDir.getAbsolutePath() + "'\n" +
                                                          "stitchProductFile: '" + stitchProductFile.getAbsolutePath() + "'\n");
+
+        // todo: check products for unique orbit number
+        // todo: sort products by start time
+        List<NetcdfFile> ncFileList = ProductStitcher.getSortedAndValidatedInputProducts(configFile, sourceProductDir);
     }
 }

@@ -1,6 +1,5 @@
 package org.esa.beam.coastcolour.util;
 
-import org.esa.beam.util.Guardian;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Section;
@@ -30,7 +29,6 @@ public class ProductStitcherNetcdfUtils {
         // Validation:
         // - make sure all products have same orbit number as first product in sorted list
         // - make sure all products have same dimensions as first product in sorted list
-        // todo implement
 
         List<NetcdfFile> unsortedProducts = new ArrayList<NetcdfFile>();
         BufferedReader reader = null;
@@ -41,7 +39,7 @@ public class ProductStitcherNetcdfUtils {
                 final String filename = line.trim();
                 System.out.println("filename = " + filename);
                 final String filePath = sourceProductDir.getAbsolutePath() + File.separator + filename;
-                final NetcdfFile ncFile = NetcdfFile.openInMemory(filePath);
+                final NetcdfFile ncFile = NetcdfFile.open(filePath);
                 unsortedProducts.add(ncFile);
             }
         } catch (IOException e) {
@@ -56,7 +54,10 @@ public class ProductStitcherNetcdfUtils {
             }
         }
 
-        return null;
+        List<NetcdfFile> sortedProducts = new ArrayList<NetcdfFile>();
+        sortedProducts = unsortedProducts;
+        // todo: sort and validate
+        return sortedProducts;
     }
 
     static float[][] getFloat2DArrayFromNetcdfVariable(Variable variable) {
@@ -74,34 +75,13 @@ public class ProductStitcherNetcdfUtils {
         return (byte[][]) arrayByte.copyToNDJavaArray();
     }
 
-    private static Array getDataArray(DataType type, Variable variable, Class clazz) {
-        final int[] origin = new int[variable.getRank()];
-        final int[] shape = variable.getShape();
-        Array array = null;
-        try {
-            array = variable.read(new Section(origin, shape));
-        } catch (Exception e) {
-            new DefaultErrorHandler().error(e);
-        }
-        return Array.factory(type, shape, array.get1DJavaArray(clazz));
-    }
-
-    static Vector<float[][]> getNetcdfVariableFloat2DDataFromSingleProducts(List<List<Variable>> variableList,
-                                                                            String variableName) {
-        Vector<float[][]> dataVector = new Vector<float[][]>();
-        for (List<Variable> variables : variableList) {
-            for (Variable variable : variables) {
-                if (variableName.equals(variable.getName())) {
-                    dataVector.add(getFloat2DArrayFromNetcdfVariable(variable));
-                }
-            }
-        }
-        return dataVector;
-    }
-
     public static long parse(String text, String pattern) throws ParseException {
-        Guardian.assertNotNullOrEmpty("text", text);
-        Guardian.assertNotNullOrEmpty("pattern", pattern);
+        if (text == null) {
+            throw new IllegalArgumentException("parse: text is null");
+        }
+        if (pattern == null) {
+            throw new IllegalArgumentException("parse: pattern is null");
+        }
 
         final int dotPos = text.lastIndexOf(".");
         String noFractionString = text;
@@ -127,6 +107,21 @@ public class ProductStitcherNetcdfUtils {
         return create(date, micros);
     }
 
+    private static Array getDataArray(DataType type, Variable variable, Class clazz) {
+        final int[] origin = new int[variable.getRank()];
+        final int[] shape = variable.getShape();
+        Array array = null;
+        try {
+            array = variable.read(new Section(origin, shape));
+        } catch (Exception e) {
+            new DefaultErrorHandler().error(e);
+        }
+        if (array != null) {
+            return Array.factory(type, shape, array.get1DJavaArray(clazz));
+        }
+        return null;
+    }
+
     private static DateFormat createDateFormat(String pattern) {
         final SimpleDateFormat dateFormat = new SimpleDateFormat(pattern, Locale.ENGLISH);
         dateFormat.setCalendar(createCalendar());
@@ -148,8 +143,8 @@ public class ProductStitcherNetcdfUtils {
         final int millisPerDay = 24 * 60 * 60 * millsPerSecond;
         calendar.add(Calendar.DATE, -(int) (offset / millisPerDay));
         calendar.add(Calendar.MILLISECOND, -(int) (offset % millisPerDay));
-        return  calendar.getTimeInMillis();
+        final long millisToAdd = Math.round(micros / 1000.0);
+        return  calendar.getTimeInMillis() + millisToAdd;
     }
-
 
 }

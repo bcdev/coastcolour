@@ -9,7 +9,10 @@ import ucar.nc2.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,20 +42,24 @@ public class ProductStitcher {
     List<List<Variable>> allBandVariablesLists = new ArrayList<List<Variable>>();
     List<List<Variable>> allTpVariablesLists = new ArrayList<List<Variable>>();
 
+    int stitchedProductWidthBands;
     int stitchedProductHeightBands;
     int stitchedProductHeightTps;
-    Map<Integer, Long> stitchedProductRowToScanTimeMap;
+    int stitchedProductWidthTps;
+    Map<Integer, Long> stitchedProductBandRowToScanTimeMap;
+    Map<Integer, Long> stitchedProductTpRowToScanTimeMap;
 
     public ProductStitcher(List<NetcdfFile> ncFileList) {
         this.ncFileList = ncFileList;
+
         setAllAttributesList();
         setAllDimensionsList();
         setAllBandVariablesLists();
         setAllTpVariablesLists();
         setRowToScanTimeMaps(true);
         setRowToScanTimeMaps(false);
-        setStitchedProductHeightBands();
-        setStitchedProductHeightTps();
+        setStitchedProductSizeBands();
+        setStitchedProductSizeTps();
         setStitchedProductRowToScanTimeMap(false, stitchedProductHeightBands);
         setStitchedProductRowToScanTimeMap(true, stitchedProductHeightTps);
     }
@@ -76,7 +83,7 @@ public class ProductStitcher {
             }
             if (xDim == -1 || yDim == -1) {
                 throw new IllegalStateException("Input file ' " + netcdfFile.getLocation() +
-                                                        "' does not have expected dimension names - check product!");
+                        "' does not have expected dimension names - check product!");
             }
 
             final List<Attribute> globalAttributes = netcdfFile.getGlobalAttributes();
@@ -94,7 +101,7 @@ public class ProductStitcher {
 
             if (startTime == -1 || stopTime == -1) {
                 throw new IllegalStateException("Input file ' " + netcdfFile.getLocation() +
-                                                        "': start/stop times cannot be parsed - check product!");
+                        "': start/stop times cannot be parsed - check product!");
             }
 
             // interpolation:
@@ -106,9 +113,9 @@ public class ProductStitcher {
         }
 
         if (isTiepoints) {
-            bandRowToScanTimeMaps = rowToScanTimeMaps;
-        } else {
             tpRowToScanTimeMaps = rowToScanTimeMaps;
+        } else {
+            bandRowToScanTimeMaps = rowToScanTimeMaps;
         }
     }
 
@@ -135,7 +142,7 @@ public class ProductStitcher {
                     bandVariablesList.add(variable);
                 }
             }
-            allBandVariablesLists.add(allVariablesList);
+            allBandVariablesLists.add(bandVariablesList);
         }
     }
 
@@ -177,17 +184,22 @@ public class ProductStitcher {
 
         if (startTime == -1) {
             throw new IllegalStateException("Input file ' " + firstNcFile.getLocation() +
-                                                    "': start time cannot be parsed - check product!");
+                    "': start time cannot be parsed - check product!");
         }
         if (stopTime == -1) {
             throw new IllegalStateException("Input file ' " + lastNcFile.getLocation() +
-                                                    "': stop time cannot be parsed - check product!");
+                    "': stop time cannot be parsed - check product!");
         }
 
         // interpolation:
-        stitchedProductRowToScanTimeMap = new HashMap<Integer, Long>();
+        Map<Integer, Long> stitchedProductRowToScanTimeMap = new HashMap<Integer, Long>();
         for (int i = 0; i < yDim; i++) {
             stitchedProductRowToScanTimeMap.put(i, startTime + i * (stopTime - startTime) / (yDim - 1));
+        }
+        if (isTiepoints) {
+            stitchedProductTpRowToScanTimeMap = stitchedProductRowToScanTimeMap;
+        } else {
+            stitchedProductBandRowToScanTimeMap = stitchedProductRowToScanTimeMap;
         }
     }
 
@@ -202,46 +214,38 @@ public class ProductStitcher {
         return -1;
     }
 
-    public void setStitchedProductHeightBands() {
+    public void setStitchedProductSizeBands() {
         // go through row <--> scanTime
         for (int i = 0; i < bandRowToScanTimeMaps.size() - 1; i++) {
             final Map<Integer, Long> map = bandRowToScanTimeMaps.get(i);
             final Map<Integer, Long> nextMap = bandRowToScanTimeMaps.get(i + 1);
-            for (int j = 0; j < map.size(); j++) {
-                // count until start time of next product is reached
-                while (map.get(j) < nextMap.get(0)) {
-                    stitchedProductHeightBands++;
-                }
+            // count until start time of next product is reached
+            int j = 0;
+            while (map.get(j++) < nextMap.get(0)) {
+                stitchedProductHeightBands++;
             }
         }
         stitchedProductHeightBands += bandRowToScanTimeMaps.get(bandRowToScanTimeMaps.size() - 1).size();
+        stitchedProductWidthBands = allDimensionsLists.get(0).get(1).getLength();
     }
 
-    public void setStitchedProductHeightTps() {
+    public void setStitchedProductSizeTps() {
         // go through row <--> scanTime
         for (int i = 0; i < tpRowToScanTimeMaps.size() - 1; i++) {
             final Map<Integer, Long> map = tpRowToScanTimeMaps.get(i);
             final Map<Integer, Long> nextMap = tpRowToScanTimeMaps.get(i + 1);
-            for (int j = 0; j < map.size(); j++) {
-                // count until start time of next product is reached
-                while (map.get(j) < nextMap.get(0)) {
-                    stitchedProductHeightTps++;
-                }
+            int j = 0;
+            // count until start time of next product is reached
+            while (map.get(j++) < nextMap.get(0)) {
+                stitchedProductHeightTps++;
             }
         }
         stitchedProductHeightTps += tpRowToScanTimeMaps.get(tpRowToScanTimeMaps.size() - 1).size();
+        stitchedProductWidthTps = allDimensionsLists.get(0).get(3).getLength();
     }
 
 
     public void writeStitchedProduct(File ncResultFile,
-                                     List<List<Attribute>> allAttributesLists,
-                                     List<List<Dimension>> allDimensionsLists,
-                                     List<List<Variable>> allBandVariableLists,
-                                     List<List<Variable>> allTpVariableLists,
-//                                     Map<Integer, Integer> bandRowToProductIndexMap,
-//                                     Map<Integer, Integer> tpRowToProductIndexMap,
-                                     List<Map<Integer, Long>> bandRowToScanTimeMaps,
-                                     List<Map<Integer, Long>> tpRowToScanTimeMaps,
                                      DefaultErrorHandler handler) {
         NetcdfFileWriteable outFile = null;
         Logger.getAnonymousLogger().log(Level.INFO, "Start writing stitched product...");
@@ -252,31 +256,34 @@ public class ProductStitcher {
             addGlobalAttributes(allAttributesLists, outFile);
 
             // add dimensions to output: we have y, x, tp_y, tp_x in this sequence:
-            outFile.addDimension(DIMY_NAME, stitchedProductHeightBands);
+//            outFile.addDimension(DIMY_NAME, stitchedProductHeightBands);
+//            outFile.addDimension(DIMX_NAME, stitchedProductWidthBands);
+//            outFile.addDimension(TP_DIMY_NAME, stitchedProductHeightTps);
+//            outFile.addDimension(TP_DIMX_NAME, stitchedProductWidthTps);
+
+            final Dimension yDim = allDimensionsLists.get(0).get(0);
             final Dimension xDim = allDimensionsLists.get(0).get(1);
-            outFile.addDimension(DIMX_NAME, xDim.getLength());
-            outFile.addDimension(TP_DIMY_NAME, stitchedProductHeightTps);
+            final Dimension yTpDim = allDimensionsLists.get(0).get(2);
             final Dimension xTpDim = allDimensionsLists.get(0).get(3);
-            outFile.addDimension(TP_DIMX_NAME, xTpDim.getLength());
+            addDimensions(outFile, yDim, xDim, yTpDim, xTpDim);
 
             // add bands and tie point variable attributes to output:
-            addVariableAttributes(allBandVariableLists, outFile, new Dimension(DIMY_NAME, stitchedProductHeightBands), new Dimension(DIMX_NAME, xDim));
-            addVariableAttributes(allTpVariableLists, outFile, new Dimension(TP_DIMY_NAME, stitchedProductHeightTps), new Dimension(TP_DIMX_NAME, xDim));
+            addVariableAttributes(allBandVariablesLists, outFile, yDim, xDim);
+            addVariableAttributes(allTpVariablesLists, outFile, yTpDim, xTpDim);
 
             // we need to call 'create' after all attributes and dimensions were added:
             try {
                 // try in standard mode first, which may fail for large files...
                 outFile.create();
             } catch (IllegalArgumentException e) {
-//                BeamLogManager.getSystemLogger().log(Level.INFO, "Switching to NetCDF 'large file' mode...");
                 Logger.getAnonymousLogger().log(Level.INFO, "Switching to NetCDF 'large file' mode...");
                 outFile.setLargeFile(true);
                 outFile.create();
             }
 
             // add band and tie point data to output:
-            writeVariables(allBandVariableLists, bandRowToScanTimeMaps, outFile, xDim.getLength());
-            writeVariables(allTpVariableLists, tpRowToScanTimeMaps, outFile, xTpDim.getLength());
+            writeVariables(allBandVariablesLists, bandRowToScanTimeMaps, outFile, false);
+            writeVariables(allTpVariablesLists, tpRowToScanTimeMaps, outFile, true);
 
         } catch (IOException e) {
             handler.error(e);
@@ -305,6 +312,18 @@ public class ProductStitcher {
         }
     }
 
+    private void addDimensions(NetcdfFileWriteable outFile, Dimension yDim, Dimension xDim, Dimension yTpDim, Dimension xTpDim) {
+        yDim.setLength(stitchedProductHeightBands);
+        xDim.setLength(stitchedProductWidthBands);
+        outFile.addDimension(DIMY_NAME, yDim.getLength());
+        outFile.addDimension(DIMX_NAME, xDim.getLength());
+        yTpDim.setLength(stitchedProductHeightTps);
+        xTpDim.setLength(stitchedProductWidthTps);
+        outFile.addDimension(TP_DIMY_NAME, yTpDim.getLength());
+        outFile.addDimension(TP_DIMX_NAME, xTpDim.getLength());
+        outFile.addGlobalAttribute("TileSize", yDim.getLength() + ":" + xDim.getLength());
+    }
+
     private static void addVariableAttributes(List<List<Variable>> variableLists,
                                               NetcdfFileWriteable outFile,
                                               Dimension yDim, Dimension xDim) throws IOException, InvalidRangeException {
@@ -321,16 +340,17 @@ public class ProductStitcher {
     }
 
     private void writeVariables(List<List<Variable>> variableLists,
-//                                       Map<Integer, Integer> rowToProductIndexMap,
-                                       List<Map<Integer, Long>> rowToScanTimeMaps,
-                                       NetcdfFileWriteable outFile,
-                                       int xDim) throws IOException, InvalidRangeException {
-        int sourceProductIndex;
+                                List<Map<Integer, Long>> rowToScanTimeMaps,
+                                NetcdfFileWriteable outFile,
+                                boolean isTiepoints) throws IOException, InvalidRangeException {
+
+        int width = (isTiepoints ? stitchedProductWidthTps : stitchedProductWidthBands);
+        int height = (isTiepoints ? stitchedProductHeightTps : stitchedProductHeightBands);
 
         // set up data buffers for all types which occur in L1P, L2R, L2W products
-        ArrayFloat.D2 bandDataFloat = new ArrayFloat.D2(stitchedProductHeightBands, xDim);
-        ArrayShort.D2 bandDataShort = new ArrayShort.D2(stitchedProductHeightBands, xDim);
-        ArrayByte.D2 bandDataByte = new ArrayByte.D2(stitchedProductHeightBands, xDim);
+        ArrayFloat.D2 bandDataFloat = new ArrayFloat.D2(height, width);
+        ArrayShort.D2 bandDataShort = new ArrayShort.D2(height, width);
+        ArrayByte.D2 bandDataByte = new ArrayByte.D2(height, width);
 
         List<Variable> firstProductBandVariables = variableLists.get(0);
 
@@ -339,7 +359,6 @@ public class ProductStitcher {
             Logger.getAnonymousLogger().log(Level.INFO, "...writing variable '" + variable.getName() + "'...");
             for (int i = 0; i < variableLists.size(); i++) {
                 List<Variable> allBandVariables = variableLists.get(i);
-                final Map<Integer, Long> rowToScanTimeMap = rowToScanTimeMaps.get(i);
                 for (Variable variable2 : allBandVariables) {
                     if (variable2.getName().equals(variable.getName())) {
                         if (variable.getName().equals("metadata")) {
@@ -367,20 +386,25 @@ public class ProductStitcher {
                                 default:
                                     throw new IllegalArgumentException("Data type '" + variable.getDataType().name() + "' not supported.");
                             }
-                            int valuesRowIndex = 0;
                             int sourceProductIndexPrev = 0;
                             // now loop over ALL rows:
-                            for (int j = 0; j < stitchedProductHeightBands; j++) {
-                                // if the current single product is the right one, loop over raster and set netcdf floatVals
-//                                sourceProductIndex = rowToProductIndexMap.get(j);
-                                // todo !!!!!
-                                sourceProductIndex = -1;
-//                                sourceProductIndex = getSourceProductIndex(j);
+                            for (int j = 0; j < height; j++) {
+                                int valuesRowIndex = 0;
+                                // search the right single product by row time
+                                int sourceProductIndex = getSourceProIndex(rowToScanTimeMaps, j);
+
+                                if (sourceProductIndex < 0 || sourceProductIndex > ncFileList.size()) {
+                                    throw new IllegalStateException("Unknown status of source product start/stop times - cannot continue.");
+                                }
+
                                 if (sourceProductIndex > sourceProductIndexPrev) {
                                     valuesRowIndex = 0;
                                 }
+
+                                // if the current single product is the right one, loop over raster and set netcdf floatVals
+                                // todo: we need to interpolate for the tie points because of the mismatch of the single products
                                 if (sourceProductIndex == i) {
-                                    for (int k = 0; k < xDim; k++) {
+                                    for (int k = 0; k < width; k++) {
                                         switch (variable2.getDataType()) {
                                             case BYTE:
                                                 bandDataByte.set(j, k, byteVals[valuesRowIndex][k]);
@@ -419,4 +443,18 @@ public class ProductStitcher {
         }
     }
 
+    private int getSourceProIndex(List<Map<Integer, Long>> rowToScanTimeMaps, int rowIndex) {
+        int sourceProductIndex = -1;
+        long sourceProductTime = stitchedProductBandRowToScanTimeMap.get(rowIndex);
+        for (int k = rowToScanTimeMaps.size() - 1; k >= 0; k--) {
+            Map<Integer, Long> map = rowToScanTimeMaps.get(k);
+            long startTime = map.get(0);
+            long stopTime = map.get(map.size() - 1);
+            if (startTime <= sourceProductTime && sourceProductTime <= stopTime) {
+                sourceProductIndex = k;
+                break;
+            }
+        }
+        return sourceProductIndex;
+    }
 }

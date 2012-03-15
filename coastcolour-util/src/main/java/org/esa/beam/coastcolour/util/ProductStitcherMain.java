@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Main class for stitching coastcolour output products
@@ -58,18 +59,15 @@ public class ProductStitcherMain {
                                 File stitchProductFile,
                                 DefaultErrorHandler handler,
                                 PrintWriterProgressMonitor pm) {
-        // todo: implement
-        BeamLogManager.getSystemLogger().log(Level.INFO, "'\n" + "configFile: '" + configFile.getName() + "'\n" +
-                                                         "sourceProductDir: '" + sourceProductDir.getAbsolutePath() + "'\n" +
-                                                         "stitchProductFile: '" + stitchProductFile.getAbsolutePath() + "'\n");
+        Logger.getAnonymousLogger().log(Level.INFO, "'\n" + "configFile: '" + configFile.getName() + "'\n" +
+                "sourceProductDir: '" + sourceProductDir.getAbsolutePath() + "'\n" +
+                "stitchProductFile: '" + stitchProductFile.getAbsolutePath() + "'\n");
 
         // todo: check products for unique orbit number
         // todo: sort products by their start and end times
         List<NetcdfFile> ncFileList = ProductStitcherNetcdfUtils.getSortedAndValidatedInputProducts(configFile, sourceProductDir);
 
         ProductStitcher stitcher = new ProductStitcher(ncFileList);
-        
-//        List<Map<Integer, Long>> bandRowToScanTimeMaps = ProductStitcher.setRowToScanTimeMaps(ncFileList);
-//        List<Map<Integer, Long>> tpRowToScanTimeMaps = ProductStitcher.getTpRowToScanTimeMaps(ncFileList);
+        stitcher.writeStitchedProduct(stitchProductFile, new DefaultErrorHandler());
     }
 }

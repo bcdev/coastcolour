@@ -3,15 +3,14 @@ package org.esa.beam.coastcolour.util;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import ucar.nc2.*;
+import ucar.nc2.NetcdfFile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNull;
 
 /**
  * Product Stitcher test class
@@ -25,16 +24,6 @@ public class ProductStitcherTest {
     private NetcdfFile ncFile1;
     private NetcdfFile ncFile2;
     private NetcdfFile ncFile3;
-    private List<List<Variable>> allBandVariablesLists;
-    private List<List<Variable>> allTpVariablesLists;
-    private List<Variable> bandVariableList1;
-    private List<Variable> bandVariableList2;
-    private List<Variable> bandVariableList3;
-    private List<Variable> tpVariableList1;
-    private List<Variable> tpVariableList2;
-    private List<Variable> tpVariableList3;
-    private List<List<Dimension>> allDimensionsLists;
-    private List<List<Attribute>> allAttributesLists;
 
     private ProductStitcher testStitcher;
 
@@ -63,128 +52,102 @@ public class ProductStitcherTest {
     }
 
     @Test
-    public void testSetRowToScanTimeMaps() throws Exception {
-        // todo
-        System.out.println("bla");
+    public void testGlobalAttributes() throws Exception {
+        assertNotNull(testStitcher.allAttributesLists);
+        assertEquals(3, testStitcher.allAttributesLists.size());
+        assertEquals(10, testStitcher.allAttributesLists.get(0).size());
+        assertEquals(10, testStitcher.allAttributesLists.get(1).size());
+        assertEquals(10, testStitcher.allAttributesLists.get(2).size());
+        assertEquals("TileSize", testStitcher.allAttributesLists.get(0).get(1).getName());
+        assertEquals("12:10", testStitcher.allAttributesLists.get(0).get(1).getStringValue());
+        assertEquals("metadata_version", testStitcher.allAttributesLists.get(1).get(4).getName());
+        assertEquals("beam", testStitcher.allAttributesLists.get(1).get(3).getStringValue());
+        assertEquals("stop_date", testStitcher.allAttributesLists.get(2).get(8).getName());
+        assertEquals("MERIS CoastColour L2R", testStitcher.allAttributesLists.get(2).get(9).getStringValue());
     }
 
-//    @Test
-//    public void testGetBandVariablesList() throws Exception {
-//        bandVariableList1 = testStitcher.getBandVariablesList(bandVariableList1);
-//        assertNotNull(bandVariablesList);
-//        assertEquals(33, bandVariablesList.size());
-//        assertEquals("reflec_1", bandVariablesList.get(0).getName());
-//        assertEquals("y", bandVariablesList.get(0).getDimension(0).getName());
-//        assertEquals("x", bandVariablesList.get(0).getDimension(1).getName());
-//        assertEquals("norm_refl_2", bandVariablesList.get(13).getName());
-//        assertEquals("y", bandVariablesList.get(13).getDimension(0).getName());
-//        assertEquals("x", bandVariablesList.get(13).getDimension(1).getName());
-//        assertEquals("l1p_flags", bandVariablesList.get(29).getName());
-//        assertEquals("y", bandVariablesList.get(29).getDimension(0).getName());
-//        assertEquals("x", bandVariablesList.get(29).getDimension(1).getName());
-//        assertEquals("l2r_flags", bandVariablesList.get(30).getName());
-//        assertEquals("y", bandVariablesList.get(30).getDimension(0).getName());
-//        assertEquals("x", bandVariablesList.get(30).getDimension(1).getName());
-//        assertEquals("lat", bandVariablesList.get(31).getName());
-//        assertEquals("y", bandVariablesList.get(31).getDimension(0).getName());
-//        assertEquals("x", bandVariablesList.get(31).getDimension(1).getName());
-//        assertEquals("lon", bandVariablesList.get(32).getName());
-//        assertEquals("y", bandVariablesList.get(32).getDimension(0).getName());
-//        assertEquals("x", bandVariablesList.get(32).getDimension(1).getName());
-//    }
+    @Test
+    public void testDimensions() throws Exception {
+        assertNotNull(testStitcher.allDimensionsLists);
+        assertEquals(3, testStitcher.allDimensionsLists.size());
+        assertEquals(4, testStitcher.allDimensionsLists.get(0).size());
+        assertEquals(4, testStitcher.allDimensionsLists.get(1).size());
+        assertEquals(4, testStitcher.allDimensionsLists.get(2).size());
+        assertEquals("y", testStitcher.allDimensionsLists.get(0).get(0).getName());
+        assertEquals(12, testStitcher.allDimensionsLists.get(0).get(0).getLength());
+        assertEquals("x", testStitcher.allDimensionsLists.get(1).get(1).getName());
+        assertEquals(10, testStitcher.allDimensionsLists.get(1).get(1).getLength());
+        assertEquals("tp_y", testStitcher.allDimensionsLists.get(1).get(2).getName());
+        assertEquals(3, testStitcher.allDimensionsLists.get(1).get(2).getLength());
+        assertEquals("tp_x", testStitcher.allDimensionsLists.get(2).get(3).getName());
+        assertEquals(3, testStitcher.allDimensionsLists.get(2).get(3).getLength());
+    }
 
-//    @Test
-//    public void testGetTpVariablesList() throws Exception {
-//        final List<Variable> tpVariablesList = ProductStitcher.getTpVariablesList(tpVariableList1);
-//        assertNotNull(tpVariablesList);
-//        assertEquals(15, tpVariablesList.size());
-//        assertEquals("latitude", tpVariablesList.get(0).getName());
-//        assertEquals("tp_y", tpVariablesList.get(0).getDimension(0).getName());
-//        assertEquals("tp_x", tpVariablesList.get(0).getDimension(1).getName());
-//        assertEquals("tp_y", tpVariablesList.get(3).getDimension(0).getName());
-//        assertEquals("dem_rough", tpVariablesList.get(3).getName());
-//        assertEquals("tp_x", tpVariablesList.get(3).getDimension(1).getName());
-//        assertEquals("rel_hum", tpVariablesList.get(14).getName());
-//        assertEquals("tp_y", tpVariablesList.get(14).getDimension(0).getName());
-//        assertEquals("tp_x", tpVariablesList.get(14).getDimension(1).getName());
-//    }
+    @Test
+    public void testBandVariables() throws Exception {
+        assertNotNull(testStitcher.allBandVariablesLists);
+        assertEquals(3, testStitcher.allBandVariablesLists.size());
+        assertEquals(34, testStitcher.allBandVariablesLists.get(0).size());
+        assertEquals(34, testStitcher.allBandVariablesLists.get(1).size());
+        assertEquals(34, testStitcher.allBandVariablesLists.get(2).size());
+        assertEquals("metadata", testStitcher.allBandVariablesLists.get(0).get(0).getName());
+        assertEquals("reflec_7", testStitcher.allBandVariablesLists.get(0).get(7).getName());
+        assertEquals("Water leaving radiance reflectance at 664,573 nm",
+                testStitcher.allBandVariablesLists.get(0).get(7).getDescription());
+        assertEquals(2, testStitcher.allBandVariablesLists.get(0).get(7).getRank());
+        assertEquals(2, testStitcher.allBandVariablesLists.get(0).get(7).getShape().length);
+        assertEquals(12, testStitcher.allBandVariablesLists.get(0).get(7).getShape()[0]);
+        assertEquals(10, testStitcher.allBandVariablesLists.get(0).get(7).getShape()[1]);
+        assertEquals("reflec_5", testStitcher.allBandVariablesLists.get(1).get(5).getName());
+        assertEquals("norm_refl_6", testStitcher.allBandVariablesLists.get(1).get(18).getName());
+        assertEquals("norm_refl_9", testStitcher.allBandVariablesLists.get(2).get(21).getName());
+        assertEquals("lon", testStitcher.allBandVariablesLists.get(2).get(33).getName());
+    }
 
-//    @Test
-//    public void testGetNetcdfVariableFloat2DDataFromSingleProducts() throws Exception {
-//        Vector<float[][]> dataVector = ProductStitcherNetcdfUtils.
-//                getNetcdfVariableFloat2DDataFromSingleProducts(allBandVariablesLists, "reflec_8");
-//        assertEquals(3, dataVector.size());
-//        assertEquals(12, dataVector.get(0).length);
-//        assertEquals(12, dataVector.get(1).length);
-//        assertEquals(12, dataVector.get(2).length);
-//        assertEquals(10, dataVector.get(0)[0].length);
-//        assertEquals(0.0007733037f, dataVector.get(0)[0][0], 1.E-6);
-//        assertEquals(0.0008143207f, dataVector.get(0)[3][7], 1.E-6);
-//        assertEquals(0.000782416f, dataVector.get(1)[4][9], 1.E-6);
-//        assertEquals(0.0008488487f, dataVector.get(2)[11][1], 1.E-6);
-//        assertEquals(0.0008642305f, dataVector.get(2)[8][5], 1.E-6);
-//    }
+    @Test
+    public void testTpVariables() throws Exception {
+        assertNotNull(testStitcher.allTpVariablesLists);
+        assertEquals(3, testStitcher.allTpVariablesLists.size());
+        assertEquals(15, testStitcher.allTpVariablesLists.get(0).size());
+        assertEquals(15, testStitcher.allTpVariablesLists.get(1).size());
+        assertEquals(15, testStitcher.allTpVariablesLists.get(2).size());
+        assertEquals("dem_alt", testStitcher.allTpVariablesLists.get(0).get(2).getName());
+        assertNull(testStitcher.allTpVariablesLists.get(0).get(2).getDescription());
+        assertEquals(2, testStitcher.allTpVariablesLists.get(0).get(7).getRank());
+        assertEquals(2, testStitcher.allTpVariablesLists.get(0).get(7).getShape().length);
+        assertEquals(3, testStitcher.allTpVariablesLists.get(0).get(7).getShape()[0]);
+        assertEquals(3, testStitcher.allTpVariablesLists.get(0).get(7).getShape()[1]);
+        assertEquals("lon_corr", testStitcher.allTpVariablesLists.get(1).get(5).getName());
+        assertEquals("view_zenith", testStitcher.allTpVariablesLists.get(1).get(8).getName());
+        assertEquals("merid_wind", testStitcher.allTpVariablesLists.get(2).get(11).getName());
+        assertEquals("ozone", testStitcher.allTpVariablesLists.get(2).get(13).getName());
+    }
 
-//    @Test
-//    public void testGetL2RVariablesFromNetcdf() throws Exception {
-//        // todo: remove this test later (no own functionality tested)
-//        final List<Variable> variableList = ncFile1.getVariables();
-//        assertNotNull(variableList);
-//        assertEquals(75, variableList.size()); // netcdf variables contain metadata, bands, tiepoints and masks!
-//
-//        assertEquals("metadata", variableList.get(0).getName());
-//        assertEquals("reflec_8", variableList.get(8).getName());
-//        assertEquals("norm_refl_12", variableList.get(23).getName());
-//        assertEquals("atm_press", variableList.get(47).getName());
-//        assertEquals("l2r_cc_solzen_mask", variableList.get(62).getName());
-//        assertEquals("l1b_invalid_mask", variableList.get(74).getName());
-//
-//        final Variable reflec8 = variableList.get(8);
-//        assertEquals(2, reflec8.getRank());
-//        assertEquals(4, reflec8.getElementSize());
-//        assertEquals(12, reflec8.getShape(0));
-//        assertEquals(120, reflec8.getSize());
-//        assertEquals(8, reflec8.getAttributes().size());
-//        assertEquals("long_name", reflec8.getAttributes().get(0).getName());
-//        assertEquals("wavelength", reflec8.getAttributes().get(4).getName());
-//        assertEquals(Float.class.getSimpleName().toLowerCase(), reflec8.getDataType().getClassType().getSimpleName());
-//        assertEquals(2, reflec8.getDimensions().size());
-//        assertEquals(12, reflec8.getDimension(0).getLength());
-//        assertEquals(10, reflec8.getDimension(1).getLength());
-//        assertEquals("y", reflec8.getDimension(0).getName());
-//        assertEquals("x", reflec8.getDimension(1).getName());
-//        assertEquals(2, reflec8.getRanges().size());
-//        assertEquals(2, reflec8.getShape().length);
-//        assertEquals(12, reflec8.getShape()[0]);
-//        assertEquals(10, reflec8.getShape()[1]);
-//    }
+    @Test
+    public void testSetRowToScanTimeMaps() throws Exception {
+        assertNotNull(testStitcher.bandRowToScanTimeMaps);
+        assertEquals(3, testStitcher.bandRowToScanTimeMaps.size());
+        assertEquals(12, testStitcher.bandRowToScanTimeMaps.get(0).size());
 
-//    @Test
-//    public void testGetBandRowToProductIndexMap() throws Exception {
-//        Map<Integer, Integer> bandRowToProductIndexMap = ProductStitcher.getBandRowToProductIndexMap(allBandVariablesLists);
-//
-//        assertNotNull(bandRowToProductIndexMap);
-//        assertEquals(30, bandRowToProductIndexMap.size());
-//        assertEquals(0, bandRowToProductIndexMap.get(new Integer(0)).intValue());
-//        assertEquals(0, bandRowToProductIndexMap.get(new Integer(4)).intValue());
-//        assertEquals(1, bandRowToProductIndexMap.get(new Integer(12)).intValue());
-//        assertEquals(1, bandRowToProductIndexMap.get(new Integer(15)).intValue());
-//        assertEquals(2, bandRowToProductIndexMap.get(new Integer(21)).intValue());
-//        assertEquals(2, bandRowToProductIndexMap.get(new Integer(29)).intValue());
-//    }
-//
-//    @Test
-//    public void testGetTpRowToProductIndexMap() throws Exception {
-//        Map<Integer, Integer> tpRowToProductIndexMap = ProductStitcher.getTpRowToProductIndexMap(allTpVariablesLists);
-//
-//        assertNotNull(tpRowToProductIndexMap);
-//        assertEquals(3, tpRowToProductIndexMap.size());
-//        assertEquals(2, tpRowToProductIndexMap.get(new Integer(0)).intValue());
-//    }
+        assertNotNull(testStitcher.tpRowToScanTimeMaps);
+        assertEquals(3, testStitcher.tpRowToScanTimeMaps.size());
+        assertEquals(3, testStitcher.tpRowToScanTimeMaps.get(0).size());
+    }
 
-//    @Test
-//    public void testGetStitchedProductHeight() throws Exception {
-//        Map<Integer, Integer> rowToProductIndexMap = ProductStitcher.getBandRowToProductIndexMap(allBandVariablesLists);
-//        assertEquals(30, rowToProductIndexMap.size());
-//    }
+    @Test
+    public void testStitchedProductSize() throws Exception {
+        assertEquals(30, testStitcher.stitchedProductHeightBands);
+        assertEquals(7, testStitcher.stitchedProductHeightTps);
+        assertEquals(10, testStitcher.stitchedProductWidthBands);
+        assertEquals(3, testStitcher.stitchedProductWidthTps);
+    }
+
+    @Test
+    public void testStitchedProductRowToScanTimeMap() throws Exception {
+        assertNotNull(testStitcher.stitchedProductBandRowToScanTimeMap);
+        assertEquals(30, testStitcher.stitchedProductBandRowToScanTimeMap.size());
+        assertNotNull(testStitcher.stitchedProductTpRowToScanTimeMap);
+        assertEquals(7, testStitcher.stitchedProductTpRowToScanTimeMap.size());
+    }
+
 }

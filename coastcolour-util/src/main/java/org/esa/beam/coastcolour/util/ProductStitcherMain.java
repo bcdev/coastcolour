@@ -5,8 +5,8 @@ import org.esa.beam.util.logging.BeamLogManager;
 import ucar.nc2.NetcdfFile;
 
 import java.io.File;
-import java.text.MessageFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -64,7 +64,12 @@ public class ProductStitcherMain {
                                                          "stitchProductFile: '" + stitchProductFile.getAbsolutePath() + "'\n");
 
         // todo: check products for unique orbit number
-        // todo: sort products by start time
-        List<NetcdfFile> ncFileList = ProductStitcher.getSortedAndValidatedInputProducts(configFile, sourceProductDir);
+        // todo: sort products by their start and end times
+        List<NetcdfFile> ncFileList = ProductStitcherNetcdfUtils.getSortedAndValidatedInputProducts(configFile, sourceProductDir);
+
+        ProductStitcher stitcher = new ProductStitcher(ncFileList);
+        
+//        List<Map<Integer, Long>> bandRowToScanTimeMaps = ProductStitcher.setRowToScanTimeMaps(ncFileList);
+//        List<Map<Integer, Long>> tpRowToScanTimeMaps = ProductStitcher.getTpRowToScanTimeMaps(ncFileList);
     }
 }

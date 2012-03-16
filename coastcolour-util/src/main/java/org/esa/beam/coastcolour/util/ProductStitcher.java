@@ -1,5 +1,6 @@
 package org.esa.beam.coastcolour.util;
 
+import com.bc.ceres.core.PrintWriterProgressMonitor;
 import ucar.ma2.ArrayByte;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayShort;
@@ -248,7 +249,8 @@ public class ProductStitcher {
     public void writeStitchedProduct(File ncResultFile,
                                      DefaultErrorHandler handler) {
         NetcdfFileWriteable outFile = null;
-        Logger.getAnonymousLogger().log(Level.INFO, "Start writing stitched product...");
+        final PrintWriterProgressMonitor pm = new PrintWriterProgressMonitor(System.out);
+        pm.beginTask( "Writing stitched product...", 0);
         try {
             outFile = NetcdfFileWriteable.createNew(ncResultFile.getAbsolutePath(), false);
 
@@ -256,11 +258,6 @@ public class ProductStitcher {
             addGlobalAttributes(allAttributesLists, outFile);
 
             // add dimensions to output: we have y, x, tp_y, tp_x in this sequence:
-//            outFile.addDimension(DIMY_NAME, stitchedProductHeightBands);
-//            outFile.addDimension(DIMX_NAME, stitchedProductWidthBands);
-//            outFile.addDimension(TP_DIMY_NAME, stitchedProductHeightTps);
-//            outFile.addDimension(TP_DIMX_NAME, stitchedProductWidthTps);
-
             final Dimension yDim = allDimensionsLists.get(0).get(0);
             final Dimension xDim = allDimensionsLists.get(0).get(1);
             final Dimension yTpDim = allDimensionsLists.get(0).get(2);
@@ -282,8 +279,8 @@ public class ProductStitcher {
             }
 
             // add band and tie point data to output:
-            writeVariables(allBandVariablesLists, bandRowToScanTimeMaps, outFile, false);
-            writeVariables(allTpVariablesLists, tpRowToScanTimeMaps, outFile, true);
+            writeVariables(allBandVariablesLists, bandRowToScanTimeMaps, outFile, false, pm);
+            writeVariables(allTpVariablesLists, tpRowToScanTimeMaps, outFile, true, pm);
 
         } catch (IOException e) {
             handler.error(e);
@@ -295,6 +292,7 @@ public class ProductStitcher {
                     outFile.close();
                 } catch (IOException ignore) {
                 }
+            pm.done();
         }
         Logger.getAnonymousLogger().log(Level.INFO, "Finished writing stitched product.");
     }
@@ -342,7 +340,7 @@ public class ProductStitcher {
     private void writeVariables(List<List<Variable>> variableLists,
                                 List<Map<Integer, Long>> rowToScanTimeMaps,
                                 NetcdfFileWriteable outFile,
-                                boolean isTiepoints) throws IOException, InvalidRangeException {
+                                boolean isTiepoints, PrintWriterProgressMonitor pm) throws IOException, InvalidRangeException {
 
         int width = (isTiepoints ? stitchedProductWidthTps : stitchedProductWidthBands);
         int height = (isTiepoints ? stitchedProductHeightTps : stitchedProductHeightBands);
@@ -356,7 +354,7 @@ public class ProductStitcher {
 
         for (Variable variable : firstProductBandVariables) {
             // loop over single products
-            Logger.getAnonymousLogger().log(Level.INFO, "...writing variable '" + variable.getName() + "'...");
+            System.out.println("...writing variable '" + variable.getName() + "'...");
             for (int i = 0; i < variableLists.size(); i++) {
                 List<Variable> allBandVariables = variableLists.get(i);
                 for (Variable variable2 : allBandVariables) {
@@ -370,9 +368,11 @@ public class ProductStitcher {
                             variable2.getDimension(0).setLength(variable2.getShape(0));
                             variable2.getDimension(1).setLength(variable2.getShape(1));
                             ////
+
                             byte[][] byteVals = null;
                             short[][] shortVals = null;
                             float[][] floatVals = null;
+
                             switch (variable2.getDataType()) {
                                 case BYTE:
                                     byteVals = ProductStitcherNetcdfUtils.getByte2DArrayFromNetcdfVariable(variable2);
@@ -387,11 +387,11 @@ public class ProductStitcher {
                                     throw new IllegalArgumentException("Data type '" + variable.getDataType().name() + "' not supported.");
                             }
                             int sourceProductIndexPrev = 0;
+                            int valuesRowIndex = 0;
                             // now loop over ALL rows:
                             for (int j = 0; j < height; j++) {
-                                int valuesRowIndex = 0;
                                 // search the right single product by row time
-                                int sourceProductIndex = getSourceProIndex(rowToScanTimeMaps, j);
+                                int sourceProductIndex = getSourceProductIndex(rowToScanTimeMaps, j, isTiepoints);
 
                                 if (sourceProductIndex < 0 || sourceProductIndex > ncFileList.size()) {
                                     throw new IllegalStateException("Unknown status of source product start/stop times - cannot continue.");
@@ -404,6 +404,8 @@ public class ProductStitcher {
                                 // if the current single product is the right one, loop over raster and set netcdf floatVals
                                 // todo: we need to interpolate for the tie points because of the mismatch of the single products
                                 if (sourceProductIndex == i) {
+//                                    System.out.println("i,j,valuesRowIndex,yDim = " + i + "," + j + "," + valuesRowIndex + "," +
+//                                    variable2.getShape()[0]);
                                     for (int k = 0; k < width; k++) {
                                         switch (variable2.getDataType()) {
                                             case BYTE:
@@ -443,9 +445,16 @@ public class ProductStitcher {
         }
     }
 
-    private int getSourceProIndex(List<Map<Integer, Long>> rowToScanTimeMaps, int rowIndex) {
+    private int getSourceProductIndex(List<Map<Integer, Long>> rowToScanTimeMaps, int rowIndex,
+                                      boolean isTiepoints) {
         int sourceProductIndex = -1;
-        long sourceProductTime = stitchedProductBandRowToScanTimeMap.get(rowIndex);
+        Map<Integer, Long> stitchedProductRowToScanTimeMap = new HashMap<Integer, Long>();
+        if (isTiepoints) {
+            stitchedProductRowToScanTimeMap = stitchedProductTpRowToScanTimeMap;
+        } else {
+            stitchedProductRowToScanTimeMap = stitchedProductBandRowToScanTimeMap;
+        }
+        long sourceProductTime = stitchedProductRowToScanTimeMap.get(rowIndex);
         for (int k = rowToScanTimeMaps.size() - 1; k >= 0; k--) {
             Map<Integer, Long> map = rowToScanTimeMaps.get(k);
             long startTime = map.get(0);
@@ -455,6 +464,7 @@ public class ProductStitcher {
                 break;
             }
         }
+
         return sourceProductIndex;
     }
 }

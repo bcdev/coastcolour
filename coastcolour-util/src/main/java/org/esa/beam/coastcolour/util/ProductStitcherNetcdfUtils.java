@@ -37,7 +37,6 @@ public class ProductStitcherNetcdfUtils {
             reader = new BufferedReader(new FileReader(configFile.getAbsolutePath()));
             while ((line = reader.readLine()) != null) {
                 final String filename = line.trim();
-                System.out.println("filename = " + filename);
                 final String filePath = sourceProductDir.getAbsolutePath() + File.separator + filename;
                 final NetcdfFile ncFile = NetcdfFile.open(filePath);
                 unsortedProducts.add(ncFile);

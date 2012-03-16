@@ -34,7 +34,7 @@ public class ProductStitcherWriteResultTest {
 
     @Before
     public void setUp() throws Exception {
-        final String srcRootDir = "C:/Users/olafd/bc/coastcolour/stitch/testdata/";
+        final String srcRootDir = "C:/Users/olafd/coastcolour/stitch/testdata/";
 //        final String ncFilename1 = srcRootDir + "l1p/l1p_subset_test_part1.nc";
 //        final String ncFilename2 = srcRootDir +  "l1p/l1p_subset_test_part2.nc";
 //        final String ncFilename3 = srcRootDir +  "l1p/l1p_subset_test_part3.nc";
@@ -67,7 +67,7 @@ public class ProductStitcherWriteResultTest {
     @Test
     public void testWriteStitchedProduct() throws Exception {
 //        final File resultFile = new File("C:/Users/olafd/coastcolour/stitch/testdata/stitch_test_l2r_small_result.nc");
-        final File resultFile = new File("C:/Users/olafd/bc/coastcolour/stitch/testdata/l1p/stitch_test_result.nc");
+        final File resultFile = new File("C:/Users/olafd/coastcolour/stitch/testdata/l2r/stitch_test_result.nc");
         testStitcher.writeStitchedProduct(resultFile, new DefaultErrorHandler());
         // todo continue
 

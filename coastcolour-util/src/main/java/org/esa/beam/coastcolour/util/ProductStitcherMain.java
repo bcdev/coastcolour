@@ -5,6 +5,7 @@ import org.esa.beam.util.logging.BeamLogManager;
 import ucar.nc2.NetcdfFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -32,8 +33,7 @@ public class ProductStitcherMain {
             final File sourceProductDir = new File(sourceProductDirPath);
             final File stitchProductFile = new File(stitchProductFilePath);
 
-            execute(configFile, sourceProductDir, stitchProductFile, new DefaultErrorHandler(),
-                    new PrintWriterProgressMonitor(System.out));
+            execute(configFile, sourceProductDir, stitchProductFile);
         } else {
             printUsage();
         }
@@ -56,9 +56,7 @@ public class ProductStitcherMain {
 
     private static void execute(File configFile,
                                 File sourceProductDir,
-                                File stitchProductFile,
-                                DefaultErrorHandler handler,
-                                PrintWriterProgressMonitor pm) {
+                                File stitchProductFile) {
         Logger.getAnonymousLogger().log(Level.INFO, "'\n" + "configFile: '" + configFile.getName() + "'\n" +
                 "sourceProductDir: '" + sourceProductDir.getAbsolutePath() + "'\n" +
                 "stitchProductFile: '" + stitchProductFile.getAbsolutePath() + "'\n");
@@ -67,7 +65,19 @@ public class ProductStitcherMain {
         // todo: sort products by their start and end times
         List<NetcdfFile> ncFileList = ProductStitcherNetcdfUtils.getSortedAndValidatedInputProducts(configFile, sourceProductDir);
 
-        ProductStitcher stitcher = new ProductStitcher(ncFileList);
-        stitcher.writeStitchedProduct(stitchProductFile, new DefaultErrorHandler());
+        try {
+            final long t1 = System.currentTimeMillis();
+            ProductStitcher stitcher = new ProductStitcher(ncFileList);
+            stitcher.writeStitchedProduct(stitchProductFile, new DefaultErrorHandler());
+            final long t2 = System.currentTimeMillis();
+            System.out.println("Processing time: " + (t2-t1)/1000 + " seconds.");
+        } finally {
+            for (NetcdfFile netcdfFile : ncFileList) {
+                try {
+                    netcdfFile.close();
+                } catch (IOException ignore) {
+                }
+            }
+        }
     }
 }

@@ -22,6 +22,7 @@ import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.meris.case2.RegionalWaterOp;
 import org.esa.beam.meris.case2.algorithm.KMin;
 import org.esa.beam.meris.case2.water.WaterAlgorithm;
+import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 
 import java.awt.Rectangle;
@@ -34,7 +35,7 @@ import java.util.Map;
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +
-                                "other variables")
+                          "other variables")
 public class L2WOp extends Operator {
 
     private static final int[] FLH_INPUT_BAND_NUMBERS = new int[]{6, 8, 10};
@@ -46,6 +47,10 @@ public class L2WOp extends Operator {
 
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")
     private Product sourceProduct;
+
+    //    @SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)", optional = true)
+    @SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)")
+    private Product classMembershipProduct;
 
     @Parameter(defaultValue = "true",
                label = "Perform calibration",
@@ -76,7 +81,7 @@ public class L2WOp extends Operator {
 
     @Parameter(label = "Use climatology map for salinity and temperature", defaultValue = "true",
                description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
-                             "for the whole scene.")
+                       "for the whole scene.")
     private boolean useSnTMap;
 
     @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU",
@@ -98,6 +103,10 @@ public class L2WOp extends Operator {
                description = "The file of the autoassociative net used for error computed instead of the default neural net.",
                notNull = false)
     private File autoassociativeNetFile;
+
+    @Parameter(label = "Directory containing the neural nets corresponding to the fuzzy membership classes",
+               description = "Directory containing the neural nets corresponding to the fuzzy membership classes.")
+    private File fuzzyNnDir;
 
     @Parameter(label = "Alternative inverse water neural net (optional)",
                description = "The file of the inverse water neural net to be used instead of the default.")
@@ -133,7 +142,7 @@ public class L2WOp extends Operator {
 
     @Parameter(defaultValue = "true", label = "Output Kd spectrum",
                description = "Toggles the output of downwelling irradiance attenuation coefficients. " +
-                             "If disabled only Kd_490 is added to the output.")
+                       "If disabled only Kd_490 is added to the output.")
     private boolean outputKdSpectrum;
 
     @Parameter(defaultValue = "false", label = "Output experimental FLH",
@@ -142,7 +151,7 @@ public class L2WOp extends Operator {
 
     @Parameter(defaultValue = "false", label = "Use QAA for IOP and concentration computation",
                description = "If enabled IOPs are computed by QAA instead of Case-2-Regional. " +
-                             "Concentrations of chlorophyll and total suspended matter will be derived from the IOPs.")
+                       "Concentrations of chlorophyll and total suspended matter will be derived from the IOPs.")
     private boolean useQaaForIops;
 
     @Parameter(defaultValue = "-0.02", label = "'A_TOTAL' lower bound",
@@ -176,6 +185,16 @@ public class L2WOp extends Operator {
     private Product qaaProduct;
     private Product case2rProduct;
     private VirtualBandOpImage invalidOpImage;
+    private static final int NUMBER_OF_WATER_NETS = 3;  // todo: will be 9 when Rolands input is available
+    private static final String[] waterForwardNets = new String[]{"23x7x16_168.5.net",
+            "23x7x16_511.3.net",
+            "23x7x16_191.2.net"};
+    private static final String[] waterInverseNets = new String[]{"46x24x18_37385.5.net",
+            "46x24x18_4584.9.net",
+            "23x7x16_34286.9.net"};
+    private Product[] c2rSingleProducts;
+    public static final int NUMBER_OF_MEMBERSHIPS = 11;  // 9 classes + sum + dominant class
+    private static final double MEMBERSHIP_CLASS_SUM_THRESH = 0.8;
 
     @Override
     public void initialize() throws OperatorException {
@@ -217,7 +236,34 @@ public class L2WOp extends Operator {
         l2wProductFactory.setOutputKdSpectrum(outputKdSpectrum);
         l2wProductFactory.setOutputReflectance(outputReflec);
 
-        setTargetProduct(l2wProductFactory.createL2WProduct());
+        final Product l2WProduct = l2wProductFactory.createL2WProduct();
+
+        // NEW: call this for all 9 water inverse/forward nets,
+        // (set each net pair as parameters in RegionalWaterOp)
+        // --> therefore get 9 case2rProducts[k]
+        // then compute k-weighted mean for Chl (and TSM?? todo: clarify)
+        // with m[k] from classMembershipProduct
+        // compute Chl_mean only if sum(m[k] > thresh := 0.8 todo: clarify
+        computeSingleCase2RProductsFromFuzzyApproach();
+        for (Band band : classMembershipProduct.getBands()) {
+            if (band.getName().startsWith("class_")) {
+                ProductUtils.copyBand(band.getName(), classMembershipProduct, l2WProduct, true);
+            }
+        }
+        ProductUtils.copyBand("dominant_class", classMembershipProduct, l2WProduct, true);
+
+        setTargetProduct(l2WProduct);
+    }
+
+    private void computeSingleCase2RProductsFromFuzzyApproach() {
+        c2rSingleProducts = new Product[NUMBER_OF_WATER_NETS];
+        for (int i = 0; i < NUMBER_OF_WATER_NETS; i++) {
+            Operator case2Op = new RegionalWaterOp.Spi().createOperator();
+            final String forwardWaterNnFilename = fuzzyNnDir + File.separator + waterForwardNets[i];
+            forwardWaterNnFile = new File(forwardWaterNnFilename);
+            setCase2rParameters(case2Op);
+            c2rSingleProducts[i] = case2Op.getTargetProduct();
+        }
     }
 
     @Override
@@ -237,7 +283,7 @@ public class L2WOp extends Operator {
 
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws
-                                                                                                             OperatorException {
+            OperatorException {
         Tile satzen = null;
         Tile solzen = null;
         Tile[] reflecTiles = null;
@@ -293,6 +339,19 @@ public class L2WOp extends Operator {
 
         final Tile z90Tile = targetTiles.get(targetProduct.getBand(L2WProductFactory.Z90_MAX_NAME));
         final Tile turbidityTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.TURBIDITY_NAME));
+        // todo: chlTile and tsmTile are null here !!! add bands in case2r factory!
+        final Tile chlTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.CONC_CHL_NAME));
+        final Tile tsmTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.CONC_TSM_NAME));
+        Tile[] chlSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
+        Tile[] tsmSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
+        for (int i = 0; i < NUMBER_OF_WATER_NETS; i++) {
+            chlSingleTiles[i] = getSourceTile(c2rSingleProducts[i].getBand("chl_conc"), targetRectangle);
+            tsmSingleTiles[i] = getSourceTile(c2rSingleProducts[i].getBand("tsm"), targetRectangle);
+        }
+        Tile[] membershipTiles = new Tile[NUMBER_OF_MEMBERSHIPS - 2];
+        for (int i = 0; i < NUMBER_OF_MEMBERSHIPS - 2; i++) {
+            membershipTiles[i] = getSourceTile(classMembershipProduct.getBand("class_" + (i+1)), targetRectangle);
+        }
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
@@ -330,8 +389,43 @@ public class L2WOp extends Operator {
                 final int invalidFlagValue = isSampleInvalid ? 1 : 0;
                 int l2wFlag = computeL2wFlags(x, y, c2rFlags, qaaFlags, invalidFlagValue);
                 l2wFlagTile.setSample(x, y, l2wFlag);
+
+                // get weighted CHL and TSM
+                final double weightedChl = getWeightedConc(x, y, membershipTiles, chlSingleTiles);
+                chlTile.setSample(x, y, weightedChl);
+                final double weightedTsm = getWeightedConc(x, y, membershipTiles, tsmSingleTiles);
+                tsmTile.setSample(x, y, weightedTsm);
             }
         }
+    }
+
+    private double getWeightedConc(int x, int y, Tile[] membershipTiles, Tile[] concSingleTiles) {
+        double weightedConc = 0.0;
+        double sumWeights = 0.0;
+        double[] mClass = new double[membershipTiles.length];
+        int index = 0;
+        for (Tile membershipTile : membershipTiles) {
+            mClass[index] = membershipTile.getSampleDouble(x, y);
+            sumWeights += mClass[index];
+            double concSingle = 0.0;
+            // todo: this can be simplified once we have all 9 pairs of water nets...
+            if (index < 2) {
+                concSingle = concSingleTiles[0].getSampleDouble(x, y);
+            } else if (index >= 2 && index < 5) {
+                concSingle = concSingleTiles[1].getSampleDouble(x, y);
+            } else if (index >= 5 && index < membershipTiles.length) {
+                concSingle = concSingleTiles[2].getSampleDouble(x, y);
+            }
+            weightedConc += mClass[index] * concSingle;
+            index++;
+        }
+
+        if (sumWeights >= MEMBERSHIP_CLASS_SUM_THRESH) {
+            weightedConc /= membershipTiles.length;
+        } else {
+            weightedConc = Double.NaN;
+        }
+        return weightedConc;
     }
 
     private int computeL2wFlags(int x, int y, Tile c2rFlags, Tile qaaFlags, int invalidFlagValue) {

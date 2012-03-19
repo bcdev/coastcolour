@@ -207,7 +207,6 @@ abstract class L2WProductFactory {
         addPatternToAutoGrouping(targetProduct, CONC_GROUPING_PATTERN);
     }
 
-
     protected void addFLHBands(Product target) {
         Band flhBand = target.addBand(EXP_FLH_681_NAME, ProductData.TYPE_FLOAT32);
         flhBand.setDescription("Fluorescence line height at 681 nm");

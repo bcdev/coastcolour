@@ -183,6 +183,12 @@
                 <version>1.2-SNAPSHOT</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.esa.beam.coastcolour</groupId>
+                <artifactId>coastcolour-processing</artifactId>
+                <version>1.5-SNAPSHOT</version>
+            </dependency>
+
             <!-- Case2R Libraries ############################################# -->
 
             <dependency>

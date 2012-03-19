@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.net.URL;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
 
 public class FuzzyClassificationTest {
 
@@ -21,7 +21,7 @@ public class FuzzyClassificationTest {
     public void testFuzzyResults() {
         final double[] reflectances = {0.0307, 0.0414, 0.0500, 0.0507, 0.0454};
         final FuzzyClassification fuzzyClassification = new FuzzyClassification(auxdata.getSpectralMeans(),
-                                                                                auxdata.getInvertedCovarianceMatrices());
+                auxdata.getInvertedCovarianceMatrices());
         final double[] classMembershipProbability = fuzzyClassification.computeClassMemberships(reflectances);
 
         // these values are validated by algorithm provider Timothy Moore
@@ -32,8 +32,10 @@ public class FuzzyClassificationTest {
                 0.0, 0.024374, 0.083183, 0.199592
         };
         assertEquals(expectedValues.length, classMembershipProbability.length);
+        double normalizationFactor = 1.0 / (0.024374 + 0.083183 + 0.19959);
         for (int i = 0; i < classMembershipProbability.length; i++) {
-            assertEquals(expectedValues[i], classMembershipProbability[i], 1.0e-6);
+            assertEquals(normalizationFactor * expectedValues[i],
+                    classMembershipProbability[i], 1.0e-5);
         }
 
     }

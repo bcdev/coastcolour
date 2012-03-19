@@ -2,6 +2,7 @@ package org.esa.beam.coastcolour.processing;
 
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.ProductUtils;
 
 /**
@@ -35,6 +36,7 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         copyIOPBands(case2rProduct, l2wProduct);
 
         copyBands(case2rProduct, l2wProduct);
+        addChlAndTsmBands(l2wProduct);
 
         if (isOutputKdSpectrum()) {
             addPatternToAutoGrouping(l2wProduct, "Kd");
@@ -46,7 +48,6 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         ProductUtils.copyTiePointGrids(case2rProduct, l2wProduct);
         renameIops(l2wProduct);
         renameChiSquare(l2wProduct);
-        renameConcentrations(l2wProduct);
         renameTurbidityBand(l2wProduct);
         copyReflecBandsIfRequired(l2rProduct, l2wProduct);
         sortFlagBands(l2wProduct);
@@ -75,7 +76,10 @@ class Case2rL2WProductFactory extends L2WProductFactory {
     }
 
     private boolean considerBandInBandCopy(Band band, Product target) {
-        return !band.isFlagBand() && !target.containsBand(band.getName());
+        return !band.isFlagBand() &&
+                !target.containsBand(band.getName()) &&
+                !band.getName().equals(TSM_SOURCE_NAME) &&
+                !band.getName().equals(CHL_CONC_SOURCE_NAME);
     }
 
     protected void copyIOPBands(Product source, Product target) {
@@ -85,6 +89,19 @@ class Case2rL2WProductFactory extends L2WProductFactory {
             targetBand.setSourceImage(source.getBand(iopSourceBandName).getGeophysicalImage());
             targetBand.setValidPixelExpression(L2W_VALID_EXPRESSION);
         }
+    }
+
+    private void addChlAndTsmBands(Product l2wProduct) {
+        final Band tsm = l2wProduct.addBand(CONC_TSM_NAME, ProductData.TYPE_FLOAT32);
+        tsm.setDescription("Total suspended matter dry weight concentration.");
+        tsm.setUnit("g m^-3");
+        tsm.setValidPixelExpression(L2W_VALID_EXPRESSION);
+
+        final Band conc_chl = l2wProduct.addBand(CONC_CHL_NAME, ProductData.TYPE_FLOAT32);
+        conc_chl.setDescription("Chlorophyll concentration.");
+        conc_chl.setUnit("mg m^-3");
+        conc_chl.setValidPixelExpression(L2W_VALID_EXPRESSION);
+        addPatternToAutoGrouping(l2wProduct, CONC_GROUPING_PATTERN);
     }
 
     private void renameChiSquare(Product l2wProduct) {

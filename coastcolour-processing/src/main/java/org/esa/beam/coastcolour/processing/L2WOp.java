@@ -8,11 +8,7 @@ import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.Tile;
+import org.esa.beam.framework.gpf.*;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
@@ -25,17 +21,17 @@ import org.esa.beam.meris.case2.water.WaterAlgorithm;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 @OperatorMetadata(alias = "CoastColour.L2W", version = "1.5",
-                  authors = "Marco Peters, Norman Fomferra",
-                  copyright = "(c) 2011 Brockmann Consult",
-                  description = "Computes information about water properties such as IOPs, concentrations and " +
-                          "other variables")
+        authors = "Marco Peters, Norman Fomferra",
+        copyright = "(c) 2011 Brockmann Consult",
+        description = "Computes information about water properties such as IOPs, concentrations and " +
+                "other variables")
 public class L2WOp extends Operator {
 
     private static final int[] FLH_INPUT_BAND_NUMBERS = new int[]{6, 8, 10};
@@ -53,130 +49,130 @@ public class L2WOp extends Operator {
     private Product classMembershipProduct;
 
     @Parameter(defaultValue = "true",
-               label = "Perform calibration",
-               description = "Whether to perform the calibration.")
+            label = "Perform calibration",
+            description = "Whether to perform the calibration.")
     private boolean doCalibration;
 
     @Parameter(defaultValue = "true",
-               label = "Perform Smile-effect correction",
-               description = "Whether to perform MERIS Smile-effect correction.")
+            label = "Perform Smile-effect correction",
+            description = "Whether to perform MERIS Smile-effect correction.")
     private boolean doSmile;
 
     @Parameter(defaultValue = "true",
-               label = "Perform equalization",
-               description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
+            label = "Perform equalization",
+            description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
 
     @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03")
     private double brightTestThreshold;
 
     @Parameter(label = "Bright Test Reference Wavelength [nm]", defaultValue = "865",
-               valueSet = {
-                       "412", "442", "490", "510", "560",
-                       "620", "665", "681", "705", "753",
-                       "760", "775", "865", "890", "900"
-               })
+            valueSet = {
+                    "412", "442", "490", "510", "560",
+                    "620", "665", "681", "705", "753",
+                    "760", "775", "865", "890", "900"
+            })
     private int brightTestWavelength;
 
 
     @Parameter(label = "Use climatology map for salinity and temperature", defaultValue = "true",
-               description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
-                       "for the whole scene.")
+            description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
+                    "for the whole scene.")
     private boolean useSnTMap;
 
     @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU",
-               description = "The average salinity of the water in the region to be processed.")
+            description = "The average salinity of the water in the region to be processed.")
     private double averageSalinity;
 
     @Parameter(label = "Average temperature", defaultValue = "15", unit = "°C",
-               description = "The average temperature of the water in the region to be processed.")
+            description = "The average temperature of the water in the region to be processed.")
     private double averageTemperature;
 
     @Parameter(label = "MERIS net (full path required for other than default)",
-               defaultValue = GlintCorrectionOperator.MERIS_ATMOSPHERIC_NET_NAME,
-               description = "The file of the atmospheric net to be used instead of the default neural net.",
-               notNull = false)
+            defaultValue = GlintCorrectionOperator.MERIS_ATMOSPHERIC_NET_NAME,
+            description = "The file of the atmospheric net to be used instead of the default neural net.",
+            notNull = false)
     private File atmoNetMerisFile;
 
     @Parameter(label = "Autoassociatve net (full path required for other than default)",
-               defaultValue = GlintCorrectionOperator.ATMO_AANN_NET,
-               description = "The file of the autoassociative net used for error computed instead of the default neural net.",
-               notNull = false)
+            defaultValue = GlintCorrectionOperator.ATMO_AANN_NET,
+            description = "The file of the autoassociative net used for error computed instead of the default neural net.",
+            notNull = false)
     private File autoassociativeNetFile;
 
     @Parameter(label = "Directory containing the neural nets corresponding to the fuzzy membership classes",
-               description = "Directory containing the neural nets corresponding to the fuzzy membership classes.")
+            description = "Directory containing the neural nets corresponding to the fuzzy membership classes.")
     private File fuzzyNnDir;
 
     @Parameter(label = "Alternative inverse water neural net (optional)",
-               description = "The file of the inverse water neural net to be used instead of the default.")
+            description = "The file of the inverse water neural net to be used instead of the default.")
     private File inverseWaterNnFile;
 
     @Parameter(label = "Alternative forward water neural net (optional)",
-               description = "The file of the forward water neural net to be used instead of the default.")
+            description = "The file of the forward water neural net to be used instead of the default.")
     private File forwardWaterNnFile;
 
     @Parameter(defaultValue = "l1p_flags.CC_LAND",
-               label = "Land detection expression",
-               description = "The arithmetic expression used for land detection.",
-               notEmpty = true, notNull = true)
+            label = "Land detection expression",
+            description = "The arithmetic expression used for land detection.",
+            notEmpty = true, notNull = true)
     private String landExpression;
 
     @Parameter(defaultValue = "l1p_flags.CC_CLOUD || l1p_flags.CC_SNOW_ICE",
-               label = "Cloud/Ice detection expression",
-               description = "The arithmetic expression used for cloud/ice detection.",
-               notEmpty = true, notNull = true)
+            label = "Cloud/Ice detection expression",
+            description = "The arithmetic expression used for cloud/ice detection.",
+            notEmpty = true, notNull = true)
     private String cloudIceExpression;
 
     @Parameter(defaultValue = "l2r_flags.INVALID",
-               description = "Expression defining pixels not considered for L2W processing")
+            description = "Expression defining pixels not considered for L2W processing")
     private String invalidPixelExpression;
 
     @Parameter(defaultValue = "false", label = "Output water leaving reflectance",
-               description = "Toggles the output of water leaving reflectance.")
+            description = "Toggles the output of water leaving reflectance.")
     private boolean outputReflec;
 
     @Parameter(defaultValue = "false", label = "Output A_Poc",
-               description = "Toggles the output of absorption by particulate organic matter.")
+            description = "Toggles the output of absorption by particulate organic matter.")
     private boolean outputAPoc;
 
     @Parameter(defaultValue = "true", label = "Output Kd spectrum",
-               description = "Toggles the output of downwelling irradiance attenuation coefficients. " +
-                       "If disabled only Kd_490 is added to the output.")
+            description = "Toggles the output of downwelling irradiance attenuation coefficients. " +
+                    "If disabled only Kd_490 is added to the output.")
     private boolean outputKdSpectrum;
 
     @Parameter(defaultValue = "false", label = "Output experimental FLH",
-               description = "Toggles the output of the experimental fluorescence line height.")
+            description = "Toggles the output of the experimental fluorescence line height.")
     private boolean outputFLH;
 
     @Parameter(defaultValue = "false", label = "Use QAA for IOP and concentration computation",
-               description = "If enabled IOPs are computed by QAA instead of Case-2-Regional. " +
-                       "Concentrations of chlorophyll and total suspended matter will be derived from the IOPs.")
+            description = "If enabled IOPs are computed by QAA instead of Case-2-Regional. " +
+                    "Concentrations of chlorophyll and total suspended matter will be derived from the IOPs.")
     private boolean useQaaForIops;
 
     @Parameter(defaultValue = "-0.02", label = "'A_TOTAL' lower bound",
-               description = "The lower bound of the valid value range.")
+            description = "The lower bound of the valid value range.")
     private float qaaATotalLower;
     @Parameter(defaultValue = "5.0", label = "'A_TOTAL' upper bound",
-               description = "The upper bound of the valid value range.")
+            description = "The upper bound of the valid value range.")
     private float qaaATotalUpper;
     @Parameter(defaultValue = "-0.2", label = "'BB_SPM' lower bound",
-               description = "The lower bound of the valid value range.")
+            description = "The lower bound of the valid value range.")
     private float qaaBbSpmLower;
     @Parameter(defaultValue = "5.0", label = "'BB_SPM' upper bound",
-               description = "The upper bound of the valid value range.")
+            description = "The upper bound of the valid value range.")
     private float qaaBbSpmUpper;
     @Parameter(defaultValue = "-0.02", label = "'A_PIG' lower bound",
-               description = "The lower bound of the valid value range.")
+            description = "The lower bound of the valid value range.")
     private float qaaAPigLower;
     @Parameter(defaultValue = "3.0", label = "'A_PIG' upper bound",
-               description = "The upper bound of the valid value range.")
+            description = "The upper bound of the valid value range.")
     private float qaaAPigUpper;
     @Parameter(defaultValue = "1.0", label = "'A_YS' upper bound",
-               description = "The upper bound of the valid value range. The lower bound is always 0.")
+            description = "The upper bound of the valid value range. The lower bound is always 0.")
     private float qaaAYsUpper;
     @Parameter(defaultValue = "false", label = "Divide source Rrs by PI(3.14)",
-               description = "If selected the source remote reflectances are divided by PI.")
+            description = "If selected the source remote reflectances are divided by PI.")
     private boolean qaaDivideByPI;
 
     private int nadirColumnIndex;
@@ -186,12 +182,16 @@ public class L2WOp extends Operator {
     private Product case2rProduct;
     private VirtualBandOpImage invalidOpImage;
     private static final int NUMBER_OF_WATER_NETS = 3;  // todo: will be 9 when Rolands input is available
-    private static final String[] waterForwardNets = new String[]{"23x7x16_168.5.net",
-            "23x7x16_511.3.net",
-            "23x7x16_191.2.net"};
-    private static final String[] waterInverseNets = new String[]{"46x24x18_37385.5.net",
-            "46x24x18_4584.9.net",
-            "23x7x16_34286.9.net"};
+    private static final String[] waterForwardNets =
+            new String[]{
+                    "23x7x16_168.5.net",
+                    "23x7x16_511.3.net",
+                    "23x7x16_191.2.net"};
+    private static final String[] waterInverseNets =
+            new String[]{
+                    "46x24x18_37385.4.net",
+                    "46x24x18_4584.9.net",
+                    "23x7x16_34286.9.net"};
     private Product[] c2rSingleProducts;
     public static final int NUMBER_OF_MEMBERSHIPS = 11;  // 9 classes + sum + dominant class
     private static final double MEMBERSHIP_CLASS_SUM_THRESH = 0.8;
@@ -219,8 +219,8 @@ public class L2WOp extends Operator {
         case2rProduct = case2Op.getTargetProduct();
 
         invalidOpImage = VirtualBandOpImage.createMask(invalidPixelExpression,
-                                                       l2rProduct,
-                                                       ResolutionLevel.MAXRES);
+                l2rProduct,
+                ResolutionLevel.MAXRES);
 
         final L2WProductFactory l2wProductFactory;
         if (useQaaForIops) {
@@ -261,6 +261,8 @@ public class L2WOp extends Operator {
             Operator case2Op = new RegionalWaterOp.Spi().createOperator();
             final String forwardWaterNnFilename = fuzzyNnDir + File.separator + waterForwardNets[i];
             forwardWaterNnFile = new File(forwardWaterNnFilename);
+            final String inverseWaterNnFilename = fuzzyNnDir + File.separator + waterInverseNets[i];
+            inverseWaterNnFile = new File(inverseWaterNnFilename);
             setCase2rParameters(case2Op);
             c2rSingleProducts[i] = case2Op.getTargetProduct();
         }
@@ -325,11 +327,11 @@ public class L2WOp extends Operator {
 
         // Maybe problematic: get a source tile from the target product. Weird.
         final Tile bbSPM443Tile = getSourceTile(targetProduct.getBand(L2WProductFactory.IOP_BB_SPM_443_NAME),
-                                                targetRectangle);
+                targetRectangle);
         final Tile aPig443Tile = getSourceTile(targetProduct.getBand(L2WProductFactory.IOP_A_PIG_443_NAME),
-                                               targetRectangle);
+                targetRectangle);
         final Tile aYs443Tile = getSourceTile(targetProduct.getBand(L2WProductFactory.IOP_A_YS_443_NAME),
-                                              targetRectangle);
+                targetRectangle);
 
         final Tile kMinTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.K_MIN_NAME));
         Tile[] kdTiles = new Tile[L2WProductFactory.KD_LAMBDAS.length];
@@ -339,7 +341,6 @@ public class L2WOp extends Operator {
 
         final Tile z90Tile = targetTiles.get(targetProduct.getBand(L2WProductFactory.Z90_MAX_NAME));
         final Tile turbidityTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.TURBIDITY_NAME));
-        // todo: chlTile and tsmTile are null here !!! add bands in case2r factory!
         final Tile chlTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.CONC_CHL_NAME));
         final Tile tsmTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.CONC_TSM_NAME));
         Tile[] chlSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
@@ -350,7 +351,7 @@ public class L2WOp extends Operator {
         }
         Tile[] membershipTiles = new Tile[NUMBER_OF_MEMBERSHIPS - 2];
         for (int i = 0; i < NUMBER_OF_MEMBERSHIPS - 2; i++) {
-            membershipTiles[i] = getSourceTile(classMembershipProduct.getBand("class_" + (i+1)), targetRectangle);
+            membershipTiles[i] = getSourceTile(classMembershipProduct.getBand("class_" + (i + 1)), targetRectangle);
         }
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
@@ -359,7 +360,7 @@ public class L2WOp extends Operator {
                 final boolean isSampleInvalid = isSampleInvalid(x, y);
                 if (outputFLH && !isSampleInvalid) {
                     computeFLHValues(x, y, satzen, solzen, reflecTiles, tosaReflecTiles, pathTiles, transTiles, flhTile,
-                                     flhOldNormTile, flhOldAltTile, flhAltTile, flhNormTile, isSampleInvalid);
+                            flhOldNormTile, flhOldAltTile, flhAltTile, flhNormTile, isSampleInvalid);
                 }
 
                 if (useQaaForIops) {
@@ -404,6 +405,7 @@ public class L2WOp extends Operator {
         double sumWeights = 0.0;
         double[] mClass = new double[membershipTiles.length];
         int index = 0;
+
         for (Tile membershipTile : membershipTiles) {
             mClass[index] = membershipTile.getSampleDouble(x, y);
             sumWeights += mClass[index];
@@ -420,9 +422,7 @@ public class L2WOp extends Operator {
             index++;
         }
 
-        if (sumWeights >= MEMBERSHIP_CLASS_SUM_THRESH) {
-            weightedConc /= membershipTiles.length;
-        } else {
+        if (sumWeights < MEMBERSHIP_CLASS_SUM_THRESH) {
             weightedConc = Double.NaN;
         }
         return weightedConc;
@@ -470,7 +470,7 @@ public class L2WOp extends Operator {
             double[] path = getValuesAt(x, y, pathTiles);
             double[] trans = getValuesAt(x, y, transTiles);
             flhValues = flhAlgorithm.computeFLH681(reflec, tosa, path, trans,
-                                                   cosTetaViewSurfRad, cosTetaSunSurfRad);
+                    cosTetaViewSurfRad, cosTetaSunSurfRad);
 
         }
         flhTile.setSample(x, y, flhValues[0]);
@@ -528,7 +528,7 @@ public class L2WOp extends Operator {
 
     private double getCosTetaViewSurfRad(Tile satzen, int x, int y) {
         double tetaViewSurfDeg = GlintCorrection.correctViewAngle(satzen.getSampleDouble(x, y), x,
-                                                                  nadirColumnIndex, true);
+                nadirColumnIndex, true);
         double tetaViewSurfRad = Math.toRadians(tetaViewSurfDeg);
         return Math.cos(tetaViewSurfRad);
     }

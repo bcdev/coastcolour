@@ -93,6 +93,15 @@ public class FuzzyClassification {
             }
         }
 
+        // normalize: sum of memberships should be equal to 1.0
+        double alphaChiSum = 0.0;
+        for (int i = 0; i < alphaChi.length; i++) {
+            alphaChiSum += alphaChi[i];
+        }
+        for (int i = 0; i < alphaChi.length; i++) {
+            alphaChi[i] /= alphaChiSum;
+        }
+
         return alphaChi;
 
     }

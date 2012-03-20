@@ -144,9 +144,14 @@ public class L1POpTest {
         int width = 10;
         int height = 10;
         Product product = new Product("MER_FR__1P", "MER_FR__1P", width, height);
+
+        final float[] MERIS_WAVELENGTHS = new float[]{412.0f, 442.0f, 490.0f, 510.0f, 560.0f, 620.0f, 665.0f,
+        681.0f, 705.0f, 753.0f, 760.0f, 775.0f, 865.0f, 890.0f, 900.0f};
+
         for (int i = 0; i < 15; i++) {
             final Band band = product.addBand(String.format("radiance_%d", (i + 1)), ProductData.TYPE_UINT16);
             band.setSpectralBandIndex(i);
+            band.setSpectralWavelength(MERIS_WAVELENGTHS[i]);
             band.setData(band.createCompatibleRasterData());
         }
         Band l1Flags = product.addBand("l1_flags", ProductData.TYPE_INT8);

@@ -136,6 +136,8 @@ public class L2WOpSecondTest {
         l2rSource.dispose();
     }
 
+    // todo: add tests for fuzzy approach!!!
+
     private static Product testTargetProduct(Product source, String expectedProductType, String[] expectedBandNames,
                                              Map<String, Object> l2wParams) {
 

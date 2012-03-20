@@ -44,8 +44,8 @@ public class L2WOp extends Operator {
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")
     private Product sourceProduct;
 
-    //    @SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)", optional = true)
-    @SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)")
+    @SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)", optional = true)
+//    @SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)")
     private Product classMembershipProduct;
 
     @Parameter(defaultValue = "true",
@@ -244,13 +244,15 @@ public class L2WOp extends Operator {
         // then compute k-weighted mean for Chl (and TSM?? todo: clarify)
         // with m[k] from classMembershipProduct
         // compute Chl_mean only if sum(m[k] > thresh := 0.8 todo: clarify
-        computeSingleCase2RProductsFromFuzzyApproach();
-        for (Band band : classMembershipProduct.getBands()) {
-            if (band.getName().startsWith("class_")) {
-                ProductUtils.copyBand(band.getName(), classMembershipProduct, l2WProduct, true);
+        if (classMembershipProduct != null) {
+            computeSingleCase2RProductsFromFuzzyApproach();
+            for (Band band : classMembershipProduct.getBands()) {
+                if (band.getName().startsWith("class_")) {
+                    ProductUtils.copyBand(band.getName(), classMembershipProduct, l2WProduct, true);
+                }
             }
+            ProductUtils.copyBand("dominant_class", classMembershipProduct, l2WProduct, true);
         }
-        ProductUtils.copyBand("dominant_class", classMembershipProduct, l2WProduct, true);
 
         setTargetProduct(l2WProduct);
     }
@@ -259,10 +261,12 @@ public class L2WOp extends Operator {
         c2rSingleProducts = new Product[NUMBER_OF_WATER_NETS];
         for (int i = 0; i < NUMBER_OF_WATER_NETS; i++) {
             Operator case2Op = new RegionalWaterOp.Spi().createOperator();
-            final String forwardWaterNnFilename = fuzzyNnDir + File.separator + waterForwardNets[i];
-            forwardWaterNnFile = new File(forwardWaterNnFilename);
-            final String inverseWaterNnFilename = fuzzyNnDir + File.separator + waterInverseNets[i];
-            inverseWaterNnFile = new File(inverseWaterNnFilename);
+            if (fuzzyNnDir != null) {
+                final String forwardWaterNnFilename = fuzzyNnDir + File.separator + waterForwardNets[i];
+                forwardWaterNnFile = new File(forwardWaterNnFilename);
+                final String inverseWaterNnFilename = fuzzyNnDir + File.separator + waterInverseNets[i];
+                inverseWaterNnFile = new File(inverseWaterNnFilename);
+            }
             setCase2rParameters(case2Op);
             c2rSingleProducts[i] = case2Op.getTargetProduct();
         }
@@ -350,8 +354,15 @@ public class L2WOp extends Operator {
             tsmSingleTiles[i] = getSourceTile(c2rSingleProducts[i].getBand("tsm"), targetRectangle);
         }
         Tile[] membershipTiles = new Tile[NUMBER_OF_MEMBERSHIPS - 2];
-        for (int i = 0; i < NUMBER_OF_MEMBERSHIPS - 2; i++) {
-            membershipTiles[i] = getSourceTile(classMembershipProduct.getBand("class_" + (i + 1)), targetRectangle);
+        Tile c2rChlTile = null;
+        Tile c2rTsmTile = null;
+        if (classMembershipProduct != null) {
+            for (int i = 0; i < NUMBER_OF_MEMBERSHIPS - 2; i++) {
+                membershipTiles[i] = getSourceTile(classMembershipProduct.getBand("class_" + (i + 1)), targetRectangle);
+            }
+        } else {
+            c2rChlTile = getSourceTile(case2rProduct.getBand("chl_conc"), targetRectangle);
+            c2rTsmTile = getSourceTile(case2rProduct.getBand("tsm"), targetRectangle);
         }
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
@@ -391,11 +402,16 @@ public class L2WOp extends Operator {
                 int l2wFlag = computeL2wFlags(x, y, c2rFlags, qaaFlags, invalidFlagValue);
                 l2wFlagTile.setSample(x, y, l2wFlag);
 
-                // get weighted CHL and TSM
-                final double weightedChl = getWeightedConc(x, y, membershipTiles, chlSingleTiles);
-                chlTile.setSample(x, y, weightedChl);
-                final double weightedTsm = getWeightedConc(x, y, membershipTiles, tsmSingleTiles);
-                tsmTile.setSample(x, y, weightedTsm);
+                if (classMembershipProduct != null) {
+                    // get weighted CHL and TSM
+                    final double weightedChl = getWeightedConc(x, y, membershipTiles, chlSingleTiles);
+                    chlTile.setSample(x, y, weightedChl);
+                    final double weightedTsm = getWeightedConc(x, y, membershipTiles, tsmSingleTiles);
+                    tsmTile.setSample(x, y, weightedTsm);
+                } else {
+                    chlTile.setSample(x, y, c2rChlTile.getSampleDouble(x, y));
+                    tsmTile.setSample(x, y, c2rTsmTile.getSampleDouble(x, y));
+                }
             }
         }
     }

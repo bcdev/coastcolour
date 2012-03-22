@@ -84,7 +84,7 @@ public class L2WOp extends Operator {
             description = "The average salinity of the water in the region to be processed.")
     private double averageSalinity;
 
-    @Parameter(label = "Average temperature", defaultValue = "15", unit = "°C",
+    @Parameter(label = "Average temperature", defaultValue = "15", unit = "C",
             description = "The average temperature of the water in the region to be processed.")
     private double averageTemperature;
 

@@ -79,7 +79,7 @@ public class L2ROp extends Operator {
                notEmpty = true, notNull = true)
     private String landExpression;
 
-    @Parameter(defaultValue = "l1p_flags.CC_CLOUD || l1p_flags.CC_SNOW_ICE",
+    @Parameter(defaultValue = "(l1p_flags.CC_CLOUD && not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE",
                label = "Cloud/Ice detection expression",
                description = "The arithmetic expression used for cloud/ice detection.",
                notEmpty = true, notNull = true)
@@ -224,11 +224,11 @@ public class L2ROp extends Operator {
         moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_LAND_FLAG_NAME.toLowerCase(), 0);
         moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_COASTLINE_FLAG_NAME.toLowerCase(), 1);
         moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_CLOUD_FLAG_NAME.toLowerCase(), 2);
-        moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_CLOUD_SPATIAL_FLAG_NAME.toLowerCase(), 3);
+        moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_CLOUD_AMBIGUOUS_FLAG_NAME.toLowerCase(), 3);
         moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_CLOUD_BUFFER_FLAG_NAME.toLowerCase(), 4);
         moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_CLOUD_SHADOW_FLAG_NAME.toLowerCase(), 5);
         moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_SNOW_ICE_FLAG_NAME.toLowerCase(), 6);
-        moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_LANDRISK_FLAG_NAME.toLowerCase(), 7);
+        moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_MIXEDPIXEL_FLAG_NAME.toLowerCase(), 7);
         moveMaskAtIndex(maskGroup, l1pMaskPrefix + L1POp.CC_GLINTRISK_FLAG_NAME.toLowerCase(), 8);
 
     }

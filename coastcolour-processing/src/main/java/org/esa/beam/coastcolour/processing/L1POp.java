@@ -30,31 +30,32 @@ import java.util.Map;
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes a refinement of top of atmosphere radiance and " +
-                                "pixel characterization information.")
+                          "pixel characterization information.")
 public class L1POp extends Operator {
 
     public static final String CC_LAND_FLAG_NAME = "CC_LAND";
     public static final String CC_COASTLINE_FLAG_NAME = "CC_COASTLINE";
     public static final String CC_CLOUD_FLAG_NAME = "CC_CLOUD";
-    public static final String CC_CLOUD_SPATIAL_FLAG_NAME = "CC_CLOUD_SPATIAL";
+    public static final String CC_CLOUD_AMBIGUOUS_FLAG_NAME = "CC_CLOUD_AMBIGUOUS";
     public static final String CC_CLOUD_BUFFER_FLAG_NAME = "CC_CLOUD_BUFFER";
     public static final String CC_CLOUD_SHADOW_FLAG_NAME = "CC_CLOUD_SHADOW";
     public static final String CC_SNOW_ICE_FLAG_NAME = "CC_SNOW_ICE";
-    public static final String CC_LANDRISK_FLAG_NAME = "CC_LANDRISK";
+    public static final String CC_MIXEDPIXEL_FLAG_NAME = "CC_MIXEDPIXEL";
     public static final String CC_GLINTRISK_FLAG_NAME = "CC_GLINTRISK";
 
     private static final String IDEPIX_OPERATOR_ALIAS = "idepix.ComputeChain";
     private static final String RADIOMETRY_OPERATOR_ALIAS = "Meris.CorrectRadiometry";
     private static final String CLOUD_FLAG_BAND_NAME = "cloud_classif_flags";
     private static final String L1P_FLAG_BAND_NAME = "l1p_flags";
+
     private static final int LAND_BIT_INDEX = 0;
     private static final int COASTLINE_BIT_INDEX = 1;
     private static final int CLOUD_BIT_INDEX = 2;
-    private static final int CLOUD_SPATIAL_BIT_INDEX = 3;
+    private static final int CLOUD_AMBIGUOUS_BIT_INDEX = 3;
     private static final int CLOUD_BUFFER_BIT_INDEX = 4;
     private static final int CLOUD_SHADOW_BIT_INDEX = 5;
     private static final int SNOW_ICE_BIT_INDEX = 6;
-    private static final int LANDRISK_BIT_INDEX = 7;
+    private static final int MIXEDPIXEL_BIT_INDEX = 7;
     private static final int GLINTRISK_BIT_INDEX = 8;
 
     @SourceProduct(alias = "l1b", description = "MERIS L1b (N1) product")
@@ -130,7 +131,6 @@ public class L1POp extends Operator {
         idepixParams.put("algorithm", algorithm);
         idepixParams.put("ipfQWGUserDefinedRhoToa442Threshold", brightTestThreshold);
         idepixParams.put("rhoAgReferenceWavelength", brightTestWavelength);
-        idepixParams.put("ccSpatialCloudTest", true);
         return idepixParams;
     }
 
@@ -238,14 +238,14 @@ public class L1POp extends Operator {
         l1pFC.addFlag(CC_LAND_FLAG_NAME, BitSetter.setFlag(0, LAND_BIT_INDEX), "Pixel masked as land");
         l1pFC.addFlag(CC_COASTLINE_FLAG_NAME, BitSetter.setFlag(0, COASTLINE_BIT_INDEX), "Pixel masked as coastline");
         l1pFC.addFlag(CC_CLOUD_FLAG_NAME, BitSetter.setFlag(0, CLOUD_BIT_INDEX), "Pixel masked as cloud");
-        l1pFC.addFlag(CC_CLOUD_SPATIAL_FLAG_NAME, BitSetter.setFlag(0, CLOUD_SPATIAL_BIT_INDEX),
-                      "Pixel masked by spatial cloud filter");
+        l1pFC.addFlag(CC_CLOUD_AMBIGUOUS_FLAG_NAME, BitSetter.setFlag(0, CLOUD_AMBIGUOUS_BIT_INDEX),
+                      "Pixel masked as ambiguous cloud");
         l1pFC.addFlag(CC_CLOUD_BUFFER_FLAG_NAME, BitSetter.setFlag(0, CLOUD_BUFFER_BIT_INDEX),
                       "Pixel masked as cloud buffer");
         l1pFC.addFlag(CC_CLOUD_SHADOW_FLAG_NAME, BitSetter.setFlag(0, CLOUD_SHADOW_BIT_INDEX),
                       "Pixel masked as cloud shadow");
         l1pFC.addFlag(CC_SNOW_ICE_FLAG_NAME, BitSetter.setFlag(0, SNOW_ICE_BIT_INDEX), "Pixel masked as snow/ice");
-        l1pFC.addFlag(CC_LANDRISK_FLAG_NAME, BitSetter.setFlag(0, LANDRISK_BIT_INDEX), "Potential land pixel");
+        l1pFC.addFlag(CC_MIXEDPIXEL_FLAG_NAME, BitSetter.setFlag(0, MIXEDPIXEL_BIT_INDEX), "Potential land pixel");
         l1pFC.addFlag(CC_GLINTRISK_FLAG_NAME, BitSetter.setFlag(0, GLINTRISK_BIT_INDEX),
                       "Risk that pixel is under glint");
 
@@ -253,48 +253,29 @@ public class L1POp extends Operator {
         final Band l1pBand = l1pProduct.addBand(L1P_FLAG_BAND_NAME, ProductData.TYPE_INT16);
         l1pBand.setDescription("CC L1P pixel classification");
         l1pBand.setSampleCoding(l1pFC);
-        int width = l1pProduct.getSceneRasterWidth();
-        int height = l1pProduct.getSceneRasterHeight();
         ProductNodeGroup<Mask> maskGroup = l1pProduct.getMaskGroup();
-        String maskPrefix = "l1p_";
-        int maskIndex = 0;
-        maskGroup.add(maskIndex++, Mask.BandMathsType.create(maskPrefix + CC_LAND_FLAG_NAME.toLowerCase(), "Land flag",
-                                                             width, height,
-                                                             L1P_FLAG_BAND_NAME + "." + CC_LAND_FLAG_NAME,
-                                                             Color.GREEN.darker(), 0.5));
-        maskGroup.add(maskIndex++, Mask.BandMathsType.create(maskPrefix + CC_COASTLINE_FLAG_NAME.toLowerCase(),
-                                                             "Coastline flag", width, height,
-                                                             L1P_FLAG_BAND_NAME + "." + CC_COASTLINE_FLAG_NAME,
-                                                             Color.GREEN, 0.5));
-        maskGroup.add(maskIndex++,
-                      Mask.BandMathsType.create(maskPrefix + CC_CLOUD_FLAG_NAME.toLowerCase(), "Cloud flag",
-                                                width, height, L1P_FLAG_BAND_NAME + "." + CC_CLOUD_FLAG_NAME,
-                                                Color.YELLOW, 0.5));
-        maskGroup.add(maskIndex++, Mask.BandMathsType.create(maskPrefix + CC_CLOUD_SPATIAL_FLAG_NAME.toLowerCase(),
-                                                             "Spatial Cloud flag", width, height,
-                                                             L1P_FLAG_BAND_NAME + "." + CC_CLOUD_SPATIAL_FLAG_NAME,
-                                                             Color.YELLOW.darker(), 0.5));
-        maskGroup.add(maskIndex++, Mask.BandMathsType.create(maskPrefix + CC_CLOUD_BUFFER_FLAG_NAME.toLowerCase(),
-                                                             "Cloud buffer flag", width, height,
-                                                             L1P_FLAG_BAND_NAME + "." + CC_CLOUD_BUFFER_FLAG_NAME,
-                                                             Color.RED, 0.5));
-        maskGroup.add(maskIndex++, Mask.BandMathsType.create(maskPrefix + CC_CLOUD_SHADOW_FLAG_NAME.toLowerCase(),
-                                                             "Cloud shadow flag", width, height,
-                                                             L1P_FLAG_BAND_NAME + "." + CC_CLOUD_SHADOW_FLAG_NAME,
-                                                             Color.BLUE, 0.5));
-        maskGroup.add(maskIndex++, Mask.BandMathsType.create(maskPrefix + CC_SNOW_ICE_FLAG_NAME.toLowerCase(),
-                                                             "Snow/Ice flag", width, height,
-                                                             L1P_FLAG_BAND_NAME + "." + CC_SNOW_ICE_FLAG_NAME,
-                                                             Color.CYAN, 0.5));
-        maskGroup.add(maskIndex++, Mask.BandMathsType.create(maskPrefix + CC_LANDRISK_FLAG_NAME.toLowerCase(),
-                                                             "Potential land pixel", width, height,
-                                                             L1P_FLAG_BAND_NAME + "." + CC_LANDRISK_FLAG_NAME,
-                                                             Color.GREEN.darker().darker(), 0.5));
-        maskGroup.add(maskIndex, Mask.BandMathsType.create(maskPrefix + CC_GLINTRISK_FLAG_NAME.toLowerCase(),
-                                                           "Risk that pixel is under glint", width, height,
-                                                           L1P_FLAG_BAND_NAME + "." + CC_GLINTRISK_FLAG_NAME,
-                                                           Color.pink, 0.5));
 
+        addMask(maskGroup, CC_LAND_FLAG_NAME, "Land flag", Color.GREEN.darker());
+        addMask(maskGroup, CC_COASTLINE_FLAG_NAME, "Coastline flag", Color.GREEN);
+        addMask(maskGroup, CC_CLOUD_FLAG_NAME, "Cloud flag", Color.YELLOW.darker());
+        addMask(maskGroup, CC_CLOUD_AMBIGUOUS_FLAG_NAME, "Ambiguous Cloud flag", Color.YELLOW);
+        addMask(maskGroup, CC_CLOUD_BUFFER_FLAG_NAME, "Cloud buffer flag", Color.RED);
+        addMask(maskGroup, CC_CLOUD_SHADOW_FLAG_NAME, "Cloud shadow flag", Color.BLUE);
+        addMask(maskGroup, CC_SNOW_ICE_FLAG_NAME, "Snow/Ice flag", Color.CYAN);
+        addMask(maskGroup, CC_MIXEDPIXEL_FLAG_NAME, "Potential land pixel", Color.GREEN.darker().darker());
+        addMask(maskGroup, CC_GLINTRISK_FLAG_NAME, "Risk that pixel is under glint", Color.pink);
+
+    }
+
+    private void addMask(ProductNodeGroup<Mask> maskGroup, String flagName, String description, Color color) {
+        int width = sourceProduct.getSceneRasterWidth();
+        int height = sourceProduct.getSceneRasterHeight();
+        String maskPrefix = "l1p_";
+        Mask mask = Mask.BandMathsType.create(maskPrefix + flagName.toLowerCase(),
+                                              "Risk that pixel is under glint", width, height,
+                                              L1P_FLAG_BAND_NAME + "." + flagName,
+                                              color, 0.5);
+        maskGroup.add(mask);
     }
 
 
@@ -320,16 +301,16 @@ public class L1POp extends Operator {
                                      cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_COASTLINE));
                 targetTile.setSample(x, y, CLOUD_BIT_INDEX,
                                      cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD));
-                targetTile.setSample(x, y, CLOUD_SPATIAL_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD_SPATIAL));
+                targetTile.setSample(x, y, CLOUD_AMBIGUOUS_BIT_INDEX,
+                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD_AMBIGUOUS));
                 targetTile.setSample(x, y, CLOUD_BUFFER_BIT_INDEX,
                                      cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD_BUFFER));
                 targetTile.setSample(x, y, CLOUD_SHADOW_BIT_INDEX,
                                      cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD_SHADOW));
                 targetTile.setSample(x, y, SNOW_ICE_BIT_INDEX,
                                      cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_SNOW_ICE));
-                targetTile.setSample(x, y, LANDRISK_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_LANDRISK));
+                targetTile.setSample(x, y, MIXEDPIXEL_BIT_INDEX,
+                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_MIXED_PIXEL));
                 targetTile.setSample(x, y, GLINTRISK_BIT_INDEX,
                                      cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_GLINTRISK));
             }

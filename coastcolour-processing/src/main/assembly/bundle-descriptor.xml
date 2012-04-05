@@ -1,12 +1,12 @@
 <bundleDescriptor>
     <bundleName>coastcolour-processing</bundleName>
-    <bundleVersion>1.4.1</bundleVersion>
+    <bundleVersion>1.5-SNAPSHOT</bundleVersion>
 
      <processorDescriptors>
         <processorDescriptor>
             <executableName>Meris.CorrectRadiometry</executableName>
             <processorName>MERIS Radiometric Corrections</processorName>
-            <processorVersion>1.4.1</processorVersion>
+            <processorVersion>1.1-SNAPSHOT</processorVersion>
             <defaultParameters><![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->
     <doCalibration>true</doCalibration>
@@ -116,7 +116,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L1P</executableName>
             <processorName>MERIS CoastColour L1P</processorName>
-            <processorVersion>1.4.1</processorVersion>
+            <processorVersion>1.5-SNAPSHOT</processorVersion>
             <defaultParameters><![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->
     <doCalibration>true</doCalibration>
@@ -239,7 +239,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2R</executableName>
             <processorName>MERIS CoastColour L2R</processorName>
-            <processorVersion>1.4.1</processorVersion>
+            <processorVersion>1.5-SNAPSHOT</processorVersion>
             <defaultParameters><![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->
     <doCalibration>true</doCalibration>
@@ -451,7 +451,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2W</executableName>
             <processorName>MERIS CoastColour L2W</processorName>
-            <processorVersion>1.4.1</processorVersion>
+            <processorVersion>1.5-SNAPSHOT</processorVersion>
             <defaultParameters>
                 <![CDATA[<parameters>
     <!-- Whether to perform the calibration. -->

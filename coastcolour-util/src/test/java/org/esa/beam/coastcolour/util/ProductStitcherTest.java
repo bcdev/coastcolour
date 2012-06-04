@@ -150,4 +150,49 @@ public class ProductStitcherTest {
         assertEquals(7, testStitcher.stitchedProductTpRowToScanTimeMap.size());
     }
 
+    @Test
+    public void testFindMaxIntegerDivisor() throws Exception {
+        int number = 10;
+        int result = ProductStitcherNetcdfUtils.findMaxIntegerDivisor(number);
+        assertEquals(5, result);
+
+        number = 81;
+        result = ProductStitcherNetcdfUtils.findMaxIntegerDivisor(number);
+        assertEquals(27, result);
+
+        number = 71;
+        result = ProductStitcherNetcdfUtils.findMaxIntegerDivisor(number);
+        assertEquals(1, result);
+
+        number = 7410;
+        result = ProductStitcherNetcdfUtils.findMaxIntegerDivisor(number);
+        assertEquals(3705, result);
+
+        number = -10;
+        result = ProductStitcherNetcdfUtils.findMaxIntegerDivisor(number);
+        assertEquals(-5, result);
+
+        number = -81;
+        result = ProductStitcherNetcdfUtils.findMaxIntegerDivisor(number);
+        assertEquals(-27, result);
+    }
+
+    @Test
+    public void testFindMaxZeroDivisorBy64() throws Exception {
+        int number = 71;
+        int result = ProductStitcherNetcdfUtils.findMaxZeroDivisorBy64(number);
+        assertEquals(64, result);
+
+        number = 640;
+        result = ProductStitcherNetcdfUtils.findMaxZeroDivisorBy64(number);
+        assertEquals(640, result);
+
+        number = 639;
+        result = ProductStitcherNetcdfUtils.findMaxZeroDivisorBy64(number);
+        assertEquals(576, result);
+
+        number = -176;
+        result = ProductStitcherNetcdfUtils.findMaxZeroDivisorBy64(number);
+        assertEquals(-128, result);
+    }
 }

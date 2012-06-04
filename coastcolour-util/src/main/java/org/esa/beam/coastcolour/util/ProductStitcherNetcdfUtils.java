@@ -106,6 +106,25 @@ public class ProductStitcherNetcdfUtils {
         return create(date, micros);
     }
 
+    public static int findMaxIntegerDivisor(int number) {
+        int decr = (int) Math.signum(number);
+        int result = number - decr;
+        while (number % result != 0) {
+            result -= decr;
+        }
+        return result;
+    }
+
+    public static int findMaxZeroDivisorBy64(int number) {
+        int decr = (int) Math.signum(number);
+        int result = number;
+        while (result % 64 != 0) {
+            result -= decr;
+        }
+        return result;
+    }
+
+
     private static Array getDataArray(DataType type, Variable variable, Class clazz) {
         final int[] origin = new int[variable.getRank()];
         final int[] shape = variable.getShape();
@@ -143,7 +162,7 @@ public class ProductStitcherNetcdfUtils {
         calendar.add(Calendar.DATE, -(int) (offset / millisPerDay));
         calendar.add(Calendar.MILLISECOND, -(int) (offset % millisPerDay));
         final long millisToAdd = Math.round(micros / 1000.0);
-        return  calendar.getTimeInMillis() + millisToAdd;
+        return calendar.getTimeInMillis() + millisToAdd;
     }
 
 }

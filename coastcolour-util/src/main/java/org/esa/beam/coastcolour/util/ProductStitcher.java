@@ -49,6 +49,8 @@ public class ProductStitcher {
     int stitchedProductWidthTps;
     Map<Integer, Long> stitchedProductBandRowToScanTimeMap;
     Map<Integer, Long> stitchedProductTpRowToScanTimeMap;
+    private ArrayFloat.D2 tpLatData;
+    private ArrayFloat.D2 tpLonData;
 
     public ProductStitcher(List<NetcdfFile> ncFileList) {
         this.ncFileList = ncFileList;
@@ -84,7 +86,7 @@ public class ProductStitcher {
             }
             if (xDim == -1 || yDim == -1) {
                 throw new IllegalStateException("Input file ' " + netcdfFile.getLocation() +
-                        "' does not have expected dimension names - check product!");
+                                                        "' does not have expected dimension names - check product!");
             }
 
             final List<Attribute> globalAttributes = netcdfFile.getGlobalAttributes();
@@ -102,7 +104,7 @@ public class ProductStitcher {
 
             if (startTime == -1 || stopTime == -1) {
                 throw new IllegalStateException("Input file ' " + netcdfFile.getLocation() +
-                        "': start/stop times cannot be parsed - check product!");
+                                                        "': start/stop times cannot be parsed - check product!");
             }
 
             // interpolation:
@@ -185,11 +187,11 @@ public class ProductStitcher {
 
         if (startTime == -1) {
             throw new IllegalStateException("Input file ' " + firstNcFile.getLocation() +
-                    "': start time cannot be parsed - check product!");
+                                                    "': start time cannot be parsed - check product!");
         }
         if (stopTime == -1) {
             throw new IllegalStateException("Input file ' " + lastNcFile.getLocation() +
-                    "': stop time cannot be parsed - check product!");
+                                                    "': stop time cannot be parsed - check product!");
         }
 
         // interpolation:
@@ -250,7 +252,7 @@ public class ProductStitcher {
                                      DefaultErrorHandler handler) {
         NetcdfFileWriteable outFile = null;
         final PrintWriterProgressMonitor pm = new PrintWriterProgressMonitor(System.out);
-        pm.beginTask( "Writing stitched product...", 0);
+        pm.beginTask("Writing stitched product...", 0);
         try {
             outFile = NetcdfFileWriteable.createNew(ncResultFile.getAbsolutePath(), false);
 
@@ -279,8 +281,10 @@ public class ProductStitcher {
             }
 
             // add band and tie point data to output:
-            writeVariables(allBandVariablesLists, bandRowToScanTimeMaps, outFile, false, pm);
-            writeVariables(allTpVariablesLists, tpRowToScanTimeMaps, outFile, true, pm);
+            writeVariables(allBandVariablesLists, bandRowToScanTimeMaps, outFile, false);
+            tpLatData = extractTpCoordinates(allTpVariablesLists, tpRowToScanTimeMaps, "latitude");
+            tpLonData = extractTpCoordinates(allTpVariablesLists, tpRowToScanTimeMaps, "longitude");
+            writeVariables(allTpVariablesLists, tpRowToScanTimeMaps, outFile, true);
 
         } catch (IOException e) {
             handler.error(e);
@@ -337,10 +341,64 @@ public class ProductStitcher {
         }
     }
 
+    private ArrayFloat.D2 extractTpCoordinates(List<List<Variable>> variableLists,
+                                               List<Map<Integer, Long>> rowToScanTimeMaps,
+                                               String coordName) throws IOException, InvalidRangeException {
+
+        int width = stitchedProductWidthTps;
+        int height = stitchedProductHeightTps;
+
+        ArrayFloat.D2 tpCoordinatesData = new ArrayFloat.D2(height, width);
+        List<Variable> firstProductBandVariables = variableLists.get(0);
+
+        // loop over lat or long tpg
+        for (Variable variable : firstProductBandVariables) {
+            // loop over single products
+            System.out.println("Stitching data of TPG '" + variable.getName() + "'...");
+            for (int i = 0; i < variableLists.size(); i++) {
+                List<Variable> allBandVariables = variableLists.get(i);
+                for (Variable variable2 : allBandVariables) {
+                    if (variable2.getName().equals(variable.getName()) && variable.getName().equals(coordName)) {
+                        variable2.getDimension(0).setLength(variable2.getShape(0));
+                        variable2.getDimension(1).setLength(variable2.getShape(1));
+
+                        float[][] floatVals = ProductStitcherNetcdfUtils.getFloat2DArrayFromNetcdfVariable(variable2);
+
+                        int sourceProductIndexPrev = 0;
+                        int valuesRowIndex = 0;
+                        // now loop over ALL rows:
+                        for (int j = 0; j < height; j++) {
+                            // search the right single product by row time
+                            int sourceProductIndex = getSourceProductIndex(rowToScanTimeMaps, j, true);
+
+                            if (sourceProductIndex < 0 || sourceProductIndex > ncFileList.size()) {
+                                throw new IllegalStateException("Unknown status of source product start/stop times - cannot continue.");
+                            }
+
+                            if (sourceProductIndex > sourceProductIndexPrev) {
+                                valuesRowIndex = 0;
+                            }
+
+                            // if the current single product is the right one, loop over raster and set netcdf floatVals
+                            if (sourceProductIndex == i) {
+                                for (int k = 0; k < width; k++) {
+                                    tpCoordinatesData.set(j, k, floatVals[valuesRowIndex][k]);
+                                }
+                            }
+                            valuesRowIndex++;
+                            sourceProductIndexPrev = sourceProductIndex;
+                        }
+                    }
+                }
+            }
+        }
+        return tpCoordinatesData;
+    }
+
     private void writeVariables(List<List<Variable>> variableLists,
                                 List<Map<Integer, Long>> rowToScanTimeMaps,
                                 NetcdfFileWriteable outFile,
-                                boolean isTiepoints, PrintWriterProgressMonitor pm) throws IOException, InvalidRangeException {
+                                boolean isTiepoints) throws IOException, InvalidRangeException {
 
         int width = (isTiepoints ? stitchedProductWidthTps : stitchedProductWidthBands);
         int height = (isTiepoints ? stitchedProductHeightTps : stitchedProductHeightBands);
@@ -352,9 +410,10 @@ public class ProductStitcher {
 
         List<Variable> firstProductBandVariables = variableLists.get(0);
 
+        // loop over bands or tpg's
         for (Variable variable : firstProductBandVariables) {
             // loop over single products
-            System.out.println("...writing variable '" + variable.getName() + "'...");
+            System.out.println("Stitching data of variable '" + variable.getName() + "'...");
             for (int i = 0; i < variableLists.size(); i++) {
                 List<Variable> allBandVariables = variableLists.get(i);
                 for (Variable variable2 : allBandVariables) {
@@ -364,7 +423,6 @@ public class ProductStitcher {
                             metadataBuffer.set(0, variable2.readScalarByte());
                         } else {
                             // get data array for THIS variable and THIS single product
-                            // todo: check if and why we need this?!
                             variable2.getDimension(0).setLength(variable2.getShape(0));
                             variable2.getDimension(1).setLength(variable2.getShape(1));
                             ////
@@ -402,10 +460,7 @@ public class ProductStitcher {
                                 }
 
                                 // if the current single product is the right one, loop over raster and set netcdf floatVals
-                                // todo: we need to interpolate for the tie points because of the mismatch of the single products
                                 if (sourceProductIndex == i) {
-//                                    System.out.println("i,j,valuesRowIndex,yDim = " + i + "," + j + "," + valuesRowIndex + "," +
-//                                    variable2.getShape()[0]);
                                     for (int k = 0; k < width; k++) {
                                         switch (variable2.getDataType()) {
                                             case BYTE:
@@ -425,30 +480,118 @@ public class ProductStitcher {
                                 valuesRowIndex++;
                                 sourceProductIndexPrev = sourceProductIndex;
                             }
-                            switch (variable2.getDataType()) {
-                                case BYTE:
-                                    outFile.write(variable2.getName(), bandDataByte);
-                                    break;
-                                case SHORT:
-                                    outFile.write(variable2.getName(), bandDataShort);
-                                    break;
-                                case FLOAT:
-                                    outFile.write(variable2.getName(), bandDataFloat);
-                                    break;
-                                default:
-                                    throw new IllegalArgumentException("Data type '" + variable2.getDataType().name() + "' not supported.");
-                            }
                         }
+                    }
+                }
+            }
+
+            // NOW interpolate latitude/longitude tpg's and write data to outFile...
+            System.out.println("...writing variable '" + variable.getName() + "'.");
+            List<Variable> allBandVariables = variableLists.get(0);
+            float[] latitudeDeltas = null;
+            float[] longitudeDeltas = null;
+            for (Variable variable2 : allBandVariables) {
+                if (isTiepoints && (variable2.getName().equals("latitude"))) {
+                    latitudeDeltas = getLatitudeDeltas(width, height);
+                }
+                if (isTiepoints && (variable2.getName().equals("longitude"))) {
+                    longitudeDeltas = getLongitudeDeltas(width, height);
+                }
+            }
+
+            for (Variable variable2 : allBandVariables) {
+                if (variable2.getName().equals(variable.getName())) {
+                    switch (variable2.getDataType()) {
+                        case BYTE:
+                            outFile.write(variable2.getName(), bandDataByte);
+                            break;
+                        case SHORT:
+                            outFile.write(variable2.getName(), bandDataShort);
+                            break;
+                        case FLOAT:
+                            if (isTiepoints && (latitudeDeltas != null)) {
+                                ArrayFloat.D2 tpDataInterpol;
+                                if (variable2.getName().equals("latitude")) {
+                                    tpDataInterpol = interpolateLatitudeTiePointData(bandDataFloat, latitudeDeltas, width, height);
+                                } else if (variable2.getName().equals("longitude")) {
+                                    tpDataInterpol = interpolateLongitudeTiePointData(bandDataFloat, longitudeDeltas, width, height);
+                                } else {
+                                    tpDataInterpol = interpolateFloatTiePointData(bandDataFloat, latitudeDeltas, longitudeDeltas, width, height);
+                                }
+                                outFile.write(variable2.getName(), tpDataInterpol);
+                            } else {
+                                outFile.write(variable2.getName(), bandDataFloat);
+                            }
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Data type '" + variable2.getDataType().name() + "' not supported.");
                     }
                 }
             }
         }
     }
 
+
+    private float[] getLatitudeDeltas(int width, int height) {
+        float[] deltaLat = new float[width];
+        for (int i = 0; i < width; i++) {
+            deltaLat[i] = Math.abs(tpLatData.get(height - 1, i) - tpLatData.get(0, i)) / (height - 2);
+        }
+        return deltaLat;
+    }
+
+    private float[] getLongitudeDeltas(int width, int height) {
+        float[] deltaLon = new float[height];
+        for (int j = 0; j < height; j++) {
+            deltaLon[j] = Math.abs(tpLonData.get(j, width - 1) - tpLonData.get(j, 0)) / (width - 1);
+        }
+        return deltaLon;
+    }
+
+    private ArrayFloat.D2 interpolateLatitudeTiePointData(ArrayFloat.D2 tpData, float[] deltaLat, int width, int height) {
+        ArrayFloat.D2 tpDataInterpol = new ArrayFloat.D2(height, width);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                float result = tpData.get(0, i) - j * deltaLat[i];
+                tpDataInterpol.set(j, i, result);
+            }
+        }
+        return tpDataInterpol;
+    }
+
+    private ArrayFloat.D2 interpolateLongitudeTiePointData(ArrayFloat.D2 tpData, float[] deltaLon, int width, int height) {
+        ArrayFloat.D2 tpDataInterpol = new ArrayFloat.D2(height, width);
+        for (int j = 0; j < height; j++) {
+            for (int i = 0; i < width; i++) {
+                float result = tpData.get(j, 0) + i * deltaLon[j];
+                tpDataInterpol.set(j, i, result);
+            }
+        }
+        return tpDataInterpol;
+    }
+
+
+    private ArrayFloat.D2 interpolateFloatTiePointData(ArrayFloat.D2 tpData, float[] deltaLat, float[] deltaLon, int width, int height) {
+        ArrayFloat.D2 tpDataInterpol = new ArrayFloat.D2(height, width);
+        for (int i = 0; i < width - 1; i++) {
+            for (int j = 0; j < height - 1; j++) {
+                float fracLat = 0.5f * Math.abs(tpLatData.get(j, i) - tpLatData.get(j + 1, i)) / deltaLat[i];
+                float fracLon = 0.5f * Math.abs(tpLonData.get(j, i) - tpLonData.get(j + 1, i)) / deltaLon[i];
+                float result = fracLat * tpData.get(j + 1, i) + (0.5f - fracLat) * tpData.get(j, i) +
+                        fracLon * tpData.get(j, i + 1) + (0.5f - fracLon) * tpData.get(j, i);
+                tpDataInterpol.set(j, i, result);
+                tpDataInterpol.set(j, width - 1, tpData.get(j, width - 1));
+            }
+            tpDataInterpol.set(height - 1, i, tpData.get(height - 1, i));
+        }
+        tpDataInterpol.set(height - 1, width - 1, tpData.get(height - 1, width - 1));
+        return tpDataInterpol;
+    }
+
     private int getSourceProductIndex(List<Map<Integer, Long>> rowToScanTimeMaps, int rowIndex,
                                       boolean isTiepoints) {
         int sourceProductIndex = -1;
-        Map<Integer, Long> stitchedProductRowToScanTimeMap = new HashMap<Integer, Long>();
+        Map<Integer, Long> stitchedProductRowToScanTimeMap;
         if (isTiepoints) {
             stitchedProductRowToScanTimeMap = stitchedProductTpRowToScanTimeMap;
         } else {

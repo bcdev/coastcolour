@@ -147,7 +147,7 @@ public class ProductStitcherTest {
         assertNotNull(testStitcher.stitchedProductBandRowToScanTimeMap);
         assertEquals(30, testStitcher.stitchedProductBandRowToScanTimeMap.size());
         assertNotNull(testStitcher.stitchedProductTpRowToScanTimeMap);
-        assertEquals(7, testStitcher.stitchedProductTpRowToScanTimeMap.size());
+        assertEquals(6, testStitcher.stitchedProductTpRowToScanTimeMap.size());
     }
 
     @Test

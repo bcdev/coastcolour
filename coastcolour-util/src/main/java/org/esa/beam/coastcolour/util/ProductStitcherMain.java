@@ -12,9 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Main class for stitching coastcolour output products
- * Date: 09.03.12
- * Time: 16:48
+ * Main class for stitching coastcolour output products.
  *
  * @author olafd
  */
@@ -41,7 +39,7 @@ public class ProductStitcherMain {
 
     private static void printUsage() {
         System.out.println("COASTCOLOUR product stitching tool, version 1.0");
-        System.out.println("March 9, 2012");
+        System.out.println("June 06, 2012");
         System.out.println();
         System.out.println("usage : stitch.sh CONFIG SOURCE TARGET");
         System.out.println();
@@ -68,7 +66,7 @@ public class ProductStitcherMain {
         try {
             final long t1 = System.currentTimeMillis();
             ProductStitcher stitcher = new ProductStitcher(ncFileList);
-            stitcher.writeStitchedProduct(stitchProductFile, new DefaultErrorHandler());
+            stitcher.writeStitchedProduct(stitchProductFile);
             final long t2 = System.currentTimeMillis();
             System.out.println("Processing time: " + (t2-t1)/1000 + " seconds.");
         } finally {

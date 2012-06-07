@@ -73,4 +73,13 @@
             </binaries>
         </moduleSet>
     </moduleSets>
+
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>commons-*:commons-*</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
 </assembly>

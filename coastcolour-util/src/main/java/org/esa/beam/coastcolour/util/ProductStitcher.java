@@ -74,6 +74,31 @@ public class ProductStitcher {
     }
 
     /**
+     * Validates source products:
+     * - product names must all have same length
+     * - product names must contain
+     */
+    public static void validateSourceProducts(String[] sourceFilePaths) throws IOException {
+        final int sourceProductLength = sourceFilePaths[0].length();
+        for (String sourceFilePath : sourceFilePaths) {
+            if (sourceFilePath.length() != sourceProductLength) {
+                throw new IOException("Inconsistent source products names (have not same length) - must be checked!");
+            }
+        }
+
+        final int ccProductPrefixIndex = sourceFilePaths[0].indexOf("_CCL");
+        for (String sourceFilePath : sourceFilePaths) {
+            if (sourceFilePath.indexOf("_CCL") != ccProductPrefixIndex) {
+                throw new IOException("Inconsistent source products names (CC identifiers not at same position) - must be checked!");
+            }
+            if (!sourceFilePath.substring(ccProductPrefixIndex, ccProductPrefixIndex + 6).
+                    equals(sourceFilePaths[0].substring(ccProductPrefixIndex, ccProductPrefixIndex + 6))) {
+                throw new IOException("Inconsistent source products names (CC identifiers different) - must be checked!");
+            }
+        }
+    }
+
+    /**
      * Writes the stitched product.
      *
      * @param ncResultFile - the file to write to.
@@ -160,7 +185,7 @@ public class ProductStitcher {
             final List<Variable> allVariablesList = ncFile.getVariables();
             List<Variable> tpVariablesList = new ArrayList<Variable>();
             for (Variable variable : allVariablesList) {
-                // todo: this is bad. validate as for bands
+                // todo: this is bad. validateSourceProducts as for bands
                 if (variable.getDimensions().size() == 2 && variable.getDataType().getClassType().getSimpleName().equals("float") &&
                         variable.getDimension(0).getName().equals(TP_DIMY_NAME) && variable.getDimension(1).getName().equals(TP_DIMX_NAME)) {
                     tpVariablesList.add(variable);

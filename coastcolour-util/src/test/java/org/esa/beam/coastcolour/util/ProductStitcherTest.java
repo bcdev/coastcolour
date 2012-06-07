@@ -5,17 +5,15 @@ import org.junit.Before;
 import org.junit.Test;
 import ucar.nc2.NetcdfFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * Product Stitcher test class
- * Date: 12.03.12
- * Time: 13:54
  *
  * @author olafd
  */
@@ -151,48 +149,67 @@ public class ProductStitcherTest {
     }
 
     @Test
-    public void testFindMaxIntegerDivisor() throws Exception {
-        int number = 10;
-        int result = ProductStitcherNetcdfUtils.findMaxIntegerDivisor(number);
-        assertEquals(5, result);
+    public void testGetStitchedProductFileName() throws Exception {
 
-        number = 81;
-        result = ProductStitcherNetcdfUtils.findMaxIntegerDivisor(number);
-        assertEquals(27, result);
+        String[] inputProducts = new String[]{
+                "MER_FRS_CCL2W_20120309_074740_000000563112_00265_52434_0001.nc",
+                "MER_FRS_CCL2W_20120309_074759_000001893112_00265_52434_0001.nc",
+                "MER_FRS_CCL2W_20120309_075032_000000873112_00265_52434_0001.nc"
+        };
 
-        number = 71;
-        result = ProductStitcherNetcdfUtils.findMaxIntegerDivisor(number);
-        assertEquals(1, result);
+        String stitchedProductFileName = ProductStitcherNetcdfUtils.getStitchedProductFileName(inputProducts);
+        assertEquals("MER_FRS_CCL2W_20120309_074740_000002593112_00265_52434_0001.nc", stitchedProductFileName);
 
-        number = 7410;
-        result = ProductStitcherNetcdfUtils.findMaxIntegerDivisor(number);
-        assertEquals(3705, result);
+        // should work for any sequence:
+        inputProducts = new String[]{
+                "MER_FRS_CCL2W_20120309_074759_000001893112_00265_52434_0001.nc",
+                "MER_FRS_CCL2W_20120309_074740_000000563112_00265_52434_0001.nc",
+                "MER_FRS_CCL2W_20120309_075032_000000873112_00265_52434_0001.nc"
+        };
 
-        number = -10;
-        result = ProductStitcherNetcdfUtils.findMaxIntegerDivisor(number);
-        assertEquals(-5, result);
-
-        number = -81;
-        result = ProductStitcherNetcdfUtils.findMaxIntegerDivisor(number);
-        assertEquals(-27, result);
+        stitchedProductFileName = ProductStitcherNetcdfUtils.getStitchedProductFileName(inputProducts);
+        assertEquals("MER_FRS_CCL2W_20120309_074740_000002593112_00265_52434_0001.nc", stitchedProductFileName);
     }
 
     @Test
-    public void testFindMaxZeroDivisorBy64() throws Exception {
-        int number = 71;
-        int result = ProductStitcherNetcdfUtils.findMaxZeroDivisorBy64(number);
-        assertEquals(64, result);
+    public void testValidateSourceProducts() {
+        // correct products
+        String[] inputProducts = new String[]{
+                "C://test//MER_FRS_CCL2W_20120309_074759_000001893112_00265_52434_0001.nc",
+                "C://test//MER_FRS_CCL2W_20120309_074740_000000563112_00265_52434_0001.nc",
+                "C://test//MER_FRS_CCL2W_20120309_075032_000000873112_00265_52434_0001.nc"
+        };
 
-        number = 640;
-        result = ProductStitcherNetcdfUtils.findMaxZeroDivisorBy64(number);
-        assertEquals(640, result);
+        try {
+            testStitcher.validateSourceProducts(inputProducts);
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
 
-        number = 639;
-        result = ProductStitcherNetcdfUtils.findMaxZeroDivisorBy64(number);
-        assertEquals(576, result);
+        // mix of L2W and L2R - bad
+        inputProducts = new String[]{
+                "C://test//MER_FRS_CCL2W_20120309_074759_000001893112_00265_52434_0001.nc",
+                "C://test//MER_FRS_CCL2R_20120309_074740_000000563112_00265_52434_0001.nc",
+                "C://test//MER_FRS_CCL2W_20120309_075032_000000873112_00265_52434_0001.nc"
+        };
 
-        number = -176;
-        result = ProductStitcherNetcdfUtils.findMaxZeroDivisorBy64(number);
-        assertEquals(-128, result);
+        try {
+            testStitcher.validateSourceProducts(inputProducts);
+        } catch (IOException e) {
+            assertEquals("Inconsistent source products names (CC identifiers different) - must be checked!", e.getMessage());
+        }
+
+        // product has incorrect name
+        inputProducts = new String[]{
+                "C://test//MER_FRS_CCL2W_20120309_074759_000001893112_00265_52434_0001.nc",
+                "C://test//MER_FRS_CCL2W_20120309_074740_000000563112_00265_52434_0001.nc",
+                "C://test//MER_FRS_CCL2W_20120309_bla.nc"
+        };
+
+        try {
+            testStitcher.validateSourceProducts(inputProducts);
+        } catch (IOException e) {
+            assertEquals("Inconsistent source products names (have not same length) - must be checked!", e.getMessage());
+        }
     }
 }

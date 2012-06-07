@@ -6,10 +6,7 @@ import ucar.ma2.Section;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,46 +14,72 @@ import java.util.*;
 
 /**
  * Netcdf utility class for CC product stitcher
- * Date: 15.03.12
- * Time: 11:25
  *
  * @author olafd
  */
 public class ProductStitcherNetcdfUtils {
-    public static List<NetcdfFile> getSortedAndValidatedInputProducts(File configFile, File sourceProductDir) {
-        // Sorting:
-        // - sort by start time
-        // Validation:
-        // - make sure all products have same orbit number as first product in sorted list
-        // - make sure all products have same dimensions as first product in sorted list
 
-        List<NetcdfFile> unsortedProducts = new ArrayList<NetcdfFile>();
-        BufferedReader reader = null;
-        try {
-            String line;
-            reader = new BufferedReader(new FileReader(configFile.getAbsolutePath()));
-            while ((line = reader.readLine()) != null) {
-                final String filename = line.trim();
-                final String filePath = sourceProductDir.getAbsolutePath() + File.separator + filename;
-                final NetcdfFile ncFile = NetcdfFile.open(filePath);
-                unsortedProducts.add(ncFile);
-            }
-        } catch (IOException e) {
-            // todo
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ignore) {
-                }
+    /**
+     * Gets the list of netCDF files from given array of source file paths
+     *
+     * @param sourceFilePaths - the source file paths
+     * @return the list of netCDF files to stitch
+     */
+    static List<NetcdfFile> getSourceProductSetsToStitch(String[] sourceFilePaths) {
+        Arrays.sort(sourceFilePaths);
+
+        List<NetcdfFile> ncProducts = new ArrayList<NetcdfFile>();
+        for (String sourceFilePath : sourceFilePaths) {
+            try {
+                final NetcdfFile ncFile = NetcdfFile.open(sourceFilePath);
+                ncProducts.add(ncFile);
+            } catch (IOException e) {
+                // todo
+                e.printStackTrace();
             }
         }
 
-        List<NetcdfFile> sortedProducts = new ArrayList<NetcdfFile>();
-        sortedProducts = unsortedProducts;
-        // todo: sort and validate
-        return sortedProducts;
+        return ncProducts;
+    }
+
+    /**
+     * Sets up filename of stitched product: just computes the acquisition time for the "stitch interval" and
+     * replaces this in the filename of first product
+     *
+     * @param sourceFilePaths  - the source file paths
+     * @return   the filename of the stitched product
+     */
+    static String getStitchedProductFileName(String[] sourceFilePaths) {
+        // e.g. from product set
+        //      MER_FRS_CCL2W_20120309_074740_000000563112_00265_52434_0001.nc
+        //      MER_FRS_CCL2W_20120309_074759_000001893112_00265_52434_0001.nc
+        //      MER_FRS_CCL2W_20120309_075032_000000873112_00265_52434_0001.nc
+        // - compute acquisition length in seconds (first 8 digits in '000000563112'):
+        //   --> diff. between 'start time + acq. of last product' and 'start time of first product' (here '20120309_074740')
+        //   --> filename shall be 'MER_FRS_CCL2W_20120309_074740_000002593112_00265_52434_0001_STITCHED.nc   (172+87=259 secs)
+
+        Arrays.sort(sourceFilePaths);
+        final String firstFileName = sourceFilePaths[0];
+        final String lastFileName = sourceFilePaths[sourceFilePaths.length-1];
+
+        final int firstDate = Integer.parseInt(firstFileName.substring(14, 22));
+        final int lastDate = Integer.parseInt(lastFileName.substring(14, 22));
+        final int firstHours = Integer.parseInt(firstFileName.substring(23, 25));
+        final int lastHours = Integer.parseInt(lastFileName.substring(23, 25));
+        final int firstMins = Integer.parseInt(firstFileName.substring(25, 27));
+        final int lastMins = Integer.parseInt(lastFileName.substring(25, 27));
+        final int firstSecs = Integer.parseInt(firstFileName.substring(27, 29));
+        final int lastSecs = Integer.parseInt(lastFileName.substring(27, 29));
+        final int lastAcquisitionTime = Integer.parseInt(lastFileName.substring(30, 38));
+
+        final int firstFileSecondsInDay = firstHours * 3600 + firstMins * 60 + firstSecs;
+        final int lastFileSecondsInDay = lastHours * 3600 + lastMins * 60 + lastSecs;
+        final int dayDiffInSeconds = (lastDate - firstDate) * 86400;
+
+        final int stitchAcquisitionTime = dayDiffInSeconds + (lastFileSecondsInDay - firstFileSecondsInDay) + lastAcquisitionTime;
+
+        final String stitchAcquisitionTimeString = String.format("%08d", stitchAcquisitionTime);
+        return (firstFileName.substring(0, 30) + stitchAcquisitionTimeString + firstFileName.substring(38));
     }
 
     static float[][] getFloat2DArrayFromNetcdfVariable(Variable variable) {
@@ -74,7 +97,7 @@ public class ProductStitcherNetcdfUtils {
         return (byte[][]) arrayByte.copyToNDJavaArray();
     }
 
-    public static long parse(String text, String pattern) throws ParseException {
+    static long parse(String text, String pattern) throws ParseException {
         if (text == null) {
             throw new IllegalArgumentException("parse: text is null");
         }
@@ -105,25 +128,6 @@ public class ProductStitcherNetcdfUtils {
         final Date date = dateFormat.parse(noFractionString);
         return create(date, micros);
     }
-
-    public static int findMaxIntegerDivisor(int number) {
-        int decr = (int) Math.signum(number);
-        int result = number - decr;
-        while (number % result != 0) {
-            result -= decr;
-        }
-        return result;
-    }
-
-    public static int findMaxZeroDivisorBy64(int number) {
-        int decr = (int) Math.signum(number);
-        int result = number;
-        while (result % 64 != 0) {
-            result -= decr;
-        }
-        return result;
-    }
-
 
     private static Array getDataArray(DataType type, Variable variable, Class clazz) {
         final int[] origin = new int[variable.getRank()];

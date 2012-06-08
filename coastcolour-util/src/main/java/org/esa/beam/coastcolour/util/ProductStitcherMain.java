@@ -143,7 +143,7 @@ public class ProductStitcherMain {
         final String stitchProductFileName = ProductStitcherNetcdfUtils.getStitchedProductFileName(sourceFilePaths);
         try {
             final long t1 = System.currentTimeMillis();
-            ProductStitcher stitcher = new ProductStitcher(ncFileList);
+            ProductStitcher stitcher = new ProductStitcher(ncFileList, logger);
             final File stitchProductFile = new File(outputDir + File.separator + stitchProductFileName);
             stitcher.writeStitchedProduct(stitchProductFile);
             final long t2 = System.currentTimeMillis();

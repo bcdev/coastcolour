@@ -46,10 +46,10 @@ public class ProductStitcherNetcdfUtils {
      * Sets up filename of stitched product: just computes the acquisition time for the "stitch interval" and
      * replaces this in the filename of first product
      *
-     * @param sourceFilePaths  - the source file paths
+     * @param sourcePaths  - the source file paths
      * @return   the filename of the stitched product
      */
-    static String getStitchedProductFileName(String[] sourceFilePaths) {
+    static String getStitchedProductFileName(String[] sourcePaths) {
         // e.g. from product set
         //      MER_FRS_CCL2W_20120309_074740_000000563112_00265_52434_0001.nc
         //      MER_FRS_CCL2W_20120309_074759_000001893112_00265_52434_0001.nc
@@ -58,9 +58,11 @@ public class ProductStitcherNetcdfUtils {
         //   --> diff. between 'start time + acq. of last product' and 'start time of first product' (here '20120309_074740')
         //   --> filename shall be 'MER_FRS_CCL2W_20120309_074740_000002593112_00265_52434_0001_STITCHED.nc   (172+87=259 secs)
 
-        Arrays.sort(sourceFilePaths);
-        final String firstFileName = sourceFilePaths[0];
-        final String lastFileName = sourceFilePaths[sourceFilePaths.length-1];
+        Arrays.sort(sourcePaths);
+        final File firstFile = new File(sourcePaths[0]);
+        final String firstFileName = firstFile.getName();
+        final File lastFile = new File(sourcePaths[sourcePaths.length - 1]);
+        final String lastFileName = lastFile.getName();
 
         final int firstDate = Integer.parseInt(firstFileName.substring(14, 22));
         final int lastDate = Integer.parseInt(lastFileName.substring(14, 22));

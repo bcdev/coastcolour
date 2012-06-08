@@ -8,6 +8,7 @@ import ucar.nc2.NetcdfFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -39,7 +40,7 @@ public class ProductStitcherTest {
         ncFileList.add(ncFile2);
         ncFileList.add(ncFile3);
 
-        testStitcher = new ProductStitcher(ncFileList);
+        testStitcher = new ProductStitcher(ncFileList, Logger.getAnonymousLogger());
     }
 
     @After

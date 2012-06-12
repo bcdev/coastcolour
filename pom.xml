@@ -246,8 +246,11 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+        <dependency>
+            <groupId>commons-cli</groupId>
+            <artifactId>commons-cli</artifactId>
+        </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
@@ -344,6 +347,15 @@
             <id>marcoz</id>
             <name>Marco Zuehlke</name>
             <email>marco.zuehlke@brockmann-consult.de</email>
+            <organization>Brockmann Consult</organization>
+            <roles>
+                <role>Software Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>olafd</id>
+            <name>Olaf Danne</name>
+            <email>olaf.danne@brockmann-consult.de</email>
             <organization>Brockmann Consult</organization>
             <roles>
                 <role>Software Developer</role>

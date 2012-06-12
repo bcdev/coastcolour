@@ -480,6 +480,7 @@ public class ProductStitcher {
                             }
                             int sourceProductIndexPrev = 0;
                             int valuesRowIndex = 0;
+
                             // now loop over ALL rows:
                             for (int j = 0; j < height; j++) {
                                 // search the right single product by row time
@@ -490,8 +491,8 @@ public class ProductStitcher {
                                 }
 
                                 if (sourceProductIndex > sourceProductIndexPrev) {
-//                                    System.out.println("valuesRowIndex = " + valuesRowIndex);
-                                    valuesRowIndex = 0;
+                                    // for band data, do not use first 20 pixels of a product to skip possible invalid pixels at top
+                                    valuesRowIndex = ((i > 0 && !isTiepoints) ? Math.min(20, rowToScanTimeMaps.get(i).size() - 1) : 0);
                                 }
 
                                 // if the current single product is the right one, loop over raster and set netcdf floatVals
@@ -585,11 +586,14 @@ public class ProductStitcher {
         } else {
             stitchedProductRowToScanTimeMap = stitchedProductBandRowToScanTimeMap;
         }
+
         if (rowIndex < stitchedProductRowToScanTimeMap.size()) {
             long sourceProductTime = stitchedProductRowToScanTimeMap.get(rowIndex);
             for (int k = rowToScanTimeMaps.size() - 1; k >= 0; k--) {
                 Map<Integer, Long> map = rowToScanTimeMaps.get(k);
-                long startTime = map.get(0);
+                // for band data, do not use first 20 pixels to skip possible invalid pixels at top
+                final int mapStartIndex = (k > 0 && !isTiepoints) ? Math.min(20, map.size() - 1) : 0;
+                long startTime = map.get(mapStartIndex);
                 long stopTime = map.get(map.size() - 1);
                 if (startTime <= sourceProductTime && sourceProductTime <= stopTime) {
                     sourceProductIndex = k;
@@ -597,21 +601,7 @@ public class ProductStitcher {
                 }
             }
         }
-//        if (rowIndex < stitchedProductRowToScanTimeMap.size()) {
-//            long sourceProductTime = stitchedProductRowToScanTimeMap.get(rowIndex);
-//            for (int k = rowToScanTimeMaps.size() - 1; k >= 0; k--) {
-//                Map<Integer, Long> map = rowToScanTimeMaps.get(k);
-//                final int mapStartIndex = (k > 0 && !isTiepoints) ? Math.min(0, map.size()-1) : 0;
-//                long startTime = map.get(mapStartIndex);
-//                long stopTime = map.get(map.size() - 1);
-//                if (startTime <= sourceProductTime && sourceProductTime <= stopTime) {
-//                    sourceProductIndex = k;
-//                    break;
-//                }
-//            }
-//        }
 
-//        System.out.println("rowIndex, sourceProductIndex = " + rowIndex + "," + sourceProductIndex);
         return sourceProductIndex;
     }
 

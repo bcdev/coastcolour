@@ -30,6 +30,9 @@ public class L2ROp extends Operator {
     private static final String AGC_FLAGS_NAME = "agc_flags";
     private static final String L2R_FLAGS_NAME = "l2r_flags";
 
+    private static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_72066.8.net";
+    private static final String ATMO_AANN_NET = "atmo_aann/21x5x21_20.4.net";
+
     @SourceProduct(description = "MERIS L1B or L1P product")
     private Product sourceProduct;
 
@@ -62,13 +65,13 @@ public class L2ROp extends Operator {
     private double averageTemperature;
 
     @Parameter(label = "MERIS net (full path required for other than default)",
-               defaultValue = GlintCorrectionOperator.MERIS_ATMOSPHERIC_NET_NAME,
+               defaultValue = MERIS_ATMOSPHERIC_NET_NAME,
                description = "The file of the atmospheric net to be used instead of the default neural net.",
                notNull = false)
     private File atmoNetMerisFile;
 
     @Parameter(label = "Autoassociative net (full path required for other than default)",
-               defaultValue = GlintCorrectionOperator.ATMO_AANN_NET,
+               defaultValue = ATMO_AANN_NET,
                description = "The file of the autoassociative net used for error computed instead of the default neural net.",
                notNull = false)
     private File autoassociativeNetFile;

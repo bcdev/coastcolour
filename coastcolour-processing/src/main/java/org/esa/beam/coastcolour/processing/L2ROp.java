@@ -30,7 +30,9 @@ public class L2ROp extends Operator {
     private static final String AGC_FLAGS_NAME = "agc_flags";
     private static final String L2R_FLAGS_NAME = "l2r_flags";
 
-    private static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_72066.8.net";
+    // another new net from RD, 2012/06/18:
+    public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_26651.6.net";
+//    private static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_72066.8.net";
     private static final String ATMO_AANN_NET = "atmo_aann/21x5x21_20.4.net";
 
     @SourceProduct(description = "MERIS L1B or L1P product")

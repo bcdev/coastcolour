@@ -183,25 +183,44 @@ public class L2WOp extends Operator {
     private Product qaaProduct;
     private Product case2rProduct;
     private VirtualBandOpImage invalidOpImage;
-    private static final int NUMBER_OF_WATER_NETS = 3;
+
     private static final String[] iopForwardNets =
             new String[]{
                     "m1/for_iop_meris_b12/17x27x17_33.8.net",
                     "m2/for_iop_meris_b12/17x27x17_15.8.net",
-                    "m3/for_iop_meris_b12/17x27x17_20.5.net"
+                    "m3/for_iop_meris_b12/17x27x17_20.5.net",
+                    "m4/for_iop_meris_b12/17x27x17_20.7.net",
+                    "m5/for_iop_meris_b12/17x27x17_91.3.net",
+                    "m6/for_iop_meris_b12/17x27x17_50.0.net",
+                    "m7/for_iop_meris_b12/17x27x17_30.5.net",
+                    "m8/for_iop_meris_b12/17x27x17_30.1.net",
+                    "m9/for_iop_meris_b12/17x27x17_180.1.net"
             };
     private static final String[] iopInverseNets =
             new String[]{
                     "m1/inv_iop_meris_b9/27x41x27_1483.8.net",
                     "m2/inv_iop_meris_b9/27x41x27_263.7.net",
-                    "m3/inv_iop_meris_b9/27x41x27_228.8.net"
+                    "m3/inv_iop_meris_b9/27x41x27_228.8.net",
+                    "m4/inv_iop_meris_b10/27x41x27_121.7.net",
+                    "m5/inv_iop_meris_b10/27x41x27_4667.9.net",
+                    "m6/inv_iop_meris_b10/27x41x27_200.6.net",
+                    "m7/inv_iop_meris_b10/27x41x27_164.8.net",
+                    "m8/inv_iop_meris_b10/27x41x27_159.1.net",
+                    "m9/inv_iop_meris_b10/27x41x27_6696.1.net"
             };
     private static final String[] kdInverseNets =
             new String[]{
                     "m1/inv_kd_meris_b8/27x41x27_51.3.net",
                     "m2/inv_kd_meris_b8/27x41x27_15.2.net",
-                    "m3/inv_kd_meris_b8/27x41x27_15.1.net"
+                    "m3/inv_kd_meris_b8/27x41x27_15.1.net",
+                    "m4/inv_kd_meris_b9/27x41x27_8.3.net",
+                    "m5/inv_kd_meris_b9/27x41x27_68.4.net",
+                    "m6/inv_kd_meris_b9/27x41x27_4.1.net",
+                    "m7/inv_kd_meris_b9/27x41x27_3.5.net",
+                    "m8/inv_kd_meris_b9/27x41x27_7.6.net",
+                    "m9/inv_kd_meris_b9/27x41x27_432.7.net"
             };
+    private static final int NUMBER_OF_WATER_NETS = iopForwardNets.length;
 
     private Product[] c2rSingleProducts;
     public static final int NUMBER_OF_MEMBERSHIPS = 11;  // 9 classes + sum + dominant class

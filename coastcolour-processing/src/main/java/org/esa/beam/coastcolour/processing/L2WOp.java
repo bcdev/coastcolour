@@ -8,7 +8,11 @@ import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.gpf.*;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.Operator;
+import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
@@ -20,9 +24,12 @@ import org.esa.beam.meris.case2.algorithm.KMin;
 import org.esa.beam.meris.case2.water.WaterAlgorithm;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
+import org.esa.beam.util.SystemUtils;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +52,6 @@ public class L2WOp extends Operator {
     private Product sourceProduct;
 
     @SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)", optional = true)
-//    @SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)")
     private Product classMembershipProduct;
 
     @Parameter(defaultValue = "true",
@@ -99,10 +105,6 @@ public class L2WOp extends Operator {
             description = "The file of the autoassociative net used for error computed instead of the default neural net.",
             notNull = false)
     private File autoassociativeNetFile;
-
-    @Parameter(label = "Directory containing the neural nets corresponding to the fuzzy membership classes",
-            description = "Directory containing the neural nets corresponding to the fuzzy membership classes.")
-    private File fuzzyNnDir;
 
     @Parameter(label = "Alternative inverse IOP neural net (optional)",
             description = "The file of the inverse IOP neural net to be used instead of the default.")
@@ -274,34 +276,34 @@ public class L2WOp extends Operator {
         // then compute k-weighted mean for Chl (and TSM?? todo: clarify)
         // with m[k] from classMembershipProduct
         // compute Chl_mean only if sum(m[k] > thresh := 0.8 todo: clarify
-        if (classMembershipProduct != null && fuzzyNnDir != null) {
-            computeSingleCase2RProductsFromFuzzyApproach(l2WProduct);
+        if (classMembershipProduct != null) {
+            File auxDataDir = new File(SystemUtils.getApplicationDataDir(), "coastcolour/auxdata/owt_nets");
+            URL sourceUrl = ResourceInstaller.getSourceUrl(this.getClass());
+            ResourceInstaller installer = new ResourceInstaller(sourceUrl, "auxdata/owt_nets", auxDataDir);
+            try {
+                installer.install(".*", ProgressMonitor.NULL);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to install auxdata of the costcolour module");
+            }
+            computeSingleCase2RProductsFromFuzzyApproach(auxDataDir, l2WProduct);
             for (Band band : classMembershipProduct.getBands()) {
                 if (band.getName().startsWith("class_")) {
                     ProductUtils.copyBand(band.getName(), classMembershipProduct, l2WProduct, true);
                 }
             }
             ProductUtils.copyBand("dominant_class", classMembershipProduct, l2WProduct, true);
-        } else {
-            classMembershipProduct = null;
-            fuzzyNnDir = null;
         }
 
         setTargetProduct(l2WProduct);
     }
 
-    private void computeSingleCase2RProductsFromFuzzyApproach(Product l2WProduct) {
+    private void computeSingleCase2RProductsFromFuzzyApproach(File auxDataDir, Product l2WProduct) {
         c2rSingleProducts = new Product[NUMBER_OF_WATER_NETS];
         for (int i = 0; i < NUMBER_OF_WATER_NETS; i++) {
             Operator case2Op = new RegionalWaterOp.Spi().createOperator();
-            if (fuzzyNnDir != null) {
-                final String forwardIopNnFilename = fuzzyNnDir + File.separator + iopForwardNets[i];
-                forwardIopNnFile = new File(forwardIopNnFilename);
-                final String inverseIopNnFilename = fuzzyNnDir + File.separator + iopInverseNets[i];
-                inverseIopNnFile = new File(inverseIopNnFilename);
-                final String inverseKdNnFilename = fuzzyNnDir + File.separator + kdInverseNets[i];
-                inverseKdNnFile = new File(inverseKdNnFilename);
-            }
+            forwardIopNnFile = new File(auxDataDir, iopForwardNets[i]);
+            inverseIopNnFile = new File(auxDataDir, iopInverseNets[i]);
+            inverseKdNnFile = new File(auxDataDir, kdInverseNets[i]);
             setCase2rParameters(case2Op);
             c2rSingleProducts[i] = case2Op.getTargetProduct();
             Band band = ProductUtils.copyBand("tsm", c2rSingleProducts[i], "tsm_m" + (i + 1), l2WProduct, true);
@@ -320,6 +322,14 @@ public class L2WOp extends Operator {
         if (case2rProduct != null) {
             case2rProduct.dispose();
             case2rProduct = null;
+        }
+        if (c2rSingleProducts != null) {
+            for (Product product : c2rSingleProducts) {
+                if (product != null) {
+                    product.dispose();
+                }
+            }
+            c2rSingleProducts = null;
         }
 
         super.dispose();

@@ -104,13 +104,15 @@ public class L2WOp extends Operator {
             description = "Directory containing the neural nets corresponding to the fuzzy membership classes.")
     private File fuzzyNnDir;
 
-    @Parameter(label = "Alternative inverse water neural net (optional)",
-            description = "The file of the inverse water neural net to be used instead of the default.")
-    private File inverseWaterNnFile;
-
-    @Parameter(label = "Alternative forward water neural net (optional)",
-            description = "The file of the forward water neural net to be used instead of the default.")
-    private File forwardWaterNnFile;
+    @Parameter(label = "Alternative inverse IOP neural net (optional)",
+            description = "The file of the inverse IOP neural net to be used instead of the default.")
+    private File inverseIopNnFile;
+    @Parameter(label = "Alternative inverse Kd neural net (optional)",
+            description = "The file of the inverse Kd neural net to be used instead of the default.")
+    private File inverseKdNnFile;
+    @Parameter(label = "Alternative forward IOP neural net (optional)",
+            description = "The file of the forward IOP neural net to be used instead of the default.")
+    private File forwardIopNnFile;
 
     @Parameter(defaultValue = "l1p_flags.CC_LAND",
             label = "Land detection expression",
@@ -181,17 +183,26 @@ public class L2WOp extends Operator {
     private Product qaaProduct;
     private Product case2rProduct;
     private VirtualBandOpImage invalidOpImage;
-    private static final int NUMBER_OF_WATER_NETS = 3;  // todo: will be 9 when Rolands input is available
-    private static final String[] waterForwardNets =
+    private static final int NUMBER_OF_WATER_NETS = 3;
+    private static final String[] iopForwardNets =
             new String[]{
-                    "23x7x16_168.5.net",
-                    "23x7x16_511.3.net",
-                    "23x7x16_191.2.net"};
-    private static final String[] waterInverseNets =
+                    "m1/for_iop_meris_b12/17x27x17_33.8.net",
+                    "m2/for_iop_meris_b12/17x27x17_15.8.net",
+                    "m3/for_iop_meris_b12/17x27x17_20.5.net"
+            };
+    private static final String[] iopInverseNets =
             new String[]{
-                    "46x24x18_37385.4.net",
-                    "46x24x18_4584.9.net",
-                    "23x7x16_34286.9.net"};
+                    "m1/inv_iop_meris_b9/27x41x27_1483.8.net",
+                    "m2/inv_iop_meris_b9/27x41x27_263.7.net",
+                    "m3/inv_iop_meris_b9/27x41x27_228.8.net"
+            };
+    private static final String[] kdInverseNets =
+            new String[]{
+                    "m1/inv_kd_meris_b8/27x41x27_51.3.net",
+                    "m2/inv_kd_meris_b8/27x41x27_15.2.net",
+                    "m3/inv_kd_meris_b8/27x41x27_15.1.net"
+            };
+
     private Product[] c2rSingleProducts;
     public static final int NUMBER_OF_MEMBERSHIPS = 11;  // 9 classes + sum + dominant class
     private static final double MEMBERSHIP_CLASS_SUM_THRESH = 0.8;
@@ -244,31 +255,40 @@ public class L2WOp extends Operator {
         // then compute k-weighted mean for Chl (and TSM?? todo: clarify)
         // with m[k] from classMembershipProduct
         // compute Chl_mean only if sum(m[k] > thresh := 0.8 todo: clarify
-        if (classMembershipProduct != null) {
-            computeSingleCase2RProductsFromFuzzyApproach();
+        if (classMembershipProduct != null && fuzzyNnDir != null) {
+            computeSingleCase2RProductsFromFuzzyApproach(l2WProduct);
             for (Band band : classMembershipProduct.getBands()) {
                 if (band.getName().startsWith("class_")) {
                     ProductUtils.copyBand(band.getName(), classMembershipProduct, l2WProduct, true);
                 }
             }
             ProductUtils.copyBand("dominant_class", classMembershipProduct, l2WProduct, true);
+        } else {
+            classMembershipProduct = null;
+            fuzzyNnDir = null;
         }
 
         setTargetProduct(l2WProduct);
     }
 
-    private void computeSingleCase2RProductsFromFuzzyApproach() {
+    private void computeSingleCase2RProductsFromFuzzyApproach(Product l2WProduct) {
         c2rSingleProducts = new Product[NUMBER_OF_WATER_NETS];
         for (int i = 0; i < NUMBER_OF_WATER_NETS; i++) {
             Operator case2Op = new RegionalWaterOp.Spi().createOperator();
             if (fuzzyNnDir != null) {
-                final String forwardWaterNnFilename = fuzzyNnDir + File.separator + waterForwardNets[i];
-                forwardWaterNnFile = new File(forwardWaterNnFilename);
-                final String inverseWaterNnFilename = fuzzyNnDir + File.separator + waterInverseNets[i];
-                inverseWaterNnFile = new File(inverseWaterNnFilename);
+                final String forwardIopNnFilename = fuzzyNnDir + File.separator + iopForwardNets[i];
+                forwardIopNnFile = new File(forwardIopNnFilename);
+                final String inverseIopNnFilename = fuzzyNnDir + File.separator + iopInverseNets[i];
+                inverseIopNnFile = new File(inverseIopNnFilename);
+                final String inverseKdNnFilename = fuzzyNnDir + File.separator + kdInverseNets[i];
+                inverseKdNnFile = new File(inverseKdNnFilename);
             }
             setCase2rParameters(case2Op);
             c2rSingleProducts[i] = case2Op.getTargetProduct();
+            Band band = ProductUtils.copyBand("tsm", c2rSingleProducts[i], "tsm_m" + (i + 1), l2WProduct, true);
+            band.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
+            band = ProductUtils.copyBand("chl_conc", c2rSingleProducts[i], "chl_conc_m" + (i+1), l2WProduct, true);
+            band.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
         }
     }
 
@@ -347,16 +367,17 @@ public class L2WOp extends Operator {
         final Tile turbidityTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.TURBIDITY_NAME));
         final Tile chlTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.CONC_CHL_NAME));
         final Tile tsmTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.CONC_TSM_NAME));
+
         Tile[] chlSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
         Tile[] tsmSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
-        for (int i = 0; i < NUMBER_OF_WATER_NETS; i++) {
-            chlSingleTiles[i] = getSourceTile(c2rSingleProducts[i].getBand("chl_conc"), targetRectangle);
-            tsmSingleTiles[i] = getSourceTile(c2rSingleProducts[i].getBand("tsm"), targetRectangle);
-        }
         Tile[] membershipTiles = new Tile[NUMBER_OF_MEMBERSHIPS - 2];
         Tile c2rChlTile = null;
         Tile c2rTsmTile = null;
         if (classMembershipProduct != null) {
+            for (int i = 0; i < NUMBER_OF_WATER_NETS; i++) {
+                chlSingleTiles[i] = getSourceTile(c2rSingleProducts[i].getBand("chl_conc"), targetRectangle);
+                tsmSingleTiles[i] = getSourceTile(c2rSingleProducts[i].getBand("tsm"), targetRectangle);
+            }
             for (int i = 0; i < NUMBER_OF_MEMBERSHIPS - 2; i++) {
                 membershipTiles[i] = getSourceTile(classMembershipProduct.getBand("class_" + (i + 1)), targetRectangle);
             }
@@ -574,8 +595,9 @@ public class L2WOp extends Operator {
     }
 
     private void setCase2rParameters(Operator regionalWaterOp) {
-        regionalWaterOp.setParameter("forwardWaterNnFile", forwardWaterNnFile);
-        regionalWaterOp.setParameter("inverseWaterNnFile", inverseWaterNnFile);
+        regionalWaterOp.setParameter("inverseIopNnFile", inverseIopNnFile);
+        regionalWaterOp.setParameter("inverseKdNnFile", inverseKdNnFile);
+        regionalWaterOp.setParameter("forwardIopNnFile", forwardIopNnFile);
         regionalWaterOp.setParameter("useSnTMap", useSnTMap);
         regionalWaterOp.setParameter("averageSalinity", averageSalinity);
         regionalWaterOp.setParameter("averageTemperature", averageTemperature);

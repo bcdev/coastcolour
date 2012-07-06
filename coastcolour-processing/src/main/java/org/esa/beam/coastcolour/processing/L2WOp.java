@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -179,6 +180,10 @@ public class L2WOp extends Operator {
             description = "If selected the source remote reflectances are divided by PI.")
     private boolean qaaDivideByPI;
 
+    @Parameter(defaultValue = "0.8", label = "Membership class sum threshold",
+               description = "Threshold for the sum of the class memberships.")
+    private double membershipClassSumThresh;
+
     private int nadirColumnIndex;
     private FLHAlgorithm flhAlgorithm;
     private Product l2rProduct;
@@ -226,7 +231,6 @@ public class L2WOp extends Operator {
 
     private Product[] c2rSingleProducts;
     public static final int NUMBER_OF_MEMBERSHIPS = 11;  // 9 classes + sum + dominant class
-    private static final double MEMBERSHIP_CLASS_SUM_THRESH = 0.8;
 
     @Override
     public void initialize() throws OperatorException {
@@ -286,8 +290,14 @@ public class L2WOp extends Operator {
                 throw new RuntimeException("Unable to install auxdata of the costcolour module");
             }
             computeSingleCase2RProductsFromFuzzyApproach(auxDataDir, l2WProduct);
+
+            Band b = ProductUtils.copyBand("tsm", case2rProduct, "conc_tsm_m_all", l2WProduct, true);
+            b.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
+            b = ProductUtils.copyBand("chl_conc", case2rProduct, "conc_chl_m_all", l2WProduct, true);
+            b.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
+
             for (Band band : classMembershipProduct.getBands()) {
-                if (band.getName().startsWith("class_")) {
+                if (band.getName().startsWith("class_") || band.getName().startsWith("norm_class_")) {
                     ProductUtils.copyBand(band.getName(), classMembershipProduct, l2WProduct, true);
                 }
             }
@@ -306,9 +316,9 @@ public class L2WOp extends Operator {
             inverseKdNnFile = new File(auxDataDir, kdInverseNets[i]);
             setCase2rParameters(case2Op);
             c2rSingleProducts[i] = case2Op.getTargetProduct();
-            Band band = ProductUtils.copyBand("tsm", c2rSingleProducts[i], "tsm_m" + (i + 1), l2WProduct, true);
+            Band band = ProductUtils.copyBand("tsm", c2rSingleProducts[i], "conc_tsm_m" + (i + 1), l2WProduct, true);
             band.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
-            band = ProductUtils.copyBand("chl_conc", c2rSingleProducts[i], "chl_conc_m" + (i+1), l2WProduct, true);
+            band = ProductUtils.copyBand("chl_conc", c2rSingleProducts[i], "conc_chl_m" + (i+1), l2WProduct, true);
             band.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
         }
     }
@@ -400,6 +410,9 @@ public class L2WOp extends Operator {
         Tile[] chlSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
         Tile[] tsmSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
         Tile[] membershipTiles = new Tile[NUMBER_OF_MEMBERSHIPS - 2];
+        double[] membershipTileValues = new double[membershipTiles.length];
+        double[] chlSingleTileValues = new double[NUMBER_OF_WATER_NETS];
+        double[] tsmSingleTileValues = new double[NUMBER_OF_WATER_NETS];
         Tile c2rChlTile = null;
         Tile c2rTsmTile = null;
         if (classMembershipProduct != null) {
@@ -408,7 +421,7 @@ public class L2WOp extends Operator {
                 tsmSingleTiles[i] = getSourceTile(c2rSingleProducts[i].getBand("tsm"), targetRectangle);
             }
             for (int i = 0; i < NUMBER_OF_MEMBERSHIPS - 2; i++) {
-                membershipTiles[i] = getSourceTile(classMembershipProduct.getBand("class_" + (i + 1)), targetRectangle);
+                membershipTiles[i] = getSourceTile(classMembershipProduct.getBand("norm_class_" + (i + 1)), targetRectangle);
             }
         } else {
             c2rChlTile = getSourceTile(case2rProduct.getBand("chl_conc"), targetRectangle);
@@ -453,10 +466,18 @@ public class L2WOp extends Operator {
                 l2wFlagTile.setSample(x, y, l2wFlag);
 
                 if (classMembershipProduct != null) {
+                    for (int k = 0; k < membershipTiles.length; k++) {
+                        membershipTileValues[k] = membershipTiles[k].getSampleDouble(x, y);
+                    }
+                    for (int k = 0; k < NUMBER_OF_WATER_NETS; k++) {
+                        chlSingleTileValues[k] = chlSingleTiles[k].getSampleDouble(x, y);
+                        tsmSingleTileValues[k] = tsmSingleTiles[k].getSampleDouble(x, y);
+                    }
+                    double[] relevantMemberships = getRelevantMembershipClasses(membershipTileValues, membershipClassSumThresh);
                     // get weighted CHL and TSM
-                    final double weightedChl = getWeightedConc(x, y, membershipTiles, chlSingleTiles);
+                    double weightedChl = getWeightedConc(relevantMemberships, chlSingleTileValues);
                     chlTile.setSample(x, y, weightedChl);
-                    final double weightedTsm = getWeightedConc(x, y, membershipTiles, tsmSingleTiles);
+                    double weightedTsm = getWeightedConc(relevantMemberships, tsmSingleTileValues);
                     tsmTile.setSample(x, y, weightedTsm);
                 } else {
                     chlTile.setSample(x, y, c2rChlTile.getSampleDouble(x, y));
@@ -466,32 +487,54 @@ public class L2WOp extends Operator {
         }
     }
 
-    private double getWeightedConc(int x, int y, Tile[] membershipTiles, Tile[] concSingleTiles) {
+    static double getWeightedConc(double[] relevantMembershipClasses, double[] concValues) {
         double weightedConc = 0.0;
         double sumWeights = 0.0;
-        double[] mClass = new double[membershipTiles.length];
-        int index = 0;
 
-        for (Tile membershipTile : membershipTiles) {
-            mClass[index] = membershipTile.getSampleDouble(x, y);
-            sumWeights += mClass[index];
-            double concSingle = 0.0;
-            // todo: this can be simplified once we have all 9 pairs of water nets...
-            if (index < 2) {
-                concSingle = concSingleTiles[0].getSampleDouble(x, y);
-            } else if (index >= 2 && index < 5) {
-                concSingle = concSingleTiles[1].getSampleDouble(x, y);
-            } else if (index >= 5 && index < membershipTiles.length) {
-                concSingle = concSingleTiles[2].getSampleDouble(x, y);
+        for (int i = 0; i < relevantMembershipClasses.length; i++) {
+            double relevantMembership = relevantMembershipClasses[i];
+            if (relevantMembership > 0.0) {
+                sumWeights += relevantMembership;
+                double concSingle = concValues[i];
+                weightedConc += relevantMembership * concSingle;
             }
-            weightedConc += mClass[index] * concSingle;
-            index++;
+        }
+        return weightedConc / sumWeights;
+    }
+
+    static double[] getRelevantMembershipClasses(double[] membershipValues, double membershipClassSumThresh) {
+        Membership[] members = new Membership[membershipValues.length];
+        for (int i = 0; i < membershipValues.length; i++) {
+            members[i] = new Membership(i, membershipValues[i]);
         }
 
-        if (sumWeights < MEMBERSHIP_CLASS_SUM_THRESH) {
-            weightedConc = Double.NaN;
+        Arrays.sort(members, new Comparator<Membership>() {
+            @Override
+            public int compare(Membership o1, Membership o2) {
+                return Double.compare(o2.weight, o1.weight);
+            }
+        });
+        double[] result = new double[membershipValues.length];
+        double weightSum = 0;
+        for (Membership member : members) {
+            final double weight = member.weight;
+            result[member.index] = weight;
+            weightSum += weight;
+            if (weightSum > membershipClassSumThresh) {
+                break;
+            }
         }
-        return weightedConc;
+        return result;
+    }
+
+    private static class  Membership {
+        final int index;
+        final double weight;
+
+        private Membership(int index, double weight) {
+            this.index = index;
+            this.weight = weight;
+        }
     }
 
     private int computeL2wFlags(int x, int y, Tile c2rFlags, Tile qaaFlags, int invalidFlagValue) {

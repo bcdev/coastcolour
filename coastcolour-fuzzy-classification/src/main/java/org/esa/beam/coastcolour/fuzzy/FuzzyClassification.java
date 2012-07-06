@@ -59,7 +59,6 @@ public class FuzzyClassification {
      *
      * @param reflectances The spectrum to compute the class memberships for.
      *                     The length of the spectrum must be equal to {@link #getBandCount()}
-     *
      * @return The fractional class memberships. The length of the returned array
      *         is equal to {@link #getClassCount()}
      */
@@ -93,17 +92,23 @@ public class FuzzyClassification {
             }
         }
 
-        // normalize: sum of memberships should be equal to 1.0
-        double alphaChiSum = 0.0;
-        for (int i = 0; i < alphaChi.length; i++) {
-            alphaChiSum += alphaChi[i];
-        }
-        for (int i = 0; i < alphaChi.length; i++) {
-            alphaChi[i] /= alphaChiSum;
-        }
-
         return alphaChi;
 
+    }
+
+    public double[] normalizeClassMemberships(double[] memberships) {
+        double[] result = new double[memberships.length];
+
+        // normalize: sum of memberships should be equal to 1.0
+        double sum = 0.0;
+        for (int i = 0; i < memberships.length; i++) {
+            sum += memberships[i];
+        }
+        for (int i = 0; i < memberships.length; i++) {
+            result[i] = memberships[i] / sum;
+        }
+
+        return result;
     }
 
     // Computes the incomplete gamma function by its continued fraction

@@ -136,8 +136,6 @@ public class L2WOpSecondTest {
         l2rSource.dispose();
     }
 
-    // todo: add tests for fuzzy approach!!!
-
     private static Product testTargetProduct(Product source, String expectedProductType, String[] expectedBandNames,
                                              Map<String, Object> l2wParams) {
 
@@ -190,5 +188,35 @@ public class L2WOpSecondTest {
     private Product getL1pProduct(Product source) {
         return GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
     }
+
+    @Test
+    public void testGetRelevantMembershipClasses() throws Exception {
+        double[] membershipValues = new double[]{0.0, 0.64, 0.12, 0.02, 0.0, 0.0, 0.01, 0.13, 0.08};
+        final double[] result = L2WOp.getRelevantMembershipClasses(membershipValues, 0.8);
+        assertNotNull(result);
+        assertEquals(9, result.length);
+        assertEquals(0.0, result[0], 1.E-6);
+        assertEquals(0.64, result[1], 1.E-6);
+        assertEquals(0.12, result[2], 1.E-6);
+        assertEquals(0.0, result[3], 1.E-6);
+        assertEquals(0.0, result[4], 1.E-6);
+        assertEquals(0.0, result[5], 1.E-6);
+        assertEquals(0.0, result[6], 1.E-6);
+        assertEquals(0.13, result[7], 1.E-6);
+        assertEquals(0.0, result[8], 1.E-6);
+    }
+
+    @Test
+    public void testGetWeightedConc() throws Exception {
+        double[] relevantMembershipClasses = new double[]{0.0, 0.64, 0.12, 0.0, 0.0, 0.0, 0.0, 0.13, 0.0};
+        double[] concValues = new double[]{1.7, 4.0, 3.0, 9.9, 5.4, 8.3, 0.7, 2.0, 0.1};
+        final double weightedConc = L2WOp.getWeightedConc(relevantMembershipClasses, concValues);
+        // we expect:
+        // (0.64*4.0 + 0.12*3.0 + 0.13*2.0)/ (0.64 + 0.12 + 0.13) = 3.57303
+        assertEquals(3.57303, weightedConc, 1.E-5);
+    }
+
+
+    // todo: add more tests for fuzzy approach!!!
 
 }

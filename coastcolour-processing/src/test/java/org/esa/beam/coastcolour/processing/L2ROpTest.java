@@ -127,7 +127,7 @@ public class L2ROpTest {
 
         // assert that valid expressions are changed according flag renaming (agc_flags --> l2r_flags)
         for (String name : expectedBandNames) {
-            assertEquals("!l2r_flags.INVALID", target.getBand(name).getValidPixelExpression());
+            assertEquals("!l2r_flags.INPUT_INVALID", target.getBand(name).getValidPixelExpression());
         }
 
         //assert that Masks are changed according flag renaming (agc_flags --> l2r_flags)

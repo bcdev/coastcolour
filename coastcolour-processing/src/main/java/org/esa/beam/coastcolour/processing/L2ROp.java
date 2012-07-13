@@ -70,6 +70,10 @@ public class L2ROp extends Operator {
                description = "The average temperature of the water in the region to be processed.")
     private double averageTemperature;
 
+    @Parameter(label = "TOSA OOS Threshold", defaultValue = "0.05",
+               description = "TOSA out of scope threshold: If chi_square_error is larger, TOSA_OOS flag is raised.")
+    private double tosaOosThresh;
+
     @Parameter(label = "MERIS net (full path required for other than default)",
                defaultValue = MERIS_ATMOSPHERIC_NET_NAME,
                description = "The file of the atmospheric net to be used instead of the default neural net.",
@@ -153,6 +157,7 @@ public class L2ROp extends Operator {
         glintParameters.put("useSnTMap", useSnTMap);
         glintParameters.put("averageSalinity", averageSalinity);
         glintParameters.put("averageTemperature", averageTemperature);
+        glintParameters.put("tosaOosThresh", tosaOosThresh);
         glintParameters.put("atmoNetMerisFile", atmoNetMerisFile);
         glintParameters.put("autoassociativeNetFile", autoassociativeNetFile);
         glintParameters.put("landExpression", landExpression);
@@ -289,7 +294,7 @@ public class L2ROp extends Operator {
         l2rFlags.removeAttribute(l2rFlags.getFlag("CLOUD_ICE"));
         l2rFlags.removeAttribute(l2rFlags.getFlag("HAS_FLINT"));
         String invalidDescr = "Invalid pixels (" + landExpression + " || " + cloudIceExpression + " || l1_flags.INVALID)";
-        l2rFlags.getFlag("INVALID").setDescription(invalidDescr);
+        l2rFlags.getFlag("INPUT_INVALID").setDescription(invalidDescr);
         String glintDescription = "High sun glint retrieved";
         l2rFlags.getFlag("SUNGLINT").setDescription(glintDescription);
         String toaDescription = "TOA reflectance out of range";
@@ -300,7 +305,7 @@ public class L2ROp extends Operator {
         maskGroup.remove(maskGroup.get("agc_land"));
         maskGroup.remove(maskGroup.get("cloud_ice"));
         maskGroup.remove(maskGroup.get("has_flint"));
-        maskGroup.get("atc_oor").setName("l2r_cc_atc_oor");
+        maskGroup.get("aot560_oor").setName("l2r_cc_aot560_oor");
         maskGroup.get("toa_oor").setDescription(toaDescription);
         maskGroup.get("toa_oor").setName("l2r_cc_toa_oor");
         maskGroup.get("tosa_oor").setDescription(tosaDescription);
@@ -310,7 +315,7 @@ public class L2ROp extends Operator {
         maskGroup.get("sunglint").setDescription(glintDescription);
         maskGroup.get("sunglint").setName("l2r_cc_sunglint");
         maskGroup.get("agc_invalid").setDescription(invalidDescr);
-        maskGroup.get("agc_invalid").setName("l2r_cc_invalid");
+        maskGroup.get("agc_invalid").setName("l2r_cc_input_invalid");
     }
 
 

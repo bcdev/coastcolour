@@ -129,7 +129,7 @@ public class L2WOp extends Operator {
             notEmpty = true, notNull = true)
     private String cloudIceExpression;
 
-    @Parameter(defaultValue = "l2r_flags.INVALID",
+    @Parameter(defaultValue = "l2r_flags.INPUT_INVALID",
             description = "Expression defining pixels not considered for L2W processing")
     private String invalidPixelExpression;
 

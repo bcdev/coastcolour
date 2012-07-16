@@ -303,6 +303,8 @@ public class L2ROp extends Operator {
         l2rFlags.getFlag("TOA_OOR").setDescription(toaDescription);
         String tosaDescription = "TOSA reflectance out of range";
         l2rFlags.getFlag("TOSA_OOR").setDescription(tosaDescription);
+        String tosaOosDescription = "TOSA reflectance out of scope";
+        l2rFlags.getFlag("TOSA_OOS").setDescription(tosaOosDescription);
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
         maskGroup.remove(maskGroup.get("agc_land"));
         maskGroup.remove(maskGroup.get("cloud_ice"));
@@ -312,6 +314,8 @@ public class L2ROp extends Operator {
         maskGroup.get("toa_oor").setName("l2r_cc_toa_oor");
         maskGroup.get("tosa_oor").setDescription(tosaDescription);
         maskGroup.get("tosa_oor").setName("l2r_cc_tosa_oor");
+        maskGroup.get("tosa_oos").setDescription(tosaOosDescription);
+        maskGroup.get("tosa_oos").setName("l2r_cc_tosa_oos");
         maskGroup.get("solzen").setName("l2r_cc_solzen");
         maskGroup.get("ancil").setName("l2r_cc_ancil");
         maskGroup.get("sunglint").setDescription(glintDescription);

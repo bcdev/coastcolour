@@ -102,7 +102,7 @@ public class L2WOp extends Operator {
     private File atmoNetMerisFile;
 
     @Parameter(label = "Autoassociatve net (full path required for other than default)",
-            defaultValue = GlintCorrectionOperator.ATMO_AANN_NET,
+            defaultValue = GlintCorrectionOperator.ATMO_AANN_NET_NAME,
             description = "The file of the autoassociative net used for error computed instead of the default neural net.",
             notNull = false)
     private File autoassociativeNetFile;

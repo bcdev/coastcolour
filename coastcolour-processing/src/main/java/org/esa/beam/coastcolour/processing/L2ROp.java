@@ -37,7 +37,8 @@ public class L2ROp extends Operator {
 //    public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_26651.6.net";
     // another new net from RD, 2012/06/08:
 //    private static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_72066.8.net";
-    private static final String ATMO_AANN_NET = "atmo_aann/21x5x21_20.4.net";
+//    private static final String ATMO_AANN_NET = "atmo_aann/21x5x21_20.4.net";
+    private static final String ATMO_AANN_NET = GlintCorrectionOperator.ATMO_AANN_NET_NAME;
 
     @SourceProduct(description = "MERIS L1B or L1P product")
     private Product sourceProduct;
@@ -70,7 +71,7 @@ public class L2ROp extends Operator {
                description = "The average temperature of the water in the region to be processed.")
     private double averageTemperature;
 
-    @Parameter(label = "TOSA OOS Threshold", defaultValue = "0.05",
+    @Parameter(label = "TOSA OOS Threshold", defaultValue = "0.25",
                description = "TOSA out of scope threshold: If chi_square_error is larger, TOSA_OOS flag is raised.")
     private double tosaOosThresh;
 
@@ -148,6 +149,7 @@ public class L2ROp extends Operator {
         HashMap<String, Object> glintParameters = new HashMap<String, Object>();
         glintParameters.put("doSmileCorrection", false);
         glintParameters.put("outputTosa", outputTosa);
+        glintParameters.put("outputTosaQualityIndicator", true);
         glintParameters.put("outputReflec", true);
         glintParameters.put("outputNormReflec", true);
         glintParameters.put("outputReflecAs", "RADIANCE_REFLECTANCES");

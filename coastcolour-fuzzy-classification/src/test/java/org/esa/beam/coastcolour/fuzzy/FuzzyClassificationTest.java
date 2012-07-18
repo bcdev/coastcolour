@@ -25,17 +25,18 @@ public class FuzzyClassificationTest {
         final double[] classMembershipProbability = fuzzyClassification.computeClassMemberships(reflectances);
 
         // these values are validated by algorithm provider Timothy Moore
-        double[] expectedValues = new double[]{
+        final double[] expectedValues = new double[]{
                 0.0, 0.0, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0,
                 0.0, 0.024374, 0.083183, 0.199592
         };
         assertEquals(expectedValues.length, classMembershipProbability.length);
-        double normalizationFactor = 1.0 / (0.024374 + 0.083183 + 0.19959);
+        final double normalizationFactor = 1.0 / (0.024374 + 0.083183 + 0.19959);
         for (int i = 0; i < classMembershipProbability.length; i++) {
-            assertEquals(normalizationFactor * expectedValues[i],
-                    classMembershipProbability[i], 1.0e-5);
+            assertEquals(expectedValues[i], classMembershipProbability[i], 1.0e-5);
+            final double normalizedMembership = fuzzyClassification.normalizeClassMemberships(classMembershipProbability)[i];
+            assertEquals(normalizationFactor * expectedValues[i], normalizedMembership, 1.0e-5);
         }
 
     }

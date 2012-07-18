@@ -258,7 +258,7 @@
     <!-- The arithmetic expression used for land detection. -->
     <landExpression>l1p_flags.CC_LAND</landExpression>
     <!-- The arithmetic expression used for cloud/ice detection. -->
-    <cloudIceExpression>l1p_flags.CC_CLOUD || l1p_flags.CC_SNOW_ICE</cloudIceExpression>
+    <cloudIceExpression>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</cloudIceExpression>
     <!-- Toggles the output of Top of Standard Atmosphere reflectance. -->
     <outputTosa>false</outputTosa>
     <!-- Toggles the output of water leaving path reflectance. -->
@@ -286,7 +286,7 @@
                 </p>]]></descriptionHtml>
             <inputProductTypes>MERIS_L1B,MERIS_CC_L1P</inputProductTypes>
             <outputProductType>MERIS_CC_L2R</outputProductType>
-            <validMaskExpression>!l2r_flags.INVALID</validMaskExpression>
+            <validMaskExpression>!l2r_flags.INPUT_INVALID</validMaskExpression>
 
             <outputVariables>
                 <outputVariable>
@@ -471,11 +471,11 @@
     <!-- The arithmetic expression used for land detection. -->
     <landExpression>l1p_flags.CC_LAND</landExpression>
     <!-- The arithmetic expression used for cloud/ice detection. -->
-    <cloudIceExpression>l1p_flags.CC_CLOUD || l1p_flags.CC_SNOW_ICE</cloudIceExpression>
+    <cloudIceExpression>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</cloudIceExpression>
     <!-- Toggles the output of water leaving radiance reflectance. -->
     <outputReflec>false</outputReflec>
     <!-- The arithmetic expression defining pixels not considered for water processing -->
-    <invalidPixelExpression>l2r_flags.INVALID</invalidPixelExpression>
+    <invalidPixelExpression>l2r_flags.INPUT_INVALID</invalidPixelExpression>
     <!-- If enabled IOPs are computed by QAA instead of Case-2-Regional. Concentrations of chlorophyll and
     total suspended matter will be derived from the IOPs. -->
     <useQaaForIops>false</useQaaForIops>

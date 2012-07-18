@@ -71,7 +71,7 @@ public class L2ROp extends Operator {
                description = "The average temperature of the water in the region to be processed.")
     private double averageTemperature;
 
-    @Parameter(label = "TOSA OOS Threshold", defaultValue = "0.25",
+    @Parameter(label = "TOSA OOS Threshold", defaultValue = "0.05",
                description = "TOSA out of scope threshold: If chi_square_error is larger, TOSA_OOS flag is raised.")
     private double tosaOosThresh;
 
@@ -148,7 +148,9 @@ public class L2ROp extends Operator {
     private HashMap<String, Object> createGlintAcParameterMap() {
         HashMap<String, Object> glintParameters = new HashMap<String, Object>();
         glintParameters.put("doSmileCorrection", false);
-        glintParameters.put("outputTosa", outputTosa);
+//        glintParameters.put("outputTosa", outputTosa);
+        glintParameters.put("outputTosa", true); // test  todo remove later
+        glintParameters.put("outputAutoTosa", true);  // test  todo remove later
         glintParameters.put("outputTosaQualityIndicator", true);
         glintParameters.put("outputReflec", true);
         glintParameters.put("outputNormReflec", true);
@@ -297,6 +299,8 @@ public class L2ROp extends Operator {
         l2rFlags.removeAttribute(l2rFlags.getFlag("HAS_FLINT"));
         String invalidDescr = "Invalid pixels (" + landExpression + " || " + cloudIceExpression + " || l1_flags.INVALID)";
         l2rFlags.getFlag("INPUT_INVALID").setDescription(invalidDescr);
+        String reflInvalidDescr = "spare flag (TBD)";
+        l2rFlags.getFlag("REFL_INVALID").setDescription(reflInvalidDescr);
         String glintDescription = "High sun glint retrieved";
         l2rFlags.getFlag("SUNGLINT").setDescription(glintDescription);
         String toaDescription = "TOA reflectance out of range";
@@ -322,6 +326,8 @@ public class L2ROp extends Operator {
         maskGroup.get("sunglint").setName("l2r_cc_sunglint");
         maskGroup.get("agc_invalid").setDescription(invalidDescr);
         maskGroup.get("agc_invalid").setName("l2r_cc_input_invalid");
+        maskGroup.get("refl_invalid").setDescription(reflInvalidDescr);
+        maskGroup.get("refl_invalid").setName("l2r_cc_refl_invalid");
     }
 
 

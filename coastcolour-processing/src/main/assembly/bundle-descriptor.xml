@@ -251,6 +251,8 @@
     <brightTestWavelength>865</brightTestWavelength>
     <!-- Threshold used by the brightness test in the CoastColour cloud screening. -->
     <brightTestThreshold>0.03</brightTestThreshold>
+    <!-- Use climatology map for salinity and temperature. -->
+    <useSnTMap>true</useSnTMap>
     <!-- The average salinity of the water in the region to be processed. -->
     <averageSalinity>35.0</averageSalinity>
     <!-- The average temperature of the water in the region to be processed. -->
@@ -464,6 +466,8 @@
     <brightTestWavelength>865</brightTestWavelength>
     <!-- Threshold used by the brightness test in the CoastColour cloud screening. -->
     <brightTestThreshold>0.03</brightTestThreshold>
+    <!-- Use climatology map for salinity and temperature. -->
+    <useSnTMap>true</useSnTMap>
     <!-- The average salinity of the water in the region to be processed. -->
     <averageSalinity>35.0</averageSalinity>
     <!-- The average temperature of the water in the region to be processed. -->

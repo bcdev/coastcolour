@@ -150,7 +150,7 @@ public class L2ROp extends Operator {
         glintParameters.put("doSmileCorrection", false);
 //        glintParameters.put("outputTosa", outputTosa);
         glintParameters.put("outputTosa", true); // test  todo remove later
-        glintParameters.put("outputAutoTosa", true);  // test  todo remove later
+//        glintParameters.put("outputAutoTosa", true);  // test  todo remove later
         glintParameters.put("outputTosaQualityIndicator", true);
         glintParameters.put("outputReflec", true);
         glintParameters.put("outputNormReflec", true);

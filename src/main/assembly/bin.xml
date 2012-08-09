@@ -3,7 +3,7 @@
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.1.xsd">
     <id>bin</id>
 
-    <includeBaseDirectory>false</includeBaseDirectory>
+    <includeBaseDirectory>true</includeBaseDirectory>
 
     <formats>
         <format>dir</format>
@@ -24,6 +24,7 @@
     </files>
 
     <fileSets>
+<!--
         <fileSet>
             <directory>src/main/bin/win</directory>
             <outputDirectory>bin</outputDirectory>
@@ -32,6 +33,7 @@
                 <include>*.bat</include>
             </includes>
         </fileSet>
+-->
 
         <fileSet>
             <directory>src/main/bin/unix</directory>
@@ -44,6 +46,7 @@
             </includes>
         </fileSet>
 
+<!--
         <fileSet>
             <directory>src/main/bin/macosx</directory>
             <outputDirectory>bin</outputDirectory>
@@ -54,6 +57,7 @@
                 <include>*.command</include>
             </includes>
         </fileSet>
+-->
     </fileSets>
 
     <moduleSets>
@@ -63,7 +67,7 @@
             </excludes>
 
             <binaries>
-                <includeDependencies>false</includeDependencies>
+                <includeDependencies>true</includeDependencies>
                 <fileMode>0444</fileMode>
                 <unpack>false</unpack>
                 <outputDirectory>modules</outputDirectory>

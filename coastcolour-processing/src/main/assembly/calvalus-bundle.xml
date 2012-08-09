@@ -35,6 +35,7 @@
                 <include>*:beam-netcdf*</include>
                 <include>*:coastcolour-processing*</include>
                 <include>*:coastcolour-util*</include>
+                <include>*:coastcolour-fuzzy-classification*</include>
                 <include>*:flint-processor*</include>
             </includes>
         </dependencySet>

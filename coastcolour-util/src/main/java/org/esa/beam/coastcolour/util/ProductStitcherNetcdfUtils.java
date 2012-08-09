@@ -1,8 +1,10 @@
 package org.esa.beam.coastcolour.util;
 
+import org.esa.beam.util.logging.BeamLogManager;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Section;
+import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
@@ -11,6 +13,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  * Netcdf utility class for CC product stitcher
@@ -18,6 +21,8 @@ import java.util.*;
  * @author olafd
  */
 public class ProductStitcherNetcdfUtils {
+
+    public static final String DATE_PATTERN = "dd-MMM-yyyy HH:mm:ss";
 
     /**
      * Gets the list of netCDF files from given array of source file paths
@@ -40,6 +45,22 @@ public class ProductStitcherNetcdfUtils {
         }
 
         return ncProducts;
+    }
+
+    /**
+     * Sets up filename of stitched product: just computes the acquisition time for the "stitch interval" and
+     * replaces this in the filename of first product
+     *
+     * @param ncFileListGroup  - the list of netcdf files
+     * @return   the filename of the stitched product
+     */
+    public static String getStitchedProductFileName(List<NetcdfFile> ncFileListGroup) {
+        String[] sourcePaths = new String[ncFileListGroup.size()];
+        int index = 0;
+        for (NetcdfFile netcdfFile : ncFileListGroup) {
+            sourcePaths[index++] = netcdfFile.getLocation();
+        }
+        return getStitchedProductFileName(sourcePaths);
     }
 
     /**
@@ -155,7 +176,7 @@ public class ProductStitcherNetcdfUtils {
     private static Calendar createCalendar() {
         final Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
         calendar.clear();
-        calendar.set(2000, 0, 1);
+        calendar.set(2000, Calendar.JANUARY, 1);
         return calendar;
     }
 
@@ -170,5 +191,70 @@ public class ProductStitcherNetcdfUtils {
         final long millisToAdd = Math.round(micros / 1000.0);
         return calendar.getTimeInMillis() + millisToAdd;
     }
+
+    public static List<List<NetcdfFile>> getNcFileSubGroups(List<NetcdfFile> ncFileList) {
+
+        List<List<NetcdfFile>> ncFileSubGroups = new ArrayList<List<NetcdfFile>>();
+        if (ncFileList.size() == 1) {
+            ncFileSubGroups.add(ncFileList) ;
+            return ncFileSubGroups;
+        }
+
+        List<NetcdfFile> ncFileSubGroup = new ArrayList<NetcdfFile>();
+        ncFileSubGroup.add(ncFileList.get(0));
+        for (int i=0; i<ncFileList.size()-1; i++) {
+            final NetcdfFile thisNcFile = ncFileList.get(i);
+            final NetcdfFile nextNcFile = ncFileList.get(i+1);
+            final long thisStopTime = getStopTime(thisNcFile);
+            final long nextStartTime = getStartTime(nextNcFile);
+            if (nextStartTime <= thisStopTime) {
+                // overlap
+                ncFileSubGroup.add(nextNcFile);
+            } else {
+                // gap --> new subgroup!
+                ncFileSubGroups.add(ncFileSubGroup);
+                ncFileSubGroup = new ArrayList<NetcdfFile>();
+                ncFileSubGroup.add(nextNcFile);
+            }
+        }
+
+        // add last group
+        ncFileSubGroups.add(ncFileSubGroup);
+
+        return ncFileSubGroups;
+    }
+
+    public static long getStartTime(NetcdfFile ncFile) {
+        final List<Attribute> globalAttributes = ncFile.getGlobalAttributes();
+
+        for (Attribute attribute : globalAttributes) {
+            if (attribute.getName().equals("start_date")) {
+                return getTimeAsLong(attribute);
+            }
+        }
+        return -1;
+    }
+
+    public static long getStopTime(NetcdfFile ncFile) {
+        final List<Attribute> globalAttributes = ncFile.getGlobalAttributes();
+
+        for (Attribute attribute : globalAttributes) {
+            if (attribute.getName().equals("stop_date")) {
+                return getTimeAsLong(attribute);
+            }
+        }
+        return -1;
+    }
+
+    public static long getTimeAsLong(Attribute attribute) {
+        final String dateString = attribute.getStringValue();
+        try {
+            return ProductStitcherNetcdfUtils.parse(dateString, DATE_PATTERN);
+        } catch (ParseException e) {
+            BeamLogManager.getSystemLogger().log(Level.SEVERE, e.getMessage());
+        }
+        return -1;
+    }
+
 
 }

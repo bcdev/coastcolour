@@ -140,14 +140,25 @@ public class ProductStitcherMain {
 
     private void execute() {
         List<NetcdfFile> ncFileList = ProductStitcherNetcdfUtils.getSourceProductSetsToStitch(sourceFilePaths);
-        final String stitchProductFileName = ProductStitcherNetcdfUtils.getStitchedProductFileName(sourceFilePaths);
+        System.out.println("ncFileList.size() = " + ncFileList.size());
+        List<List<NetcdfFile>> ncFileListGroups = ProductStitcherNetcdfUtils.getNcFileSubGroups(ncFileList);
+        System.out.println("ncFileListGroups.size() = " + ncFileListGroups.size());
         try {
-            final long t1 = System.currentTimeMillis();
-            ProductStitcher stitcher = new ProductStitcher(ncFileList, logger);
-            final File stitchProductFile = new File(outputDir + File.separator + stitchProductFileName);
-            stitcher.writeStitchedProduct(stitchProductFile);
-            final long t2 = System.currentTimeMillis();
-            logger.log(Level.INFO, "Processing time: " + (t2 - t1) / 1000 + " seconds.");
+            for (List<NetcdfFile> ncFileListGroup : ncFileListGroups) {
+                System.out.println("=====================");
+                for (NetcdfFile netcdfFile : ncFileListGroup) {
+                    final String location = netcdfFile.getLocation();
+                    System.out.println("location = " + location);
+                }
+                final String stitchProductFileName = ProductStitcherNetcdfUtils.getStitchedProductFileName(ncFileListGroup);
+
+                final long t1 = System.currentTimeMillis();
+                ProductStitcher stitcher = new ProductStitcher(ncFileListGroup, logger);
+                final File stitchProductFile = new File(outputDir + File.separator + stitchProductFileName);
+                stitcher.writeStitchedProduct(stitchProductFile);
+                final long t2 = System.currentTimeMillis();
+                logger.log(Level.INFO, "Processing time: " + (t2 - t1) / 1000 + " seconds.");
+            }
         } finally {
             for (NetcdfFile netcdfFile : ncFileList) {
                 try {

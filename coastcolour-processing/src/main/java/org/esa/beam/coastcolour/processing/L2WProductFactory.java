@@ -19,6 +19,9 @@ abstract class L2WProductFactory {
     static final String A_TOTAL_443_SOURCE_NAME = "a_total_443";
     static final String A_YS_443_SOURCE_NAME = "a_ys_443";
     static final String A_PIG_443_SOURCE_NAME = "a_pig_443";
+    static final String A_DET_443_SOURCE_NAME = "a_det_443";
+    static final String B_TSM_443_SOURCE_NAME = "b_tsm_443";
+    static final String B_WHIT_443_SOURCE_NAME = "b_whit_443";
     static final String BB_SPM_443_SOURCE_NAME = "bb_spm_443";
     static final String A_POC_443_SOURCE_NAME = "a_poc_443";
     static final String TSM_SOURCE_NAME = "tsm";
@@ -30,10 +33,13 @@ abstract class L2WProductFactory {
     public static final String IOP_A_TOTAL_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_TOTAL_443_SOURCE_NAME;
     public static final String IOP_A_YS_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_YS_443_SOURCE_NAME;
     public static final String IOP_A_PIG_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_PIG_443_SOURCE_NAME;
+    public static final String IOP_A_DET_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_DET_443_SOURCE_NAME;
+    public static final String IOP_B_TSM_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + B_TSM_443_SOURCE_NAME;
+    public static final String IOP_B_WHIT_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + B_WHIT_443_SOURCE_NAME;
     public static final String IOP_BB_SPM_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + BB_SPM_443_SOURCE_NAME;
     public static final String IOP_A_POC_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_POC_443_SOURCE_NAME;
-    public static final String CONC_TSM_NAME = "conc_tsm";
-    public static final String CONC_CHL_NAME = "conc_chl";
+    public static final String OWT_CONC_TSM_NAME = "owt_conc_tsm";
+    public static final String OWT_CONC_CHL_NAME = "owt_conc_chl";
 
     static final String L2W_FLAGS_NAME = "l2w_flags";
     static final String EXP_FLH_681_NAME = "exp_FLH_681";
@@ -42,6 +48,7 @@ abstract class L2WProductFactory {
     static final String EXP_FLH_NORM_OLD_681_NAME = "exp_FLH_norm_old_681";
     static final String EXP_FLH_ALT_OLD_681_NAME = "exp_FLH_alt_old_681";
     static final String K_MIN_NAME = "K_min";
+    static final String KD_MIN_NAME = "Kd_min";
     static final int[] KD_LAMBDAS = new int[]{412, 443, 490, 510, 560, 620, 664, 680};
     static final String Z90_MAX_NAME = "Z90_max";
 
@@ -132,6 +139,9 @@ abstract class L2WProductFactory {
         targetProduct.getBand(A_TOTAL_443_SOURCE_NAME).setName(IOP_A_TOTAL_443_NAME);
         targetProduct.getBand(A_YS_443_SOURCE_NAME).setName(IOP_A_YS_443_NAME);
         targetProduct.getBand(A_PIG_443_SOURCE_NAME).setName(IOP_A_PIG_443_NAME);
+        targetProduct.getBand(A_DET_443_SOURCE_NAME).setName(IOP_A_DET_443_NAME);
+        targetProduct.getBand(B_TSM_443_SOURCE_NAME).setName(IOP_B_TSM_443_NAME);
+        targetProduct.getBand(B_WHIT_443_SOURCE_NAME).setName(IOP_B_WHIT_443_NAME);
         Band aPocBand = targetProduct.getBand(A_POC_443_SOURCE_NAME);
         if (aPocBand != null) {
             aPocBand.setName(IOP_A_POC_443_NAME);
@@ -202,8 +212,8 @@ abstract class L2WProductFactory {
     }
 
     protected void renameConcentrations(Product targetProduct) {
-        targetProduct.getBand(TSM_SOURCE_NAME).setName(CONC_TSM_NAME);
-        targetProduct.getBand(CHL_CONC_SOURCE_NAME).setName(CONC_CHL_NAME);
+        targetProduct.getBand(TSM_SOURCE_NAME).setName(OWT_CONC_TSM_NAME);
+        targetProduct.getBand(CHL_CONC_SOURCE_NAME).setName(OWT_CONC_CHL_NAME);
         addPatternToAutoGrouping(targetProduct, CONC_GROUPING_PATTERN);
     }
 

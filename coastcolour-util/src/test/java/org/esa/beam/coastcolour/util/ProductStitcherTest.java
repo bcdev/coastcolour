@@ -213,4 +213,9 @@ public class ProductStitcherTest {
             assertEquals("Inconsistent source products names (have not same length) - must be checked!", e.getMessage());
         }
     }
+
+    @Test
+    public void testGetNcFileSubGroups() throws Exception {
+        // todo!!
+    }
 }

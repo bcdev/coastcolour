@@ -147,7 +147,7 @@ class QaaL2WProductFactory extends L2WProductFactory {
     }
 
     private void addChlAndTsmBands(Product l2wProduct) {
-        final Band tsm = l2wProduct.addBand(CONC_TSM_NAME, ProductData.TYPE_FLOAT32);
+        final Band tsm = l2wProduct.addBand(OWT_CONC_TSM_NAME, ProductData.TYPE_FLOAT32);
         tsm.setDescription("Total suspended matter dry weight concentration.");
         tsm.setUnit("g m^-3");
         tsm.setValidPixelExpression(L2W_VALID_EXPRESSION);
@@ -157,7 +157,7 @@ class QaaL2WProductFactory extends L2WProductFactory {
 
         tsm.setSourceImage(tsmImage);
 
-        final Band conc_chl = l2wProduct.addBand(CONC_CHL_NAME, ProductData.TYPE_FLOAT32);
+        final Band conc_chl = l2wProduct.addBand(OWT_CONC_CHL_NAME, ProductData.TYPE_FLOAT32);
         conc_chl.setDescription("Chlorophyll concentration.");
         conc_chl.setUnit("mg m^-3");
         conc_chl.setValidPixelExpression(L2W_VALID_EXPRESSION);

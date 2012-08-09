@@ -1,12 +1,6 @@
 #! /bin/sh
 
-export BEAM4_HOME=${installer:sys.installationDir}
-
-if [ ! -d "$BEAM4_HOME" ]
-then
-    PRGDIR=`dirname $0`
-    export BEAM4_HOME=`cd "$PRGDIR/.." ; pwd`
-fi
+export BEAM4_HOME=$(dirname $(dirname $0))
 
 if [ -z "$BEAM4_HOME" ]; then
     echo
@@ -18,13 +12,13 @@ if [ -z "$BEAM4_HOME" ]; then
     exit 2
 fi
 
-. "$BEAM4_HOME/bin/detect_java.sh"
+JAVA_DIR=/usr/lib/jvm/default-java
 
-"$app_java_home/bin/java" \
+"$JAVA_DIR/bin/java" \
     -Xmx1024M \
     -Dceres.context=beam \
     "-Dbeam.mainClass=org.esa.beam.coastcolour.util.ProductStitcherMain" \
     "-Dbeam.home=$BEAM4_HOME" \
-    -jar "$BEAM4_HOME/bin/ceres-launcher.jar" "$@"
+    -jar "$BEAM4_HOME/modules/ceres-launcher-0.13.jar" "$@"
 
 exit 0

@@ -273,7 +273,9 @@ public class L2WOp extends Operator {
         l2wProductFactory.setOutputReflectance(outputReflec);
 
         final Product l2WProduct = l2wProductFactory.createL2WProduct();
-
+        if (classMembershipProduct == null) {
+            classMembershipProduct = GPF.createProduct("CoastColour.FuzzyClassification", GPF.NO_PARAMS, sourceProduct);
+        }
         // NEW: call this for all 9 water inverse/forward nets,
         // (set each net pair as parameters in RegionalWaterOp)
         // --> therefore get 9 case2rProducts[k]
@@ -291,17 +293,20 @@ public class L2WOp extends Operator {
             }
             computeSingleCase2RProductsFromFuzzyApproach(auxDataDir, l2WProduct);
 
-            Band b = ProductUtils.copyBand("tsm", case2rProduct, "conc_tsm_m_all", l2WProduct, true);
+            Band b = ProductUtils.copyBand("tsm", case2rProduct, "conc_tsm", l2WProduct, true);
             b.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
-            b = ProductUtils.copyBand("chl_conc", case2rProduct, "conc_chl_m_all", l2WProduct, true);
+            b = ProductUtils.copyBand("chl_conc", case2rProduct, "conc_chl", l2WProduct, true);
             b.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
 
             for (Band band : classMembershipProduct.getBands()) {
-                if (band.getName().startsWith("class_") || band.getName().startsWith("norm_class_")) {
-                    ProductUtils.copyBand(band.getName(), classMembershipProduct, l2WProduct, true);
+//                if (band.getName().startsWith("class_") || band.getName().startsWith("norm_class_")) {
+                final String bandName = band.getName();
+                if (bandName.startsWith("class_")) {
+                    ProductUtils.copyBand(bandName, classMembershipProduct, "owt_" + bandName, l2WProduct, true);
                 }
             }
-            ProductUtils.copyBand("dominant_class", classMembershipProduct, l2WProduct, true);
+            ProductUtils.copyBand("dominant_class", classMembershipProduct, "owt_dominant_class", l2WProduct, true);
+            l2wProductFactory.addPatternToAutoGrouping(l2WProduct, "owt");
         }
 
         setTargetProduct(l2WProduct);
@@ -316,10 +321,10 @@ public class L2WOp extends Operator {
             inverseKdNnFile = new File(auxDataDir, kdInverseNets[i]);
             setCase2rParameters(case2Op);
             c2rSingleProducts[i] = case2Op.getTargetProduct();
-            Band band = ProductUtils.copyBand("tsm", c2rSingleProducts[i], "conc_tsm_m" + (i + 1), l2WProduct, true);
-            band.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
-            band = ProductUtils.copyBand("chl_conc", c2rSingleProducts[i], "conc_chl_m" + (i+1), l2WProduct, true);
-            band.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
+//            Band band = ProductUtils.copyBand("tsm", c2rSingleProducts[i], "conc_tsm_m" + (i + 1), l2WProduct, true);
+//            band.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
+//            band = ProductUtils.copyBand("chl_conc", c2rSingleProducts[i], "conc_chl_m" + (i+1), l2WProduct, true);
+//            band.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
         }
     }
 
@@ -404,8 +409,8 @@ public class L2WOp extends Operator {
 
         final Tile z90Tile = targetTiles.get(targetProduct.getBand(L2WProductFactory.Z90_MAX_NAME));
         final Tile turbidityTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.TURBIDITY_NAME));
-        final Tile chlTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.CONC_CHL_NAME));
-        final Tile tsmTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.CONC_TSM_NAME));
+        final Tile chlTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.OWT_CONC_CHL_NAME));
+        final Tile tsmTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.OWT_CONC_TSM_NAME));
 
         Tile[] chlSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
         Tile[] tsmSingleTiles = new Tile[NUMBER_OF_WATER_NETS];

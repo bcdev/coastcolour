@@ -273,9 +273,9 @@ public class L2WOp extends Operator {
         l2wProductFactory.setOutputReflectance(outputReflec);
 
         final Product l2WProduct = l2wProductFactory.createL2WProduct();
-        if (classMembershipProduct == null) {
+        //if (classMembershipProduct == null) {
             classMembershipProduct = GPF.createProduct("CoastColour.FuzzyClassification", GPF.NO_PARAMS, sourceProduct);
-        }
+        //}
         // NEW: call this for all 9 water inverse/forward nets,
         // (set each net pair as parameters in RegionalWaterOp)
         // --> therefore get 9 case2rProducts[k]

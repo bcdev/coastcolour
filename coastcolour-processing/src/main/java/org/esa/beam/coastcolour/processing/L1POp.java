@@ -272,7 +272,7 @@ public class L1POp extends Operator {
         int height = sourceProduct.getSceneRasterHeight();
         String maskPrefix = "l1p_";
         Mask mask = Mask.BandMathsType.create(maskPrefix + flagName.toLowerCase(),
-                                              "Risk that pixel is under glint", width, height,
+                                              description, width, height,
                                               L1P_FLAG_BAND_NAME + "." + flagName,
                                               color, 0.5);
         maskGroup.add(mask);

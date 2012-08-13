@@ -135,7 +135,7 @@ public class ProductStitcherTest {
 
     @Test
     public void testStitchedProductSize() throws Exception {
-        assertEquals(30, testStitcher.stitchedProductHeightBands);
+        assertEquals(32, testStitcher.stitchedProductHeightBands);
         assertEquals(7, testStitcher.stitchedProductHeightTps);
         assertEquals(10, testStitcher.stitchedProductWidthBands);
         assertEquals(3, testStitcher.stitchedProductWidthTps);
@@ -144,7 +144,7 @@ public class ProductStitcherTest {
     @Test
     public void testStitchedProductRowToScanTimeMap() throws Exception {
         assertNotNull(testStitcher.stitchedProductBandRowToScanTimeMap);
-        assertEquals(30, testStitcher.stitchedProductBandRowToScanTimeMap.size());
+        assertEquals(32, testStitcher.stitchedProductBandRowToScanTimeMap.size());
         assertNotNull(testStitcher.stitchedProductTpRowToScanTimeMap);
         assertEquals(6, testStitcher.stitchedProductTpRowToScanTimeMap.size());
     }

@@ -127,7 +127,7 @@ public class ProductStitcher {
             try {
                 // try in standard mode first, which may fail for large files...
                 outFile.create();
-            } catch (IllegalArgumentException e) {
+            } catch (IOException e) {
                 Logger.getAnonymousLogger().log(Level.INFO, "Switching to NetCDF 'large file' mode...");
                 outFile.setLargeFile(true);
                 outFile.create();

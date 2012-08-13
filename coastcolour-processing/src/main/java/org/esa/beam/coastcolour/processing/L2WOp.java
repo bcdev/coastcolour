@@ -302,7 +302,8 @@ public class L2WOp extends Operator {
 //                if (band.getName().startsWith("class_") || band.getName().startsWith("norm_class_")) {
                 final String bandName = band.getName();
                 if (bandName.startsWith("class_")) {
-                    ProductUtils.copyBand(bandName, classMembershipProduct, "owt_" + bandName, l2WProduct, true);
+                    b = ProductUtils.copyBand(bandName, classMembershipProduct, "owt_" + bandName, l2WProduct, true);
+                    b.setValidPixelExpression("owt_" + b.getValidPixelExpression());
                 }
             }
             ProductUtils.copyBand("dominant_class", classMembershipProduct, "owt_dominant_class", l2WProduct, true);

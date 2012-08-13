@@ -293,6 +293,12 @@ public class ProductStitcher {
         for (Attribute attribute : lastGlobalAttributes) {
             if (attribute.getName().equals("stop_date")) {
                 stopTime = ProductStitcherNetcdfUtils.getTimeAsLong(attribute);
+                if (isTiepoints) {
+                    // make sure last tiepoint row time does not exceed last one from last single product
+                    final Map<Integer, Long> tpMap = tpRowToScanTimeMaps.get(tpRowToScanTimeMaps.size() - 1);
+                    final Long stopTimeLimit = tpMap.get(tpMap.size() - 1);
+                    stopTime = Math.min(stopTime, stopTimeLimit);
+                }
             }
         }
 
@@ -482,7 +488,6 @@ public class ProductStitcher {
                                 int sourceProductIndex = getSourceProductIndex(rowToScanTimeMaps, j, isTiepoints);
 
                                 if (sourceProductIndex < 0 || sourceProductIndex > ncFileList.size()) {
-//                                    sourceProductIndex = getSourceProductIndex(rowToScanTimeMaps, j, isTiepoints);
                                     throw new IllegalStateException("Unknown status of source product start/stop times - cannot continue.");
                                 }
 
@@ -604,6 +609,9 @@ public class ProductStitcher {
         for (int j = 0; j < stitchedProductTpRowToScanTimeMap.size(); j++) {
             long sourceProductTime = stitchedProductTpRowToScanTimeMap.get(j);
             int sourceProductIndex = getSourceProductIndex(tpRowToScanTimeMaps, j, true);
+            if (sourceProductIndex == -1) {
+                sourceProductIndex = getSourceProductIndex(tpRowToScanTimeMaps, j, true);
+            }
             Map<Integer, Long> map = tpRowToScanTimeMaps.get(sourceProductIndex);
             for (int k = 0; k < map.size() - 1; k++) {
                 final long t1 = map.get(k);

@@ -136,17 +136,38 @@ abstract class L2WProductFactory {
     }
 
     protected void renameIops(Product targetProduct) {
-        targetProduct.getBand(A_TOTAL_443_SOURCE_NAME).setName(IOP_A_TOTAL_443_NAME);
-        targetProduct.getBand(A_YS_443_SOURCE_NAME).setName(IOP_A_YS_443_NAME);
-        targetProduct.getBand(A_PIG_443_SOURCE_NAME).setName(IOP_A_PIG_443_NAME);
-        targetProduct.getBand(A_DET_443_SOURCE_NAME).setName(IOP_A_DET_443_NAME);
-        targetProduct.getBand(B_TSM_443_SOURCE_NAME).setName(IOP_B_TSM_443_NAME);
-        targetProduct.getBand(B_WHIT_443_SOURCE_NAME).setName(IOP_B_WHIT_443_NAME);
-        Band aPocBand = targetProduct.getBand(A_POC_443_SOURCE_NAME);
+        final Band aTotal443Band = targetProduct.getBand(A_TOTAL_443_SOURCE_NAME);
+        if (aTotal443Band != null) {
+            aTotal443Band.setName(IOP_A_TOTAL_443_NAME);
+        }
+        final Band aYs443Band = targetProduct.getBand(A_YS_443_SOURCE_NAME);
+        if (aYs443Band != null) {
+            aYs443Band.setName(IOP_A_YS_443_NAME);
+        }
+        final Band aPig443Band = targetProduct.getBand(A_PIG_443_SOURCE_NAME);
+        if (aPig443Band != null) {
+            aPig443Band.setName(IOP_A_PIG_443_NAME);
+        }
+        final Band aDet443Band = targetProduct.getBand(A_DET_443_SOURCE_NAME);
+        if (aDet443Band != null) {
+            aDet443Band.setName(IOP_A_DET_443_NAME);
+        }
+        final Band bTsm443Band = targetProduct.getBand(B_TSM_443_SOURCE_NAME);
+        if (bTsm443Band != null) {
+            bTsm443Band.setName(IOP_B_TSM_443_NAME);
+        }
+        final Band bWhit443Band = targetProduct.getBand(B_WHIT_443_SOURCE_NAME);
+        if (bWhit443Band != null) {
+            bWhit443Band.setName(IOP_B_WHIT_443_NAME);
+        }
+        final Band aPocBand = targetProduct.getBand(A_POC_443_SOURCE_NAME);
         if (aPocBand != null) {
             aPocBand.setName(IOP_A_POC_443_NAME);
         }
-        targetProduct.getBand(BB_SPM_443_SOURCE_NAME).setName(IOP_BB_SPM_443_NAME);
+        final Band bbSpm443Band = targetProduct.getBand(BB_SPM_443_SOURCE_NAME);
+        if (bbSpm443Band != null) {
+            bbSpm443Band.setName(IOP_BB_SPM_443_NAME);
+        }
         String groupPattern = IOP_PREFIX_TARGET_BAND_NAME.substring(0, IOP_PREFIX_TARGET_BAND_NAME.length() - 1);
         addPatternToAutoGrouping(targetProduct, groupPattern);
     }
@@ -209,12 +230,6 @@ abstract class L2WProductFactory {
         Mask mask = Mask.BandMathsType.create(maskName, maskDescription, width, height,
                                               maskExpression, maskColor, transparency);
         maskGroup.add(index, mask);
-    }
-
-    protected void renameConcentrations(Product targetProduct) {
-        targetProduct.getBand(TSM_SOURCE_NAME).setName(OWT_CONC_TSM_NAME);
-        targetProduct.getBand(CHL_CONC_SOURCE_NAME).setName(OWT_CONC_CHL_NAME);
-        addPatternToAutoGrouping(targetProduct, CONC_GROUPING_PATTERN);
     }
 
     protected void addFLHBands(Product target) {

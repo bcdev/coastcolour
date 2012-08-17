@@ -120,6 +120,11 @@ public class ProductStitcherNetcdfUtils {
         return (byte[][]) arrayByte.copyToNDJavaArray();
     }
 
+    static byte getByte0DArrayFromNetcdfVariable(Variable variable) {
+        final Array arrayByte = getDataArray(DataType.BYTE, variable, Byte.class);
+        return arrayByte.getByte(0);
+    }
+
     static long parse(String text, String pattern) throws ParseException {
         if (text == null) {
             throw new IllegalArgumentException("parse: text is null");

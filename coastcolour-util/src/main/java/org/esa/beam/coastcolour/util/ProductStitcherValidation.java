@@ -23,6 +23,14 @@ public class ProductStitcherValidation {
                 isValidL2WFlagBandVariable(variable);
     }
 
+    static boolean isValidMaskBandVariable(Variable variable) {
+        return variable.getName().endsWith("_mask");
+    }
+
+    static boolean isMetadataVariable(Variable variable) {
+        return variable.getName().equals("metadata");
+    }
+
     static boolean isValidTpVariable(Variable variable) {
         final String name = variable.getName();
         final boolean isNameValid = name.equals("latitude") || name.equals("longitude") ||

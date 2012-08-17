@@ -86,9 +86,9 @@ public class ProductStitcherTest {
     public void testBandVariables() throws Exception {
         assertNotNull(testStitcher.allBandVariablesLists);
         assertEquals(3, testStitcher.allBandVariablesLists.size());
-        assertEquals(34, testStitcher.allBandVariablesLists.get(0).size());
-        assertEquals(34, testStitcher.allBandVariablesLists.get(1).size());
-        assertEquals(34, testStitcher.allBandVariablesLists.get(2).size());
+        assertEquals(59, testStitcher.allBandVariablesLists.get(0).size());
+        assertEquals(59, testStitcher.allBandVariablesLists.get(1).size());
+        assertEquals(59, testStitcher.allBandVariablesLists.get(2).size());
         assertEquals("metadata", testStitcher.allBandVariablesLists.get(0).get(0).getName());
         assertEquals("reflec_7", testStitcher.allBandVariablesLists.get(0).get(7).getName());
         assertEquals("Water leaving radiance reflectance at 664,573 nm",

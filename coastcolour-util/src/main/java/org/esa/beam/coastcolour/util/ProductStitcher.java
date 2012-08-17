@@ -171,7 +171,9 @@ public class ProductStitcher {
             final List<Variable> allVariablesList = ncFile.getVariables();
             List<Variable> bandVariablesList = new ArrayList<Variable>();
             for (Variable variable : allVariablesList) {
-                if (ProductStitcherValidation.isValidBandVariable(variable) || ProductStitcherValidation.isValidFlagBandVariable(variable)) {
+                if (ProductStitcherValidation.isValidBandVariable(variable) ||
+                        ProductStitcherValidation.isValidFlagBandVariable(variable) ||
+                        ProductStitcherValidation.isValidMaskBandVariable(variable)) {
                     bandVariablesList.add(variable);
                 }
             }
@@ -443,6 +445,7 @@ public class ProductStitcher {
         ArrayFloat.D2 bandDataFloat = new ArrayFloat.D2(height, width);
         ArrayShort.D2 bandDataShort = new ArrayShort.D2(height, width);
         ArrayByte.D2 bandDataByte = new ArrayByte.D2(height, width);
+        ArrayByte.D0 bandDataSingleByte = new ArrayByte.D0();
 
         final List<Variable> firstProductBandVariables = variableLists.get(0);
 
@@ -454,8 +457,11 @@ public class ProductStitcher {
                 List<Variable> allBandVariables = variableLists.get(i);
                 for (Variable variable2 : allBandVariables) {
                     if (variable2.getName().equals(variable.getName())) {
-                        if (variable.getName().equals("metadata")) {
+                        if (ProductStitcherValidation.isMetadataVariable(variable)) {
                             // skip
+                        } else if (ProductStitcherValidation.isValidMaskBandVariable(variable)) {
+                            final byte byteVal = ProductStitcherNetcdfUtils.getByte0DArrayFromNetcdfVariable(variable2);
+                            bandDataSingleByte.set(byteVal);
                         } else {
                             // get data array for THIS variable and THIS single product
                             variable2.getDimension(0).setLength(variable2.getShape(0));
@@ -524,7 +530,9 @@ public class ProductStitcher {
             logger.log(Level.INFO, "...writing variable '" + variable.getName() + "'.");
             final List<Variable> allBandVariables = variableLists.get(0);
             for (Variable variable2 : allBandVariables) {
-                if (variable2.getName().equals(variable.getName()) && !variable.getName().equals("metadata")) {
+                if (variable2.getName().equals(variable.getName()) &&
+                        !ProductStitcherValidation.isMetadataVariable(variable) &&
+                        !ProductStitcherValidation.isValidMaskBandVariable(variable)) {
                     switch (variable2.getDataType()) {
                         case BYTE:
                             outFile.write(variable2.getName(), bandDataByte);
@@ -543,6 +551,8 @@ public class ProductStitcher {
                         default:
                             throw new IllegalArgumentException("Data type '" + variable2.getDataType().name() + "' not supported.");
                     }
+                } else if (ProductStitcherValidation.isValidMaskBandVariable(variable)) {
+                    outFile.write(variable2.getName(), bandDataSingleByte);
                 }
             }
         }

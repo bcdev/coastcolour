@@ -43,7 +43,8 @@ public class ProductStitcherValidation {
 
     private static boolean isValidL2WBandVariable(Variable variable) {
         final String name = variable.getName();
-        final boolean isNameValid = name.equals("lat") || name.equals("lon") ||
+        final boolean isNameValid = name.equals("lat") || name.equals("lon") || name.equals("altitude") ||
+                name.equals("quality_indicator") || name.equals("detector_index") ||
                 name.equals("chiSquare") || name.equals("K_min") || name.equals("Z90_max") || name.equals("turbidity") ||
                 name.startsWith("iop") || name.startsWith("conc") || name.startsWith("Kd");
         return isNameValid && areBandDimensionsValid(variable);
@@ -52,7 +53,7 @@ public class ProductStitcherValidation {
     private static boolean isValidL2RBandVariable(Variable variable) {
         final String name = variable.getName();
         final boolean isNameValid = name.equals("lat") || name.equals("lon") || name.equals("ang_443_865") ||
-                name.startsWith("reflec") || name.startsWith("norm_refl") || name.startsWith("atm_tau");
+                name.startsWith("tosa_reflec") || name.startsWith("reflec") || name.startsWith("norm_refl") || name.startsWith("atm_tau");
         return isNameValid && areBandDimensionsValid(variable);
     }
 

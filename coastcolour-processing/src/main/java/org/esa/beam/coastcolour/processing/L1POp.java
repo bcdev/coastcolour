@@ -1,6 +1,7 @@
 package org.esa.beam.coastcolour.processing;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
@@ -43,20 +44,22 @@ public class L1POp extends Operator {
     public static final String CC_MIXEDPIXEL_FLAG_NAME = "CC_MIXEDPIXEL";
     public static final String CC_GLINTRISK_FLAG_NAME = "CC_GLINTRISK";
 
+    public static final String L1P_FLAG_BAND_NAME = "l1p_flags";
+
+    public static final int LAND_BIT_INDEX = 0;
+
+    public static final int COASTLINE_BIT_INDEX = GlintCorrectionOperator.COASTLINE_BIT_INDEX;
+    public static final int CLOUD_BIT_INDEX = GlintCorrectionOperator.COASTLINE_BIT_INDEX;
+    public static final int CLOUD_AMBIGUOUS_BIT_INDEX = GlintCorrectionOperator.CLOUD_AMBIGUOUS_BIT_INDEX;
+    public static final int CLOUD_BUFFER_BIT_INDEX = GlintCorrectionOperator.CLOUD_BUFFER_BIT_INDEX;
+    public static final int CLOUD_SHADOW_BIT_INDEX = GlintCorrectionOperator.CLOUD_SHADOW_BIT_INDEX;
+    public static final int SNOW_ICE_BIT_INDEX = GlintCorrectionOperator.SNOW_ICE_BIT_INDEX;
+    public static final int MIXEDPIXEL_BIT_INDEX = GlintCorrectionOperator.MIXEDPIXEL_BIT_INDEX;
+    public static final int GLINTRISK_BIT_INDEX = GlintCorrectionOperator.GLINTRISK_BIT_INDEX;
+
     private static final String IDEPIX_OPERATOR_ALIAS = "idepix.ComputeChain";
     private static final String RADIOMETRY_OPERATOR_ALIAS = "Meris.CorrectRadiometry";
     private static final String CLOUD_FLAG_BAND_NAME = "cloud_classif_flags";
-    private static final String L1P_FLAG_BAND_NAME = "l1p_flags";
-
-    private static final int LAND_BIT_INDEX = 0;
-    private static final int COASTLINE_BIT_INDEX = 1;
-    private static final int CLOUD_BIT_INDEX = 2;
-    private static final int CLOUD_AMBIGUOUS_BIT_INDEX = 3;
-    private static final int CLOUD_BUFFER_BIT_INDEX = 4;
-    private static final int CLOUD_SHADOW_BIT_INDEX = 5;
-    private static final int SNOW_ICE_BIT_INDEX = 6;
-    private static final int MIXEDPIXEL_BIT_INDEX = 7;
-    private static final int GLINTRISK_BIT_INDEX = 8;
 
     @SourceProduct(alias = "l1b", description = "MERIS L1b (N1) product")
     private Product sourceProduct;

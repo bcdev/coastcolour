@@ -93,7 +93,7 @@ public class L2ROp extends Operator {
                notEmpty = true, notNull = true)
     private String landExpression;
 
-    @Parameter(defaultValue = "(l1p_flags.CC_CLOUD && not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE",
+    @Parameter(defaultValue = "l1p_flags.CC_CLOUD || l1p_flags.CC_SNOW_ICE",
                label = "Cloud/Ice detection expression",
                description = "The arithmetic expression used for cloud/ice detection.",
                notEmpty = true, notNull = true)
@@ -297,7 +297,7 @@ public class L2ROp extends Operator {
         l2rFlags.removeAttribute(l2rFlags.getFlag("LAND"));
         l2rFlags.removeAttribute(l2rFlags.getFlag("CLOUD_ICE"));
         l2rFlags.removeAttribute(l2rFlags.getFlag("HAS_FLINT"));
-        String invalidDescr = "Invalid pixels (" + landExpression + " || " + cloudIceExpression + " || l1_flags.INVALID)";
+        String invalidDescr = "'Input invalid' pixels (" + landExpression + " || " + cloudIceExpression + " || l1_flags.INVALID)";
         l2rFlags.getFlag("INPUT_INVALID").setDescription(invalidDescr);
         String reflInvalidDescr = "spare flag (TBD)";
         l2rFlags.getFlag("REFL_INVALID").setDescription(reflInvalidDescr);
@@ -310,9 +310,10 @@ public class L2ROp extends Operator {
         String tosaOosDescription = "TOSA reflectance out of scope";
         l2rFlags.getFlag("TOSA_OOS").setDescription(tosaOosDescription);
 
-        String l2rInvalidDescr = "L2R Invalid pixels";
+        String l2rInvalidDescr = "'L2R invalid' pixels (quality indicator > 1 || l1_flags.CLOUD)";
         l2rFlags.getFlag("L2R_INVALID").setDescription(l2rInvalidDescr);
-        String l2rSuspectDescr = "L2R Invalid pixels";
+        String l2rSuspectDescr = "'L2R suspect' pixels " +
+                                 "(quality indicator > 3 || l1_flags.CLOUD || l1_flags.CLOUD_BUFFER || l1_flags.CLOUD_SHADOW || l1_flags.SNOW_ICE || l1_flags.MIXED_PIXEL";
         l2rFlags.getFlag("L2R_INVALID").setDescription(l2rSuspectDescr);
 
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
@@ -337,7 +338,7 @@ public class L2ROp extends Operator {
 
         maskGroup.get("l2r_invalid").setDescription(l2rInvalidDescr);
         maskGroup.get("l2r_invalid").setName("l2r_cc_l2r_invalid");
-        maskGroup.get("l2r_suspect").setDescription(l2rInvalidDescr);
+        maskGroup.get("l2r_suspect").setDescription(l2rSuspectDescr);
         maskGroup.get("l2r_suspect").setName("l2r_cc_l2r_suspect");
     }
 

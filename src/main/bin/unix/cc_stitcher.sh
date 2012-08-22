@@ -20,5 +20,3 @@ JAVA_DIR=/usr/lib/jvm/default-java
     "-Dbeam.mainClass=org.esa.beam.coastcolour.util.ProductStitcherMain" \
     "-Dbeam.home=$BEAM4_HOME" \
     -jar "$BEAM4_HOME/modules/ceres-launcher-0.13.jar" "$@"
-
-exit 0

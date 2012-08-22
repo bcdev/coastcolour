@@ -86,9 +86,9 @@ public class ProductStitcherTest {
     public void testBandVariables() throws Exception {
         assertNotNull(testStitcher.allBandVariablesLists);
         assertEquals(3, testStitcher.allBandVariablesLists.size());
-        assertEquals(59, testStitcher.allBandVariablesLists.get(0).size());
-        assertEquals(59, testStitcher.allBandVariablesLists.get(1).size());
-        assertEquals(59, testStitcher.allBandVariablesLists.get(2).size());
+        assertEquals(60, testStitcher.allBandVariablesLists.get(0).size());
+        assertEquals(60, testStitcher.allBandVariablesLists.get(1).size());
+        assertEquals(60, testStitcher.allBandVariablesLists.get(2).size());
         assertEquals("metadata", testStitcher.allBandVariablesLists.get(0).get(0).getName());
         assertEquals("reflec_7", testStitcher.allBandVariablesLists.get(0).get(7).getName());
         assertEquals("Water leaving radiance reflectance at 664,573 nm",
@@ -100,7 +100,7 @@ public class ProductStitcherTest {
         assertEquals("reflec_5", testStitcher.allBandVariablesLists.get(1).get(5).getName());
         assertEquals("norm_refl_6", testStitcher.allBandVariablesLists.get(1).get(18).getName());
         assertEquals("norm_refl_9", testStitcher.allBandVariablesLists.get(2).get(21).getName());
-        assertEquals("lon", testStitcher.allBandVariablesLists.get(2).get(33).getName());
+        assertEquals("lat", testStitcher.allBandVariablesLists.get(2).get(33).getName());
     }
 
     @Test

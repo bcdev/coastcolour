@@ -310,10 +310,10 @@ public class L2ROp extends Operator {
         String tosaOosDescription = "TOSA reflectance out of scope";
         l2rFlags.getFlag("TOSA_OOS").setDescription(tosaOosDescription);
 
-        String l2rInvalidDescr = "'L2R invalid' pixels (quality indicator > 1 || l1_flags.CLOUD)";
+        String l2rInvalidDescr = "'L2R invalid' pixels (quality indicator > 1 || l1p_flags.CC_CLOUD)";
         l2rFlags.getFlag("L2R_INVALID").setDescription(l2rInvalidDescr);
         String l2rSuspectDescr = "'L2R suspect' pixels " +
-                                 "(quality indicator > 3 || l1_flags.CLOUD || l1_flags.CLOUD_BUFFER || l1_flags.CLOUD_SHADOW || l1_flags.SNOW_ICE || l1_flags.MIXED_PIXEL";
+                                 "(quality indicator > 3 || l1p_flags.CC_CLOUD || l1p_flags.CC_CLOUD_BUFFER || l1p_flags.CC_CLOUD_SHADOW || l1p_flags.CC_SNOW_ICE || l1p_flags.CC_MIXEDPIXEL)";
         l2rFlags.getFlag("L2R_INVALID").setDescription(l2rSuspectDescr);
 
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();

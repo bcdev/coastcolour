@@ -17,15 +17,16 @@ firstInputFile="hdfs://master00:9000$(echo $inputFiles | tr ' ' '\n' | sort | he
 if [ $numberInputFiles = 1 ]; then
     echo "copying single file in orbit $orbitNumber"
     /home/hadoop/opt/coastcolour/coastcolour-bin-1.5-SNAPSHOT/bin/reportprogress.sh &
+    trap 'kill %1' EXIT
     if hadoop fs -ls ${outputURL}/$(basename ${inputFiles}) 2> /dev/null; then
         hadoop fs -rm ${outputURL}/$(basename ${inputFiles})
     fi
     #echo "hadoop fs -cp $inputFiles ${outputURL}/$(basename ${inputFiles})"
     hadoop fs -cp $inputFiles ${outputURL}/$(basename ${inputFiles})
-    kill %1
-elif [ "$numberInputFiles" -gt 1 -a "$inputURL" = "$firstInputFile" ]; then	
+elif [ "$numberInputFiles" -gt 1 -a "$inputURL" = "$firstInputFile" ]; then
     echo "found $numberInputFiles input files to stitch for orbit $orbitNumber"
     /home/hadoop/opt/coastcolour/coastcolour-bin-1.5-SNAPSHOT/bin/reportprogress.sh &
+    trap 'kill %1' EXIT
     mkdir in
     for p in $inputFiles; do
 	hadoop fs -get $p in
@@ -41,8 +42,7 @@ elif [ "$numberInputFiles" -gt 1 -a "$inputURL" = "$firstInputFile" ]; then
 	#echo "hadoop fs -put ${resultFile} ${outputURL}/$(basename ${resultFile})"
 	hadoop fs -put ${resultFile} ${outputURL}/$(basename ${resultFile})
     done
-    kill %1
-elif [ "$numberInputFiles" -gt 1 -a "$inputURL" != "$firstInputFile" ]; then	
+elif [ "$numberInputFiles" -gt 1 -a "$inputURL" != "$firstInputFile" ]; then
     echo "skipping because $firstInputFile is first" 	
     exit 0
 else

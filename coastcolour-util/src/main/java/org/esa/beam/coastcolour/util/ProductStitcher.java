@@ -9,13 +9,10 @@ import ucar.nc2.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Class providing the product stitching. Applicable for Coastcolour L1P, L2R and L2W NetCDF input products.
@@ -48,17 +45,13 @@ public class ProductStitcher {
     int stitchedProductHeightTps;
     int stitchedProductWidthTps;
 
-    private final Logger logger;
-
     /**
      * Product stitcher constructor.
      *
      * @param ncFileList - the list of input netCDF files
-     * @param logger
      */
-    public ProductStitcher(List<NetcdfFile> ncFileList, Logger logger) {
+    public ProductStitcher(List<NetcdfFile> ncFileList) {
         this.ncFileList = ncFileList;
-        this.logger = logger;
 
         setAllAttributesList();
         setAllDimensionsList();
@@ -128,7 +121,7 @@ public class ProductStitcher {
                 // try in standard mode first, which may fail for large files...
                 outFile.create();
             } catch (Exception e) {
-                Logger.getAnonymousLogger().log(Level.INFO, "Switching to NetCDF 'large file' mode...");
+                System.out.println("Switching to NetCDF 'large file' mode...");
                 outFile.setLargeFile(true);
                 outFile.create();
             }
@@ -138,9 +131,9 @@ public class ProductStitcher {
             writeVariables(allTpVariablesLists, tpRowToScanTimeMaps, outFile, true);
 
         } catch (IOException e) {
-            logger.log(Level.SEVERE, e.getMessage());
+            System.out.println("ERROR: " + e.getMessage());
         } catch (InvalidRangeException e) {
-            logger.log(Level.SEVERE, e.getMessage());
+            System.out.println("ERROR: " + e.getMessage());
         } finally {
             if (null != outFile)
                 try {
@@ -149,7 +142,7 @@ public class ProductStitcher {
                 }
             pm.done();
         }
-        Logger.getAnonymousLogger().log(Level.INFO, "Finished writing stitched product '" + ncResultFile.getAbsolutePath() + "'.");
+        System.out.println("Finished writing stitched product '" + ncResultFile.getAbsolutePath() + "'.");
     }
 
     private void setAllAttributesList() {
@@ -186,11 +179,6 @@ public class ProductStitcher {
             final List<Variable> allVariablesList = ncFile.getVariables();
             List<Variable> tpVariablesList = new ArrayList<Variable>();
             for (Variable variable : allVariablesList) {
-                // todo: this is bad. validateSourceProducts as for bands
-//                if (variable.getDimensions().size() == 2 && variable.getDataType().getClassType().getSimpleName().equals("float") &&
-//                        variable.getDimension(0).getName().equals(TP_DIMY_NAME) && variable.getDimension(1).getName().equals(TP_DIMX_NAME)) {
-//                    tpVariablesList.add(variable);
-//                }
                 if (ProductStitcherValidation.isValidTpVariable(variable)) {
                     tpVariablesList.add(variable);
                 }
@@ -445,13 +433,12 @@ public class ProductStitcher {
         ArrayFloat.D2 bandDataFloat = new ArrayFloat.D2(height, width);
         ArrayShort.D2 bandDataShort = new ArrayShort.D2(height, width);
         ArrayByte.D2 bandDataByte = new ArrayByte.D2(height, width);
-        ArrayByte.D0 bandDataSingleByte = new ArrayByte.D0();
 
         final List<Variable> firstProductBandVariables = variableLists.get(0);
 
         // loop over bands or tpg's
         for (Variable variable : firstProductBandVariables) {
-            logger.log(Level.INFO, "Stitching data of variable '" + variable.getName() + "'...");
+            System.out.println("Stitching data of variable '" + variable.getName() + "'...");
             // loop over single products
             for (int i = 0; i < variableLists.size(); i++) {
                 List<Variable> allBandVariables = variableLists.get(i);
@@ -460,8 +447,7 @@ public class ProductStitcher {
                         if (ProductStitcherValidation.isMetadataVariable(variable)) {
                             // skip
                         } else if (ProductStitcherValidation.isValidMaskBandVariable(variable)) {
-                            final byte byteVal = ProductStitcherNetcdfUtils.getByte0DArrayFromNetcdfVariable(variable2);
-                            bandDataSingleByte.set(byteVal);
+                            // skip
                         } else {
                             // get data array for THIS variable and THIS single product
                             variable2.getDimension(0).setLength(variable2.getShape(0));
@@ -527,7 +513,7 @@ public class ProductStitcher {
                 }
             }
 
-            logger.log(Level.INFO, "...writing variable '" + variable.getName() + "'.");
+            System.out.println("...writing variable '" + variable.getName() + "'.");
             final List<Variable> allBandVariables = variableLists.get(0);
             for (Variable variable2 : allBandVariables) {
                 if (variable2.getName().equals(variable.getName()) &&
@@ -550,15 +536,6 @@ public class ProductStitcher {
                             break;
                         default:
                             throw new IllegalArgumentException("Data type '" + variable2.getDataType().name() + "' not supported.");
-                    }
-                } else if (ProductStitcherValidation.isValidMaskBandVariable(variable)) {
-                    try {
-                        outFile.write(variable2.getName(), bandDataSingleByte);
-                    } catch (IOException e) {
-                        // todo !!
-                        e.printStackTrace();
-                    } catch (InvalidRangeException e) {
-                        // todo: seems that we can ignore this for our purpose, but clarify!
                     }
                 }
             }

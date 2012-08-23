@@ -1,16 +1,11 @@
 package org.esa.beam.coastcolour.util;
 
 import org.apache.commons.cli.*;
-import org.esa.beam.util.logging.BeamLogManager;
 import ucar.nc2.NetcdfFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * Main class for stitching coastcolour output products.
@@ -44,8 +39,8 @@ public class ProductStitcherMain {
     private String[] sourceFilePaths;
     private File outputDir;
 
-    private Logger logger;
-    private File logFile;
+//    private Logger logger;
+//    private File logFile;
 
     public static void main(String[] args) {
         final ProductStitcherMain productStitcherMain = new ProductStitcherMain(args);
@@ -55,14 +50,14 @@ public class ProductStitcherMain {
     public ProductStitcherMain(String[] args) {
         CommandLine commandLine = null;
 
-        initLogger();
+//        initLogger();
 
         options = createCommandLineOptions();
 
         try {
             commandLine = parseCommandLine(args);
         } catch (ParseException e) {
-            logger.log(Level.SEVERE, "Error: " + e.getMessage() + " (use option '-h' for help)");
+            System.out.println("ERROR: " + e.getMessage() + " (use option '-h' for help)");
             System.exit(-1);
         }
 
@@ -76,7 +71,7 @@ public class ProductStitcherMain {
         try {
             ProductStitcher.validateSourceProducts(sourceFilePaths);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error: " + e.getMessage() + " (use option '-h' for help)");
+            System.out.println("ERROR: " + e.getMessage() + " (use option '-h' for help)");
             System.exit(-1);
         }
     }
@@ -87,24 +82,24 @@ public class ProductStitcherMain {
         helpFormatter.printHelp(argString, options, true);
     }
 
-    private void initLogger() {
-        logger = BeamLogManager.getSystemLogger();
-        logger.setLevel(Level.INFO);
-        final FileHandler fileTxt;
-        logFile = new File(System.getProperty("user.home") + File.separator + DEFAULT_LOGFILE_NAME);
-        try {
-            fileTxt = new FileHandler(logFile.getAbsolutePath());
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Problems with creating the log file - cannot continue.");
-        }
-
-        // Create txt Formatter
-        SimpleFormatter formatterTxt = new SimpleFormatter();
-        fileTxt.setFormatter(formatterTxt);
-        logger.addHandler(fileTxt);
-        logger.setLevel(Level.INFO);
-    }
+//    private void initLogger() {
+//        logger = BeamLogManager.getSystemLogger();
+//        logger.setLevel(Level.INFO);
+//        final FileHandler fileTxt;
+//        logFile = new File(System.getProperty("user.home") + File.separator + DEFAULT_LOGFILE_NAME);
+//        try {
+//            fileTxt = new FileHandler(logFile.getAbsolutePath());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            throw new RuntimeException("Problems with creating the log file - cannot continue.");
+//        }
+//
+//        // Create txt Formatter
+//        SimpleFormatter formatterTxt = new SimpleFormatter();
+//        fileTxt.setFormatter(formatterTxt);
+//        logger.addHandler(fileTxt);
+//        logger.setLevel(Level.INFO);
+//    }
 
 
     @SuppressWarnings({"AccessStaticViaInstance"})
@@ -133,7 +128,7 @@ public class ProductStitcherMain {
             outputDir = new File(cl.getOptionValue(OPT_OUTPUT_DIR.getOpt()));
         }
         if (!outputDir.isDirectory()) {
-            logger.log(Level.SEVERE, "Error: The given output directory '" + outputDir.getPath() + "' is not a directory.");
+            System.out.println("ERROR: The given output directory '" + outputDir.getPath() + "' is not a directory.");
             System.exit(1);
         }
     }
@@ -153,11 +148,11 @@ public class ProductStitcherMain {
                 final String stitchProductFileName = ProductStitcherNetcdfUtils.getStitchedProductFileName(ncFileListGroup);
 
                 final long t1 = System.currentTimeMillis();
-                ProductStitcher stitcher = new ProductStitcher(ncFileListGroup, logger);
+                ProductStitcher stitcher = new ProductStitcher(ncFileListGroup);
                 final File stitchProductFile = new File(outputDir + File.separator + stitchProductFileName);
                 stitcher.writeStitchedProduct(stitchProductFile);
                 final long t2 = System.currentTimeMillis();
-                logger.log(Level.INFO, "Processing time: " + (t2 - t1) / 1000 + " seconds.");
+                System.out.println("Processing time: " + (t2 - t1) / 1000 + " seconds.");
             }
         } finally {
             for (NetcdfFile netcdfFile : ncFileList) {

@@ -40,7 +40,7 @@ public class ProductStitcherTest {
         ncFileList.add(ncFile2);
         ncFileList.add(ncFile3);
 
-        testStitcher = new ProductStitcher(ncFileList, Logger.getAnonymousLogger());
+        testStitcher = new ProductStitcher(ncFileList);
     }
 
     @After

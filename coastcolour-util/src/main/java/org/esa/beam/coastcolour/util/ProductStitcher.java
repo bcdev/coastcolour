@@ -552,7 +552,14 @@ public class ProductStitcher {
                             throw new IllegalArgumentException("Data type '" + variable2.getDataType().name() + "' not supported.");
                     }
                 } else if (ProductStitcherValidation.isValidMaskBandVariable(variable)) {
-                    outFile.write(variable2.getName(), bandDataSingleByte);
+                    try {
+                        outFile.write(variable2.getName(), bandDataSingleByte);
+                    } catch (IOException e) {
+                        // todo !!
+                        e.printStackTrace();
+                    } catch (InvalidRangeException e) {
+                        // todo: seems that we can ignore this for our purpose, but clarify!
+                    }
                 }
             }
         }

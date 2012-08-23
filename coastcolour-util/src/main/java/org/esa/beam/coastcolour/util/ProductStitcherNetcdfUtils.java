@@ -51,8 +51,8 @@ public class ProductStitcherNetcdfUtils {
      * Sets up filename of stitched product: just computes the acquisition time for the "stitch interval" and
      * replaces this in the filename of first product
      *
-     * @param ncFileListGroup  - the list of netcdf files
-     * @return   the filename of the stitched product
+     * @param ncFileListGroup - the list of netcdf files
+     * @return the filename of the stitched product
      */
     public static String getStitchedProductFileName(List<NetcdfFile> ncFileListGroup) {
         String[] sourcePaths = new String[ncFileListGroup.size()];
@@ -67,8 +67,8 @@ public class ProductStitcherNetcdfUtils {
      * Sets up filename of stitched product: just computes the acquisition time for the "stitch interval" and
      * replaces this in the filename of first product
      *
-     * @param sourcePaths  - the source file paths
-     * @return   the filename of the stitched product
+     * @param sourcePaths - the source file paths
+     * @return the filename of the stitched product
      */
     static String getStitchedProductFileName(String[] sourcePaths) {
         // e.g. from product set
@@ -201,20 +201,26 @@ public class ProductStitcherNetcdfUtils {
 
         List<List<NetcdfFile>> ncFileSubGroups = new ArrayList<List<NetcdfFile>>();
         if (ncFileList.size() == 1) {
-            ncFileSubGroups.add(ncFileList) ;
+            ncFileSubGroups.add(ncFileList);
             return ncFileSubGroups;
         }
 
         List<NetcdfFile> ncFileSubGroup = new ArrayList<NetcdfFile>();
         ncFileSubGroup.add(ncFileList.get(0));
-        for (int i=0; i<ncFileList.size()-1; i++) {
+        for (int i = 0; i < ncFileList.size() - 1; i++) {
             final NetcdfFile thisNcFile = ncFileList.get(i);
-            final NetcdfFile nextNcFile = ncFileList.get(i+1);
+            final NetcdfFile nextNcFile = ncFileList.get(i + 1);
             final long thisStopTime = getStopTime(thisNcFile);
             final long nextStartTime = getStartTime(nextNcFile);
+            final long nextStopTime = getStopTime(nextNcFile);
             if (nextStartTime <= thisStopTime) {
-                // overlap
-                ncFileSubGroup.add(nextNcFile);
+                if (nextStopTime > thisStopTime) {
+                    // overlap
+                    ncFileSubGroup.add(nextNcFile);
+                } else {
+                    // 'next' product is fully included in current product, no need to process
+                    // --> no action
+                }
             } else {
                 // gap --> new subgroup!
                 ncFileSubGroups.add(ncFileSubGroup);

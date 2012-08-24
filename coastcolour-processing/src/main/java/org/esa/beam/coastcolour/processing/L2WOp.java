@@ -52,7 +52,7 @@ public class L2WOp extends Operator {
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")
     private Product sourceProduct;
 
-    @SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)", optional = true)
+    //@SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)", optional = true)
     private Product classMembershipProduct;
 
     @Parameter(defaultValue = "true",

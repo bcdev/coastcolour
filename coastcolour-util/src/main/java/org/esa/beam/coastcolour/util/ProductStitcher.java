@@ -489,6 +489,9 @@ public class ProductStitcher {
 
                                 // if the current single product is the right one, loop over raster and set netcdf floatVals
                                 if (sourceProductIndex == i) {
+                                    if (valuesRowIndex >= variable2.getShape(0)) {
+                                        valuesRowIndex--; // dirty fix for product length problem
+                                    }
                                     for (int k = 0; k < width; k++) {
                                         switch (variable2.getDataType()) {
                                             case BYTE:
@@ -571,8 +574,7 @@ public class ProductStitcher {
         return tpDataInterpol;
     }
 
-    private int getSourceProductIndex(List<Map<Integer, Long>> rowToScanTimeMaps, int rowIndex,
-                                      boolean isTiepoints) {
+    private int getSourceProductIndex(List<Map<Integer, Long>> rowToScanTimeMaps, int rowIndex, boolean isTiepoints) {
         int sourceProductIndex = -1;
         Map<Integer, Long> stitchedProductRowToScanTimeMap;
         if (isTiepoints) {
@@ -582,13 +584,13 @@ public class ProductStitcher {
         }
 
         if (rowIndex < stitchedProductRowToScanTimeMap.size()) {
-            long sourceProductTime = stitchedProductRowToScanTimeMap.get(rowIndex);
+            long targetProductTime = stitchedProductRowToScanTimeMap.get(rowIndex);
             for (int k = rowToScanTimeMaps.size() - 1; k >= 0; k--) {
                 Map<Integer, Long> map = rowToScanTimeMaps.get(k);
                 final int mapStartIndex = 0;
                 long startTime = map.get(mapStartIndex);
                 long stopTime = map.get(map.size() - 1);
-                if (startTime <= sourceProductTime && sourceProductTime <= stopTime) {
+                if (startTime <= targetProductTime && targetProductTime <= stopTime) {
                     sourceProductIndex = k;
                     break;
                 }

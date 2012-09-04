@@ -15,7 +15,7 @@ fi
 JAVA_DIR=/usr/lib/jvm/default-java
 
 "$JAVA_DIR/bin/java" \
-    -Xmx1024M \
+    -Xmx1524M \
     -Dceres.context=beam \
     "-Dbeam.mainClass=org.esa.beam.coastcolour.util.ProductStitcherMain" \
     "-Dbeam.home=$BEAM4_HOME" \

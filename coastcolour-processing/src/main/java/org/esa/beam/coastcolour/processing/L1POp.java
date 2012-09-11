@@ -49,7 +49,7 @@ public class L1POp extends Operator {
     public static final int LAND_BIT_INDEX = 0;
 
     public static final int COASTLINE_BIT_INDEX = GlintCorrectionOperator.COASTLINE_BIT_INDEX;
-    public static final int CLOUD_BIT_INDEX = GlintCorrectionOperator.COASTLINE_BIT_INDEX;
+    public static final int CLOUD_BIT_INDEX = GlintCorrectionOperator.CLOUD_BIT_INDEX;
     public static final int CLOUD_AMBIGUOUS_BIT_INDEX = GlintCorrectionOperator.CLOUD_AMBIGUOUS_BIT_INDEX;
     public static final int CLOUD_BUFFER_BIT_INDEX = GlintCorrectionOperator.CLOUD_BUFFER_BIT_INDEX;
     public static final int CLOUD_SHADOW_BIT_INDEX = GlintCorrectionOperator.CLOUD_SHADOW_BIT_INDEX;

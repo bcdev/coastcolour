@@ -531,7 +531,13 @@ public class ProductStitcher {
                             break;
                         case FLOAT:
                             if (isTiepoints) {
-                                ArrayFloat.D2 tpDataInterpol = interpolateTiePointData(bandDataFloat, width);
+//                                ArrayFloat.D2 tpDataInterpol = interpolateTiePointData(bandDataFloat, width);
+                                ArrayFloat.D2 tpDataInterpol;
+                                if (ncFileList.size() > 1) {
+                                    tpDataInterpol = interpolateTiePointData(bandDataFloat, width);
+                                } else {
+                                    tpDataInterpol = bandDataFloat;
+                                }
                                 outFile.write(variable2.getName(), tpDataInterpol);
                             } else {
                                 outFile.write(variable2.getName(), bandDataFloat);
@@ -564,12 +570,14 @@ public class ProductStitcher {
             }
         }
 
-        // for the last row, use the delta from the previous step for interpolation
-        for (int i = 0; i < width; i++) {
-            final float lastResultDelta = tpDataInterpol.get(stitchedProductTpRowToScanTimeMap.size() - 2, i) -
-                    tpDataInterpol.get(stitchedProductTpRowToScanTimeMap.size() - 3, i);
-            final float lastResult = tpDataInterpol.get(stitchedProductTpRowToScanTimeMap.size() - 2, i) + lastResultDelta;
-            tpDataInterpol.set(stitchedProductTpRowToScanTimeMap.size() - 1, i, lastResult);
+        // if we have more than one row to interpolate: for the last row, use the delta from the previous step for interpolation
+        if (stitchedProductTpRowToScanTimeMap.size() > 2) {
+            for (int i = 0; i < width; i++) {
+                final float lastResultDelta = tpDataInterpol.get(stitchedProductTpRowToScanTimeMap.size() - 2, i) -
+                        tpDataInterpol.get(stitchedProductTpRowToScanTimeMap.size() - 3, i);
+                final float lastResult = tpDataInterpol.get(stitchedProductTpRowToScanTimeMap.size() - 2, i) + lastResultDelta;
+                tpDataInterpol.set(stitchedProductTpRowToScanTimeMap.size() - 1, i, lastResult);
+            }
         }
         return tpDataInterpol;
     }

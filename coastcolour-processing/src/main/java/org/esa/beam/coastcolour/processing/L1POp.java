@@ -19,6 +19,8 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
 import org.esa.beam.idepix.operators.CoastColourCloudClassificationOp;
+import org.esa.beam.meris.icol.AeArea;
+import org.esa.beam.meris.icol.meris.MerisOp;
 import org.esa.beam.util.BitSetter;
 import org.esa.beam.util.ProductUtils;
 
@@ -63,6 +65,11 @@ public class L1POp extends Operator {
 
     @SourceProduct(alias = "l1b", description = "MERIS L1b (N1) product")
     private Product sourceProduct;
+
+    @Parameter(defaultValue = "false",
+               label = "Perform ICOL correction",
+               description = "Whether to perform ICOL correction.")
+    private boolean doIcol;
 
     @Parameter(defaultValue = "true",
                label = "Perform calibration",
@@ -110,7 +117,14 @@ public class L1POp extends Operator {
         final Map<String, Object> rcParams = createRadiometryParameterMap();
         radiometryProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);
 
-        final Product l1pProduct = createL1PProduct(radiometryProduct);
+        Product l1pProduct = createL1PProduct(radiometryProduct);
+
+        // todo: it is likely not a good idea to put the 'heavy' ICOL on top of the L1P process.
+        // maybe better do ICOL in a separate processing step, invoke it from an empty wrapper operator, e.g. L1PIcolOp
+        if (doIcol) {
+            Product icolProduct = createIcolProduct(l1pProduct);
+            l1pProduct = icolProduct;
+        }
 
         if (useIdepix) {
             HashMap<String, Object> idepixParams = createIdepixParameterMap();
@@ -162,6 +176,30 @@ public class L1POp extends Operator {
         ProductUtils.copyGeoCoding(radiometryProduct, l1pProduct);
 
         return l1pProduct;
+    }
+
+    private Product createIcolProduct(Product l1pProduct) {
+        final int sceneWidth = l1pProduct.getSceneRasterWidth();
+        final int sceneHeight = l1pProduct.getSceneRasterHeight();
+        final String l1pProductType = l1pProduct.getProductType();
+        final Product icolProduct = new Product(l1pProduct.getName(), l1pProductType, sceneWidth, sceneHeight);
+        icolProduct.setDescription("MERIS CoastColour Icolized L1P");
+        icolProduct.setStartTime(l1pProduct.getStartTime());
+        icolProduct.setEndTime(l1pProduct.getEndTime());
+        ProductUtils.copyMetadata(l1pProduct, icolProduct);
+        ProductUtils.copyMasks(l1pProduct, icolProduct);
+        ProductUtils.copyFlagBands(l1pProduct, icolProduct, true);
+        ProductUtils.copyTiePointGrids(l1pProduct, icolProduct);
+        ProductUtils.copyGeoCoding(l1pProduct, icolProduct);
+
+        HashMap<String, Object> icolParams = new HashMap<String, Object>();
+        icolParams.put("icolAerosolCase2", true);
+        icolParams.put("productType", 0);
+        icolParams.put("aeArea", AeArea.COASTAL_OCEAN);
+        icolParams.put("useAdvancedLandWaterMask", true);
+        Map<String, Product> sourceProducts = new HashMap<String, Product>(1);
+        sourceProducts.put("sourceProduct", l1pProduct);
+        return GPF.createProduct(OperatorSpi.getOperatorAlias(MerisOp.class), icolParams, sourceProducts);
     }
 
     private void copyBands(Product radiometryProduct, Product l1pProduct) {

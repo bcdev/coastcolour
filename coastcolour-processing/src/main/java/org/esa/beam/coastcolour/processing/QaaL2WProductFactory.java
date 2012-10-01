@@ -45,7 +45,8 @@ class QaaL2WProductFactory extends L2WProductFactory {
         copyIOPBands(qaaProduct, l2wProduct);
 
         addIOPQualityBand(l2wProduct);
-        addChlAndTsmBands(l2wProduct);
+//        addChlAndTsmBands(l2wProduct);
+        addPatternToAutoGrouping(l2wProduct, CONC_GROUPING_PATTERN);
         addKMinBand(l2wProduct);
         if (isOutputKdSpectrum()) {
             addKdSpectrum(l2wProduct);
@@ -165,7 +166,6 @@ class QaaL2WProductFactory extends L2WProductFactory {
                                                                           ProductData.TYPE_FLOAT32, Double.NaN,
                                                                           qaaProduct, ResolutionLevel.MAXRES);
         conc_chl.setSourceImage(chlConcImage);
-        addPatternToAutoGrouping(l2wProduct, CONC_GROUPING_PATTERN);
     }
 
     protected void copyAltitudeBand(Product sourceProduct, Product targetProduct) {

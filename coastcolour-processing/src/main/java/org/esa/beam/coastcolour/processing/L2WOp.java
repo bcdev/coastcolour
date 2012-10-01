@@ -410,29 +410,6 @@ public class L2WOp extends Operator {
 
         final Tile z90Tile = targetTiles.get(targetProduct.getBand(L2WProductFactory.Z90_MAX_NAME));
         final Tile turbidityTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.TURBIDITY_NAME));
-        final Tile chlTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.OWT_CONC_CHL_NAME));
-        final Tile tsmTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.OWT_CONC_TSM_NAME));
-
-        Tile[] chlSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
-        Tile[] tsmSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
-        Tile[] membershipTiles = new Tile[NUMBER_OF_MEMBERSHIPS - 2];
-        double[] membershipTileValues = new double[membershipTiles.length];
-        double[] chlSingleTileValues = new double[NUMBER_OF_WATER_NETS];
-        double[] tsmSingleTileValues = new double[NUMBER_OF_WATER_NETS];
-        Tile c2rChlTile = null;
-        Tile c2rTsmTile = null;
-        if (classMembershipProduct != null) {
-            for (int i = 0; i < NUMBER_OF_WATER_NETS; i++) {
-                chlSingleTiles[i] = getSourceTile(c2rSingleProducts[i].getBand("chl_conc"), targetRectangle);
-                tsmSingleTiles[i] = getSourceTile(c2rSingleProducts[i].getBand("tsm"), targetRectangle);
-            }
-            for (int i = 0; i < NUMBER_OF_MEMBERSHIPS - 2; i++) {
-                membershipTiles[i] = getSourceTile(classMembershipProduct.getBand("norm_class_" + (i + 1)), targetRectangle);
-            }
-        } else {
-            c2rChlTile = getSourceTile(case2rProduct.getBand("chl_conc"), targetRectangle);
-            c2rTsmTile = getSourceTile(case2rProduct.getBand("tsm"), targetRectangle);
-        }
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
@@ -470,25 +447,6 @@ public class L2WOp extends Operator {
                 final int invalidFlagValue = isSampleInvalid ? 1 : 0;
                 int l2wFlag = computeL2wFlags(x, y, c2rFlags, qaaFlags, invalidFlagValue);
                 l2wFlagTile.setSample(x, y, l2wFlag);
-
-                if (classMembershipProduct != null) {
-                    for (int k = 0; k < membershipTiles.length; k++) {
-                        membershipTileValues[k] = membershipTiles[k].getSampleDouble(x, y);
-                    }
-                    for (int k = 0; k < NUMBER_OF_WATER_NETS; k++) {
-                        chlSingleTileValues[k] = chlSingleTiles[k].getSampleDouble(x, y);
-                        tsmSingleTileValues[k] = tsmSingleTiles[k].getSampleDouble(x, y);
-                    }
-                    double[] relevantMemberships = getRelevantMembershipClasses(membershipTileValues, membershipClassSumThresh);
-                    // get weighted CHL and TSM
-                    double weightedChl = getWeightedConc(relevantMemberships, chlSingleTileValues);
-                    chlTile.setSample(x, y, weightedChl);
-                    double weightedTsm = getWeightedConc(relevantMemberships, tsmSingleTileValues);
-                    tsmTile.setSample(x, y, weightedTsm);
-                } else {
-                    chlTile.setSample(x, y, c2rChlTile.getSampleDouble(x, y));
-                    tsmTile.setSample(x, y, c2rTsmTile.getSampleDouble(x, y));
-                }
             }
         }
     }

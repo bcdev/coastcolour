@@ -37,7 +37,8 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         copyMasks(l2rProduct, l2wProduct);
         copyIOPBands(case2rProduct, l2wProduct);
         copyBands(case2rProduct, l2wProduct);
-        addChlAndTsmBands(l2wProduct);
+//        addChlAndTsmBands(l2wProduct);
+        addPatternToAutoGrouping(l2wProduct, CONC_GROUPING_PATTERN);
 
         if (isOutputKdSpectrum()) {
             addPatternToAutoGrouping(l2wProduct, "Kd");
@@ -92,18 +93,18 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         }
     }
 
-    private void addChlAndTsmBands(Product l2wProduct) {
-        final Band tsm = l2wProduct.addBand(OWT_CONC_TSM_NAME, ProductData.TYPE_FLOAT32);
-        tsm.setDescription("Total suspended matter dry weight concentration.");
-        tsm.setUnit("g m^-3");
-        tsm.setValidPixelExpression(L2W_VALID_EXPRESSION);
-
-        final Band conc_chl = l2wProduct.addBand(OWT_CONC_CHL_NAME, ProductData.TYPE_FLOAT32);
-        conc_chl.setDescription("Chlorophyll concentration.");
-        conc_chl.setUnit("mg m^-3");
-        conc_chl.setValidPixelExpression(L2W_VALID_EXPRESSION);
-        addPatternToAutoGrouping(l2wProduct, CONC_GROUPING_PATTERN);
-    }
+    // currently not used
+//    private void addChlAndTsmBands(Product l2wProduct) {
+//        final Band tsm = l2wProduct.addBand(OWT_CONC_TSM_NAME, ProductData.TYPE_FLOAT32);
+//        tsm.setDescription("Total suspended matter dry weight concentration.");
+//        tsm.setUnit("g m^-3");
+//        tsm.setValidPixelExpression(L2W_VALID_EXPRESSION);
+//
+//        final Band conc_chl = l2wProduct.addBand(OWT_CONC_CHL_NAME, ProductData.TYPE_FLOAT32);
+//        conc_chl.setDescription("Chlorophyll concentration.");
+//        conc_chl.setUnit("mg m^-3");
+//        conc_chl.setValidPixelExpression(L2W_VALID_EXPRESSION);
+//    }
 
     private void renameChiSquare(Product l2wProduct) {
         final Band iopQualityBand = l2wProduct.getBand("chiSquare");

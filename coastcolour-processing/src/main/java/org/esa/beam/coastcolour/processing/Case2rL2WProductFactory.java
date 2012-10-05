@@ -2,7 +2,6 @@ package org.esa.beam.coastcolour.processing;
 
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.ProductUtils;
 
 /**

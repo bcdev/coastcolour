@@ -1,14 +1,9 @@
 package org.esa.beam.coastcolour.processing;
 
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.FlagCoding;
-import org.esa.beam.framework.datamodel.Mask;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.ProductUtils;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * @author Marco Peters
@@ -30,6 +25,7 @@ abstract class L2WProductFactory {
 
 
     static final String IOP_PREFIX_TARGET_BAND_NAME = "iop_";
+    static final String QAA_PREFIX_TARGET_BAND_NAME = "qaa_";
     public static final String IOP_A_TOTAL_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_TOTAL_443_SOURCE_NAME;
     public static final String IOP_A_YS_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_YS_443_SOURCE_NAME;
     public static final String IOP_A_PIG_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_PIG_443_SOURCE_NAME;
@@ -38,8 +34,9 @@ abstract class L2WProductFactory {
     public static final String IOP_B_WHIT_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + B_WHIT_443_SOURCE_NAME;
     public static final String IOP_BB_SPM_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + BB_SPM_443_SOURCE_NAME;
     public static final String IOP_A_POC_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_POC_443_SOURCE_NAME;
-    public static final String OWT_CONC_TSM_NAME = "owt_conc_tsm";
-    public static final String OWT_CONC_CHL_NAME = "owt_conc_chl";
+    // currently not used
+//    public static final String OWT_CONC_TSM_NAME = "owt_conc_tsm";
+//    public static final String OWT_CONC_CHL_NAME = "owt_conc_chl";
 
     static final String L2W_FLAGS_NAME = "l2w_flags";
     static final String EXP_FLH_681_NAME = "exp_FLH_681";

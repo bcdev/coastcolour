@@ -312,7 +312,7 @@ public class L2ROp extends Operator {
         l2rFlags.getFlag("L2R_INVALID").setDescription(l2rInvalidDescr);
         String l2rSuspectDescr = "'L2R suspect' pixels " +
                                  "(quality indicator > 3 || l1p_flags.CC_CLOUD || l1p_flags.CC_CLOUD_BUFFER || l1p_flags.CC_CLOUD_SHADOW || l1p_flags.CC_SNOW_ICE || l1p_flags.CC_MIXEDPIXEL)";
-        l2rFlags.getFlag("L2R_INVALID").setDescription(l2rSuspectDescr);
+        l2rFlags.getFlag("L2R_SUSPECT").setDescription(l2rSuspectDescr);
 
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
         maskGroup.remove(maskGroup.get("agc_land"));

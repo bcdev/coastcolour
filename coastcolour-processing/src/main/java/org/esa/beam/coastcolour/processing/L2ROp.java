@@ -93,7 +93,7 @@ public class L2ROp extends Operator {
                notEmpty = true, notNull = true)
     private String landExpression;
 
-    @Parameter(defaultValue = "l1p_flags.CC_CLOUD || l1p_flags.CC_SNOW_ICE",
+    @Parameter(defaultValue = "(l1p_flags.CC_CLOUD && not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE",
                label = "Cloud/Ice detection expression",
                description = "The arithmetic expression used for cloud/ice detection.",
                notEmpty = true, notNull = true)

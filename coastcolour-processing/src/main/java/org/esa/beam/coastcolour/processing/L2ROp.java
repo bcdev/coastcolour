@@ -148,9 +148,7 @@ public class L2ROp extends Operator {
     private HashMap<String, Object> createGlintAcParameterMap() {
         HashMap<String, Object> glintParameters = new HashMap<String, Object>();
         glintParameters.put("doSmileCorrection", false);
-//        glintParameters.put("outputTosa", outputTosa);
-        glintParameters.put("outputTosa", true); // test  todo remove later
-//        glintParameters.put("outputAutoTosa", true);  // test  todo remove later
+        glintParameters.put("outputTosa", outputTosa);
         glintParameters.put("outputTosaQualityIndicator", true);
         glintParameters.put("outputReflec", true);
         glintParameters.put("outputNormReflec", true);

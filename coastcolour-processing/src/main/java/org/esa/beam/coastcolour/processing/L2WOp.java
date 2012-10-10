@@ -48,6 +48,8 @@ public class L2WOp extends Operator {
     private static final double TURBIDITY_BT = 0.39;
     private static final double TURBIDITY_C = 0.1533;
 
+    // compile time switch (RD)
+    static final boolean ENABLE_OWT_CONC_BANDS = true;
 
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")
     private Product sourceProduct;
@@ -191,46 +193,46 @@ public class L2WOp extends Operator {
     private Product case2rProduct;
     private VirtualBandOpImage invalidOpImage;
 
-    // currently not used
-//    private static final String[] iopForwardNets =
-//            new String[]{
-//                    "m1/for_iop_meris_b12/17x27x17_33.8.net",
-//                    "m2/for_iop_meris_b12/17x27x17_15.8.net",
-//                    "m3/for_iop_meris_b12/17x27x17_20.5.net",
-//                    "m4/for_iop_meris_b12/17x27x17_20.7.net",
-//                    "m5/for_iop_meris_b12/17x27x17_91.3.net",
-//                    "m6/for_iop_meris_b12/17x27x17_50.0.net",
-//                    "m7/for_iop_meris_b12/17x27x17_30.5.net",
-//                    "m8/for_iop_meris_b12/17x27x17_30.1.net",
-//                    "m9/for_iop_meris_b12/17x27x17_180.1.net"
-//            };
-//    private static final String[] iopInverseNets =
-//            new String[]{
-//                    "m1/inv_iop_meris_b9/27x41x27_1483.8.net",
-//                    "m2/inv_iop_meris_b9/27x41x27_263.7.net",
-//                    "m3/inv_iop_meris_b9/27x41x27_228.8.net",
-//                    "m4/inv_iop_meris_b10/27x41x27_121.7.net",
-//                    "m5/inv_iop_meris_b10/27x41x27_4667.9.net",
-//                    "m6/inv_iop_meris_b10/27x41x27_200.6.net",
-//                    "m7/inv_iop_meris_b10/27x41x27_164.8.net",
-//                    "m8/inv_iop_meris_b10/27x41x27_159.1.net",
-//                    "m9/inv_iop_meris_b10/27x41x27_6696.1.net"
-//            };
-//    private static final String[] kdInverseNets =
-//            new String[]{
-//                    "m1/inv_kd_meris_b8/27x41x27_51.3.net",
-//                    "m2/inv_kd_meris_b8/27x41x27_15.2.net",
-//                    "m3/inv_kd_meris_b8/27x41x27_15.1.net",
-//                    "m4/inv_kd_meris_b9/27x41x27_8.3.net",
-//                    "m5/inv_kd_meris_b9/27x41x27_68.4.net",
-//                    "m6/inv_kd_meris_b9/27x41x27_4.1.net",
-//                    "m7/inv_kd_meris_b9/27x41x27_3.5.net",
-//                    "m8/inv_kd_meris_b9/27x41x27_7.6.net",
-//                    "m9/inv_kd_meris_b9/27x41x27_432.7.net"
-//            };
-//    private static final int NUMBER_OF_WATER_NETS = iopForwardNets.length;
-//
-//    public static final int NUMBER_OF_MEMBERSHIPS = 11;  // 9 classes + sum + dominant class
+    private static final String[] iopForwardNets =
+            new String[]{
+                    "m1/for_iop_meris_b12/17x27x17_33.8.net",
+                    "m2/for_iop_meris_b12/17x27x17_15.8.net",
+                    "m3/for_iop_meris_b12/17x27x17_20.5.net",
+                    "m4/for_iop_meris_b12/17x27x17_20.7.net",
+                    "m5/for_iop_meris_b12/17x27x17_91.3.net",
+                    "m6/for_iop_meris_b12/17x27x17_50.0.net",
+                    "m7/for_iop_meris_b12/17x27x17_30.5.net",
+                    "m8/for_iop_meris_b12/17x27x17_30.1.net",
+                    "m9/for_iop_meris_b12/17x27x17_180.1.net"
+            };
+    private static final String[] iopInverseNets =
+            new String[]{
+                    "m1/inv_iop_meris_b9/27x41x27_1483.8.net",
+                    "m2/inv_iop_meris_b9/27x41x27_263.7.net",
+                    "m3/inv_iop_meris_b9/27x41x27_228.8.net",
+                    "m4/inv_iop_meris_b10/27x41x27_121.7.net",
+                    "m5/inv_iop_meris_b10/27x41x27_4667.9.net",
+                    "m6/inv_iop_meris_b10/27x41x27_200.6.net",
+                    "m7/inv_iop_meris_b10/27x41x27_164.8.net",
+                    "m8/inv_iop_meris_b10/27x41x27_159.1.net",
+                    "m9/inv_iop_meris_b10/27x41x27_6696.1.net"
+            };
+    private static final String[] kdInverseNets =
+            new String[]{
+                    "m1/inv_kd_meris_b8/27x41x27_51.3.net",
+                    "m2/inv_kd_meris_b8/27x41x27_15.2.net",
+                    "m3/inv_kd_meris_b8/27x41x27_15.1.net",
+                    "m4/inv_kd_meris_b9/27x41x27_8.3.net",
+                    "m5/inv_kd_meris_b9/27x41x27_68.4.net",
+                    "m6/inv_kd_meris_b9/27x41x27_4.1.net",
+                    "m7/inv_kd_meris_b9/27x41x27_3.5.net",
+                    "m8/inv_kd_meris_b9/27x41x27_7.6.net",
+                    "m9/inv_kd_meris_b9/27x41x27_432.7.net"
+            };
+    private static final int NUMBER_OF_WATER_NETS = iopForwardNets.length;
+
+    private Product[] c2rSingleProducts;
+    public static final int NUMBER_OF_MEMBERSHIPS = 11;  // 9 classes + sum + dominant class
 
     @Override
     public void initialize() throws OperatorException {
@@ -296,6 +298,9 @@ public class L2WOp extends Operator {
             } catch (IOException e) {
                 throw new RuntimeException("Unable to install auxdata of the costcolour module");
             }
+            if (ENABLE_OWT_CONC_BANDS) {
+                computeSingleCase2RProductsFromFuzzyApproach(auxDataDir, l2WProduct);
+            }
 
             Band b = ProductUtils.copyBand("tsm", case2rProduct, "conc_tsm", l2WProduct, true);
             b.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
@@ -326,6 +331,22 @@ public class L2WOp extends Operator {
         setTargetProduct(l2WProduct);
     }
 
+    private void computeSingleCase2RProductsFromFuzzyApproach(File auxDataDir, Product l2WProduct) {
+        c2rSingleProducts = new Product[NUMBER_OF_WATER_NETS];
+        for (int i = 0; i < NUMBER_OF_WATER_NETS; i++) {
+            Operator case2Op = new RegionalWaterOp.Spi().createOperator();
+            forwardIopNnFile = new File(auxDataDir, iopForwardNets[i]);
+            inverseIopNnFile = new File(auxDataDir, iopInverseNets[i]);
+            inverseKdNnFile = new File(auxDataDir, kdInverseNets[i]);
+            setCase2rParameters(case2Op);
+            c2rSingleProducts[i] = case2Op.getTargetProduct();
+//            Band band = ProductUtils.copyBand("tsm", c2rSingleProducts[i], "conc_tsm_m" + (i + 1), l2WProduct, true);
+//            band.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
+//            band = ProductUtils.copyBand("chl_conc", c2rSingleProducts[i], "conc_chl_m" + (i+1), l2WProduct, true);
+//            band.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
+        }
+    }
+
     @Override
     public void dispose() {
         if (qaaProduct != null) {
@@ -336,6 +357,15 @@ public class L2WOp extends Operator {
             case2rProduct.dispose();
             case2rProduct = null;
         }
+        if (c2rSingleProducts != null) {
+            for (Product product : c2rSingleProducts) {
+                if (product != null) {
+                    product.dispose();
+                }
+            }
+            c2rSingleProducts = null;
+        }
+
         super.dispose();
     }
 
@@ -380,6 +410,37 @@ public class L2WOp extends Operator {
         } else {
             c2rFlags = getSourceTile(case2rProduct.getRasterDataNode("case2_flags"), targetRectangle);
         }
+
+        double[] membershipTileValues;
+        double[] chlSingleTileValues;
+        double[] tsmSingleTileValues;
+        final Tile chlTile;
+        final Tile tsmTile;
+        Tile c2rChlTile = null;
+        Tile c2rTsmTile = null;
+        Tile[] chlSingleTiles;
+        Tile[] tsmSingleTiles;
+        Tile[] membershipTiles;
+
+        if (ENABLE_OWT_CONC_BANDS) {
+            chlTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.OWT_CONC_CHL_NAME));
+            tsmTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.OWT_CONC_TSM_NAME));
+
+            chlSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
+            tsmSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
+            membershipTiles = new Tile[NUMBER_OF_MEMBERSHIPS - 2];
+            membershipTileValues = new double[membershipTiles.length];
+            chlSingleTileValues = new double[NUMBER_OF_WATER_NETS];
+            tsmSingleTileValues = new double[NUMBER_OF_WATER_NETS];
+            for (int i = 0; i < NUMBER_OF_WATER_NETS; i++) {
+                chlSingleTiles[i] = getSourceTile(c2rSingleProducts[i].getBand("chl_conc"), targetRectangle);
+                tsmSingleTiles[i] = getSourceTile(c2rSingleProducts[i].getBand("tsm"), targetRectangle);
+            }
+            for (int i = 0; i < NUMBER_OF_MEMBERSHIPS - 2; i++) {
+                membershipTiles[i] = getSourceTile(classMembershipProduct.getBand("norm_class_" + (i + 1)), targetRectangle);
+            }
+        }
+
 
 //        if (useQaaForIops) {
 //            final Tile rho620Tile = getSourceTile(l2rProduct.getBand("reflec_6"), targetRectangle);
@@ -437,6 +498,25 @@ public class L2WOp extends Operator {
                 final int invalidFlagValue = isSampleInvalid ? 1 : 0;
                 int l2wFlag = computeL2wFlags(x, y, c2rFlags, qaaFlags, invalidFlagValue);
                 l2wFlagTile.setSample(x, y, l2wFlag);
+
+                if (ENABLE_OWT_CONC_BANDS) {
+                    for (int k = 0; k < membershipTiles.length; k++) {
+                        membershipTileValues[k] = membershipTiles[k].getSampleDouble(x, y);
+                    }
+                    for (int k = 0; k < NUMBER_OF_WATER_NETS; k++) {
+                        chlSingleTileValues[k] = chlSingleTiles[k].getSampleDouble(x, y);
+                        tsmSingleTileValues[k] = tsmSingleTiles[k].getSampleDouble(x, y);
+                    }
+                    double[] relevantMemberships = getRelevantMembershipClasses(membershipTileValues, membershipClassSumThresh);
+                    // get weighted CHL and TSM
+                    double weightedChl = getWeightedConc(relevantMemberships, chlSingleTileValues);
+                    chlTile.setSample(x, y, weightedChl);
+                    double weightedTsm = getWeightedConc(relevantMemberships, tsmSingleTileValues);
+                    tsmTile.setSample(x, y, weightedTsm);
+                } else {
+                    chlTile.setSample(x, y, c2rChlTile.getSampleDouble(x, y));
+                    tsmTile.setSample(x, y, c2rTsmTile.getSampleDouble(x, y));
+                }
             }
         }
     }

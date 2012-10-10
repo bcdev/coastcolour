@@ -35,8 +35,8 @@ abstract class L2WProductFactory {
     public static final String IOP_BB_SPM_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + BB_SPM_443_SOURCE_NAME;
     public static final String IOP_A_POC_443_NAME = IOP_PREFIX_TARGET_BAND_NAME + A_POC_443_SOURCE_NAME;
     // currently not used
-//    public static final String OWT_CONC_TSM_NAME = "owt_conc_tsm";
-//    public static final String OWT_CONC_CHL_NAME = "owt_conc_chl";
+    public static final String OWT_CONC_TSM_NAME = "owt_conc_tsm";
+    public static final String OWT_CONC_CHL_NAME = "owt_conc_chl";
 
     static final String L2W_FLAGS_NAME = "l2w_flags";
     static final String EXP_FLH_681_NAME = "exp_FLH_681";

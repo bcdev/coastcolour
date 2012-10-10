@@ -51,6 +51,12 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         ProductUtils.copyFlagBands(l2rProduct, l2wProduct, true);
 
         renameIops(l2wProduct);
+
+        Band adg = l2wProduct.addBand("iop_a_dg_443", "iop_a_det_443 +  iop_a_ys_443");
+        adg.setDescription("Yellow substance absorption + Pigment absorption at 443 nm.");
+        adg.setUnit("m^-1");
+        adg.setSpectralBandwidth(433);
+
         l2wProduct.getBand(K_MIN_NAME).setName(KD_MIN_NAME);
         renameChiSquare(l2wProduct);
         renameTurbidityBand(l2wProduct);

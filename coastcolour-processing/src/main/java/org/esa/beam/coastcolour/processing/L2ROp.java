@@ -297,8 +297,6 @@ public class L2ROp extends Operator {
         l2rFlags.removeAttribute(l2rFlags.getFlag("HAS_FLINT"));
         String invalidDescr = "'Input invalid' pixels (" + landExpression + " || " + cloudIceExpression + " || l1_flags.INVALID)";
         l2rFlags.getFlag("INPUT_INVALID").setDescription(invalidDescr);
-        String reflInvalidDescr = "spare flag (TBD)";
-        l2rFlags.getFlag("REFL_INVALID").setDescription(reflInvalidDescr);
         String glintDescription = "High sun glint retrieved";
         l2rFlags.getFlag("SUNGLINT").setDescription(glintDescription);
         String toaDescription = "TOA reflectance out of range";
@@ -331,11 +329,9 @@ public class L2ROp extends Operator {
         maskGroup.get("sunglint").setName("l2r_cc_sunglint");
         maskGroup.get("agc_invalid").setDescription(invalidDescr);
         maskGroup.get("agc_invalid").setName("l2r_cc_input_invalid");
-        maskGroup.get("refl_invalid").setDescription(reflInvalidDescr);
-        maskGroup.get("refl_invalid").setName("l2r_cc_refl_invalid");
 
         maskGroup.get("l2r_invalid").setDescription(l2rInvalidDescr);
-        maskGroup.get("l2r_invalid").setName("l2r_cc_l2r_invalid");
+        maskGroup.get("l2r_invalid").setName("l2r_cc_reflec_invalid");
         maskGroup.get("l2r_suspect").setDescription(l2rSuspectDescr);
         maskGroup.get("l2r_suspect").setName("l2r_cc_l2r_suspect");
     }

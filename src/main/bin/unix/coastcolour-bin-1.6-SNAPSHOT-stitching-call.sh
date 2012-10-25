@@ -14,7 +14,13 @@ inputFiles=$(hadoop fs -ls ${regionDir}/*/MER*_${orbitNumber}_*nc.gz |awk '{ pri
 numberInputFiles=$(echo $inputFiles |wc -w)
 firstInputFile="hdfs://master00:9000$(echo $inputFiles | tr ' ' '\n' | sort | head -n 1)"
 
-if [ $numberInputFiles = 1 ]; then
+firstInputBasename=$(basename ${firstInputFile})
+firstInputPrefix=${firstInputBasename:0:29}
+if hadoop fs -ls ${outputURL}/${firstInputPrefix}*.nc.gz 2> /dev/null
+then
+    echo "skipping because $firstInputPrefix already stitched"
+    exit 0
+elif [ $numberInputFiles = 1 ]; then
     echo "copying single file in orbit $orbitNumber"
     /home/hadoop/opt/coastcolour/coastcolour-bin-1.6-SNAPSHOT/bin/reportprogress.sh &
     trap 'kill %1' EXIT

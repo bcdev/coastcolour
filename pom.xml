@@ -7,7 +7,7 @@
     <name>CoastColour</name>
     <groupId>org.esa.beam.coastcolour</groupId>
     <artifactId>coastcolour</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.6</version>
 
     <packaging>pom</packaging>
 

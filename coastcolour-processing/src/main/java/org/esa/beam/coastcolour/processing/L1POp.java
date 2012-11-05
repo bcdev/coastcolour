@@ -1,6 +1,8 @@
 package org.esa.beam.coastcolour.processing;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.jai.tilecache.DefaultSwapSpace;
+import com.bc.ceres.jai.tilecache.SwappingTileCache;
 import org.esa.beam.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
@@ -17,6 +19,7 @@ import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.framework.gpf.internal.OperatorImage;
 import org.esa.beam.idepix.operators.CloudScreeningSelector;
 import org.esa.beam.idepix.operators.CoastColourCloudClassificationOp;
 import org.esa.beam.meris.icol.AeArea;
@@ -24,12 +27,16 @@ import org.esa.beam.meris.icol.meris.MerisOp;
 import org.esa.beam.util.BitSetter;
 import org.esa.beam.util.ProductUtils;
 
+import javax.media.jai.OpImage;
+import javax.media.jai.TileCache;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.image.RenderedImage;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L1P", version = "1.5",
+@OperatorMetadata(alias = "CoastColour.L1P", version = "1.6.1",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes a refinement of top of atmosphere radiance and " +
@@ -58,6 +65,8 @@ public class L1POp extends Operator {
     public static final int SNOW_ICE_BIT_INDEX = GlintCorrectionOperator.SNOW_ICE_BIT_INDEX;
     public static final int MIXEDPIXEL_BIT_INDEX = GlintCorrectionOperator.MIXEDPIXEL_BIT_INDEX;
     public static final int GLINTRISK_BIT_INDEX = GlintCorrectionOperator.GLINTRISK_BIT_INDEX;
+
+    private static final long MEGABYTE = 1024L * 1024L;
 
     private static final String IDEPIX_OPERATOR_ALIAS = "idepix.ComputeChain";
     private static final String RADIOMETRY_OPERATOR_ALIAS = "Meris.CorrectRadiometry";
@@ -124,6 +133,7 @@ public class L1POp extends Operator {
         if (doIcol) {
             Product icolProduct = createIcolProduct(l1pProduct);
             l1pProduct = icolProduct;
+            attachFileTileCache(l1pProduct);
         }
 
         if (useIdepix) {
@@ -142,6 +152,25 @@ public class L1POp extends Operator {
 
         setTargetProduct(l1pProduct);
     }
+
+    private void attachFileTileCache(Product product) {
+        String productName = sourceProduct.getName();
+        File tmpDir = new File(System.getProperty("java.io.tmpdir"), productName + "_" + System.currentTimeMillis());
+        if (!tmpDir.mkdirs()) {
+            throw new OperatorException("Failed to create tmp dir for SwappingTileCache: " + tmpDir.getAbsolutePath());
+        }
+        tmpDir.deleteOnExit();
+        TileCache tileCache = new SwappingTileCache(16L * MEGABYTE, new DefaultSwapSpace(tmpDir));
+        Band[] bands = product.getBands();
+        for (Band band : bands) {
+            RenderedImage image = band.getSourceImage().getImage(0);
+            if (image instanceof OperatorImage) {// OperatorImage is subclass of OpImage
+                OpImage opImage = (OpImage) image;
+                opImage.setTileCache(tileCache);
+            }
+        }
+    }
+
 
     private HashMap<String, Object> createIdepixParameterMap() {
         HashMap<String, Object> idepixParams = new HashMap<String, Object>();

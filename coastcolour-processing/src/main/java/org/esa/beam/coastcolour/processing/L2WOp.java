@@ -35,7 +35,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L2W", version = "1.5",
+@OperatorMetadata(alias = "CoastColour.L2W", version = "1.6.1",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +

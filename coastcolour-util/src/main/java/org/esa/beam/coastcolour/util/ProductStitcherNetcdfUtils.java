@@ -30,18 +30,13 @@ public class ProductStitcherNetcdfUtils {
      * @param sourceFilePaths - the source file paths
      * @return the list of netCDF files to stitch
      */
-    static List<NetcdfFile> getSourceProductSetsToStitch(String[] sourceFilePaths) {
+    static List<NetcdfFile> getSourceProductSetsToStitch(String[] sourceFilePaths) throws IOException {
         Arrays.sort(sourceFilePaths);
 
         List<NetcdfFile> ncProducts = new ArrayList<NetcdfFile>();
         for (String sourceFilePath : sourceFilePaths) {
-            try {
-                final NetcdfFile ncFile = NetcdfFile.open(sourceFilePath);
-                ncProducts.add(ncFile);
-            } catch (IOException e) {
-                // todo
-                e.printStackTrace();
-            }
+            final NetcdfFile ncFile = NetcdfFile.open(sourceFilePath);
+            ncProducts.add(ncFile);
         }
 
         return ncProducts;
@@ -105,22 +100,22 @@ public class ProductStitcherNetcdfUtils {
         return (firstFileName.substring(0, 30) + stitchAcquisitionTimeString + firstFileName.substring(38));
     }
 
-    static float[][] getFloat2DArrayFromNetcdfVariable(Variable variable) {
+    static float[][] getFloat2DArrayFromNetcdfVariable(Variable variable) throws IOException {
         final Array arrayFloat = getDataArray(DataType.FLOAT, variable, Float.class);
         return (float[][]) arrayFloat.copyToNDJavaArray();
     }
 
-    static short[][] getShort2DArrayFromNetcdfVariable(Variable variable) {
+    static short[][] getShort2DArrayFromNetcdfVariable(Variable variable) throws IOException {
         final Array arrayShort = getDataArray(DataType.SHORT, variable, Short.class);
         return (short[][]) arrayShort.copyToNDJavaArray();
     }
 
-    static byte[][] getByte2DArrayFromNetcdfVariable(Variable variable) {
+    static byte[][] getByte2DArrayFromNetcdfVariable(Variable variable) throws IOException {
         final Array arrayByte = getDataArray(DataType.BYTE, variable, Byte.class);
         return (byte[][]) arrayByte.copyToNDJavaArray();
     }
 
-    static byte getByte0DArrayFromNetcdfVariable(Variable variable) {
+    static byte getByte0DArrayFromNetcdfVariable(Variable variable) throws IOException {
         final Array arrayByte = getDataArray(DataType.BYTE, variable, Byte.class);
         return arrayByte.getByte(0);
     }
@@ -157,14 +152,14 @@ public class ProductStitcherNetcdfUtils {
         return create(date, micros);
     }
 
-    private static Array getDataArray(DataType type, Variable variable, Class clazz) {
+    private static Array getDataArray(DataType type, Variable variable, Class clazz) throws IOException {
         final int[] origin = new int[variable.getRank()];
         final int[] shape = variable.getShape();
         Array array = null;
         try {
             array = variable.read(new Section(origin, shape));
         } catch (Exception e) {
-            new DefaultErrorHandler().error(e);
+            throw new IOException(e);
         }
         if (array != null) {
             return Array.factory(type, shape, array.get1DJavaArray(clazz));

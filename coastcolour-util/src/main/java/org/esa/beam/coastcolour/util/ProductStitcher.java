@@ -95,7 +95,7 @@ public class ProductStitcher {
      *
      * @param ncResultFile - the file to write to.
      */
-    public void writeStitchedProduct(File ncResultFile) {
+    public void writeStitchedProduct(File ncResultFile) throws IOException, InvalidRangeException {
         NetcdfFileWriteable outFile = null;
         final PrintWriterProgressMonitor pm = new PrintWriterProgressMonitor(System.out);
         pm.beginTask("Writing stitched product '" + ncResultFile.getAbsolutePath() + "' ...", 0);
@@ -130,16 +130,10 @@ public class ProductStitcher {
             writeVariables(allBandVariablesLists, bandRowToScanTimeMaps, outFile, false);
             writeVariables(allTpVariablesLists, tpRowToScanTimeMaps, outFile, true);
 
-        } catch (IOException e) {
-            System.out.println("ERROR: " + e.getMessage());
-        } catch (InvalidRangeException e) {
-            System.out.println("ERROR: " + e.getMessage());
         } finally {
-            if (null != outFile)
-                try {
-                    outFile.close();
-                } catch (IOException ignore) {
-                }
+            if (null != outFile) {
+                outFile.close();
+            }
             pm.done();
         }
         System.out.println("Finished writing stitched product '" + ncResultFile.getAbsolutePath() + "'.");

@@ -1,6 +1,7 @@
 package org.esa.beam.coastcolour.util;
 
 import org.apache.commons.cli.*;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 
 import java.io.File;
@@ -44,7 +45,13 @@ public class ProductStitcherMain {
 
     public static void main(String[] args) {
         final ProductStitcherMain productStitcherMain = new ProductStitcherMain(args);
-        productStitcherMain.execute();
+        try {
+            productStitcherMain.execute();
+        } catch (Exception e) {
+            System.out.println("ERROR: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     public ProductStitcherMain(String[] args) {
@@ -133,7 +140,7 @@ public class ProductStitcherMain {
         }
     }
 
-    private void execute() {
+    private void execute() throws IOException, InvalidRangeException {
         List<NetcdfFile> ncFileList = ProductStitcherNetcdfUtils.getSourceProductSetsToStitch(sourceFilePaths);
         System.out.println("ncFileList.size() = " + ncFileList.size());
         List<List<NetcdfFile>> ncFileListGroups = ProductStitcherNetcdfUtils.getNcFileSubGroups(ncFileList);

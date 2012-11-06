@@ -179,14 +179,14 @@
 
             <dependency>
                 <groupId>org.esa.beam.coastcolour</groupId>
-                <artifactId>coastcolour-fuzzy-classification</artifactId>
-                <version>1.2-SNAPSHOT</version>
+                <artifactId>coastcolour-processing</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.beam.coastcolour</groupId>
-                <artifactId>coastcolour-processing</artifactId>
-                <version>1.6-SNAPSHOT</version>
+                <artifactId>coastcolour-fuzzy-classification</artifactId>
+                <version>1.2-SNAPSHOT</version>
             </dependency>
 
             <!-- Case2R Libraries ############################################# -->

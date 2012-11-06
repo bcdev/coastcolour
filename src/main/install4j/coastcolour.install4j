@@ -111,7 +111,7 @@
                       <void method="put">
                         <string>en</string>
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>../../../target/coastcolour-1.6-SNAPSHOT-bin/coastcolour-1.6-SNAPSHOT/license.html</string>
+                          <string>../../../target/coastcolour-1.6.1-SNAPSHOT-bin/coastcolour-1.6.1-SNAPSHOT/license.html</string>
                         </object>
                       </void>
                     </void>

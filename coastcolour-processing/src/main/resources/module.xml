@@ -70,6 +70,10 @@
         <module>beam-meris-case2-regional</module>
     </dependency>
 
+    <dependency>
+        <module>beam-meris-icol</module>
+    </dependency>
+
 
     <categories>Processor,MERIS</categories>
 

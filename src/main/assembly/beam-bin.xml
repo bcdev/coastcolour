@@ -58,6 +58,7 @@
                 <include>org.esa.beam:beam-meris-glint</include>
                 <include>org.esa.beam.glint:flint-processor</include>
                 <include>org.esa.beam:beam-watermask-operator</include>
+                <include>org.esa.beam:beam-waterradiance-auxdata</include>
             </includes>
         </dependencySet>
     </dependencySets>

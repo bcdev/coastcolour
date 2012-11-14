@@ -1,0 +1,64 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.1.xsd">
+    <id>beam-bin</id>
+
+    <includeBaseDirectory>true</includeBaseDirectory>
+
+    <formats>
+        <format>dir</format>
+    </formats>
+
+    <files>
+        <file>
+            <source>README.txt</source>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0444</fileMode>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>license.html</source>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0444</fileMode>
+        </file>
+    </files>
+
+    <moduleSets>
+        <moduleSet>
+            <excludes>
+                <exclude>org.esa.beam.coastcolour:coastcolour-bootstrap</exclude>
+            </excludes>
+            <binaries>
+                <includeDependencies>false</includeDependencies>
+                <fileMode>0444</fileMode>
+                <unpack>false</unpack>
+                <outputDirectory>modules</outputDirectory>
+                <outputFileNameMapping>
+                    ${artifact.artifactId}-${artifact.version}.${artifact.extension}
+                </outputFileNameMapping>
+            </binaries>
+        </moduleSet>
+    </moduleSets>
+
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>commons-cli:commons-cli</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>modules</outputDirectory>
+            <includes>
+                <include>org.esa.beam:beam-meris-glint</include>
+                <include>org.esa.beam:beam-meris-qaa</include>
+                <include>org.esa.beam:beam-meris-case2-regional</include>
+                <include>org.esa.beam:beam-idepix</include>
+                <include>org.esa.beam:beam-meris-icol</include>
+                <include>org.esa.beam:beam-meris-glint</include>
+                <include>org.esa.beam.glint:flint-processor</include>
+                <include>org.esa.beam:beam-watermask-operator</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+</assembly>

@@ -1,7 +1,7 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.1.xsd">
-    <id>bin</id>
+    <id>stitcher-bin</id>
 
     <includeBaseDirectory>true</includeBaseDirectory>
 
@@ -24,16 +24,6 @@
     </files>
 
     <fileSets>
-<!--
-        <fileSet>
-            <directory>src/main/bin/win</directory>
-            <outputDirectory>bin</outputDirectory>
-            <lineEnding>dos</lineEnding>
-            <includes>
-                <include>*.bat</include>
-            </includes>
-        </fileSet>
--->
 
         <fileSet>
             <directory>src/main/bin/unix</directory>
@@ -46,18 +36,6 @@
             </includes>
         </fileSet>
 
-<!--
-        <fileSet>
-            <directory>src/main/bin/macosx</directory>
-            <outputDirectory>bin</outputDirectory>
-            <lineEnding>unix</lineEnding>
-            <fileMode>0755</fileMode>
-            <directoryMode>0755</directoryMode>
-            <includes>
-                <include>*.command</include>
-            </includes>
-        </fileSet>
--->
     </fileSets>
 
     <moduleSets>

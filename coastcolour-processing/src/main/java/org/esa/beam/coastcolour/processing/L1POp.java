@@ -40,7 +40,7 @@ import java.util.Map;
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes a refinement of top of atmosphere radiance and " +
-                          "pixel characterization information.")
+                                "pixel characterization information.")
 public class L1POp extends Operator {
 
     public static final String CC_LAND_FLAG_NAME = "CC_LAND";
@@ -117,22 +117,20 @@ public class L1POp extends Operator {
 
     private Band cloudFlagBand;
     private Product idepixProduct;
-    private Product radiometryProduct;
 
 
     @Override
     public void initialize() throws OperatorException {
 
         final Map<String, Object> rcParams = createRadiometryParameterMap();
-        radiometryProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);
+        Product radiometryProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);
 
         Product l1pProduct = createL1PProduct(radiometryProduct);
 
         // todo: it is likely not a good idea to put the 'heavy' ICOL on top of the L1P process.
         // maybe better do ICOL in a separate processing step, invoke it from an empty wrapper operator, e.g. L1PIcolOp
         if (doIcol) {
-            Product icolProduct = createIcolProduct(l1pProduct);
-            l1pProduct = icolProduct;
+            l1pProduct = createIcolProduct(l1pProduct);
             attachFileTileCache(l1pProduct);
         }
 
@@ -208,19 +206,6 @@ public class L1POp extends Operator {
     }
 
     private Product createIcolProduct(Product l1pProduct) {
-        final int sceneWidth = l1pProduct.getSceneRasterWidth();
-        final int sceneHeight = l1pProduct.getSceneRasterHeight();
-        final String l1pProductType = l1pProduct.getProductType();
-        final Product icolProduct = new Product(l1pProduct.getName(), l1pProductType, sceneWidth, sceneHeight);
-        icolProduct.setDescription("MERIS CoastColour Icolized L1P");
-        icolProduct.setStartTime(l1pProduct.getStartTime());
-        icolProduct.setEndTime(l1pProduct.getEndTime());
-        ProductUtils.copyMetadata(l1pProduct, icolProduct);
-        ProductUtils.copyMasks(l1pProduct, icolProduct);
-        ProductUtils.copyFlagBands(l1pProduct, icolProduct, true);
-        ProductUtils.copyTiePointGrids(l1pProduct, icolProduct);
-        ProductUtils.copyGeoCoding(l1pProduct, icolProduct);
-
         HashMap<String, Object> icolParams = new HashMap<String, Object>();
         icolParams.put("icolAerosolCase2", true);
         icolParams.put("productType", 0);
@@ -240,17 +225,16 @@ public class L1POp extends Operator {
         }
     }
 
-
     @Override
     public void dispose() {
         if (idepixProduct != null) {
             idepixProduct.dispose();
             idepixProduct = null;
         }
-        if (radiometryProduct != null) {
-            radiometryProduct.dispose();
-            radiometryProduct = null;
-        }
+        // it is ok to dispose the idepixProduct because if this product is created the the L1POp will compute a band.
+        // if idepix is disabled the L1POp does not compute a band and will therefore be removed from the chain.
+        // In this case, if the radiometryProduct would be disposed here it would break the processing chain, because it
+        // is lost as source product for the ICOL operator
         super.dispose();
     }
 

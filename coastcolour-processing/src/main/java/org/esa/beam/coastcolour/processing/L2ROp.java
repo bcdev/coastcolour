@@ -152,7 +152,7 @@ public class L2ROp extends Operator {
         glintParameters.put("outputTosaQualityIndicator", true);
         glintParameters.put("outputReflec", true);
         glintParameters.put("outputNormReflec", true);
-        glintParameters.put("outputReflecAs", "RADIANCE_REFLECTANCES");
+        glintParameters.put("outputReflecAs", "IRRADIANCE_REFLECTANCES");
         glintParameters.put("outputPath", outputPath);
         glintParameters.put("outputTransmittance", outputTransmittance);
         glintParameters.put("deriveRwFromPath", false);
@@ -306,10 +306,10 @@ public class L2ROp extends Operator {
         String tosaOosDescription = "TOSA reflectance out of scope";
         l2rFlags.getFlag("TOSA_OOS").setDescription(tosaOosDescription);
 
-        String l2rInvalidDescr = "'L2R invalid' pixels (quality indicator > 1 || l1p_flags.CC_CLOUD)";
+        String l2rInvalidDescr = "'L2R invalid' pixels (quality indicator > 3 || l1p_flags.CC_CLOUD)";
         l2rFlags.getFlag("L2R_INVALID").setDescription(l2rInvalidDescr);
         String l2rSuspectDescr = "'L2R suspect' pixels " +
-                                 "(quality indicator > 3 || l1p_flags.CC_CLOUD || l1p_flags.CC_CLOUD_BUFFER || l1p_flags.CC_CLOUD_SHADOW || l1p_flags.CC_SNOW_ICE || l1p_flags.CC_MIXEDPIXEL)";
+                                 "(quality indicator > 1 || l1p_flags.CC_CLOUD || l1p_flags.CC_CLOUD_BUFFER || l1p_flags.CC_CLOUD_SHADOW || l1p_flags.CC_SNOW_ICE || l1p_flags.CC_MIXEDPIXEL)";
         l2rFlags.getFlag("L2R_SUSPECT").setDescription(l2rSuspectDescr);
 
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
@@ -333,7 +333,7 @@ public class L2ROp extends Operator {
         maskGroup.get("l2r_invalid").setDescription(l2rInvalidDescr);
         maskGroup.get("l2r_invalid").setName("l2r_cc_reflec_invalid");
         maskGroup.get("l2r_suspect").setDescription(l2rSuspectDescr);
-        maskGroup.get("l2r_suspect").setName("l2r_cc_l2r_suspect");
+        maskGroup.get("l2r_suspect").setName("l2r_cc_reflec_suspect");
     }
 
 

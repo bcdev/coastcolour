@@ -250,6 +250,17 @@
             <outputProductType>MERIS_CC_L1P</outputProductType>
             <validMaskExpression>!l1p_flags.INVALID</validMaskExpression>
 
+            <jobConfig>
+                <jobParameter>
+                    <name>calvalus.input.minWidth</name>
+                    <value>50</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.input.minHeight</name>
+                    <value>50</value>
+                </jobParameter>
+            </jobConfig>
+
             <outputVariables>
                 <outputVariable>
                     <name>radiance_1</name>

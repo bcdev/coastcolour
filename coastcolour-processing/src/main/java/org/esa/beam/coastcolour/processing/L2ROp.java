@@ -24,7 +24,7 @@ import java.util.HashMap;
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Performs a atmospheric correction. The result contains (normalised) water leaving " +
-                                "reflectance and information about atmospheric properties")
+                          "reflectance and information about atmospheric properties")
 public class L2ROp extends Operator {
 
     private static final String AGC_FLAGS_NAME = "agc_flags";
@@ -60,7 +60,7 @@ public class L2ROp extends Operator {
 
     @Parameter(label = "Use climatology map for salinity and temperature", defaultValue = "true",
                description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
-                             "for the whole scene.")
+                       "for the whole scene.")
     private boolean useSnTMap;
 
     @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU",
@@ -114,13 +114,14 @@ public class L2ROp extends Operator {
                description = "Toggles the output of Top of Standard Atmosphere reflectance.")
     private boolean outputTosa;
 
-    @Parameter(defaultValue = "false", label = "Output path reflectance",
-               description = "Toggles the output of water leaving path reflectance.")
-    private boolean outputPath;
-
-    @Parameter(defaultValue = "false", label = "Output transmittance",
-               description = "Toggles the output of downwelling irradiance transmittance.")
-    private boolean outputTransmittance;
+    // no longer a user option because path and transmittance are no longer output from atmospheric net
+//    @Parameter(defaultValue = "false", label = "Output path reflectance",
+//               description = "Toggles the output of water leaving path reflectance.")
+//    private boolean outputPath;
+//
+//    @Parameter(defaultValue = "false", label = "Output transmittance",
+//               description = "Toggles the output of downwelling irradiance transmittance.")
+//    private boolean outputTransmittance;
 
     private Product glintProduct;
     private Product l1pProduct;
@@ -153,8 +154,8 @@ public class L2ROp extends Operator {
         glintParameters.put("outputReflec", true);
         glintParameters.put("outputNormReflec", true);
         glintParameters.put("outputReflecAs", "IRRADIANCE_REFLECTANCES");
-        glintParameters.put("outputPath", outputPath);
-        glintParameters.put("outputTransmittance", outputTransmittance);
+        glintParameters.put("outputPath", false);
+        glintParameters.put("outputTransmittance", false);
         glintParameters.put("deriveRwFromPath", false);
         glintParameters.put("useSnTMap", useSnTMap);
         glintParameters.put("averageSalinity", averageSalinity);
@@ -202,6 +203,17 @@ public class L2ROp extends Operator {
         sortFlagBands(l2rProduct);
         renameTauBands(l2rProduct);
         removeUnwantedBands(l2rProduct);
+
+        // copy AMORGOS lat/lon bands from L1P if available
+        if (sourceProduct.getBand("corr_longitude") != null && sourceProduct.getBand("corr_latitude") != null) {
+            if (!l2rProduct.containsBand("corr_longitude")) {
+                ProductUtils.copyBand("corr_longitude", sourceProduct, l2rProduct, true);
+            }
+            if (!l2rProduct.containsBand("corr_latitude")) {
+                ProductUtils.copyBand("corr_latitude", sourceProduct, l2rProduct, true);
+            }
+        }
+
         return l2rProduct;
     }
 
@@ -309,7 +321,7 @@ public class L2ROp extends Operator {
         String l2rInvalidDescr = "'L2R invalid' pixels (quality indicator > 3 || l1p_flags.CC_CLOUD)";
         l2rFlags.getFlag("L2R_INVALID").setDescription(l2rInvalidDescr);
         String l2rSuspectDescr = "'L2R suspect' pixels " +
-                                 "(quality indicator > 1 || l1p_flags.CC_CLOUD || l1p_flags.CC_CLOUD_BUFFER || l1p_flags.CC_CLOUD_SHADOW || l1p_flags.CC_SNOW_ICE || l1p_flags.CC_MIXEDPIXEL)";
+                "(quality indicator > 1 || l1p_flags.CC_CLOUD || l1p_flags.CC_CLOUD_BUFFER || l1p_flags.CC_CLOUD_SHADOW || l1p_flags.CC_SNOW_ICE || l1p_flags.CC_MIXEDPIXEL)";
         l2rFlags.getFlag("L2R_SUSPECT").setDescription(l2rSuspectDescr);
 
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();

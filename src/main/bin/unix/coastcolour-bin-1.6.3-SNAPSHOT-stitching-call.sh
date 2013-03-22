@@ -1,6 +1,6 @@
 #!/bin/bash
 # export l1b_catalogue=hdfs:...
-# coastcolour-bin-1.6.2-SNAPSHOT-stitching-call.bash hdfs://master00:9000/calvalus/projects/cc/l1p-nc/greatbarrierreef/2005/MER_FSG_CCL1P_20050614_001256_000001912038_00102_17190_0001.nc.gz hdfs://master00:9000/calvalus/projects/cc/test
+# coastcolour-bin-1.6.3-SNAPSHOT-stitching-call.bash hdfs://master00:9000/calvalus/projects/cc/l1p-nc/greatbarrierreef/2005/MER_FSG_CCL1P_20050614_001256_000001912038_00102_17190_0001.nc.gz hdfs://master00:9000/calvalus/projects/cc/test
 set -e
 set -m
 
@@ -22,7 +22,7 @@ then
     exit 0
 elif [ $numberInputFiles = 1 ]; then
     echo "copying single file in orbit $orbitNumber"
-    /home/hadoop/opt/coastcolour/coastcolour-bin-1.6.2-SNAPSHOT/bin/reportprogress.sh &
+    /home/hadoop/opt/coastcolour/coastcolour-bin-1.6.3-SNAPSHOT/bin/reportprogress.sh &
     trap 'kill %1' EXIT
     if hadoop fs -ls ${outputURL}/$(basename ${inputFiles}) 2> /dev/null; then
         hadoop fs -rm ${outputURL}/$(basename ${inputFiles})
@@ -31,7 +31,7 @@ elif [ $numberInputFiles = 1 ]; then
     hadoop fs -cp $inputFiles ${outputURL}/$(basename ${inputFiles})
 elif [ "$numberInputFiles" -gt 1 -a "$inputURL" = "$firstInputFile" ]; then
     echo "found $numberInputFiles input files to stitch for orbit $orbitNumber"
-    /home/hadoop/opt/coastcolour/coastcolour-bin-1.6.2-SNAPSHOT/bin/reportprogress.sh &
+    /home/hadoop/opt/coastcolour/coastcolour-bin-1.6.3-SNAPSHOT/bin/reportprogress.sh &
     trap 'kill %1' EXIT
     mkdir in
     for p in $inputFiles; do
@@ -39,7 +39,7 @@ elif [ "$numberInputFiles" -gt 1 -a "$inputURL" = "$firstInputFile" ]; then
     done
     gunzip in/*gz
     mkdir out
-    /home/hadoop/opt/coastcolour/coastcolour-bin-1.6.2-SNAPSHOT/bin/cc_stitcher.sh in/*.nc -o out
+    /home/hadoop/opt/coastcolour/coastcolour-bin-1.6.3-SNAPSHOT/bin/cc_stitcher.sh in/*.nc -o out
     gzip out/*.nc
     for resultFile in out/*.nc.gz; do
         if hadoop fs -ls ${outputURL}/$(basename ${resultFile}) 2> /dev/null; then

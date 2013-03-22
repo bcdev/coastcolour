@@ -70,12 +70,8 @@ public class L2ROpTest {
         Product source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
         Map<String, Object> l2rParams = new HashMap<String, Object>();
         l2rParams.put("outputTosa", true);
-        l2rParams.put("outputTransmittance", true);
-        l2rParams.put("outputPath", true);
         target = testDefaultTargetProduct(source, l2rParams, "MER_FR__CCL2R");
         assertProductContainsBands(target, "tosa_reflec_1", "tosa_reflec_8", "tosa_reflec_13");
-        assertProductContainsBands(target, "trans_3", "trans_6", "trans_12");
-        assertProductContainsBands(target, "path_2", "path_7", "path_10");
         source.dispose();
     }
 
@@ -119,7 +115,7 @@ public class L2ROpTest {
 //        L1POpTest.dumpBands(target);
 
         String[] expectedBandNames = new String[]{
-                "reflec_1", "reflec_2", "reflec_13", "norm_refl_3", "norm_refl_7", "norm_refl_12",
+                "reflec_1", "reflec_2", "reflec_13", "norm_reflec_3", "norm_reflec_7", "norm_reflec_12",
         };
         for (String name : expectedBandNames) {
             assertNotNull("Target band missing: " + name, target.getBand(name));

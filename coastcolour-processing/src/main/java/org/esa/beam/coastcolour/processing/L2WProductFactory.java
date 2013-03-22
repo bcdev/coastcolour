@@ -201,13 +201,13 @@ abstract class L2WProductFactory {
 
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
 
-        addMask(maskGroup, 0, "l2w_cc_c2r_wlr_ootr", WLR_OOR_DESCRIPTION, L2W_FLAGS_NAME + ".C2R_WLR_OOR",
+        addMask(maskGroup, 0, "l2w_cc_NN_wlr_ootr", WLR_OOR_DESCRIPTION, L2W_FLAGS_NAME + ".C2R_WLR_OOR",
                 Color.CYAN, 0.5f);
-        addMask(maskGroup, 1, "l2w_cc_c2r_conc_ootr", CONC_OOR_DESCRIPTION, L2W_FLAGS_NAME + ".C2R_CONC_OOR",
+        addMask(maskGroup, 1, "l2w_cc_NN_conc_ootr", CONC_OOR_DESCRIPTION, L2W_FLAGS_NAME + ".C2R_CONC_OOR",
                 Color.DARK_GRAY, 0.5f);
-        addMask(maskGroup, 2, "l2w_cc_c2r_ootr", OOTR_DESCRIPTION, L2W_FLAGS_NAME + ".C2R_OOTR",
+        addMask(maskGroup, 2, "l2w_cc_NN_ootr", OOTR_DESCRIPTION, L2W_FLAGS_NAME + ".C2R_OOTR",
                 Color.ORANGE, 0.5f);
-        addMask(maskGroup, 3, "l2w_cc_c2r_whitecaps", WHITE_CAPS_DESCRIPTION, L2W_FLAGS_NAME + ".C2R_WHITECAPS",
+        addMask(maskGroup, 3, "l2w_cc_NN_whitecaps", WHITE_CAPS_DESCRIPTION, L2W_FLAGS_NAME + ".C2R_WHITECAPS",
                 Color.CYAN, 0.5f);
         addMask(maskGroup, 4, "l2w_cc_qaa_imaginary_number", IMAGINARY_NUMBER_DESCRIPTION,
                 L2W_FLAGS_NAME + ".QAA_IMAGINARY_NUMBER",
@@ -215,7 +215,7 @@ abstract class L2WProductFactory {
         addMask(maskGroup, 5, "l2w_cc_qaa_negative_ays", NEGATIVE_AYS_DESCRIPTION, L2W_FLAGS_NAME + ".QAA_NEGATIVE_AYS",
                 Color.YELLOW, 0.5f);
         final String invalidMaskDescription = String.format(INVALID_DESCRIPTION_FORMAT, getInvalidMaskExpression());
-        addMask(maskGroup, 6, "l2w_cc_invalid", invalidMaskDescription, getInvalidMaskExpression(),
+        addMask(maskGroup, 6, "l2w_cc_NN_invalid", invalidMaskDescription, getInvalidMaskExpression(),
                 Color.RED, 0.0f);
     }
 

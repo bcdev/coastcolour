@@ -328,6 +328,16 @@ public class L2WOp extends Operator {
         final String groupPattern = L2WProductFactory.QAA_PREFIX_TARGET_BAND_NAME.substring(0, 3);
         l2wProductFactory.addPatternToAutoGrouping(l2WProduct, groupPattern);
 
+        // copy AMORGOS lat/lon bands from L1P/L2R if available
+        if (sourceProduct.getBand("corr_longitude") != null && sourceProduct.getBand("corr_latitude") != null) {
+            if (!l2WProduct.containsBand("corr_longitude")) {
+                ProductUtils.copyBand("corr_longitude", sourceProduct, l2WProduct, true);
+            }
+            if (!l2WProduct.containsBand("corr_latitude")) {
+                ProductUtils.copyBand("corr_latitude", sourceProduct, l2WProduct, true);
+            }
+        }
+
         setTargetProduct(l2WProduct);
     }
 
@@ -414,8 +424,8 @@ public class L2WOp extends Operator {
         double[] membershipTileValues;
         double[] chlSingleTileValues;
         double[] tsmSingleTileValues;
-        final Tile chlTile;
-        final Tile tsmTile;
+        Tile chlTile = null;
+        Tile tsmTile = null;
         Tile c2rChlTile = null;
         Tile c2rTsmTile = null;
         Tile[] chlSingleTiles;
@@ -423,8 +433,8 @@ public class L2WOp extends Operator {
         Tile[] membershipTiles;
 
         if (ENABLE_OWT_CONC_BANDS) {
-            chlTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.OWT_CONC_CHL_NAME));
-            tsmTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.OWT_CONC_TSM_NAME));
+//            chlTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.OWT_CONC_CHL_NAME));
+//            tsmTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.OWT_CONC_TSM_NAME));
 
             chlSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
             tsmSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
@@ -509,10 +519,10 @@ public class L2WOp extends Operator {
                     }
                     double[] relevantMemberships = getRelevantMembershipClasses(membershipTileValues, membershipClassSumThresh);
                     // get weighted CHL and TSM
-                    double weightedChl = getWeightedConc(relevantMemberships, chlSingleTileValues);
-                    chlTile.setSample(x, y, weightedChl);
-                    double weightedTsm = getWeightedConc(relevantMemberships, tsmSingleTileValues);
-                    tsmTile.setSample(x, y, weightedTsm);
+//                    double weightedChl = getWeightedConc(relevantMemberships, chlSingleTileValues);
+//                    chlTile.setSample(x, y, weightedChl);
+//                    double weightedTsm = getWeightedConc(relevantMemberships, tsmSingleTileValues);
+//                    tsmTile.setSample(x, y, weightedTsm);
                 } else {
                     chlTile.setSample(x, y, c2rChlTile.getSampleDouble(x, y));
                     tsmTile.setSample(x, y, c2rTsmTile.getSampleDouble(x, y));
@@ -709,7 +719,7 @@ public class L2WOp extends Operator {
         regionalWaterOp.setParameter("averageTemperature", averageTemperature);
         regionalWaterOp.setParameter("outputKdSpectrum", outputKdSpectrum);
         regionalWaterOp.setParameter("outputAPoc", outputAPoc);
-        regionalWaterOp.setParameter("inputReflecAre", "RADIANCE_REFLECTANCES");
+        regionalWaterOp.setParameter("inputReflecAre", "IRRADIANCE_REFLECTANCES");
         regionalWaterOp.setParameter("invalidPixelExpression", invalidPixelExpression);
         regionalWaterOp.setSourceProduct("acProduct", l2rProduct);
     }

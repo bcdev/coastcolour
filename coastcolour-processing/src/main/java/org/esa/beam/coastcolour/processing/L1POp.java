@@ -309,29 +309,29 @@ public class L1POp extends Operator {
         l1pBand.setSampleCoding(l1pFC);
         ProductNodeGroup<Mask> maskGroup = l1pProduct.getMaskGroup();
 
-        addMask(maskGroup, CC_LAND_FLAG_NAME, "Land flag", Color.GREEN.darker());
-        addMask(maskGroup, CC_COASTLINE_FLAG_NAME, "Coastline flag", Color.GREEN);
-        addMask(maskGroup, CC_CLOUD_FLAG_NAME, "Cloud flag", Color.YELLOW.darker());
-        addMask(maskGroup, CC_CLOUD_AMBIGUOUS_FLAG_NAME, "Ambiguous Cloud flag", Color.YELLOW);
-        addMask(maskGroup, CC_CLOUD_BUFFER_FLAG_NAME, "Cloud buffer flag", Color.RED);
-        addMask(maskGroup, CC_CLOUD_SHADOW_FLAG_NAME, "Cloud shadow flag", Color.BLUE);
-        addMask(maskGroup, CC_SNOW_ICE_FLAG_NAME, "Snow/Ice flag", Color.CYAN);
-        addMask(maskGroup, CC_MIXEDPIXEL_FLAG_NAME, "Potential land pixel", Color.GREEN.darker().darker());
-        addMask(maskGroup, CC_GLINTRISK_FLAG_NAME, "Risk that pixel is under glint", Color.pink);
+        addMask(maskGroup, CC_LAND_FLAG_NAME, "Land flag", new Color(238,223,145), 0.0f);
+        addMask(maskGroup, CC_COASTLINE_FLAG_NAME, "Coastline flag", Color.GREEN, 0.5f);
+        addMask(maskGroup, CC_CLOUD_FLAG_NAME, "Cloud flag", Color.white, 0.0f);
+        addMask(maskGroup, CC_CLOUD_AMBIGUOUS_FLAG_NAME, "Ambiguous Cloud flag", Color.YELLOW, 0.5f);
+        addMask(maskGroup, CC_CLOUD_BUFFER_FLAG_NAME, "Cloud buffer flag", Color.RED, 0.5f);
+        addMask(maskGroup, CC_CLOUD_SHADOW_FLAG_NAME, "Cloud shadow flag", Color.BLUE, 0.5f);
+        addMask(maskGroup, CC_SNOW_ICE_FLAG_NAME, "Snow/Ice flag", Color.CYAN, 0.5f);
+        addMask(maskGroup, CC_MIXEDPIXEL_FLAG_NAME, "Potential land pixel", Color.GREEN.darker().darker(), 0.5f);
+        addMask(maskGroup, CC_GLINTRISK_FLAG_NAME, "Risk that pixel is under glint", Color.pink, 0.5f);
 
     }
 
-    private void addMask(ProductNodeGroup<Mask> maskGroup, String flagName, String description, Color color) {
+    private void addMask(ProductNodeGroup<Mask> maskGroup, String flagName, String description, Color color,
+                         float transparency) {
         int width = sourceProduct.getSceneRasterWidth();
         int height = sourceProduct.getSceneRasterHeight();
         String maskPrefix = "l1p_";
         Mask mask = Mask.BandMathsType.create(maskPrefix + flagName.toLowerCase(),
                                               description, width, height,
                                               L1P_FLAG_BAND_NAME + "." + flagName,
-                                              color, 0.5);
+                                              color, transparency);
         maskGroup.add(mask);
     }
-
 
     private void checkForExistingFlagBand(Product idepixProduct, String flagBandName) {
         if (!idepixProduct.containsBand(flagBandName)) {

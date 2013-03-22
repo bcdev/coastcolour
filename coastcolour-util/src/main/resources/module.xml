@@ -3,7 +3,7 @@
 
     <symbolicName>coastcolour-util</symbolicName>
     <name>COASTCOLOUR Utilities</name>
-    <version>1.6.2</version>
+    <version>1.6.3</version>
     <description>
         This module provides utilities used in the context of COASTCOLOUR.
     </description>

@@ -37,9 +37,9 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         copyMasks(l2rProduct, l2wProduct);
         copyIOPBands(case2rProduct, l2wProduct);
         copyBands(case2rProduct, l2wProduct);
-        if (L2WOp.ENABLE_OWT_CONC_BANDS) {
-            addChlAndTsmBands(l2wProduct);
-        }
+//        if (L2WOp.ENABLE_OWT_CONC_BANDS) {
+//            addChlAndTsmBands(l2wProduct);
+//        }
         addPatternToAutoGrouping(l2wProduct, CONC_GROUPING_PATTERN);
 
         if (isOutputKdSpectrum()) {

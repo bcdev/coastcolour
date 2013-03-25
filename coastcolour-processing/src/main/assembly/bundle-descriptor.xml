@@ -378,10 +378,6 @@
     <cloudIceExpression>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</cloudIceExpression>
     <!-- Toggles the output of Top of Standard Atmosphere reflectance. -->
     <outputTosa>false</outputTosa>
-    <!-- Toggles the output of water leaving path reflectance. -->
-    <outputPath>false</outputPath>
-    <!-- Toggles the output of downwelling irradiance transmittance. -->
-    <outputTransmittance>false</outputTransmittance>
 </parameters>]]></defaultParameters>
             <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
             <descriptionHtml>

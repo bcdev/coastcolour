@@ -20,7 +20,7 @@ import org.esa.beam.util.ResourceInstaller;
 import java.io.File;
 import java.util.HashMap;
 
-@OperatorMetadata(alias = "CoastColour.L2R", version = "1.6.2",
+@OperatorMetadata(alias = "CoastColour.L2R", version = "1.6.3",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Performs a atmospheric correction. The result contains (normalised) water leaving " +

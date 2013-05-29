@@ -20,7 +20,7 @@ import org.esa.beam.util.ResourceInstaller;
 import java.io.File;
 import java.util.HashMap;
 
-@OperatorMetadata(alias = "CoastColour.L2R", version = "1.6.3",
+@OperatorMetadata(alias = "CoastColour.L2R", version = "1.6.4-SNAPSHOT",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Performs a atmospheric correction. The result contains (normalised) water leaving " +
@@ -32,13 +32,13 @@ public class L2ROp extends Operator {
 
     // another new net from RD, 2012/06/28:
     // 31x47x37_57596.9.net
-    public static final String MERIS_ATMOSPHERIC_NET_NAME = GlintCorrectionOperator.MERIS_ATMOSPHERIC_NET_NAME;
+    public static final String MERIS_ATMOSPHERIC_NET_NAME = GlintCorrectionOperator.MERIS_ATMOSPHERIC_EXTREME_NET_NAME;
     // another new net from RD, 2012/06/18:
 //    public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_26651.6.net";
     // another new net from RD, 2012/06/08:
 //    private static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_72066.8.net";
 //    private static final String ATMO_AANN_NET = "atmo_aann/21x5x21_20.4.net";
-    private static final String ATMO_AANN_NET = GlintCorrectionOperator.ATMO_AANN_NET_NAME;
+    private static final String ATMO_AANN_NET = GlintCorrectionOperator.ATMO_AANN_EXTREME_NET_NAME;
 
     @SourceProduct(description = "MERIS L1B or L1P product")
     private Product sourceProduct;
@@ -62,6 +62,10 @@ public class L2ROp extends Operator {
                description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
                        "for the whole scene.")
     private boolean useSnTMap;
+
+    @Parameter(label = "Use NNs for extreme ranges of coastcolour IOPs", defaultValue = "true",
+               description = "Use special set of NNs to finally derive water IOPs in extreme ranges.")
+    private boolean useExtremeCaseMode;
 
     @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU",
                description = "The average salinity of the water in the region to be processed.")
@@ -161,6 +165,10 @@ public class L2ROp extends Operator {
         glintParameters.put("averageSalinity", averageSalinity);
         glintParameters.put("averageTemperature", averageTemperature);
         glintParameters.put("tosaOosThresh", tosaOosThresh);
+        if (!useExtremeCaseMode) {
+            atmoNetMerisFile = new File(GlintCorrectionOperator.MERIS_ATMOSPHERIC_NET_NAME);
+            autoassociativeNetFile = new File(GlintCorrectionOperator.ATMO_AANN_NET_NAME);
+        }
         glintParameters.put("atmoNetMerisFile", atmoNetMerisFile);
         glintParameters.put("autoassociativeNetFile", autoassociativeNetFile);
         glintParameters.put("landExpression", landExpression);

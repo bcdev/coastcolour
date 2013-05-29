@@ -140,8 +140,6 @@ public class L2ROpTest {
             assertNull("Target contains band: " + bandName, target.getBand(bandName));
         }
         assertNotNull(target.getBand("atm_tau_550"));
-        assertNotNull(target.getBand("atm_tau_778"));
-        assertNotNull(target.getBand("atm_tau_865"));
 
         // bands not wanted to be included in L2R product
         assertNull(target.getBand("glint_ratio"));

@@ -35,7 +35,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L2W", version = "1.6.3",
+@OperatorMetadata(alias = "CoastColour.L2W", version = "1.6.4-SNAPSHOT",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +
@@ -89,6 +89,10 @@ public class L2WOp extends Operator {
                        "for the whole scene.")
     private boolean useSnTMap;
 
+    @Parameter(label = "Use NNs for extreme ranges of coastcolour IOPs", defaultValue = "true",
+               description = "Use special set of NNs to finally derive water IOPs in extreme ranges.")
+    private boolean useExtremeCaseMode;
+
     @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU",
                description = "The average salinity of the water in the region to be processed.")
     private double averageSalinity;
@@ -98,13 +102,13 @@ public class L2WOp extends Operator {
     private double averageTemperature;
 
     @Parameter(label = "MERIS net (full path required for other than default)",
-               defaultValue = GlintCorrectionOperator.MERIS_ATMOSPHERIC_NET_NAME,
+               defaultValue = GlintCorrectionOperator.MERIS_ATMOSPHERIC_EXTREME_NET_NAME,
                description = "The file of the atmospheric net to be used instead of the default neural net.",
                notNull = false)
     private File atmoNetMerisFile;
 
     @Parameter(label = "Autoassociatve net (full path required for other than default)",
-               defaultValue = GlintCorrectionOperator.ATMO_AANN_NET_NAME,
+               defaultValue = GlintCorrectionOperator.ATMO_AANN_EXTREME_NET_NAME,
                description = "The file of the autoassociative net used for error computed instead of the default neural net.",
                notNull = false)
     private File autoassociativeNetFile;
@@ -338,6 +342,11 @@ public class L2WOp extends Operator {
             }
         }
 
+        for (Band b: l2WProduct.getBands()) {
+            final String invalidPixelExpression1 = l2wProductFactory.getInvalidMaskExpression();
+            b.setValidPixelExpression("!(" + invalidPixelExpression1 + ")");
+        }
+
         setTargetProduct(l2WProduct);
     }
 
@@ -417,7 +426,8 @@ public class L2WOp extends Operator {
         Tile qaaFlags = null;
         if (qaaProduct != null) {
             qaaFlags = getSourceTile(qaaProduct.getRasterDataNode("analytical_flags"), targetRectangle);
-        } else {
+        }
+        if (case2rProduct != null) {
             c2rFlags = getSourceTile(case2rProduct.getRasterDataNode("case2_flags"), targetRectangle);
         }
 
@@ -506,8 +516,7 @@ public class L2WOp extends Operator {
 //                    turbidityTile.setSample(x, y, isSampleInvalid ? Double.NaN : turbidityValue);
 //                }
                 final int invalidFlagValue = isSampleInvalid ? 1 : 0;
-                int l2wFlag = computeL2wFlags(x, y, c2rFlags, qaaFlags, invalidFlagValue);
-                l2wFlagTile.setSample(x, y, l2wFlag);
+                setL2wFlags(x, y, l2wFlagTile, c2rFlags, qaaFlags, isSampleInvalid);
 
                 if (ENABLE_OWT_CONC_BANDS) {
                     for (int k = 0; k < membershipTiles.length; k++) {
@@ -581,19 +590,32 @@ public class L2WOp extends Operator {
         }
     }
 
-    private int computeL2wFlags(int x, int y, Tile c2rFlags, Tile qaaFlags, int invalidFlagValue) {
-        int l2wFlag = 0;
-        if (c2rFlags != null) {
-            final int sampleInt = c2rFlags.getSampleInt(x, y);
-            l2wFlag = sampleInt & 0x0F;
+    private void setL2wFlags(int x, int y, Tile l2wFlags, Tile c2rFlags, Tile qaaFlags, boolean l2rInvalid) {
+
+        l2wFlags.setSample(x, y, 0);
+        boolean isInvalid = l2rInvalid;
+
+        if (l2wFlags != null) {
+            final boolean _nn_wlr_ootr = c2rFlags.getSampleBit(x, y, WaterAlgorithm.WLR_OOR_BIT_INDEX);
+            l2wFlags.setSample(x, y, 0, _nn_wlr_ootr);
+            final boolean _nn_conc_ootr = c2rFlags.getSampleBit(x, y, WaterAlgorithm.CONC_OOR_BIT_INDEX);
+            l2wFlags.setSample(x, y, 1, _nn_conc_ootr);
+            final boolean _nn_ootr = c2rFlags.getSampleBit(x, y, WaterAlgorithm.OOTR_BIT_INDEX);
+            l2wFlags.setSample(x, y, 2, _nn_ootr);
+            isInvalid = isInvalid || _nn_ootr;
+            final boolean _nn_whitecaps = c2rFlags.getSampleBit(x, y, WaterAlgorithm.WHITECAPS_BIT_INDEX);
+            l2wFlags.setSample(x, y, 3, _nn_whitecaps);
         }
+
         if (qaaFlags != null) {
-            l2wFlag = qaaFlags.getSampleInt(x, y) & 0x30;
+            final boolean _qaa_imaginary = qaaFlags.getSampleBit(x, y, 2);
+            l2wFlags.setSample(x, y, 4, _qaa_imaginary);
+            final boolean _qaa_negative_ays = qaaFlags.getSampleBit(x, y, 1);
+            l2wFlags.setSample(x, y, 5, _qaa_negative_ays);
+            isInvalid = isInvalid || _qaa_imaginary || _qaa_negative_ays;
         }
 
-        l2wFlag = l2wFlag | (invalidFlagValue << 7);
-
-        return l2wFlag;
+        l2wFlags.setSample(x, y, 6, isInvalid);
     }
 
     private double computeTurbidity(double rlw620) {
@@ -711,6 +733,9 @@ public class L2WOp extends Operator {
     }
 
     private void setCase2rParameters(Operator regionalWaterOp) {
+        if (!useExtremeCaseMode) {
+            inverseIopNnFile = new File(RegionalWaterOp.DEFAULT_INVERSE_IOP_NET);
+        }
         regionalWaterOp.setParameter("inverseIopNnFile", inverseIopNnFile);
         regionalWaterOp.setParameter("inverseKdNnFile", inverseKdNnFile);
         regionalWaterOp.setParameter("forwardIopNnFile", forwardIopNnFile);
@@ -759,6 +784,10 @@ public class L2WOp extends Operator {
         l2rParams.put("useSnTMap", useSnTMap);
         l2rParams.put("averageSalinity", averageSalinity);
         l2rParams.put("averageTemperature", averageTemperature);
+        if (!useExtremeCaseMode) {
+            atmoNetMerisFile = new File(GlintCorrectionOperator.MERIS_ATMOSPHERIC_NET_NAME);
+            autoassociativeNetFile = new File(GlintCorrectionOperator.ATMO_AANN_NET_NAME);
+        }
         l2rParams.put("atmoNetMerisFile", atmoNetMerisFile);
         l2rParams.put("autoassociativeNetFile", autoassociativeNetFile);
         l2rParams.put("landExpression", landExpression);

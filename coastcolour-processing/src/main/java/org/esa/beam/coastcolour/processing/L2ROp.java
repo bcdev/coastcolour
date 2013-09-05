@@ -13,7 +13,6 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.esa.beam.idepix.operators.CloudScreeningSelector;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 
@@ -183,7 +182,6 @@ public class L2ROp extends Operator {
         l1pParams.put("doSmile", doSmile);
         l1pParams.put("doEqualization", doEqualization);
         l1pParams.put("useIdepix", true);
-        l1pParams.put("algorithm", CloudScreeningSelector.CoastColour);
         l1pParams.put("brightTestThreshold", brightTestThreshold);
         l1pParams.put("brightTestWavelength", brightTestWavelength);
         return l1pParams;

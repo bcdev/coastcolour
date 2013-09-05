@@ -20,8 +20,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.internal.OperatorImage;
-import org.esa.beam.idepix.operators.CloudScreeningSelector;
-import org.esa.beam.idepix.operators.CoastColourCloudClassificationOp;
+import org.esa.beam.idepix.algorithms.coastcolour.CoastColourClassificationOp;
 import org.esa.beam.meris.icol.AeArea;
 import org.esa.beam.meris.icol.meris.MerisOp;
 import org.esa.beam.util.BitSetter;
@@ -68,7 +67,7 @@ public class L1POp extends Operator {
 
     private static final long MEGABYTE = 1024L * 1024L;
 
-    private static final String IDEPIX_OPERATOR_ALIAS = "idepix.ComputeChain";
+    private static final String IDEPIX_OPERATOR_ALIAS = "idepix.coastcolour";
     private static final String RADIOMETRY_OPERATOR_ALIAS = "Meris.CorrectRadiometry";
     private static final String CLOUD_FLAG_BAND_NAME = "cloud_classif_flags";
 
@@ -98,10 +97,6 @@ public class L1POp extends Operator {
     @Parameter(defaultValue = "true",
                description = "Performs pixel classification if enabled.")
     private boolean useIdepix;
-
-    @Parameter(defaultValue = "CoastColour", valueSet = {"GlobAlbedo", "QWG", "CoastColour"},
-               description = "Specifies the name of the cloud screening algorithm used by the pixel classification.")
-    private CloudScreeningSelector algorithm;
 
     @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03",
                description = "Threshold used by the brightness test in the CoastColour cloud screening.")
@@ -172,9 +167,8 @@ public class L1POp extends Operator {
 
     private HashMap<String, Object> createIdepixParameterMap() {
         HashMap<String, Object> idepixParams = new HashMap<String, Object>();
-        idepixParams.put("algorithm", algorithm);
-        idepixParams.put("ipfQWGUserDefinedRhoToa442Threshold", brightTestThreshold);
-        idepixParams.put("rhoAgReferenceWavelength", brightTestWavelength);
+        idepixParams.put("ccUserDefinedRhoToa442Threshold", brightTestThreshold);
+        idepixParams.put("ccRhoAgReferenceWavelength", brightTestWavelength);
         return idepixParams;
     }
 
@@ -350,23 +344,23 @@ public class L1POp extends Operator {
             checkForCancellation();
             for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
                 targetTile.setSample(x, y, LAND_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_LAND));
+                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_LAND));
                 targetTile.setSample(x, y, COASTLINE_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_COASTLINE));
+                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_COASTLINE));
                 targetTile.setSample(x, y, CLOUD_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD));
+                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_CLOUD));
                 targetTile.setSample(x, y, CLOUD_AMBIGUOUS_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD_AMBIGUOUS));
+                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_CLOUD_AMBIGUOUS));
                 targetTile.setSample(x, y, CLOUD_BUFFER_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD_BUFFER));
+                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_CLOUD_BUFFER));
                 targetTile.setSample(x, y, CLOUD_SHADOW_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_CLOUD_SHADOW));
+                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_CLOUD_SHADOW));
                 targetTile.setSample(x, y, SNOW_ICE_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_SNOW_ICE));
+                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_SNOW_ICE));
                 targetTile.setSample(x, y, MIXEDPIXEL_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_MIXED_PIXEL));
+                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_MIXED_PIXEL));
                 targetTile.setSample(x, y, GLINTRISK_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourCloudClassificationOp.F_GLINTRISK));
+                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_GLINTRISK));
             }
         }
 

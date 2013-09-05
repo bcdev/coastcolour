@@ -59,7 +59,7 @@
     </dependency>
 
     <dependency>
-        <module>beam-idepix</module>
+        <module>beam-idepix-algorithms</module>
     </dependency>
 
     <dependency>

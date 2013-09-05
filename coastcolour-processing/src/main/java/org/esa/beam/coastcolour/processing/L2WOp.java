@@ -341,8 +341,15 @@ public class L2WOp extends Operator {
         }
 
         for (Band b: l2WProduct.getBands()) {
-            final String invalidPixelExpression1 = l2wProductFactory.getInvalidMaskExpression();
-            b.setValidPixelExpression("!(" + invalidPixelExpression1 + ")");
+            String bandName = b.getName();
+            if (bandName.startsWith("iopo_") ||
+                    bandName.startsWith("Kd_") ||
+                    bandName.startsWith("conc_") ||
+                    bandName.startsWith("qaa_") ||
+                    bandName.equals("Z90_max") ||
+                    bandName.equals("turbidity")) {
+                b.setValidPixelExpression("!(" + l2wProductFactory.getInvalidMaskExpression() + ")");
+            }
         }
 
         setTargetProduct(l2WProduct);

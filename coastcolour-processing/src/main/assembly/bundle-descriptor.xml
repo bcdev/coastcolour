@@ -126,9 +126,6 @@
     <doEqualization>true</doEqualization>
     <!-- Performs pixel classification if enabled. -->
     <useIdepix>true</useIdepix>
-    <!-- Specifies the name of the cloud screening algorithm used by the pixel classification.
-         Must be one of 'CoastColour', 'GlobAlbedo', 'QWG' -->
-    <algorithm>CoastColour</algorithm>
     <!-- Wavelength of the band used by the brightness test in the CoastColour cloud screening. -->
     <brightTestWavelength>865</brightTestWavelength>
     <!-- Threshold used by the brightness test in the CoastColour cloud screening. -->

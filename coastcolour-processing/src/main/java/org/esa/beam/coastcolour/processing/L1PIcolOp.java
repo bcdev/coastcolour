@@ -30,19 +30,6 @@ public class L1PIcolOp extends Operator {
     }
 
     private Product createIcolL1pProduct() {
-        final int sceneWidth = sourceProduct.getSceneRasterWidth();
-        final int sceneHeight = sourceProduct.getSceneRasterHeight();
-        final String l1pProductType = sourceProduct.getProductType();
-        final Product icolProduct = new Product(sourceProduct.getName(), l1pProductType, sceneWidth, sceneHeight);
-        icolProduct.setDescription("MERIS CoastColour Icolized L1P");
-        icolProduct.setStartTime(sourceProduct.getStartTime());
-        icolProduct.setEndTime(sourceProduct.getEndTime());
-        ProductUtils.copyMetadata(sourceProduct, icolProduct);
-        ProductUtils.copyMasks(sourceProduct, icolProduct);
-        ProductUtils.copyFlagBands(sourceProduct, icolProduct, true);
-        ProductUtils.copyTiePointGrids(sourceProduct, icolProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, icolProduct);
-
         HashMap<String, Object> icolParams = new HashMap<String, Object>();
         icolParams.put("icolAerosolCase2", true);
         icolParams.put("productType", 0);

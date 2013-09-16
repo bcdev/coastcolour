@@ -169,6 +169,8 @@ public class L1POp extends Operator {
         HashMap<String, Object> idepixParams = new HashMap<String, Object>();
         idepixParams.put("ccUserDefinedRhoToa442Threshold", brightTestThreshold);
         idepixParams.put("ccRhoAgReferenceWavelength", brightTestWavelength);
+        idepixParams.put("ccMixedPixel", true);
+        idepixParams.put("ccOutputRayleigh", true); // required for mixed pixel
         return idepixParams;
     }
 

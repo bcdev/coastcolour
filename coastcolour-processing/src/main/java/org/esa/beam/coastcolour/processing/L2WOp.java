@@ -42,6 +42,7 @@ import java.util.Map;
 public class L2WOp extends Operator {
 
     private static final int[] FLH_INPUT_BAND_NUMBERS = new int[]{6, 8, 10};
+    private static final int[] OC4_INPUT_BAND_NUMBERS = new int[]{2, 3, 4, 5};
     private static final double TURBIDITY_RLW620_MAX = 0.03823;
     private static final double TURBIDITY_AT = 174.41;
     private static final double TURBIDITY_BT = 0.39;
@@ -405,7 +406,7 @@ public class L2WOp extends Operator {
             OperatorException {
         Tile satzen = null;
         Tile solzen = null;
-        Tile[] reflecTiles = null;
+        Tile[] flhReflecTiles = null;
         Tile[] tosaReflecTiles = null;
         Tile[] pathTiles = null;
         Tile[] transTiles = null;
@@ -421,10 +422,10 @@ public class L2WOp extends Operator {
             satzen = getSourceTile(satzenNode, targetRectangle);
             solzen = getSourceTile(solzenNode, targetRectangle);
 
-            reflecTiles = getTiles(targetRectangle, "reflec_");
-            tosaReflecTiles = getTiles(targetRectangle, "tosa_reflec_");
-            pathTiles = getTiles(targetRectangle, "path_");
-            transTiles = getTiles(targetRectangle, "trans_");
+            flhReflecTiles = getTiles(targetRectangle, FLH_INPUT_BAND_NUMBERS, "reflec_");
+            tosaReflecTiles = getTiles(targetRectangle, FLH_INPUT_BAND_NUMBERS, "tosa_reflec_");
+            pathTiles = getTiles(targetRectangle, FLH_INPUT_BAND_NUMBERS, "path_");
+            transTiles = getTiles(targetRectangle, FLH_INPUT_BAND_NUMBERS, "trans_");
             flhTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_681_NAME));
             flhOldNormTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_NORM_OLD_681_NAME));
             flhOldAltTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_ALT_OLD_681_NAME));
@@ -442,6 +443,7 @@ public class L2WOp extends Operator {
         if (case2rProduct != null) {
             c2rFlags = getSourceTile(case2rProduct.getRasterDataNode("case2_flags"), targetRectangle);
         }
+        Tile[] oc4ReflecTiles = getTiles(targetRectangle, OC4_INPUT_BAND_NUMBERS, "reflec_");
 
         double[] membershipTileValues;
         double[] chlSingleTileValues;
@@ -499,7 +501,7 @@ public class L2WOp extends Operator {
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
                 final boolean isSampleInvalid = isSampleInvalid(x, y);
                 if (outputFLH && !isSampleInvalid) {
-                    computeFLHValues(x, y, satzen, solzen, reflecTiles, tosaReflecTiles, pathTiles, transTiles, flhTile,
+                    computeFLHValues(x, y, satzen, solzen, flhReflecTiles, tosaReflecTiles, pathTiles, transTiles, flhTile,
                                      flhOldNormTile, flhOldAltTile, flhAltTile, flhNormTile, isSampleInvalid);
                 }
 
@@ -528,7 +530,7 @@ public class L2WOp extends Operator {
 //                    turbidityTile.setSample(x, y, isSampleInvalid ? Double.NaN : turbidityValue);
 //                }
 
-                oc4Tile.setSample(x, y, computeOC4(x, y, reflecTiles));
+                oc4Tile.setSample(x, y, computeOC4(x, y, oc4ReflecTiles));
 
                 final int invalidFlagValue = isSampleInvalid ? 1 : 0;
                 setL2wFlags(x, y, l2wFlagTile, c2rFlags, qaaFlags, isSampleInvalid);
@@ -557,9 +559,9 @@ public class L2WOp extends Operator {
 
     private double computeOC4(int x, int y, Tile[] reflecTiles) {
         double rrs443 = reflecTiles[0].getSampleDouble(x, y);
-        double rrs490 = reflecTiles[0].getSampleDouble(x, y);
-        double rrs510 = reflecTiles[0].getSampleDouble(x, y);
-        double rrs555 = reflecTiles[0].getSampleDouble(x, y);
+        double rrs490 = reflecTiles[1].getSampleDouble(x, y);
+        double rrs510 = reflecTiles[2].getSampleDouble(x, y);
+        double rrs555 = reflecTiles[3].getSampleDouble(x, y);
         return oc4Algorithm.compute(rrs443, rrs490, rrs510, rrs555);
     }
 
@@ -746,11 +748,11 @@ public class L2WOp extends Operator {
         return values;
     }
 
-    private Tile[] getTiles(Rectangle rectangle, String bandNamePrefix) {
-        Tile[] tiles = new Tile[FLH_INPUT_BAND_NUMBERS.length];
-        for (int i = 0; i < FLH_INPUT_BAND_NUMBERS.length; i++) {
-            int flhInputBandIndex = FLH_INPUT_BAND_NUMBERS[i];
-            tiles[i] = getSourceTile(l2rProduct.getBand(bandNamePrefix + flhInputBandIndex), rectangle);
+    private Tile[] getTiles(Rectangle rectangle, int[] bandNumbers, String bandNamePrefix) {
+        Tile[] tiles = new Tile[bandNumbers.length];
+        for (int i = 0; i < bandNumbers.length; i++) {
+            int bandIndex = bandNumbers[i];
+            tiles[i] = getSourceTile(l2rProduct.getBand(bandNamePrefix + bandIndex), rectangle);
         }
         return tiles;
     }

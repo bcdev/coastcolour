@@ -324,8 +324,12 @@ public class L2WOp extends Operator {
         }
 
         // add oc4v6 chl band
-        l2WProduct.addBand("chl_conc_oc4", ProductData.TYPE_FLOAT32);
+        l2WProduct.addBand("conc_chl_oc4", ProductData.TYPE_FLOAT32);
         oc4Algorithm = new Oc4Algorithm(Oc4Algorithm.CHLOC4_COEF_MERIS);
+
+        l2WProduct.addBand("conc_chl_weight", ProductData.TYPE_FLOAT32);
+        l2WProduct.addBand("conc_chl_merged", ProductData.TYPE_FLOAT32);
+        l2WProduct.addBand("conc_chl_merge_indicator", ProductData.TYPE_FLOAT32);
 
         // add the IOP bands from the QAA product
         for (Band band : l2WQaaIopProduct.getBands()) {
@@ -434,15 +438,18 @@ public class L2WOp extends Operator {
         }
 
         Tile l2wFlagTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.L2W_FLAGS_NAME));
-        Tile oc4Tile = targetTiles.get(targetProduct.getBand("chl_conc_oc4"));
-        Tile c2rFlags = null;
+        Tile oc4Tile = targetTiles.get(targetProduct.getBand("conc_chl_oc4"));
+        Tile chlWeightTile = targetTiles.get(targetProduct.getBand("conc_chl_weight"));
+        Tile chlMergedTile = targetTiles.get(targetProduct.getBand("conc_chl_merged"));
+        Tile chlMergeIndiTile = targetTiles.get(targetProduct.getBand("conc_chl_merge_indicator"));
         Tile qaaFlags = null;
         if (qaaProduct != null) {
             qaaFlags = getSourceTile(qaaProduct.getRasterDataNode("analytical_flags"), targetRectangle);
         }
-        if (case2rProduct != null) {
-            c2rFlags = getSourceTile(case2rProduct.getRasterDataNode("case2_flags"), targetRectangle);
-        }
+
+        Tile chlNNTile = getSourceTile(case2rProduct.getRasterDataNode("chl_conc"), targetRectangle);
+        Tile tsmNNTile = getSourceTile(case2rProduct.getRasterDataNode("tsm"), targetRectangle);
+        Tile c2rFlags = getSourceTile(case2rProduct.getRasterDataNode("case2_flags"), targetRectangle);
         Tile[] oc4ReflecTiles = getTiles(targetRectangle, OC4_INPUT_BAND_NUMBERS, "reflec_");
 
         double[] membershipTileValues;
@@ -530,7 +537,35 @@ public class L2WOp extends Operator {
 //                    turbidityTile.setSample(x, y, isSampleInvalid ? Double.NaN : turbidityValue);
 //                }
 
-                oc4Tile.setSample(x, y, computeOC4(x, y, oc4ReflecTiles));
+                double conc_tsm = tsmNNTile.getSampleDouble(x, y);
+                double conc_chl_nn = chlNNTile.getSampleDouble(x, y);
+
+                double conc_chl_oc4 = computeOC4(x, y, oc4ReflecTiles);
+                double chlWeight = Math.min(Math.max(((conc_tsm - 5) / 5), 0), 1);
+                double chl_merge;
+                boolean useOc4 = conc_chl_nn < 0.1 || conc_tsm < 5;
+                boolean useNN = conc_chl_oc4 > 20;
+                if (useOc4) {
+                    chl_merge = conc_chl_oc4;
+                } else if (useNN) {
+                    chl_merge = conc_chl_nn;
+                } else {
+                    chl_merge = chlWeight * conc_chl_nn + (1 - chlWeight) * conc_chl_oc4;
+                }
+                double merge_indicator;
+                if (useOc4) {
+                    merge_indicator = -1;
+                } else if (useNN) {
+                    merge_indicator = 2;
+                } else {
+                    merge_indicator = chlWeight;
+                }
+
+                oc4Tile.setSample(x, y, conc_chl_oc4);
+                chlWeightTile.setSample(x, y, chlWeight);
+                chlMergedTile.setSample(x, y, chl_merge);
+                chlMergeIndiTile.setSample(x, y, merge_indicator);
+
 
                 final int invalidFlagValue = isSampleInvalid ? 1 : 0;
                 setL2wFlags(x, y, l2wFlagTile, c2rFlags, qaaFlags, isSampleInvalid);

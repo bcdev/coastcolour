@@ -49,7 +49,7 @@ public class L2WOp extends Operator {
     private static final double TURBIDITY_C = 0.1533;
 
     // compile time switch (RD)
-    static final boolean ENABLE_OWT_CONC_BANDS = true;
+    static final boolean ENABLE_OWT_CONC_BANDS = false;
 
     @SourceProduct(description = "MERIS L1B, L1P or L2R product")
     private Product sourceProduct;
@@ -549,9 +549,9 @@ public class L2WOp extends Operator {
 //                    chlTile.setSample(x, y, weightedChl);
 //                    double weightedTsm = getWeightedConc(relevantMemberships, tsmSingleTileValues);
 //                    tsmTile.setSample(x, y, weightedTsm);
-                } else {
-                    chlTile.setSample(x, y, c2rChlTile.getSampleDouble(x, y));
-                    tsmTile.setSample(x, y, c2rTsmTile.getSampleDouble(x, y));
+//                } else {
+//                    chlTile.setSample(x, y, c2rChlTile.getSampleDouble(x, y));
+//                    tsmTile.setSample(x, y, c2rTsmTile.getSampleDouble(x, y));
                 }
             }
         }

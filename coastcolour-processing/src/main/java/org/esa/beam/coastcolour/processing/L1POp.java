@@ -35,7 +35,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L1P", version = "1.6.4-SNAPSHOT",
+@OperatorMetadata(alias = "CoastColour.L1P", version = "1.6.5-SNAPSHOT",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes a refinement of top of atmosphere radiance and " +

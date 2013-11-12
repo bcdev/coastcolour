@@ -7,6 +7,7 @@ import org.esa.beam.atmosphere.operator.MerisFlightDirection;
 import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
@@ -33,7 +34,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L2W", version = "1.6.4-SNAPSHOT",
+@OperatorMetadata(alias = "CoastColour.L2W", version = "1.6.5-SNAPSHOT",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +
@@ -235,6 +236,7 @@ public class L2WOp extends Operator {
 
     private Product[] c2rSingleProducts;
     public static final int NUMBER_OF_MEMBERSHIPS = 11;  // 9 classes + sum + dominant class
+    private Oc4Algorithm oc4Algorithm;
 
     @Override
     public void initialize() throws OperatorException {
@@ -319,6 +321,10 @@ public class L2WOp extends Operator {
             ProductUtils.copyBand("dominant_class", classMembershipProduct, "owt_dominant_class", l2WProduct, true);
             l2wProductFactory.addPatternToAutoGrouping(l2WProduct, "owt");
         }
+
+        // add oc4v6 chl band
+        l2WProduct.addBand("chl_conc_oc4", ProductData.TYPE_FLOAT32);
+        oc4Algorithm = new Oc4Algorithm(Oc4Algorithm.CHLOC4_COEF_MERIS);
 
         // add the IOP bands from the QAA product
         for (Band band : l2WQaaIopProduct.getBands()) {
@@ -427,6 +433,7 @@ public class L2WOp extends Operator {
         }
 
         Tile l2wFlagTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.L2W_FLAGS_NAME));
+        Tile oc4Tile = targetTiles.get(targetProduct.getBand("chl_conc_oc4"));
         Tile c2rFlags = null;
         Tile qaaFlags = null;
         if (qaaProduct != null) {
@@ -520,6 +527,9 @@ public class L2WOp extends Operator {
 //                    final double turbidityValue = computeTurbidity(rho620Tile.getSampleDouble(x, y));
 //                    turbidityTile.setSample(x, y, isSampleInvalid ? Double.NaN : turbidityValue);
 //                }
+
+                oc4Tile.setSample(x, y, computeOC4(x, y, reflecTiles));
+
                 final int invalidFlagValue = isSampleInvalid ? 1 : 0;
                 setL2wFlags(x, y, l2wFlagTile, c2rFlags, qaaFlags, isSampleInvalid);
 
@@ -531,7 +541,7 @@ public class L2WOp extends Operator {
                         chlSingleTileValues[k] = chlSingleTiles[k].getSampleDouble(x, y);
                         tsmSingleTileValues[k] = tsmSingleTiles[k].getSampleDouble(x, y);
                     }
-                    double[] relevantMemberships = getRelevantMembershipClasses(membershipTileValues, membershipClassSumThresh);
+//                    double[] relevantMemberships = getRelevantMembershipClasses(membershipTileValues, membershipClassSumThresh);
                     // get weighted CHL and TSM
 //                    double weightedChl = getWeightedConc(relevantMemberships, chlSingleTileValues);
 //                    chlTile.setSample(x, y, weightedChl);
@@ -543,6 +553,14 @@ public class L2WOp extends Operator {
                 }
             }
         }
+    }
+
+    private double computeOC4(int x, int y, Tile[] reflecTiles) {
+        double rrs443 = reflecTiles[0].getSampleDouble(x, y);
+        double rrs490 = reflecTiles[0].getSampleDouble(x, y);
+        double rrs510 = reflecTiles[0].getSampleDouble(x, y);
+        double rrs555 = reflecTiles[0].getSampleDouble(x, y);
+        return oc4Algorithm.compute(rrs443, rrs490, rrs510, rrs555);
     }
 
     static double getWeightedConc(double[] relevantMembershipClasses, double[] concValues) {

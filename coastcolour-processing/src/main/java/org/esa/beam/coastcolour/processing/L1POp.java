@@ -170,6 +170,8 @@ public class L1POp extends Operator {
         idepixParams.put("ccUserDefinedRhoToa442Threshold", brightTestThreshold);
         idepixParams.put("ccRhoAgReferenceWavelength", brightTestWavelength);
         idepixParams.put("ccMixedPixel", true);
+        idepixParams.put("ccOutputL2CloudDetection", true);
+        idepixParams.put("ccOutputSchillerCloudValue", false);
         idepixParams.put("ccOutputRayleigh", true); // required for mixed pixel
         return idepixParams;
     }
@@ -305,7 +307,7 @@ public class L1POp extends Operator {
         l1pBand.setSampleCoding(l1pFC);
         ProductNodeGroup<Mask> maskGroup = l1pProduct.getMaskGroup();
 
-        addMask(maskGroup, CC_LAND_FLAG_NAME, "Land flag", new Color(238,223,145), 0.0f);
+        addMask(maskGroup, CC_LAND_FLAG_NAME, "Land flag", new Color(238, 223, 145), 0.0f);
         addMask(maskGroup, CC_COASTLINE_FLAG_NAME, "Coastline flag", Color.GREEN, 0.5f);
         addMask(maskGroup, CC_CLOUD_FLAG_NAME, "Cloud flag", Color.white, 0.0f);
         addMask(maskGroup, CC_CLOUD_AMBIGUOUS_FLAG_NAME, "Ambiguous Cloud flag", Color.YELLOW, 0.5f);

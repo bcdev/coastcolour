@@ -3,7 +3,7 @@ package org.esa.beam.coastcolour.processing;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.meris.qaa.QaaConstants;
+import org.esa.beam.meris.qaa.algorithm.QaaConstants;
 import org.esa.beam.util.ProductUtils;
 
 import javax.media.jai.ImageLayout;
@@ -11,7 +11,7 @@ import javax.media.jai.JAI;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.ConstantDescriptor;
 import javax.media.jai.operator.SubtractDescriptor;
-import java.awt.*;
+import java.awt.RenderingHints;
 import java.awt.image.RenderedImage;
 
 /**

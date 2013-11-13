@@ -85,11 +85,8 @@
             <text>CoastColour L1P...</text>
             <dialogTitle>CoastColour L1P Processor</dialogTitle>
             <targetProductNameSuffix>_L1P</targetProductNameSuffix>
-            <shortDescr></shortDescr>
-            <longDescr></longDescr>
             <mnemonic/>
             <parent>tools</parent>
-            <helpID></helpID>
         </action>
         <action>
             <id>coastColourProcessingL2R</id>
@@ -98,11 +95,8 @@
             <text>CoastColour L2R...</text>
             <dialogTitle>CoastColour L2R Processor</dialogTitle>
             <targetProductNameSuffix>_L2R</targetProductNameSuffix>
-            <shortDescr></shortDescr>
-            <longDescr></longDescr>
             <mnemonic/>
             <parent>tools</parent>
-            <helpID></helpID>
         </action>
         <action>
             <id>coastColourProcessingL2W</id>
@@ -111,19 +105,9 @@
             <text>CoastColour L2W...</text>
             <dialogTitle>CoastColour L2W Processor</dialogTitle>
             <targetProductNameSuffix>_L2W</targetProductNameSuffix>
-            <shortDescr></shortDescr>
-            <longDescr></longDescr>
             <mnemonic/>
             <parent>tools</parent>
-            <helpID></helpID>
         </action>
     </extension>
-
-    <!--<extension point="beam-ui:helpSets">-->
-    <!--<helpSet>-->
-    <!--<parent>beam-help</parent>-->
-    <!--<path>doc/help/meris-glint.hs</path>-->
-    <!--</helpSet>-->
-    <!--</extension>-->
 
 </module>

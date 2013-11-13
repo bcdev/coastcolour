@@ -25,7 +25,7 @@ import java.net.URL;
                   description = ".",
                   authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
                   copyright = "(c) 2010 by Brockmann Consult",
-                  version = "1.2")
+                  version = "1.2.1")
 public class FuzzyOp extends PixelOperator {
 
     private static final String AUXDATA_PATH = "owt16_meris_stats_101119_5band.hdf";
@@ -175,12 +175,12 @@ public class FuzzyOp extends PixelOperator {
         }
 
         if (!areSourceSamplesValid(x, y, sourceSamples)) {
-            for (int i = 0; i < CLASS_COUNT*2; i++) {
+            for (int i = 0; i < CLASS_COUNT * 2; i++) {
                 targetSamples[i].set(Double.NaN);
             }
-            targetSamples[CLASS_COUNT*2].set(-1);
-            targetSamples[CLASS_COUNT*2+1].set(-1);
-            targetSamples[CLASS_COUNT*2+2].set(Double.NaN);
+            targetSamples[CLASS_COUNT * 2].set(-1);
+            targetSamples[CLASS_COUNT * 2 + 1].set(-1);
+            targetSamples[CLASS_COUNT * 2 + 2].set(Double.NaN);
             return;
         }
 
@@ -233,12 +233,12 @@ public class FuzzyOp extends PixelOperator {
             classSum += currentClassValue;
             normalizedClassSum += targetSamples[CLASS_COUNT + i].getDouble();
         }
-        targetSamples[CLASS_COUNT*2].set(dominantClass);
-        targetSamples[CLASS_COUNT*2 + 1].set(classSum);
-        targetSamples[CLASS_COUNT*2 + 2].set(normalizedClassSum);
+        targetSamples[CLASS_COUNT * 2].set(dominantClass);
+        targetSamples[CLASS_COUNT * 2 + 1].set(classSum);
+        targetSamples[CLASS_COUNT * 2 + 2].set(normalizedClassSum);
 
         if (writeInputReflectances) {
-            final int targetSampleOffset = CLASS_COUNT*2 + 3;
+            final int targetSampleOffset = CLASS_COUNT * 2 + 3;
             for (int i = 0; i < bandCount; i++) {
                 final double reflectance = sourceSamples[i].getDouble();
                 targetSamples[targetSampleOffset + i].set(reflectance);

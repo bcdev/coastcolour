@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>coastcolour-fuzzy-classification</symbolicName>
-    <version>1.2</version>
+    <version>1.2.1</version>
     <name>CoastColour FuzzyClassification</name>
     <packaging>dir</packaging>
 
@@ -10,7 +10,10 @@
     </description>
 
     <changelog>
-        <![CDATA[]]>
+        <![CDATA[
+        Changes in 1.2.1<br/>
+        Updated dependency version of netcdf and
+                ]]>
     </changelog>
 
     <vendor>Brockmann Consult GmbH</vendor>

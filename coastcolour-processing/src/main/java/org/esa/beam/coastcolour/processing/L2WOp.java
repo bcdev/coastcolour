@@ -35,11 +35,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L2W", version = "1.6.5-SNAPSHOT",
+@OperatorMetadata(alias = "CoastColour.L2W",
+                  version = "1.6.5",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +
-                          "other variables")
+                                "other variables")
 public class L2WOp extends Operator {
 
     private static final int[] FLH_INPUT_BAND_NUMBERS = new int[]{6, 8, 10};
@@ -87,7 +88,7 @@ public class L2WOp extends Operator {
 
     @Parameter(label = "Use climatology map for salinity and temperature", defaultValue = "true",
                description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
-                       "for the whole scene.")
+                             "for the whole scene.")
     private boolean useSnTMap;
 
     @Parameter(label = "Use NNs for extreme ranges of coastcolour IOPs", defaultValue = "true",
@@ -150,7 +151,7 @@ public class L2WOp extends Operator {
 
     @Parameter(defaultValue = "true", label = "Output Kd spectrum",
                description = "Toggles the output of downwelling irradiance attenuation coefficients. " +
-                       "If disabled only Kd_490 is added to the output.")
+                             "If disabled only Kd_490 is added to the output.")
     private boolean outputKdSpectrum;
 
     @Parameter(defaultValue = "false", label = "Output experimental FLH",
@@ -159,7 +160,7 @@ public class L2WOp extends Operator {
 
     @Parameter(defaultValue = "false", label = "Use QAA for IOP and concentration computation",
                description = "If enabled IOPs are computed by QAA instead of Case-2-Regional. " +
-                       "Concentrations of chlorophyll and total suspended matter will be derived from the IOPs.")
+                             "Concentrations of chlorophyll and total suspended matter will be derived from the IOPs.")
     private boolean useQaaForIops;
 
     @Parameter(defaultValue = "-0.02", label = "'A_TOTAL' lower bound",
@@ -355,14 +356,14 @@ public class L2WOp extends Operator {
             }
         }
 
-        for (Band b: l2WProduct.getBands()) {
+        for (Band b : l2WProduct.getBands()) {
             String bandName = b.getName();
             if (bandName.startsWith("iopo_") ||
-                    bandName.startsWith("Kd_") ||
-                    bandName.startsWith("conc_") ||
-                    bandName.startsWith("qaa_") ||
-                    bandName.equals("Z90_max") ||
-                    bandName.equals("turbidity")) {
+                bandName.startsWith("Kd_") ||
+                bandName.startsWith("conc_") ||
+                bandName.startsWith("qaa_") ||
+                bandName.equals("Z90_max") ||
+                bandName.equals("turbidity")) {
                 b.setValidPixelExpression("!(" + l2wProductFactory.getInvalidMaskExpression() + ")");
             }
         }
@@ -411,7 +412,7 @@ public class L2WOp extends Operator {
 
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws
-            OperatorException {
+                                                                                                             OperatorException {
         Tile satzen = null;
         Tile solzen = null;
         Tile[] flhReflecTiles = null;
@@ -648,6 +649,7 @@ public class L2WOp extends Operator {
     }
 
     private static class Membership {
+
         final int index;
         final double weight;
 

@@ -19,11 +19,12 @@ import org.esa.beam.util.ResourceInstaller;
 import java.io.File;
 import java.util.HashMap;
 
-@OperatorMetadata(alias = "CoastColour.L2R", version = "1.6.5-SNAPSHOT",
+@OperatorMetadata(alias = "CoastColour.L2R",
+                  version = "1.6.5",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Performs a atmospheric correction. The result contains (normalised) water leaving " +
-                          "reflectance and information about atmospheric properties")
+                                "reflectance and information about atmospheric properties")
 public class L2ROp extends Operator {
 
     private static final String AGC_FLAGS_NAME = "agc_flags";
@@ -59,7 +60,7 @@ public class L2ROp extends Operator {
 
     @Parameter(label = "Use climatology map for salinity and temperature", defaultValue = "true",
                description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
-                       "for the whole scene.")
+                             "for the whole scene.")
     private boolean useSnTMap;
 
     @Parameter(label = "Use NNs for extreme ranges of coastcolour IOPs", defaultValue = "true",
@@ -327,7 +328,7 @@ public class L2ROp extends Operator {
         String l2rInvalidDescr = "'L2R invalid' pixels (quality indicator > 3 || l1p_flags.CC_CLOUD)";
         l2rFlags.getFlag("L2R_INVALID").setDescription(l2rInvalidDescr);
         String l2rSuspectDescr = "'L2R suspect' pixels " +
-                "(quality indicator > 1 || l1p_flags.CC_CLOUD || l1p_flags.CC_CLOUD_BUFFER || l1p_flags.CC_CLOUD_SHADOW || l1p_flags.CC_SNOW_ICE || l1p_flags.CC_MIXEDPIXEL)";
+                                 "(quality indicator > 1 || l1p_flags.CC_CLOUD || l1p_flags.CC_CLOUD_BUFFER || l1p_flags.CC_CLOUD_SHADOW || l1p_flags.CC_SNOW_ICE || l1p_flags.CC_MIXEDPIXEL)";
         l2rFlags.getFlag("L2R_SUSPECT").setDescription(l2rSuspectDescr);
 
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();

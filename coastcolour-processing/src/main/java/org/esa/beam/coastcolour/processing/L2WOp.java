@@ -6,6 +6,7 @@ import org.esa.beam.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.atmosphere.operator.MerisFlightDirection;
 import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.RasterDataNode;
@@ -238,6 +239,7 @@ public class L2WOp extends Operator {
     private Product[] c2rSingleProducts;
     public static final int NUMBER_OF_MEMBERSHIPS = 11;  // 9 classes + sum + dominant class
     private Oc4Algorithm oc4Algorithm;
+    private int l2rSuspectMask;
 
     @Override
     public void initialize() throws OperatorException {
@@ -326,6 +328,8 @@ public class L2WOp extends Operator {
         // add oc4v6 chl band
         l2WProduct.addBand("conc_chl_oc4", ProductData.TYPE_FLOAT32);
         oc4Algorithm = new Oc4Algorithm(Oc4Algorithm.CHLOC4_COEF_MERIS);
+        FlagCoding l2rFlagcoding = l2rProduct.getFlagCodingGroup().get("l2r_flags");
+        l2rSuspectMask = l2rFlagcoding.getFlagMask("L2R_SUSPECT");
 
         l2WProduct.addBand("conc_chl_weight", ProductData.TYPE_FLOAT32);
         l2WProduct.addBand("conc_chl_merged", ProductData.TYPE_FLOAT32);
@@ -449,6 +453,7 @@ public class L2WOp extends Operator {
 
         Tile chlNNTile = getSourceTile(case2rProduct.getRasterDataNode("chl_conc"), targetRectangle);
         Tile tsmNNTile = getSourceTile(case2rProduct.getRasterDataNode("tsm"), targetRectangle);
+        Tile l2rFlagsTile = getSourceTile(l2rProduct.getRasterDataNode("l2r_flags"), targetRectangle);
         Tile c2rFlags = getSourceTile(case2rProduct.getRasterDataNode("case2_flags"), targetRectangle);
         Tile[] oc4ReflecTiles = getTiles(targetRectangle, OC4_INPUT_BAND_NUMBERS, "reflec_");
 
@@ -539,11 +544,13 @@ public class L2WOp extends Operator {
 
                 double conc_tsm = tsmNNTile.getSampleDouble(x, y);
                 double conc_chl_nn = chlNNTile.getSampleDouble(x, y);
+                int l2rFlagValue = l2rFlagsTile.getSampleInt(x, y);
+                boolean l2rSuspect = (l2rFlagValue & l2rSuspectMask) != 0;
 
                 double conc_chl_oc4 = computeOC4(x, y, oc4ReflecTiles);
                 double chlWeight = Math.min(Math.max(((conc_tsm - 5) / 5), 0), 1);
                 double chl_merge;
-                boolean useOc4 = conc_chl_nn < 0.1 || conc_tsm < 5;
+                boolean useOc4 = conc_chl_nn < 0.1 || conc_tsm < 5   || l2rSuspect;
                 boolean useNN = conc_chl_oc4 > 20;
                 if (useOc4) {
                     chl_merge = conc_chl_oc4;

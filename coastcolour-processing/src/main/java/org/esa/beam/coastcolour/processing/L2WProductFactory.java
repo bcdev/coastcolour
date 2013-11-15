@@ -50,6 +50,7 @@ abstract class L2WProductFactory {
     static final String Z90_MAX_NAME = "Z90_max";
 
     static final String L2W_VALID_EXPRESSION = "!l2w_flags.INVALID";
+    static final String L2W_INVALID_EXPRESSION = "l2w_flags.INVALID";
 
     protected static final String[] IOP_SOURCE_BAND_NAMES = new String[]{
             A_TOTAL_443_SOURCE_NAME, A_YS_443_SOURCE_NAME,
@@ -193,7 +194,7 @@ abstract class L2WProductFactory {
         l2wFlagCoding.addFlag("QAA_IMAGINARY_NUMBER", 16, IMAGINARY_NUMBER_DESCRIPTION);
         l2wFlagCoding.addFlag("QAA_NEGATIVE_AYS", 32, NEGATIVE_AYS_DESCRIPTION);
         final String invalidDescription = String.format(INVALID_DESCRIPTION_FORMAT, getInvalidPixelExpression());
-        l2wFlagCoding.addFlag("INVALID", 128, invalidDescription);
+        l2wFlagCoding.addFlag("INVALID", 64, invalidDescription);
 
         Band l2wFlagsBand = targetProduct.addBand(L2W_FLAGS_NAME, ProductData.TYPE_UINT8);
         l2wFlagsBand.setSampleCoding(l2wFlagCoding);
@@ -214,9 +215,8 @@ abstract class L2WProductFactory {
                 Color.MAGENTA, 0.5f);
         addMask(maskGroup, 5, "l2w_cc_qaa_negative_ays", NEGATIVE_AYS_DESCRIPTION, L2W_FLAGS_NAME + ".QAA_NEGATIVE_AYS",
                 Color.YELLOW, 0.5f);
-        final String invalidMaskDescription = String.format(INVALID_DESCRIPTION_FORMAT, getInvalidMaskExpression());
-        addMask(maskGroup, 6, "l2w_cc_invalid", invalidMaskDescription, getInvalidMaskExpression(),
-                Color.RED, 0.0f);
+        final String invalidMaskDescription = String.format(INVALID_DESCRIPTION_FORMAT, L2W_INVALID_EXPRESSION);
+        addMask(maskGroup, 6, "l2w_cc_invalid", invalidMaskDescription, L2W_INVALID_EXPRESSION, Color.RED, 0.0f);
     }
 
 
@@ -255,10 +255,6 @@ abstract class L2WProductFactory {
         Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
         String stringPattern = autoGrouping != null ? autoGrouping.toString() + ":" + groupPattern : groupPattern;
         targetProduct.setAutoGrouping(stringPattern);
-    }
-
-    protected String getInvalidMaskExpression() {
-        return getInvalidPixelExpression() + " || l2w_flags.NN_OOTR || l2w_flags.QAA_IMAGINARY_NUMBER || l2w_flags.QAA_NEGATIVE_AYS";
     }
 
 }

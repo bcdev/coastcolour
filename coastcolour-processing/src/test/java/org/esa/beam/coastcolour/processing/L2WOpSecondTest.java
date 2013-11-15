@@ -113,7 +113,7 @@ public class L2WOpSecondTest {
     @Test
     public void testCreateProduct_WithFLHOutput() throws ParseException {
         Product source = getL1pProduct(l1bProduct);
-        final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl", "exp_FLH_681", "turbidity"};
+        final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl_nn", "exp_FLH_681", "turbidity"};
         Map<String, Object> l2wParams = new HashMap<String, Object>();
         l2wParams.put("outputFLH", true);
         target = testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, l2wParams);
@@ -158,7 +158,7 @@ public class L2WOpSecondTest {
         assertFalse(target.getBand("iop_a_total_443").isLog10Scaled());
         assertFalse(target.getBand("iop_quality").isLog10Scaled());
         assertTrue(target.getBand("conc_tsm").isLog10Scaled());
-        assertTrue(target.getBand("conc_chl").isLog10Scaled());
+        assertTrue(target.getBand("conc_chl_nn").isLog10Scaled());
 
         // Tests on generated L1P flags dataset
         L1POpTest.testFlags(target, "l1p_flags");

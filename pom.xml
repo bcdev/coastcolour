@@ -8,7 +8,7 @@
     <groupId>org.esa.beam.coastcolour</groupId>
     <artifactId>coastcolour</artifactId>
     <!-- if version is updated, the script for install4j needs to be updated too. -->
-    <version>1.6.5-SNAPSHOT</version>
+    <version>1.6.5</version>
 
     <packaging>pom</packaging>
 
@@ -186,7 +186,7 @@
             <dependency>
                 <groupId>org.esa.beam.coastcolour</groupId>
                 <artifactId>coastcolour-fuzzy-classification</artifactId>
-                <version>1.2.1-SNAPSHOT</version>
+                <version>1.2.1</version>
             </dependency>
 
             <!-- Case2R Libraries ############################################# -->

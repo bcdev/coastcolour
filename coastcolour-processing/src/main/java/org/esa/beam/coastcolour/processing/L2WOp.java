@@ -6,7 +6,6 @@ import org.esa.beam.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.atmosphere.operator.MerisFlightDirection;
 import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.RasterDataNode;
@@ -27,6 +26,7 @@ import org.esa.beam.util.ResourceInstaller;
 import org.esa.beam.util.SystemUtils;
 
 import java.awt.Rectangle;
+import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -44,7 +44,7 @@ import java.util.Map;
 public class L2WOp extends Operator {
 
     private static final int[] FLH_INPUT_BAND_NUMBERS = new int[]{6, 8, 10};
-    private static final int[] OC4_INPUT_BAND_NUMBERS = new int[]{2, 3, 4, 5};
+    private static final int[] REFLEC_BAND_NUMBERS = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     private static final double TURBIDITY_RLW620_MAX = 0.03823;
     private static final double TURBIDITY_AT = 174.41;
     private static final double TURBIDITY_BT = 0.39;
@@ -198,6 +198,7 @@ public class L2WOp extends Operator {
     private Product qaaProduct;
     private Product case2rProduct;
     private VirtualBandOpImage invalidOpImage;
+    private VirtualBandOpImage invalidL2wImage;
 
     private static final String[] iopForwardNets =
             new String[]{
@@ -240,7 +241,8 @@ public class L2WOp extends Operator {
     private Product[] c2rSingleProducts;
     public static final int NUMBER_OF_MEMBERSHIPS = 11;  // 9 classes + sum + dominant class
     private Oc4Algorithm oc4Algorithm;
-    private int l2rSuspectMask;
+    private Band concChlOc4Band;
+    private Band conChlMergedBand;
 
     @Override
     public void initialize() throws OperatorException {
@@ -265,6 +267,15 @@ public class L2WOp extends Operator {
         case2rProduct = case2Op.getTargetProduct();
 
         invalidOpImage = VirtualBandOpImage.createMask(invalidPixelExpression,
+                                                       l2rProduct,
+                                                       ResolutionLevel.MAXRES);
+
+        String invalidL2wExpression = "l1p_flags.CC_LAND || l1p_flags.CC_CLOUD || l1p_flags.CC_MIXEDPIXEL";
+        if (invalidPixelExpression != null && !invalidPixelExpression.isEmpty()) {
+            invalidL2wExpression = invalidPixelExpression + " || " + invalidL2wExpression;
+        }
+        System.out.println("invalidL2wExpression = " + invalidL2wExpression);
+        invalidL2wImage = VirtualBandOpImage.createMask(invalidL2wExpression,
                                                        l2rProduct,
                                                        ResolutionLevel.MAXRES);
 
@@ -310,15 +321,15 @@ public class L2WOp extends Operator {
                 computeSingleCase2RProductsFromFuzzyApproach(auxDataDir, l2WProduct);
             }
 
-            Band b = ProductUtils.copyBand("tsm", case2rProduct, "conc_tsm", l2WProduct, true);
-            b.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
-            b = ProductUtils.copyBand("chl_conc", case2rProduct, "conc_chl", l2WProduct, true);
-            b.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
+            Band concTsmNnBand = ProductUtils.copyBand("tsm", case2rProduct, "conc_tsm", l2WProduct, true);
+            concTsmNnBand.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
+            Band concChlNnBand = ProductUtils.copyBand("chl_conc", case2rProduct, "conc_chl_nn", l2WProduct, true);
+            concChlNnBand.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
 
             for (Band band : classMembershipProduct.getBands()) {
                 final String bandName = band.getName();
                 if (bandName.startsWith("class_")) {
-                    b = ProductUtils.copyBand(bandName, classMembershipProduct, "owt_" + bandName, l2WProduct, true);
+                    Band b = ProductUtils.copyBand(bandName, classMembershipProduct, "owt_" + bandName, l2WProduct, true);
                     b.setValidPixelExpression("owt_" + b.getValidPixelExpression());
                 }
             }
@@ -327,14 +338,16 @@ public class L2WOp extends Operator {
         }
 
         // add oc4v6 chl band
-        l2WProduct.addBand("conc_chl_oc4", ProductData.TYPE_FLOAT32);
+        concChlOc4Band = l2WProduct.addBand("conc_chl_oc4", ProductData.TYPE_FLOAT32);
+        conChlMergedBand = l2WProduct.addBand("conc_chl_merged", ProductData.TYPE_FLOAT32);
+
+        Band concChlNnBand = case2rProduct.getBand("chl_conc");
+        ProductUtils.copyRasterDataNodeProperties(concChlNnBand, concChlOc4Band);
+        ProductUtils.copyRasterDataNodeProperties(concChlNnBand, conChlMergedBand);
+
         oc4Algorithm = new Oc4Algorithm(Oc4Algorithm.CHLOC4_COEF_MERIS);
-        FlagCoding l2rFlagcoding = l2rProduct.getFlagCodingGroup().get("l2r_flags");
-        l2rSuspectMask = l2rFlagcoding.getFlagMask("L2R_SUSPECT");
 
         l2WProduct.addBand("conc_chl_weight", ProductData.TYPE_FLOAT32);
-        l2WProduct.addBand("conc_chl_merged", ProductData.TYPE_FLOAT32);
-        l2WProduct.addBand("conc_chl_merge_indicator", ProductData.TYPE_FLOAT32);
 
         // add the IOP bands from the QAA product
         for (Band band : l2WQaaIopProduct.getBands()) {
@@ -364,7 +377,7 @@ public class L2WOp extends Operator {
                 bandName.startsWith("qaa_") ||
                 bandName.equals("Z90_max") ||
                 bandName.equals("turbidity")) {
-                b.setValidPixelExpression("!(" + l2wProductFactory.getInvalidMaskExpression() + ")");
+                b.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
             }
         }
 
@@ -443,10 +456,9 @@ public class L2WOp extends Operator {
         }
 
         Tile l2wFlagTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.L2W_FLAGS_NAME));
-        Tile oc4Tile = targetTiles.get(targetProduct.getBand("conc_chl_oc4"));
+        Tile oc4Tile = targetTiles.get(concChlOc4Band);
         Tile chlWeightTile = targetTiles.get(targetProduct.getBand("conc_chl_weight"));
-        Tile chlMergedTile = targetTiles.get(targetProduct.getBand("conc_chl_merged"));
-        Tile chlMergeIndiTile = targetTiles.get(targetProduct.getBand("conc_chl_merge_indicator"));
+        Tile chlMergedTile = targetTiles.get(conChlMergedBand);
         Tile qaaFlags = null;
         if (qaaProduct != null) {
             qaaFlags = getSourceTile(qaaProduct.getRasterDataNode("analytical_flags"), targetRectangle);
@@ -454,9 +466,8 @@ public class L2WOp extends Operator {
 
         Tile chlNNTile = getSourceTile(case2rProduct.getRasterDataNode("chl_conc"), targetRectangle);
         Tile tsmNNTile = getSourceTile(case2rProduct.getRasterDataNode("tsm"), targetRectangle);
-        Tile l2rFlagsTile = getSourceTile(l2rProduct.getRasterDataNode("l2r_flags"), targetRectangle);
         Tile c2rFlags = getSourceTile(case2rProduct.getRasterDataNode("case2_flags"), targetRectangle);
-        Tile[] oc4ReflecTiles = getTiles(targetRectangle, OC4_INPUT_BAND_NUMBERS, "reflec_");
+        Tile[] reflecTiles = getTiles(targetRectangle, REFLEC_BAND_NUMBERS, "reflec_");
 
         double[] membershipTileValues;
         double[] chlSingleTileValues;
@@ -509,6 +520,7 @@ public class L2WOp extends Operator {
 //        }
 //
 
+        Raster invalidL2wRaster = invalidL2wImage.getData(targetRectangle);
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
@@ -543,40 +555,46 @@ public class L2WOp extends Operator {
 //                    turbidityTile.setSample(x, y, isSampleInvalid ? Double.NaN : turbidityValue);
 //                }
 
+                double[] reflec = new double[REFLEC_BAND_NUMBERS.length];
+                for (int i = 0; i < reflec.length; i++) {
+                    reflec[i] = reflecTiles[i].getSampleDouble(x, y);
+                }
+
                 double conc_tsm = tsmNNTile.getSampleDouble(x, y);
                 double conc_chl_nn = chlNNTile.getSampleDouble(x, y);
-                int l2rFlagValue = l2rFlagsTile.getSampleInt(x, y);
-                boolean l2rSuspect = (l2rFlagValue & l2rSuspectMask) != 0;
 
-                double conc_chl_oc4 = computeOC4(x, y, oc4ReflecTiles);
-                double chlWeight = Math.min(Math.max(((conc_tsm - 5) / 5), 0), 1);
+                double conc_chl_oc4 = computeOC4(reflec);
+                double chlWeightInternal = Math.min(Math.max(((conc_tsm - 5) / 5), 0), 1);
                 double chl_merge;
-                boolean useOc4 = conc_chl_nn < 0.1 || conc_tsm < 5   || l2rSuspect;
+                boolean useOc4 = conc_chl_nn < 0.1 || conc_tsm < 5;
                 boolean useNN = conc_chl_oc4 > 20;
                 if (useOc4) {
                     chl_merge = conc_chl_oc4;
                 } else if (useNN) {
                     chl_merge = conc_chl_nn;
                 } else {
-                    chl_merge = chlWeight * conc_chl_nn + (1 - chlWeight) * conc_chl_oc4;
+                    chl_merge = chlWeightInternal * conc_chl_nn + (1 - chlWeightInternal) * conc_chl_oc4;
                 }
-                double merge_indicator;
+                double chlWeight;
                 if (useOc4) {
-                    merge_indicator = -1;
+                    chlWeight = 0;
                 } else if (useNN) {
-                    merge_indicator = 2;
+                    chlWeight = 1;
                 } else {
-                    merge_indicator = chlWeight;
+                    chlWeight = chlWeightInternal;
                 }
 
                 oc4Tile.setSample(x, y, conc_chl_oc4);
                 chlWeightTile.setSample(x, y, chlWeight);
                 chlMergedTile.setSample(x, y, chl_merge);
-                chlMergeIndiTile.setSample(x, y, merge_indicator);
 
+                final double slope = computeReflSlope(reflec);
+                double maxRefl = computeMaxRefle(reflec);
+                double MCIrel = computeMCIRrel(reflec);
+                boolean invalidSpectra = (slope > 0 && maxRefl < 0.01 && !(MCIrel > 10 && slope < 7)) || slope>=8;
 
-                final int invalidFlagValue = isSampleInvalid ? 1 : 0;
-                setL2wFlags(x, y, l2wFlagTile, c2rFlags, qaaFlags, isSampleInvalid);
+                final boolean invalidFlagValue = invalidSpectra || (invalidL2wRaster.getSample(x, y, 0) != 0);
+                setL2wFlags(x, y, l2wFlagTile, c2rFlags, qaaFlags, invalidFlagValue);
 
                 if (ENABLE_OWT_CONC_BANDS) {
                     for (int k = 0; k < membershipTiles.length; k++) {
@@ -600,11 +618,39 @@ public class L2WOp extends Operator {
         }
     }
 
-    private double computeOC4(int x, int y, Tile[] reflecTiles) {
-        double rrs443 = reflecTiles[0].getSampleDouble(x, y);
-        double rrs490 = reflecTiles[1].getSampleDouble(x, y);
-        double rrs510 = reflecTiles[2].getSampleDouble(x, y);
-        double rrs555 = reflecTiles[3].getSampleDouble(x, y);
+    private double computeMCIRrel(double[] reflec) {
+        double baseline = reflec[7] + (reflec[7] - reflec[9]) * (709.0 - 681.0) / (779.0 - 681.0);
+        double MCI_abs = reflec[8] - baseline;
+        double MCI_rel = 100 * MCI_abs / baseline;
+        return MCI_rel;
+    }
+
+    private double computeMaxRefle(double[] reflec) {
+        double max = reflec[0];
+        for (int j = 1; j < reflec.length; j++) {
+            if (Double.isNaN(reflec[j])) {
+                return Double.NaN;
+            }
+            if (reflec[j] > max) {
+                max = reflec[j];
+            }
+        }
+        return max;
+    }
+
+    private int computeReflSlope(double[] reflec) {
+        int slope = 0;
+        for (int i = 0; i < reflec.length - 1; i++) {
+            slope += Math.signum(reflec[i + 1] - reflec[i]);
+        }
+        return slope;
+    }
+
+    private double computeOC4(double[] reflec) {
+        double rrs443 = reflec[1];
+        double rrs490 = reflec[2];
+        double rrs510 = reflec[3];
+        double rrs555 = reflec[4];
         return oc4Algorithm.compute(rrs443, rrs490, rrs510, rrs555);
     }
 
@@ -659,12 +705,12 @@ public class L2WOp extends Operator {
         }
     }
 
-    private void setL2wFlags(int x, int y, Tile l2wFlags, Tile c2rFlags, Tile qaaFlags, boolean l2rInvalid) {
+    private void setL2wFlags(int x, int y, Tile l2wFlags, Tile c2rFlags, Tile qaaFlags, boolean l2wInvalid) {
 
         l2wFlags.setSample(x, y, 0);
-        boolean isInvalid = l2rInvalid;
+        boolean isInvalid = l2wInvalid;
 
-        if (l2wFlags != null) {
+        if (c2rFlags != null) {
             final boolean _nn_wlr_ootr = c2rFlags.getSampleBit(x, y, WaterAlgorithm.WLR_OOR_BIT_INDEX);
             l2wFlags.setSample(x, y, 0, _nn_wlr_ootr);
             final boolean _nn_conc_ootr = c2rFlags.getSampleBit(x, y, WaterAlgorithm.CONC_OOR_BIT_INDEX);
@@ -681,7 +727,7 @@ public class L2WOp extends Operator {
             l2wFlags.setSample(x, y, 4, _qaa_imaginary);
             final boolean _qaa_negative_ays = qaaFlags.getSampleBit(x, y, 1);
             l2wFlags.setSample(x, y, 5, _qaa_negative_ays);
-            isInvalid = isInvalid || _qaa_imaginary || _qaa_negative_ays;
+            //isInvalid = isInvalid || _qaa_imaginary || _qaa_negative_ays;
         }
 
         l2wFlags.setSample(x, y, 6, isInvalid);

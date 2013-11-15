@@ -23,13 +23,13 @@
       <mountPoint id="326" root="" location="lib" mode="755" />
     </mountPoints>
     <entries>
-      <dirEntry mountPoint="17" file="../../../target/coastcolour-1.6.5-SNAPSHOT-beam-bin/coastcolour-1.6.5-SNAPSHOT/modules" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" entryMode="direct" subDirectory="" excludeSuffixes="" dirMode="755" overrideDirMode="true">
+      <dirEntry mountPoint="17" file="../../../target/coastcolour-1.6.5-beam-bin/coastcolour-1.6.5/modules" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" entryMode="direct" subDirectory="" excludeSuffixes="" dirMode="755" overrideDirMode="true">
         <exclude />
       </dirEntry>
-      <dirEntry mountPoint="98" file="../../../target/coastcolour-1.6.5-SNAPSHOT-beam-bin/coastcolour-1.6.5-SNAPSHOT/bin" overwriteMode="4" shared="false" fileMode="755" uninstallMode="0" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" entryMode="direct" subDirectory="" excludeSuffixes="" dirMode="755" overrideDirMode="true">
+      <dirEntry mountPoint="98" file="../../../target/coastcolour-1.6.5-beam-bin/coastcolour-1.6.5/bin" overwriteMode="4" shared="false" fileMode="755" uninstallMode="0" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" entryMode="direct" subDirectory="" excludeSuffixes="" dirMode="755" overrideDirMode="true">
         <exclude />
       </dirEntry>
-      <dirEntry mountPoint="326" file="../../../target/coastcolour-1.6.5-SNAPSHOT-beam-bin/coastcolour-1.6.5-SNAPSHOT/lib" overwriteMode="4" shared="false" fileMode="666" uninstallMode="0" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" entryMode="direct" subDirectory="" excludeSuffixes="" dirMode="755" overrideDirMode="true">
+      <dirEntry mountPoint="326" file="../../../target/coastcolour-1.6.5-beam-bin/coastcolour-1.6.5/lib" overwriteMode="4" shared="false" fileMode="666" uninstallMode="0" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" entryMode="direct" subDirectory="" excludeSuffixes="" dirMode="755" overrideDirMode="true">
         <exclude />
       </dirEntry>
     </entries>
@@ -111,7 +111,7 @@
                       <void method="put">
                         <string>en</string>
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>../../../target/coastcolour-1.6.5-SNAPSHOT-beam-bin/coastcolour-1.6.5-SNAPSHOT/license.html</string>
+                          <string>../../../target/coastcolour-1.6.5-beam-bin/coastcolour-1.6.5/license.html</string>
                         </object>
                       </void>
                     </void>

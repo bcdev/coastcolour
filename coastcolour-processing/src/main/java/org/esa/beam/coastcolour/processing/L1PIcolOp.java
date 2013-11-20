@@ -14,7 +14,7 @@ import org.esa.beam.util.ProductUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-@OperatorMetadata(alias = "CoastColour.L1P.Icol", version = "1.6.5",
+@OperatorMetadata(alias = "CoastColour.L1P.Icol", version = "1.6.6",
                   authors = "Olaf Danne",
                   copyright = "(c) 2012 Brockmann Consult",
                   description = "Wrapper operator to apply ICOL correction to L1P product.")

@@ -371,7 +371,7 @@ public class L2WOp extends Operator {
 
         for (Band b : l2WProduct.getBands()) {
             String bandName = b.getName();
-            if (bandName.startsWith("iopo_") ||
+            if (bandName.startsWith("iop_") ||
                 bandName.startsWith("Kd_") ||
                 bandName.startsWith("conc_") ||
                 bandName.startsWith("qaa_") ||

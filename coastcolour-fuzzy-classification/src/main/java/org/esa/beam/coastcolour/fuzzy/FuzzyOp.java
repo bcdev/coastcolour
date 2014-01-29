@@ -25,7 +25,7 @@ import java.net.URL;
                   description = ".",
                   authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
                   copyright = "(c) 2010 by Brockmann Consult",
-                  version = "1.2.1")
+                  version = "1.3")
 public class FuzzyOp extends PixelOperator {
 
     private static final String AUXDATA_PATH = "owt16_meris_stats_101119_5band.hdf";
@@ -123,34 +123,6 @@ public class FuzzyOp extends PixelOperator {
         }
     }
 
-    private String getSourceBandName(String reflectancesPrefix, float wavelength) {
-        final Band[] bands = sourceProduct.getBands();
-        String bestBandName = getBestBandName(reflectancesPrefix, wavelength, bands);
-        if (bestBandName == null) {
-            throw new OperatorException(
-                    String.format("Not able to find band with prefix '%s' and wavelength '%4.3f'.",
-                                  reflectancesPrefix, wavelength));
-        }
-        return bestBandName;
-    }
-
-    static String getBestBandName(String reflectancesPrefix, float wavelength, Band[] bands) {
-        String bestBandName = null;
-        final double maxDistance = 10.0;
-        double wavelengthDist = Double.MAX_VALUE;
-        for (Band band : bands) {
-            final boolean isSpectralBand = band.getSpectralBandIndex() > -1;
-            if (isSpectralBand && band.getName().startsWith(reflectancesPrefix)) {
-                final float currentWavelengthDist = Math.abs(band.getSpectralWavelength() - wavelength);
-                if (currentWavelengthDist < wavelengthDist && currentWavelengthDist < maxDistance) {
-                    wavelengthDist = currentWavelengthDist;
-                    bestBandName = band.getName();
-                }
-            }
-        }
-        return bestBandName;
-    }
-
     @Override
     protected void configureTargetSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
         Band[] bands = getTargetProduct().getBands();
@@ -161,10 +133,6 @@ public class FuzzyOp extends PixelOperator {
                 targetSampleIndex++;
             }
         }
-    }
-
-    private boolean mustDefineTargetSample(Band band) {
-        return !band.isSourceImageSet();
     }
 
     @Override
@@ -189,32 +157,32 @@ public class FuzzyOp extends PixelOperator {
             rrsBelowWater[i] = convertToSubsurfaceWaterRrs(sourceSamples[i].getDouble());
         }
 
-        double[] membershipIndicators = fuzzyClassification.computeClassMemberships(rrsBelowWater);
+        double[] classMemberships = fuzzyClassification.computeClassMemberships(rrsBelowWater);
         // setting the values for the first 8 classes
         for (int i = 0; i < 8; i++) {
             WritableSample targetSample = targetSamples[i];
-            final double membershipIndicator = membershipIndicators[i];
+            final double membershipIndicator = classMemberships[i];
             targetSample.set(membershipIndicator);
         }
         // setting the value for the 9th class to the sum of the last 8 classes
         double ninthClassValue = 0.0;
-        for (int i = 8; i < membershipIndicators.length; i++) {
-            ninthClassValue += membershipIndicators[i];
+        for (int i = 8; i < classMemberships.length; i++) {
+            ninthClassValue += classMemberships[i];
         }
         targetSamples[8].set(ninthClassValue);
 
 
-        final double[] normalizedMembershipIndicators = fuzzyClassification.normalizeClassMemberships(membershipIndicators);
+        final double[] normalizedClassMemberships = normalizeClassMemberships(classMemberships);
         // setting the values for the first 8 classes
         for (int i = 0; i < 8; i++) {
             WritableSample targetSample = targetSamples[CLASS_COUNT + i];
-            final double membershipIndicator = normalizedMembershipIndicators[i];
+            final double membershipIndicator = normalizedClassMemberships[i];
             targetSample.set(membershipIndicator);
         }
         // setting the value for the 9th class to the sum of the last 8 classes
         ninthClassValue = 0.0;
-        for (int i = 8; i < normalizedMembershipIndicators.length; i++) {
-            ninthClassValue += normalizedMembershipIndicators[i];
+        for (int i = 8; i < normalizedClassMemberships.length; i++) {
+            ninthClassValue += normalizedClassMemberships[i];
         }
         targetSamples[CLASS_COUNT + 8].set(ninthClassValue);
 
@@ -244,6 +212,54 @@ public class FuzzyOp extends PixelOperator {
                 targetSamples[targetSampleOffset + i].set(reflectance);
             }
         }
+    }
+
+    static double[] normalizeClassMemberships(double[] memberships) {
+        double[] result = new double[memberships.length];
+
+        // normalize: sum of memberships should be equal to 1.0
+        double sum = 0.0;
+        for (double membership : memberships) {
+            sum += membership;
+        }
+        for (int i = 0; i < memberships.length; i++) {
+            result[i] = memberships[i] / sum;
+        }
+
+        return result;
+    }
+
+    static String getBestBandName(String reflectancesPrefix, float wavelength, Band[] bands) {
+        String bestBandName = null;
+        final double maxDistance = 10.0;
+        double wavelengthDist = Double.MAX_VALUE;
+        for (Band band : bands) {
+            final boolean isSpectralBand = band.getSpectralBandIndex() > -1;
+            if (isSpectralBand && band.getName().startsWith(reflectancesPrefix)) {
+                final float currentWavelengthDist = Math.abs(band.getSpectralWavelength() - wavelength);
+                if (currentWavelengthDist < wavelengthDist && currentWavelengthDist < maxDistance) {
+                    wavelengthDist = currentWavelengthDist;
+                    bestBandName = band.getName();
+                }
+            }
+        }
+        return bestBandName;
+    }
+
+    private String getSourceBandName(String reflectancesPrefix, float wavelength) {
+        final Band[] bands = sourceProduct.getBands();
+        String bestBandName = getBestBandName(reflectancesPrefix, wavelength, bands);
+        if (bestBandName == null) {
+            throw new OperatorException(
+                    String.format("Not able to find band with prefix '%s' and wavelength '%4.3f'.",
+                                  reflectancesPrefix, wavelength));
+        }
+        return bestBandName;
+    }
+
+
+    private static boolean mustDefineTargetSample(Band band) {
+        return !band.isSourceImageSet();
     }
 
     private boolean areSourceSamplesValid(int x, int y, Sample[] sourceSamples) {

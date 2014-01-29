@@ -10,29 +10,29 @@ public class FuzzyClassification {
 
     private final double[][] uReflecMeans;
     private final double[][][] invCovMatrix;
-    private int bandCount;
+    private int wavelengthCount;
     private int classCount;
 
     /**
      * Creates an instance of the fuzzy classification class.
      *
-     * @param classReflectanceMeans  a two dimensional array specifying the mean spectrum for each class.
+     * @param reflectanceMeans  a two dimensional array specifying the mean spectrum for each class.
      *                               The first dimension specifies the number of bands,
      *                               the second specifies the number of classes.
      * @param invertedClassCovMatrix a three dimensional array.
      *                               The first dimension specifies the number of classes,
      *                               the second and third dimensions build up the squared matrix defined by
-     *                               the number of bands.
+     *                               the number of wavelength.
      */
-    public FuzzyClassification(double[][] classReflectanceMeans, double[][][] invertedClassCovMatrix) {
-        bandCount = classReflectanceMeans.length;
-        classCount = classReflectanceMeans[0].length;
-        final String pattern = "Number of %s of classReflectanceMeans [%d] and invertedClassCovMatrix [%d] do not match.";
+    public FuzzyClassification(double[][] reflectanceMeans, double[][][] invertedClassCovMatrix) {
+        wavelengthCount = reflectanceMeans.length;
+        classCount = reflectanceMeans[0].length;
+        final String pattern = "Number of %s of reflectanceMeans [%d] and invertedClassCovMatrix [%d] do not match.";
         Assert.argument(invertedClassCovMatrix.length == classCount,
                         String.format(pattern, "classes", classCount, invertedClassCovMatrix.length));
-        Assert.argument(invertedClassCovMatrix[0].length == bandCount,
-                        String.format(pattern, "bands", bandCount, invertedClassCovMatrix[0].length));
-        uReflecMeans = classReflectanceMeans.clone();
+        Assert.argument(invertedClassCovMatrix[0].length == wavelengthCount,
+                        String.format(pattern, "wavelength", wavelengthCount, invertedClassCovMatrix[0].length));
+        uReflecMeans = reflectanceMeans.clone();
         invCovMatrix = invertedClassCovMatrix.clone();
     }
 
@@ -41,8 +41,8 @@ public class FuzzyClassification {
      *
      * @return the number bands used.
      */
-    public int getBandCount() {
-        return bandCount;
+    public int getWavelengthCount() {
+        return wavelengthCount;
     }
 
     /**
@@ -58,31 +58,31 @@ public class FuzzyClassification {
      * Computes the fractional class memberships for the given spectrum.
      *
      * @param reflectances The spectrum to compute the class memberships for.
-     *                     The length of the spectrum must be equal to {@link #getBandCount()}
+     *                     The length of the spectrum must be equal to {@link #getWavelengthCount()}
      * @return The fractional class memberships. The length of the returned array
      *         is equal to {@link #getClassCount()}
      */
     public double[] computeClassMemberships(double[] reflectances) {
         final String pattern = "Number of reflectances must be %d but is %d.";
-        Assert.argument(reflectances.length == bandCount, String.format(pattern, bandCount, reflectances.length));
+        Assert.argument(reflectances.length == wavelengthCount, String.format(pattern, wavelengthCount, reflectances.length));
 
-        double[] y = new double[bandCount];
-        double[][] yInvers = new double[bandCount][bandCount];   // yinv
+        double[] y = new double[wavelengthCount];
+        double[][] yInvers = new double[wavelengthCount][wavelengthCount];   // yinv
         double[] alphaChi = new double[classCount];
 
         for (int i = 0; i < classCount; i++) {
-            for (int j = 0; j < bandCount; j++) {
+            for (int j = 0; j < wavelengthCount; j++) {
                 y[j] = reflectances[j] - uReflecMeans[j][i];
-                System.arraycopy(invCovMatrix[i][j], 0, yInvers[j], 0, bandCount);
+                System.arraycopy(invCovMatrix[i][j], 0, yInvers[j], 0, wavelengthCount);
             }
             final Matrix yInvMatrix = new Matrix(yInvers);
             final Matrix matrixB = yInvMatrix.times(new Matrix(y, y.length));  // b
             double zSquare = 0;
-            for (int j = 0; j < bandCount; j++) {
+            for (int j = 0; j < wavelengthCount; j++) {
                 zSquare += y[j] * matrixB.getArray()[j][0];
             }
             double x = zSquare / 2.0;   // no idea why this is needed. Even Tim doesn't have
-            double chiSquare = bandCount / 2.0;
+            double chiSquare = wavelengthCount / 2.0;
             if (x <= (chiSquare + 1.0)) {
                 double gamma = computeIGFSeries(chiSquare, x);
                 alphaChi[i] = 1.0 - gamma;
@@ -94,21 +94,6 @@ public class FuzzyClassification {
 
         return alphaChi;
 
-    }
-
-    public double[] normalizeClassMemberships(double[] memberships) {
-        double[] result = new double[memberships.length];
-
-        // normalize: sum of memberships should be equal to 1.0
-        double sum = 0.0;
-        for (int i = 0; i < memberships.length; i++) {
-            sum += memberships[i];
-        }
-        for (int i = 0; i < memberships.length; i++) {
-            result[i] = memberships[i] / sum;
-        }
-
-        return result;
     }
 
     // Computes the incomplete gamma function by its continued fraction

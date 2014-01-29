@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.net.URL;
 
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.*;
 
 public class FuzzyClassificationTest {
 
@@ -35,7 +35,7 @@ public class FuzzyClassificationTest {
         final double normalizationFactor = 1.0 / (0.024374 + 0.083183 + 0.19959);
         for (int i = 0; i < classMembershipProbability.length; i++) {
             assertEquals(expectedValues[i], classMembershipProbability[i], 1.0e-5);
-            final double normalizedMembership = fuzzyClassification.normalizeClassMemberships(classMembershipProbability)[i];
+            final double normalizedMembership = FuzzyOp.normalizeClassMemberships(classMembershipProbability)[i];
             assertEquals(normalizationFactor * expectedValues[i], normalizedMembership, 1.0e-5);
         }
 

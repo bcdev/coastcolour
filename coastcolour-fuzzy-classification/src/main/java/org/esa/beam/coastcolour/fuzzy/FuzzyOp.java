@@ -16,6 +16,7 @@ import org.esa.beam.framework.gpf.pointop.ProductConfigurer;
 import org.esa.beam.framework.gpf.pointop.Sample;
 import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
 import org.esa.beam.framework.gpf.pointop.WritableSample;
+import org.esa.beam.util.ProductUtils;
 
 import java.awt.Color;
 
@@ -101,12 +102,10 @@ public class FuzzyOp extends PixelOperator {
         normalizedSumBand.setValidPixelExpression(normalizedSumBand.getName() + " > 0.0");
 
         if (writeInputReflectances) {
-            float[] wavelengths = owtType.getWavelengths();
-            for (float wavelength : wavelengths) {
-                final String bandName = getSourceBandName(reflectancesPrefix, wavelength);
-                Band sourceBand = sourceProduct.getBand(bandName);
-                final int bandDataType = sourceBand.getDataType();
-                final Band reflecBand = targetProduct.addBand(bandName, bandDataType);
+            bandCount = auxdata.getSpectralMeans().length;
+            for (int i = 0; i < bandCount; i++) {
+                final String bandName = getSourceBandName(reflectancesPrefix, BAND_WAVELENGTHS[i]);
+                ProductUtils.copyBand(bandName, sourceProduct, targetProduct, true);
             }
         }
     }
@@ -205,13 +204,6 @@ public class FuzzyOp extends PixelOperator {
         targetSamples[CLASS_COUNT * 2 + 1].set(classSum);
         targetSamples[CLASS_COUNT * 2 + 2].set(normalizedClassSum);
 
-        if (writeInputReflectances) {
-            final int targetSampleOffset = CLASS_COUNT * 2 + 3;
-            for (int i = 0; i < numWLs; i++) {
-                final double reflectance = sourceSamples[i].getDouble();
-                targetSamples[targetSampleOffset + i].set(reflectance);
-            }
-        }
     }
 
     static double[] normalizeClassMemberships(double[] memberships) {

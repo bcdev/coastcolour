@@ -28,8 +28,6 @@ import java.awt.Color;
                   version = "1.3")
 public class FuzzyOp extends PixelOperator {
 
-    private static final String AUXDATA_PATH = "owt16_meris_stats_101119_5band.hdf";
-
     private static final Color[] CLASS_COLORS = new Color[]{
             new Color(0.3438f, 0.0039f, 0.5703f),
             new Color(0.0039f, 0.1562f, 0.8008f),

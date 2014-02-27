@@ -102,9 +102,9 @@ public class FuzzyOp extends PixelOperator {
         normalizedSumBand.setValidPixelExpression(normalizedSumBand.getName() + " > 0.0");
 
         if (writeInputReflectances) {
-            bandCount = auxdata.getSpectralMeans().length;
-            for (int i = 0; i < bandCount; i++) {
-                final String bandName = getSourceBandName(reflectancesPrefix, BAND_WAVELENGTHS[i]);
+            float[] wavelengths = owtType.getWavelengths();
+            for (float wavelength : wavelengths) {
+                final String bandName = getSourceBandName(reflectancesPrefix, wavelength);
                 ProductUtils.copyBand(bandName, sourceProduct, targetProduct, true);
             }
         }

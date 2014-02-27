@@ -13,6 +13,22 @@ public enum OWT_TYPE {
         }
 
         @Override
+        int getClassCount() {
+            return 9;
+        }
+
+        @Override
+        double[] mapMembershipsToClasses(double[] memberships) {
+            double[] classes = new double[getClassCount()];
+            System.arraycopy(memberships, 0, classes, 0, 8);
+            // setting the value for the 9th class to the sum of the last 8 classes
+            for (int i = 8; i < memberships.length; i++) {
+                classes[8] += memberships[i];
+            }
+            return classes;
+        }
+
+        @Override
         float[] getWavelengths() {
             return wavelength;
         }
@@ -31,9 +47,23 @@ public enum OWT_TYPE {
             return wavelength;
 
         }
+
+        @Override
+        int getClassCount() {
+            return 7;
+        }
+
+        @Override
+        double[] mapMembershipsToClasses(double[] memberships) {
+            return memberships;
+        }
     };
 
     abstract AuxdataFactory getAuxdataFactory();
 
     abstract float[] getWavelengths();
+
+    abstract int getClassCount();
+
+    abstract double[] mapMembershipsToClasses(double[] memberships);
 }

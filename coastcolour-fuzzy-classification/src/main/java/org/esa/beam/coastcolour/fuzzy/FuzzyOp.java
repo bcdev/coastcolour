@@ -39,7 +39,6 @@ public class FuzzyOp extends PixelOperator {
             new Color(1.0000f, 0.0039f, 0.0039f),
             new Color(1.0000f, 1.0000f, 0f)
     };
-    private static final int CLASS_COUNT = CLASS_COLORS.length;
     private int nanPixelCount = 0;
 
 
@@ -69,12 +68,12 @@ public class FuzzyOp extends PixelOperator {
 
         Product targetProduct = productConfigurer.getTargetProduct();
 
-        for (int i = 1; i <= CLASS_COUNT; i++) {
+        for (int i = 1; i <= owtType.getClassCount(); i++) {
             final Band classBand = targetProduct.addBand("class_" + i, ProductData.TYPE_FLOAT32);
             classBand.setValidPixelExpression(classBand.getName() + " > 0.0");
             classBand.setNoDataValueUsed(true);
         }
-        for (int i = 1; i <= CLASS_COUNT; i++) {
+        for (int i = 1; i <= owtType.getClassCount(); i++) {
             final Band normalizedClassBand = targetProduct.addBand("norm_class_" + i, ProductData.TYPE_FLOAT32);
             normalizedClassBand.setValidPixelExpression(normalizedClassBand.getName() + " > 0.0");
             normalizedClassBand.setNoDataValueUsed(true);
@@ -83,8 +82,8 @@ public class FuzzyOp extends PixelOperator {
         domClassBand.setNoDataValue(-1);
         domClassBand.setNoDataValueUsed(true);
         final IndexCoding indexCoding = new IndexCoding("Cluster_classes");
-        final ColorPaletteDef.Point[] points = new ColorPaletteDef.Point[CLASS_COUNT];
-        for (int i = 1; i <= CLASS_COUNT; i++) {
+        final ColorPaletteDef.Point[] points = new ColorPaletteDef.Point[owtType.getClassCount()];
+        for (int i = 1; i <= owtType.getClassCount(); i++) {
             String name = "class_" + i;
             indexCoding.addIndex(name, i, "Class " + i);
             points[i - 1] = new ColorPaletteDef.Point(i - 1, CLASS_COLORS[i - 1], name);
@@ -140,12 +139,12 @@ public class FuzzyOp extends PixelOperator {
         }
 
         if (!areSourceSamplesValid(x, y, sourceSamples)) {
-            for (int i = 0; i < CLASS_COUNT * 2; i++) {
+            for (int i = 0; i < owtType.getClassCount() * 2; i++) {
                 targetSamples[i].set(Double.NaN);
             }
-            targetSamples[CLASS_COUNT * 2].set(-1);
-            targetSamples[CLASS_COUNT * 2 + 1].set(-1);
-            targetSamples[CLASS_COUNT * 2 + 2].set(Double.NaN);
+            targetSamples[owtType.getClassCount() * 2].set(-1);
+            targetSamples[owtType.getClassCount() * 2 + 1].set(-1);
+            targetSamples[owtType.getClassCount() * 2 + 2].set(Double.NaN);
             return;
         }
 
@@ -155,33 +154,16 @@ public class FuzzyOp extends PixelOperator {
         }
 
         double[] classMemberships = fuzzyClassification.computeClassMemberships(rrsBelowWater);
-        // setting the values for the first 8 classes
-        for (int i = 0; i < 8; i++) {
-            WritableSample targetSample = targetSamples[i];
-            final double membershipIndicator = classMemberships[i];
-            targetSample.set(membershipIndicator);
+        double[] classes = owtType.mapMembershipsToClasses(classMemberships);
+        for (int i = 0; i < classes.length; i++) {
+            targetSamples[i].set(classes[i]);
         }
-        // setting the value for the 9th class to the sum of the last 8 classes
-        double ninthClassValue = 0.0;
-        for (int i = 8; i < classMemberships.length; i++) {
-            ninthClassValue += classMemberships[i];
-        }
-        targetSamples[8].set(ninthClassValue);
 
-
-        final double[] normalizedClassMemberships = normalizeClassMemberships(classMemberships);
-        // setting the values for the first 8 classes
-        for (int i = 0; i < 8; i++) {
-            WritableSample targetSample = targetSamples[CLASS_COUNT + i];
-            final double membershipIndicator = normalizedClassMemberships[i];
-            targetSample.set(membershipIndicator);
+        final double[] normClassMemberships = normalizeClassMemberships(classMemberships);
+        double[] normClasses = owtType.mapMembershipsToClasses(normClassMemberships);
+        for (int i = 0; i < classes.length; i++) {
+            targetSamples[owtType.getClassCount() + i].set(normClasses[i]);
         }
-        // setting the value for the 9th class to the sum of the last 8 classes
-        ninthClassValue = 0.0;
-        for (int i = 8; i < normalizedClassMemberships.length; i++) {
-            ninthClassValue += normalizedClassMemberships[i];
-        }
-        targetSamples[CLASS_COUNT + 8].set(ninthClassValue);
 
         // setting the value for dominant class, which is the max value of all other classes
         // setting the value for class sum, which is the sum of all other classes
@@ -196,11 +178,11 @@ public class FuzzyOp extends PixelOperator {
                 dominantClass = i + 1;
             }
             classSum += currentClassValue;
-            normalizedClassSum += targetSamples[CLASS_COUNT + i].getDouble();
+            normalizedClassSum += targetSamples[owtType.getClassCount() + i].getDouble();
         }
-        targetSamples[CLASS_COUNT * 2].set(dominantClass);
-        targetSamples[CLASS_COUNT * 2 + 1].set(classSum);
-        targetSamples[CLASS_COUNT * 2 + 2].set(normalizedClassSum);
+        targetSamples[owtType.getClassCount() * 2].set(dominantClass);
+        targetSamples[owtType.getClassCount() * 2 + 1].set(classSum);
+        targetSamples[owtType.getClassCount() * 2 + 2].set(normalizedClassSum);
 
     }
 

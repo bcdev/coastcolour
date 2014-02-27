@@ -3,8 +3,6 @@ package org.esa.beam.coastcolour.fuzzy;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.URL;
-
 import static junit.framework.Assert.*;
 
 public class FuzzyClassificationTest {
@@ -13,8 +11,7 @@ public class FuzzyClassificationTest {
 
     @Before
     public void setup() throws Exception {
-        final URL resourceUrl = FuzzyClassification.class.getResource("owt16_meris_stats_101119_5band.hdf");
-        auxdata = new Auxdata(resourceUrl.toURI());
+        auxdata = new CoastalAuxdataFactory().createAuxdata();
     }
 
     @Test

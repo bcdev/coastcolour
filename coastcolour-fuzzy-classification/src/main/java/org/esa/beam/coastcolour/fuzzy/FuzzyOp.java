@@ -18,7 +18,6 @@ import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
 import org.esa.beam.framework.gpf.pointop.WritableSample;
 
 import java.awt.Color;
-import java.net.URL;
 
 @SuppressWarnings({"UnusedDeclaration"})
 @OperatorMetadata(alias = "CoastColour.FuzzyClassification",
@@ -29,7 +28,6 @@ import java.net.URL;
 public class FuzzyOp extends PixelOperator {
 
     private static final String AUXDATA_PATH = "owt16_meris_stats_101119_5band.hdf";
-    private static final float[] BAND_WAVELENGTHS = new float[]{410.0f, 443.0f, 490.0f, 510.0f, 555.0f, 670.0f};
 
     private static final Color[] CLASS_COLORS = new Color[]{
             new Color(0.3438f, 0.0039f, 0.5703f),
@@ -56,18 +54,18 @@ public class FuzzyOp extends PixelOperator {
     private boolean writeInputReflectances;
 
     private FuzzyClassification fuzzyClassification;
-    private int bandCount;
     private Auxdata auxdata;
+    private OWT_TYPE owtType = OWT_TYPE.COASTAL;
 
     @Override
     protected void configureTargetProduct(ProductConfigurer productConfigurer) {
         super.configureTargetProduct(productConfigurer);
 
-        final URL resourceUrl = FuzzyClassification.class.getResource(AUXDATA_PATH);
+        AuxdataFactory auxdataFactory = owtType.getAuxdataFactory();
         try {
-            auxdata = new Auxdata(resourceUrl.toURI());
-        } catch (Exception e) {
-            throw new OperatorException("Unable to load auxdata", e);
+            auxdata = auxdataFactory.createAuxdata();
+        } catch (AuxdataFactory.Exception e) {
+            throw new OperatorException("Unable to initialise auxdata", e);
         }
 
         Product targetProduct = productConfigurer.getTargetProduct();
@@ -103,10 +101,11 @@ public class FuzzyOp extends PixelOperator {
         normalizedSumBand.setValidPixelExpression(normalizedSumBand.getName() + " > 0.0");
 
         if (writeInputReflectances) {
-            bandCount = auxdata.getSpectralMeans().length;
-            for (int i = 0; i < bandCount; i++) {
-                final String bandName = getSourceBandName(reflectancesPrefix, BAND_WAVELENGTHS[i]);
-                final int bandDataType = sourceProduct.getBand(bandName).getDataType();
+            float[] wavelengths = owtType.getWavelengths();
+            for (float wavelength : wavelengths) {
+                final String bandName = getSourceBandName(reflectancesPrefix, wavelength);
+                Band sourceBand = sourceProduct.getBand(bandName);
+                final int bandDataType = sourceBand.getDataType();
                 final Band reflecBand = targetProduct.addBand(bandName, bandDataType);
             }
         }
@@ -116,9 +115,9 @@ public class FuzzyOp extends PixelOperator {
     protected void configureSourceSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
         fuzzyClassification = new FuzzyClassification(auxdata.getSpectralMeans(),
                                                       auxdata.getInvertedCovarianceMatrices());
-        bandCount = auxdata.getSpectralMeans().length;
-        for (int i = 0; i < bandCount; i++) {
-            final String bandName = getSourceBandName(reflectancesPrefix, BAND_WAVELENGTHS[i]);
+        float[] wavelengths = owtType.getWavelengths();
+        for (int i = 0; i < wavelengths.length; i++) {
+            final String bandName = getSourceBandName(reflectancesPrefix, wavelengths[i]);
             sampleConfigurer.defineSample(i, bandName);
         }
     }
@@ -137,8 +136,9 @@ public class FuzzyOp extends PixelOperator {
 
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
-        if (sourceSamples.length != bandCount) {
-            throw new OperatorException("Wrong number of source samples: Expected: " + bandCount +
+        int numWLs = owtType.getWavelengths().length;
+        if (sourceSamples.length != numWLs) {
+            throw new OperatorException("Wrong number of source samples: Expected: " + numWLs +
                                         ", Actual: " + sourceSamples.length);
         }
 
@@ -152,8 +152,8 @@ public class FuzzyOp extends PixelOperator {
             return;
         }
 
-        double[] rrsBelowWater = new double[bandCount];
-        for (int i = 0; i < bandCount; i++) {
+        double[] rrsBelowWater = new double[numWLs];
+        for (int i = 0; i < numWLs; i++) {
             rrsBelowWater[i] = convertToSubsurfaceWaterRrs(sourceSamples[i].getDouble());
         }
 
@@ -207,7 +207,7 @@ public class FuzzyOp extends PixelOperator {
 
         if (writeInputReflectances) {
             final int targetSampleOffset = CLASS_COUNT * 2 + 3;
-            for (int i = 0; i < bandCount; i++) {
+            for (int i = 0; i < numWLs; i++) {
                 final double reflectance = sourceSamples[i].getDouble();
                 targetSamples[targetSampleOffset + i].set(reflectance);
             }

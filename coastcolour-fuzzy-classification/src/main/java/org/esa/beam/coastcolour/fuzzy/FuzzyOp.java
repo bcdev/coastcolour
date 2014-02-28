@@ -16,17 +16,18 @@ import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
 import org.esa.beam.framework.gpf.pointop.WritableSample;
 import org.esa.beam.util.ProductUtils;
 
-// todo - discuss with CB,KS,AR if sum bands can be removed. Have no additional use to the user. At least the norm_class_sum band
-// todo - convertToSubsurfaceWaterRrs should be configurable; should be discussed with CB,KS,AR
+// todo - (mp;28.02.2014) discuss with CB,KS,AR if sum bands can be removed. Have no additional use to the user. At least the norm_class_sum band
+// todo - (mp;22.11.2010) convertToSubsurfaceWaterRrs should be configurable; should be discussed with CB,KS,AR
+// todo - (mp;28.02.2014) rename class to OWTClassificationOp and alias to OWTClassification
 
 @OperatorMetadata(alias = "CoastColour.FuzzyClassification",
                   description = ".",
                   authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
-                  copyright = "(c) 2010 by Brockmann Consult",
+                  copyright = "(c) 2014 by Brockmann Consult",
                   version = "1.3")
 public class FuzzyOp extends PixelOperator {
 
-    public static final int DOMINANT_CLASS_NO_DATA_VALUE = -1;
+    private static final int DOMINANT_CLASS_NO_DATA_VALUE = -1;
 
     @SourceProduct(alias = "source")
     private Product sourceProduct;

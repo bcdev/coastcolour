@@ -11,7 +11,7 @@ public class FuzzyClassificationTest {
 
     @Before
     public void setup() throws Exception {
-        auxdata = new CoastalAuxdataFactory().createAuxdata();
+        auxdata = new CoastalAuxdataFactory("/auxdata/coastal/owt16_meris_stats_101119_5band.hdf").createAuxdata();
     }
 
     @Test

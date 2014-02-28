@@ -16,7 +16,7 @@ public class Auxdata {
     @Deprecated
     public Auxdata(URI filePath) throws IOException, InvalidRangeException {
         try {
-            Auxdata auxdata = new CoastalAuxdataFactory().createAuxdata();
+            Auxdata auxdata = new CoastalAuxdataFactory("/auxdata/coastal/owt16_meris_stats_101119_5band.hdf").createAuxdata();
             this.spectralMeans = auxdata.spectralMeans;
             this.invCovarianceMatrices = auxdata.invCovarianceMatrices;
         } catch (AuxdataFactory.Exception e) {

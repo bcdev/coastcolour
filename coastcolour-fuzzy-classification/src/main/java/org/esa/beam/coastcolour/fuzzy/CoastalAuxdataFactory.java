@@ -13,13 +13,17 @@ import java.util.List;
  */
 public class CoastalAuxdataFactory extends AuxdataFactory {
 
-    private static final String AUXDATA_PATH = "/auxdata/coastal/owt16_meris_stats_101119_5band.hdf";
+    private final String resourcePath;
+
+    public CoastalAuxdataFactory(String resourcePath) {
+        this.resourcePath = resourcePath;
+    }
 
     @Override
     public Auxdata createAuxdata() throws Exception {
         NetcdfFile netcdfFile;
         try {
-            final URI resourceUri = getClass().getResource(AUXDATA_PATH).toURI();
+            final URI resourceUri = getClass().getResource(resourcePath).toURI();
             netcdfFile = NetcdfFile.openInMemory(resourceUri);
             try {
                 final Group rootGroup = netcdfFile.getRootGroup();

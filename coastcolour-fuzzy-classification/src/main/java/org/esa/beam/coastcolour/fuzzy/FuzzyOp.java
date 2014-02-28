@@ -34,6 +34,9 @@ public class FuzzyOp extends PixelOperator {
     @SourceProduct(alias = "source")
     private Product sourceProduct;
 
+    @Parameter(defaultValue = "COASTAL")
+    private OWT_TYPE owtType;
+
     @Parameter(defaultValue = "reflec")
     private String reflectancesPrefix;
 
@@ -42,7 +45,6 @@ public class FuzzyOp extends PixelOperator {
 
     private FuzzyClassification fuzzyClassification;
     private Auxdata auxdata;
-    private OWT_TYPE owtType = OWT_TYPE.COASTAL;
 
     @Override
     protected void configureTargetProduct(ProductConfigurer productConfigurer) {

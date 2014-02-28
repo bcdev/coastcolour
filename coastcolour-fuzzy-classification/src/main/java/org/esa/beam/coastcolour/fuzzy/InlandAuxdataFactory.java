@@ -41,12 +41,12 @@ public class InlandAuxdataFactory extends AuxdataFactory {
         return new Auxdata(spectralMeans, invCovarianceMatrix);
     }
 
-    static double[][][] reduceCovarianceMatrixToWLs(double[][][] invCovarianceMatrices, int[] useIndices) {
-        double[][][] reducedMatrix = new double[invCovarianceMatrices.length][useIndices.length][useIndices.length];
-        for (int i = 0; i < invCovarianceMatrices.length; i++) {
-            double[][] invCovarianceMatrix = invCovarianceMatrices[i];
+    static double[][][] reduceCovarianceMatrixToWLs(double[][][] invCovarianceMatrix, int[] useIndices) {
+        double[][][] reducedMatrix = new double[invCovarianceMatrix.length][useIndices.length][useIndices.length];
+        for (int i = 0; i < invCovarianceMatrix.length; i++) {
+            double[][] innerInvCovarianceMatrix = invCovarianceMatrix[i];
             for (int j = 0; j < useIndices.length; j++) {
-                double[] innerArray = invCovarianceMatrix[useIndices[j]];
+                double[] innerArray = innerInvCovarianceMatrix[useIndices[j]];
                 for (int k = 0; k < useIndices.length; k++) {
                     reducedMatrix[i][j][k] = innerArray[useIndices[k]];
                 }

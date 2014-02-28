@@ -16,7 +16,7 @@ public class FuzzyClassification {
     /**
      * Creates an instance of the fuzzy classification class.
      *
-     * @param reflectanceMeans  a two dimensional array specifying the mean spectrum for each class.
+     * @param reflectanceMeans       a two dimensional array specifying the mean spectrum for each class.
      *                               The first dimension specifies the number of bands,
      *                               the second specifies the number of classes.
      * @param invertedClassCovMatrix a three dimensional array.
@@ -59,8 +59,9 @@ public class FuzzyClassification {
      *
      * @param reflectances The spectrum to compute the class memberships for.
      *                     The length of the spectrum must be equal to {@link #getWavelengthCount()}
+     *
      * @return The fractional class memberships. The length of the returned array
-     *         is equal to {@link #getClassCount()}
+     * is equal to {@link #getClassCount()}
      */
     public double[] computeClassMemberships(double[] reflectances) {
         final String pattern = "Number of reflectances must be %d but is %d.";
@@ -127,7 +128,6 @@ public class FuzzyClassification {
     }
 
     // Computes the incomplete gamma function by its series representation
-
     private static double computeIGFSeries(double a, double x) {
         if (x < 0.0) {
             throw new IllegalArgumentException("x must be greater or equal to zero");

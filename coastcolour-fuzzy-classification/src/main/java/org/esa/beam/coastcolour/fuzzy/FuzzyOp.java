@@ -24,6 +24,7 @@ import org.esa.beam.util.ProductUtils;
                   version = "1.3")
 public class FuzzyOp extends PixelOperator {
 
+    public static final int DOMINANT_CLASS_NO_DATA_VALUE = -1;
     private int nanPixelCount = 0;
 
     @SourceProduct(alias = "source")
@@ -55,15 +56,13 @@ public class FuzzyOp extends PixelOperator {
         for (int i = 1; i <= owtType.getClassCount(); i++) {
             final Band classBand = targetProduct.addBand("class_" + i, ProductData.TYPE_FLOAT32);
             classBand.setValidPixelExpression(classBand.getName() + " > 0.0");
-            classBand.setNoDataValueUsed(true);
         }
         for (int i = 1; i <= owtType.getClassCount(); i++) {
             final Band normalizedClassBand = targetProduct.addBand("norm_class_" + i, ProductData.TYPE_FLOAT32);
             normalizedClassBand.setValidPixelExpression(normalizedClassBand.getName() + " > 0.0");
-            normalizedClassBand.setNoDataValueUsed(true);
         }
         final Band domClassBand = targetProduct.addBand("dominant_class", ProductData.TYPE_INT8);
-        domClassBand.setNoDataValue(-1);
+        domClassBand.setNoDataValue(DOMINANT_CLASS_NO_DATA_VALUE);
         domClassBand.setNoDataValueUsed(true);
         final IndexCoding indexCoding = new IndexCoding("Cluster_classes");
         for (int i = 1; i <= owtType.getClassCount(); i++) {
@@ -121,11 +120,11 @@ public class FuzzyOp extends PixelOperator {
 
         if (!areSourceSamplesValid(x, y, sourceSamples)) {
             for (int i = 0; i < owtType.getClassCount() * 2; i++) {
-                targetSamples[i].set(Double.NaN);
+                targetSamples[i].set(Double.NaN);  // classes and norm_classes
             }
-            targetSamples[owtType.getClassCount() * 2].set(-1);
-            targetSamples[owtType.getClassCount() * 2 + 1].set(-1);
-            targetSamples[owtType.getClassCount() * 2 + 2].set(Double.NaN);
+            targetSamples[owtType.getClassCount() * 2].set(DOMINANT_CLASS_NO_DATA_VALUE); // dominant_class
+            targetSamples[owtType.getClassCount() * 2 + 1].set(-1); // class_sum
+            targetSamples[owtType.getClassCount() * 2 + 2].set(Double.NaN); // norm_class_sum
             return;
         }
 
@@ -148,11 +147,11 @@ public class FuzzyOp extends PixelOperator {
 
         // setting the value for dominant class, which is the max value of all other classes
         // setting the value for class sum, which is the sum of all other classes
-        int dominantClass = -1;
+        int dominantClass = DOMINANT_CLASS_NO_DATA_VALUE;
         double dominantClassValue = Double.MIN_VALUE;
         double classSum = 0.0;
         double normalizedClassSum = 0.0;
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < owtType.getClassCount(); i++) {
             final double currentClassValue = targetSamples[i].getDouble();
             if (currentClassValue > dominantClassValue) {
                 dominantClassValue = currentClassValue;

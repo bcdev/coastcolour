@@ -221,11 +221,9 @@ public class FuzzyOp extends PixelOperator {
         }
         for (Sample sourceSample : sourceSamples) {
             if (!sourceSample.getNode().isPixelValid(x, y)) {
-                //System.out.println("Rejected invalid pixel: x,y = " + x + "," + y);
                 return false;
             }
             if (Double.isNaN(sourceSample.getDouble())) {
-                //System.out.println("Rejected NaN pixel #" + nanPixelCount + ": x,y = " + x + "," + y);
                 nanPixelCount++;
                 return false;
             }

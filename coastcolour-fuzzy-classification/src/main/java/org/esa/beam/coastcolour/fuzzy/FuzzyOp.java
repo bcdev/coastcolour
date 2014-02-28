@@ -60,7 +60,7 @@ public class FuzzyOp extends PixelOperator {
         final Band domClassBand = targetProduct.addBand("dominant_class", ProductData.TYPE_INT8);
         domClassBand.setNoDataValue(DOMINANT_CLASS_NO_DATA_VALUE);
         domClassBand.setNoDataValueUsed(true);
-        final IndexCoding indexCoding = new IndexCoding("Cluster_classes");
+        final IndexCoding indexCoding = new IndexCoding("Dominant_classes");
         for (int i = 1; i <= owtType.getClassCount(); i++) {
             String name = "class_" + i;
             indexCoding.addIndex(name, i, "Class " + i);

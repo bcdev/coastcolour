@@ -1,17 +1,84 @@
 package org.esa.beam.coastcolour.fuzzy;
 
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.IndexCoding;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.gpf.Operator;
 import org.junit.Test;
 
-import static junit.framework.Assert.*;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class FuzzyOpTest {
 
-    @Test
-    public void testTheOp() throws Exception {
-        new FuzzyOp();
+    private static final float[] MERIS_WAVELENGTHS = new float[]{412, 442, 490, 510, 560, 520, 665, 681, 709, 754, 761, 779, 865, 885, 900};
 
+    @Test
+    public void testTheOpWithDefaults() throws Exception {
+        Operator fuzzyOp = new FuzzyOp();
+        fuzzyOp.setSourceProduct(createSourceProduct());
+        Product targetProduct = fuzzyOp.getTargetProduct();
+
+        assertEquals(21, targetProduct.getNumBands());
+
+        // some band names
+        List<String> bandNames = Arrays.asList(targetProduct.getBandNames());
+        assertTrue(bandNames.contains("class_4"));
+        assertTrue(bandNames.contains("class_9"));
+        assertTrue(bandNames.contains("norm_class_2"));
+        assertTrue(bandNames.contains("norm_class_7"));
+        assertTrue(bandNames.contains("dominant_class"));
+        assertTrue(bandNames.contains("class_sum"));
+        assertTrue(bandNames.contains("norm_class_sum"));
+
+        Band dominant_class = targetProduct.getBand("dominant_class");
+        assertTrue(dominant_class.isIndexBand());
+        IndexCoding indexCoding = dominant_class.getIndexCoding();
+        assertEquals("Dominant_Classes", indexCoding.getName());
+        assertEquals(9, indexCoding.getIndexNames().length);
+    }
+
+    @Test
+    public void testTheOpWithInputReflectances() throws Exception {
+        Operator fuzzyOp = new FuzzyOp();
+        fuzzyOp.setSourceProduct(createSourceProduct());
+        fuzzyOp.setParameter("writeInputReflectances", true);
+        Product targetProduct = fuzzyOp.getTargetProduct();
+
+        assertEquals(26, targetProduct.getNumBands());
+
+        // test some band names
+        List<String> bandNames = Arrays.asList(targetProduct.getBandNames());
+        assertTrue(bandNames.contains("class_4"));
+        assertTrue(bandNames.contains("class_9"));
+        assertTrue(bandNames.contains("norm_class_2"));
+        assertTrue(bandNames.contains("norm_class_7"));
+        assertTrue(bandNames.contains("dominant_class"));
+        assertTrue(bandNames.contains("class_sum"));
+        assertTrue(bandNames.contains("norm_class_sum"));
+        assertTrue(bandNames.contains("reflec_1"));
+        assertTrue(bandNames.contains("reflec_3"));
+        assertTrue(bandNames.contains("reflec_5"));
+
+        Band dominant_class = targetProduct.getBand("dominant_class");
+        assertTrue(dominant_class.isIndexBand());
+        IndexCoding indexCoding = dominant_class.getIndexCoding();
+        assertEquals("Dominant_Classes", indexCoding.getName());
+        assertEquals(9, indexCoding.getIndexNames().length);
+    }
+
+    private Product createSourceProduct() {
+        Product product = new Product("OWT_Input", "REFLEC", 10, 10);
+        for (int i = 0; i < MERIS_WAVELENGTHS.length; i++) {
+            Band reflecBand = product.addBand("reflec_" + (i + 1), ProductData.TYPE_FLOAT32);
+            reflecBand.setSpectralWavelength(MERIS_WAVELENGTHS[i]);
+            reflecBand.setSpectralBandIndex(i);
+            reflecBand.setSpectralBandwidth(10);
+        }
+        return product;
     }
 
     @Test

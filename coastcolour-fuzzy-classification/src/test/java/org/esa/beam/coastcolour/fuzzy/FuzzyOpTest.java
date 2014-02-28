@@ -9,6 +9,12 @@ import static junit.framework.Assert.*;
 public class FuzzyOpTest {
 
     @Test
+    public void testTheOp() throws Exception {
+        new FuzzyOp();
+
+    }
+
+    @Test
     public void testGetBestBandName() throws Exception {
         final Band band1 = new Band("reflec_10", ProductData.TYPE_FLOAT32, 10, 10);
         band1.setSpectralBandIndex(1);

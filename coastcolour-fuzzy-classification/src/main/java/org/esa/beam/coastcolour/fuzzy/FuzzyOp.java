@@ -16,7 +16,9 @@ import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
 import org.esa.beam.framework.gpf.pointop.WritableSample;
 import org.esa.beam.util.ProductUtils;
 
-@SuppressWarnings({"UnusedDeclaration"})
+// todo - discuss with CB,KS,AR if sum bands can be removed. Have no additional use to the user. At least the norm_class_sum band
+// todo - convertToSubsurfaceWaterRrs should be configurable; should be discussed with CB,KS,AR
+
 @OperatorMetadata(alias = "CoastColour.FuzzyClassification",
                   description = ".",
                   authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
@@ -25,7 +27,6 @@ import org.esa.beam.util.ProductUtils;
 public class FuzzyOp extends PixelOperator {
 
     public static final int DOMINANT_CLASS_NO_DATA_VALUE = -1;
-    private int nanPixelCount = 0;
 
     @SourceProduct(alias = "source")
     private Product sourceProduct;
@@ -53,14 +54,9 @@ public class FuzzyOp extends PixelOperator {
 
         Product targetProduct = productConfigurer.getTargetProduct();
 
-        for (int i = 1; i <= owtType.getClassCount(); i++) {
-            final Band classBand = targetProduct.addBand("class_" + i, ProductData.TYPE_FLOAT32);
-            classBand.setValidPixelExpression(classBand.getName() + " > 0.0");
-        }
-        for (int i = 1; i <= owtType.getClassCount(); i++) {
-            final Band normalizedClassBand = targetProduct.addBand("norm_class_" + i, ProductData.TYPE_FLOAT32);
-            normalizedClassBand.setValidPixelExpression(normalizedClassBand.getName() + " > 0.0");
-        }
+        addClassBands("class_", targetProduct);
+        addClassBands("norm_class_", targetProduct);
+
         final Band domClassBand = targetProduct.addBand("dominant_class", ProductData.TYPE_INT8);
         domClassBand.setNoDataValue(DOMINANT_CLASS_NO_DATA_VALUE);
         domClassBand.setNoDataValueUsed(true);
@@ -198,6 +194,13 @@ public class FuzzyOp extends PixelOperator {
         return bestBandName;
     }
 
+    private void addClassBands(String bandNamePrefix, Product targetProduct) {
+        for (int i = 1; i <= owtType.getClassCount(); i++) {
+            final Band classBand = targetProduct.addBand(bandNamePrefix + i, ProductData.TYPE_FLOAT32);
+            classBand.setValidPixelExpression(classBand.getName() + " > 0.0");
+        }
+    }
+
     private String getSourceBandName(String reflectancesPrefix, float wavelength) {
         final Band[] bands = sourceProduct.getBands();
         String bestBandName = getBestBandName(reflectancesPrefix, wavelength, bands);
@@ -223,15 +226,12 @@ public class FuzzyOp extends PixelOperator {
                 return false;
             }
             if (Double.isNaN(sourceSample.getDouble())) {
-                nanPixelCount++;
                 return false;
             }
         }
         return true;
     }
 
-    // todo - conversion should be configurable
-    // should be discussed with CB, KS
     private double convertToSubsurfaceWaterRrs(double merisL2Reflec) {
         // convert to remote sensing reflectances
         final double rrsAboveWater = merisL2Reflec / Math.PI;

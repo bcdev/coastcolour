@@ -26,7 +26,7 @@ public class CoastalAuxdataFactory extends AuxdataFactory {
                 final List<Variable> variableList = rootGroup.getVariables();
 
                 double[][] spectralMeans = null;
-                double[][][] invCovarianceMatrices = null;
+                double[][][] invCovarianceMatrix = null;
                 for (Variable variable : variableList) {
                     if ("class_means".equals(variable.getFullName())) {
                         final Array arrayDouble = getDoubleArray(variable);
@@ -34,13 +34,13 @@ public class CoastalAuxdataFactory extends AuxdataFactory {
                     }
                     if ("class_covariance".equals(variable.getFullName()) || "Yinv".equals(variable.getFullName())) {
                         final Array arrayDouble = getDoubleArray(variable);
-                        invCovarianceMatrices = invertMatrix((double[][][]) arrayDouble.copyToNDJavaArray());
+                        invCovarianceMatrix = invertMatrix((double[][][]) arrayDouble.copyToNDJavaArray());
                     }
-                    if (spectralMeans != null && invCovarianceMatrices != null) {
+                    if (spectralMeans != null && invCovarianceMatrix != null) {
                         break;
                     }
                 }
-                return new Auxdata(spectralMeans, invCovarianceMatrices);
+                return new Auxdata(spectralMeans, invCovarianceMatrix);
             } finally {
                 netcdfFile.close();
             }

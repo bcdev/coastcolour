@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 
 public class FuzzyOpTest {
 
-    private static final float[] MERIS_WAVELENGTHS = new float[]{412, 442, 490, 510, 560, 520, 665, 681, 709, 754, 761, 779, 865, 885, 900};
+    private static final float[] MERIS_WAVELENGTHS = new float[]{412, 442, 490, 510, 560, 620, 665, 681, 709, 754, 761, 779, 865, 885, 900};
 
     @Test
     public void testTheOpWithDefaults() throws Exception {
@@ -68,6 +68,35 @@ public class FuzzyOpTest {
         IndexCoding indexCoding = dominant_class.getIndexCoding();
         assertEquals("Dominant_Classes", indexCoding.getName());
         assertEquals(9, indexCoding.getIndexNames().length);
+    }
+
+    @Test
+    public void testTheOpWithInlandAuxdata() throws Exception {
+        Operator fuzzyOp = new FuzzyOp();
+        fuzzyOp.setSourceProduct(createSourceProduct());
+        fuzzyOp.setParameter("owtType", "INLAND");
+        Product targetProduct = fuzzyOp.getTargetProduct();
+
+//        assertEquals(26, targetProduct.getNumBands());
+//
+//        // test some band names
+//        List<String> bandNames = Arrays.asList(targetProduct.getBandNames());
+//        assertTrue(bandNames.contains("class_4"));
+//        assertTrue(bandNames.contains("class_9"));
+//        assertTrue(bandNames.contains("norm_class_2"));
+//        assertTrue(bandNames.contains("norm_class_7"));
+//        assertTrue(bandNames.contains("dominant_class"));
+//        assertTrue(bandNames.contains("class_sum"));
+//        assertTrue(bandNames.contains("norm_class_sum"));
+//        assertTrue(bandNames.contains("reflec_1"));
+//        assertTrue(bandNames.contains("reflec_3"));
+//        assertTrue(bandNames.contains("reflec_5"));
+//
+//        Band dominant_class = targetProduct.getBand("dominant_class");
+//        assertTrue(dominant_class.isIndexBand());
+//        IndexCoding indexCoding = dominant_class.getIndexCoding();
+//        assertEquals("Dominant_Classes", indexCoding.getName());
+//        assertEquals(9, indexCoding.getIndexNames().length);
     }
 
     @Test

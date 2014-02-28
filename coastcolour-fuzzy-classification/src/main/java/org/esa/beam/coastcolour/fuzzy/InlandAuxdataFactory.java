@@ -32,13 +32,13 @@ public class InlandAuxdataFactory extends AuxdataFactory {
     @Override
     public Auxdata createAuxdata() throws Exception {
         double[][] spectralMeans = loadSpectralMeans();
-        double[][][] invCovarianceMatrices = loadInvCovarianceMatrix();
-        if (spectralMeans == null || invCovarianceMatrices == null) {
+        double[][][] invCovarianceMatrix = loadInvCovarianceMatrix();
+        if (spectralMeans == null || invCovarianceMatrix == null) {
             throw new Exception("Could not load auxiliary data");
         }
         spectralMeans = reduceSpectralMeansToWLs(spectralMeans, wlIndices);
-        invCovarianceMatrices = reduceCovarianceMatrixToWLs(invCovarianceMatrices, wlIndices);
-        return new Auxdata(spectralMeans, invCovarianceMatrices);
+        invCovarianceMatrix = reduceCovarianceMatrixToWLs(invCovarianceMatrix, wlIndices);
+        return new Auxdata(spectralMeans, invCovarianceMatrix);
     }
 
     static double[][][] reduceCovarianceMatrixToWLs(double[][][] invCovarianceMatrices, int[] useIndices) {
@@ -82,7 +82,7 @@ public class InlandAuxdataFactory extends AuxdataFactory {
     }
 
     private double[][][] loadInvCovarianceMatrix() throws Exception {
-        double[][][] invCovarianceMatrices = null;
+        double[][][] invCovarianceMatrix = null;
         try {
             NetcdfFile covMatrixFile = loadFile(COVARIANCE_MATRIX_RESOURCE);
             try {
@@ -92,7 +92,7 @@ public class InlandAuxdataFactory extends AuxdataFactory {
                 for (Variable variable : variableList) {
                     if ("rrs_cov".equals(variable.getFullName())) {
                         final Array arrayDouble = getDoubleArray(variable);
-                        invCovarianceMatrices = invertMatrix((double[][][]) arrayDouble.copyToNDJavaArray());
+                        invCovarianceMatrix = invertMatrix((double[][][]) arrayDouble.copyToNDJavaArray());
                     }
                 }
             } finally {
@@ -101,7 +101,7 @@ public class InlandAuxdataFactory extends AuxdataFactory {
         } catch (java.lang.Exception e) {
             throw new Exception("Could not load auxiliary data", e);
         }
-        return invCovarianceMatrices;
+        return invCovarianceMatrix;
     }
 
     private double[][] loadSpectralMeans() throws Exception {

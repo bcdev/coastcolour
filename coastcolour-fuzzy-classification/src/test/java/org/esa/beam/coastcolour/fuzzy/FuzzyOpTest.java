@@ -70,17 +70,6 @@ public class FuzzyOpTest {
         assertEquals(9, indexCoding.getIndexNames().length);
     }
 
-    private Product createSourceProduct() {
-        Product product = new Product("OWT_Input", "REFLEC", 10, 10);
-        for (int i = 0; i < MERIS_WAVELENGTHS.length; i++) {
-            Band reflecBand = product.addBand("reflec_" + (i + 1), ProductData.TYPE_FLOAT32);
-            reflecBand.setSpectralWavelength(MERIS_WAVELENGTHS[i]);
-            reflecBand.setSpectralBandIndex(i);
-            reflecBand.setSpectralBandwidth(10);
-        }
-        return product;
-    }
-
     @Test
     public void testGetBestBandName() throws Exception {
         final Band band1 = new Band("reflec_10", ProductData.TYPE_FLOAT32, 10, 10);
@@ -96,4 +85,16 @@ public class FuzzyOpTest {
         assertEquals("reflec_10", bestBandName1);
         assertEquals("reflec_20", bestBandName2);
     }
+
+    private Product createSourceProduct() {
+        Product product = new Product("OWT_Input", "REFLEC", 10, 10);
+        for (int i = 0; i < MERIS_WAVELENGTHS.length; i++) {
+            Band reflecBand = product.addBand("reflec_" + (i + 1), ProductData.TYPE_FLOAT32);
+            reflecBand.setSpectralWavelength(MERIS_WAVELENGTHS[i]);
+            reflecBand.setSpectralBandIndex(i);
+            reflecBand.setSpectralBandwidth(10);
+        }
+        return product;
+    }
+
 }

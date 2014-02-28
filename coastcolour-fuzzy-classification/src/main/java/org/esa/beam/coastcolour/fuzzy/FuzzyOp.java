@@ -1,8 +1,6 @@
 package org.esa.beam.coastcolour.fuzzy;
 
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.ColorPaletteDef;
-import org.esa.beam.framework.datamodel.ImageInfo;
 import org.esa.beam.framework.datamodel.IndexCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -18,8 +16,6 @@ import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
 import org.esa.beam.framework.gpf.pointop.WritableSample;
 import org.esa.beam.util.ProductUtils;
 
-import java.awt.Color;
-
 @SuppressWarnings({"UnusedDeclaration"})
 @OperatorMetadata(alias = "CoastColour.FuzzyClassification",
                   description = ".",
@@ -28,19 +24,7 @@ import java.awt.Color;
                   version = "1.3")
 public class FuzzyOp extends PixelOperator {
 
-    private static final Color[] CLASS_COLORS = new Color[]{
-            new Color(0.3438f, 0.0039f, 0.5703f),
-            new Color(0.0039f, 0.1562f, 0.8008f),
-            new Color(0.0039f, 1.0000f, 1.0000f),
-            new Color(0.0469f, 0.9258f, 0.0039f),
-            new Color(0.0039f, 0.4375f, 0.3281f),
-            new Color(0.7490f, 0.5059f, 0.1765f),
-            new Color(0.5490f, 0.3176f, 0.0392f),
-            new Color(1.0000f, 0.0039f, 0.0039f),
-            new Color(1.0000f, 1.0000f, 0f)
-    };
     private int nanPixelCount = 0;
-
 
     @SourceProduct(alias = "source")
     private Product sourceProduct;
@@ -82,15 +66,12 @@ public class FuzzyOp extends PixelOperator {
         domClassBand.setNoDataValue(-1);
         domClassBand.setNoDataValueUsed(true);
         final IndexCoding indexCoding = new IndexCoding("Cluster_classes");
-        final ColorPaletteDef.Point[] points = new ColorPaletteDef.Point[owtType.getClassCount()];
         for (int i = 1; i <= owtType.getClassCount(); i++) {
             String name = "class_" + i;
             indexCoding.addIndex(name, i, "Class " + i);
-            points[i - 1] = new ColorPaletteDef.Point(i - 1, CLASS_COLORS[i - 1], name);
         }
         targetProduct.getIndexCodingGroup().add(indexCoding);
         domClassBand.setSampleCoding(indexCoding);
-        domClassBand.setImageInfo(new ImageInfo(new ColorPaletteDef(points, points.length)));
 
 
         final Band sumBand = targetProduct.addBand("class_sum", ProductData.TYPE_FLOAT32);

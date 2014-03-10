@@ -20,6 +20,7 @@ import org.esa.beam.util.ProductUtils;
 // todo - (mp;22.11.2010) convertToSubsurfaceWaterRrs should be configurable; should be discussed with CB,KS,AR
 // todo - (mp;28.02.2014) rename class to OWTClassificationOp and alias to OWTClassification
 // todo - (mp;28.02.2014) description should be checked by CB,KS,AR
+// todo - (mp;10.03.2014) help is missing
 
 @OperatorMetadata(alias = "CoastColour.FuzzyClassification",
                   description = "Performs a fuzzy classification derived from the water leaving reflectance data.",

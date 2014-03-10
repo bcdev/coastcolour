@@ -19,11 +19,8 @@ public class InlandAuxdataFactory extends AuxdataFactory {
     public static final float[] ALL_WAVELENGTHS = new float[]{412, 443, 490, 510, 531, 547, 555, 560, 620, 665, 667, 670, 678, 680, 709, 748, 754};
     private static final String COVARIANCE_MATRIX_RESOURCE = "/auxdata/inland/rrs_owt_cov_inland.hdf";
     private static final String SPECTRAL_MEANS_RESOURCE = "/auxdata/inland/rrs_owt_means_inland.hdf";
-//    private static final int[] MERIS_WL_INDICES_WITHOUT_BLUEBAND = new int[]{1, 2, 3, 7, 8, 9, 13, 14, 16};
-// as it sensitive to atmospheric correction in the turbid/inland water scenes.
-// Comment by Tim Moore: I've also had better success in leaving out the 412 band when classifying imagery,
 
-    private int[] wlIndices = new int[]{0, 1, 2, 3, 7, 8, 9, 13, 14, 16};
+    private int[] wlIndices;
 
     public InlandAuxdataFactory(float[] useWavelengths) {
         wlIndices = findWavelengthIndices(useWavelengths);
@@ -36,33 +33,9 @@ public class InlandAuxdataFactory extends AuxdataFactory {
         if (spectralMeans == null || invCovarianceMatrix == null) {
             throw new Exception("Could not load auxiliary data");
         }
-        spectralMeans = reduceSpectralMeansToWLs(spectralMeans, wlIndices);
-        invCovarianceMatrix = reduceCovarianceMatrixToWLs(invCovarianceMatrix, wlIndices);
         return new Auxdata(spectralMeans, invCovarianceMatrix);
     }
 
-    static double[][][] reduceCovarianceMatrixToWLs(double[][][] invCovarianceMatrix, int[] useIndices) {
-        double[][][] reducedMatrix = new double[invCovarianceMatrix.length][useIndices.length][useIndices.length];
-        for (int i = 0; i < invCovarianceMatrix.length; i++) {
-            double[][] innerInvCovarianceMatrix = invCovarianceMatrix[i];
-            for (int j = 0; j < useIndices.length; j++) {
-                double[] innerArray = innerInvCovarianceMatrix[useIndices[j]];
-                for (int k = 0; k < useIndices.length; k++) {
-                    reducedMatrix[i][j][k] = innerArray[useIndices[k]];
-                }
-            }
-
-        }
-        return reducedMatrix;
-    }
-
-    static double[][] reduceSpectralMeansToWLs(double[][] spectralMeans, int[] useIndices) {
-        double[][] reducedSpectralMeans = new double[useIndices.length][];
-        for (int i = 0; i < useIndices.length; i++) {
-            reducedSpectralMeans[i] = spectralMeans[useIndices[i]];
-        }
-        return reducedSpectralMeans;
-    }
 
     static int[] findWavelengthIndices(float[] useWavelengths) {
         ArrayList<Integer> wavelengthIdxList = new ArrayList<Integer>();
@@ -92,7 +65,10 @@ public class InlandAuxdataFactory extends AuxdataFactory {
                 for (Variable variable : variableList) {
                     if ("rrs_cov".equals(variable.getFullName())) {
                         final Array arrayDouble = getDoubleArray(variable);
-                        invCovarianceMatrix = invertMatrix((double[][][]) arrayDouble.copyToNDJavaArray());
+                        double[][][] matrix = (double[][][]) arrayDouble.copyToNDJavaArray();
+                        // important first reduce to the wavelength and invert afterwards
+                        double[][][] redMatrix = reduceCovarianceMatrixToWLs(matrix, wlIndices);
+                        invCovarianceMatrix = invertMatrix(redMatrix);
                     }
                 }
             } finally {
@@ -104,8 +80,23 @@ public class InlandAuxdataFactory extends AuxdataFactory {
         return invCovarianceMatrix;
     }
 
+    static double[][][] reduceCovarianceMatrixToWLs(double[][][] covarianceMatrix, int[] useIndices) {
+        double[][][] reducedMatrix = new double[covarianceMatrix.length][useIndices.length][useIndices.length];
+        for (int i = 0; i < covarianceMatrix.length; i++) {
+            double[][] innerCovarianceMatrix = covarianceMatrix[i];
+            for (int j = 0; j < useIndices.length; j++) {
+                double[] innerArray = innerCovarianceMatrix[useIndices[j]];
+                for (int k = 0; k < useIndices.length; k++) {
+                    reducedMatrix[i][j][k] = innerArray[useIndices[k]];
+                }
+            }
+
+        }
+        return reducedMatrix;
+    }
+
     private double[][] loadSpectralMeans() throws Exception {
-        double[][] spectralMean = null;
+        double[][] spectralMeans = null;
         try {
             NetcdfFile specMeansFile = loadFile(SPECTRAL_MEANS_RESOURCE);
             try {
@@ -115,7 +106,8 @@ public class InlandAuxdataFactory extends AuxdataFactory {
                 for (Variable variable : variableList) {
                     if ("class_means".equals(variable.getFullName())) {
                         final Array arrayDouble = getDoubleArray(variable);
-                        spectralMean = (double[][]) arrayDouble.copyToNDJavaArray();
+                        double[][] allSpectralMeans = (double[][]) arrayDouble.copyToNDJavaArray();
+                        spectralMeans = reduceSpectralMeansToWLs(allSpectralMeans, wlIndices);
                     }
                 }
             } finally {
@@ -124,7 +116,15 @@ public class InlandAuxdataFactory extends AuxdataFactory {
         } catch (java.lang.Exception e) {
             throw new Exception("Could not load auxiliary data", e);
         }
-        return spectralMean;
+        return spectralMeans;
+    }
+
+    static double[][] reduceSpectralMeansToWLs(double[][] spectralMeans, int[] useIndices) {
+        double[][] reducedSpectralMeans = new double[useIndices.length][];
+        for (int i = 0; i < useIndices.length; i++) {
+            reducedSpectralMeans[i] = spectralMeans[useIndices[i]];
+        }
+        return reducedSpectralMeans;
     }
 
     private NetcdfFile loadFile(String resourcePath) throws URISyntaxException, IOException {

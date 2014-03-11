@@ -104,7 +104,7 @@ public class InlandAuxdataFactory extends AuxdataFactory {
                 final List<Variable> variableList = rootGroup.getVariables();
 
                 for (Variable variable : variableList) {
-                    if ("class_means".equals(variable.getFullName())) {
+                    if ("class_means".equals(variable.getName())) {
                         final Array arrayDouble = getDoubleArray(variable);
                         double[][] allSpectralMeans = (double[][]) arrayDouble.copyToNDJavaArray();
                         spectralMeans = reduceSpectralMeansToWLs(allSpectralMeans, wlIndices);

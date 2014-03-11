@@ -63,7 +63,7 @@ public class InlandAuxdataFactory extends AuxdataFactory {
                 final List<Variable> variableList = rootGroup.getVariables();
 
                 for (Variable variable : variableList) {
-                    if ("rrs_cov".equals(variable.getFullName())) {
+                    if ("rrs_cov".equals(variable.getName())) {
                         final Array arrayDouble = getDoubleArray(variable);
                         double[][][] matrix = (double[][][]) arrayDouble.copyToNDJavaArray();
                         // important first reduce to the wavelength and invert afterwards

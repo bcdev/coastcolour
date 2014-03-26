@@ -24,8 +24,6 @@
                 <include>*:beam-watermask*</include>
                 <include>*:beam-unmix*</include>
                 <include>*:beam-meris-brr*</include>
-                <include>*:beam-meris-case2-regional*</include>
-                <include>*:beam-meris-glint*</include>
                 <include>*:beam-meris-icol*</include>
                 <include>*:beam-meris-l2auxdata*</include>
                 <include>*:beam-meris-qaa*</include>
@@ -37,7 +35,6 @@
                 <include>*:coastcolour-processing*</include>
                 <include>*:coastcolour-util*</include>
                 <include>*:coastcolour-fuzzy-classification*</include>
-                <include>*:flint-processor*</include>
             </includes>
         </dependencySet>
     </dependencySets>

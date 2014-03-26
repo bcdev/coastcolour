@@ -1,7 +1,7 @@
 package org.esa.beam.coastcolour.processing;
 
-import org.esa.beam.atmosphere.operator.GlintCorrectionOperator;
-import org.esa.beam.atmosphere.operator.ReflectanceEnum;
+import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrectionOperator;
+import org.esa.beam.coastcolour.glint.atmosphere.operator.ReflectanceEnum;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Mask;
@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.HashMap;
 
 @OperatorMetadata(alias = "CoastColour.L2R",
-                  version = "1.6.7",
+                  version = "1.7",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Performs a atmospheric correction. The result contains (normalised) water leaving " +
@@ -151,7 +151,7 @@ public class L2ROp extends Operator {
         sourceProducts.put("merisProduct", l1pProduct);
 
         HashMap<String, Object> glintParameters = createGlintAcParameterMap();
-        glintProduct = GPF.createProduct("Meris.GlintCorrection", glintParameters, sourceProducts);
+        glintProduct = GPF.createProduct("MerisCC.GlintCorrection", glintParameters, sourceProducts);
 
         Product targetProduct = createL2RProduct();
         setTargetProduct(targetProduct);

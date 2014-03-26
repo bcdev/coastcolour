@@ -3,7 +3,7 @@ package org.esa.beam.coastcolour.processing;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.jai.tilecache.DefaultSwapSpace;
 import com.bc.ceres.jai.tilecache.SwappingTileCache;
-import org.esa.beam.atmosphere.operator.GlintCorrectionOperator;
+import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @OperatorMetadata(alias = "CoastColour.L1P",
-                  version = "1.6.7",
+                  version = "1.7",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes a refinement of top of atmosphere radiance and " +

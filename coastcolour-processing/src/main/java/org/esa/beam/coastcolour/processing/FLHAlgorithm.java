@@ -1,6 +1,6 @@
 package org.esa.beam.coastcolour.processing;
 
-import org.esa.beam.atmosphere.operator.GlintCorrection;
+import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrection;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.processor.ProcessorException;
 import org.esa.beam.processor.flh_mci.BaselineAlgorithm;

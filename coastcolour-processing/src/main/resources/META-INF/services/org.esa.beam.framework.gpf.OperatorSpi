@@ -2,3 +2,8 @@ org.esa.beam.coastcolour.processing.L1POp$Spi
 org.esa.beam.coastcolour.processing.L1PIcolOp$Spi
 org.esa.beam.coastcolour.processing.L2ROp$Spi
 org.esa.beam.coastcolour.processing.L2WOp$Spi
+org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrectionOperator$Spi
+org.esa.beam.coastcolour.glint.atmosphere.operator.ToaReflectanceOp$Spi
+org.esa.beam.coastcolour.glint.atmosphere.operator.ToaReflectanceValidationOp$Spi
+org.esa.beam.coastcolour.case2.Case2IOPOperator$Spi
+org.esa.beam.coastcolour.case2.RegionalWaterOp$Spi

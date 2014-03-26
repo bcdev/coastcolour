@@ -1,9 +1,9 @@
 package org.esa.beam.coastcolour.processing;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.atmosphere.operator.GlintCorrection;
-import org.esa.beam.atmosphere.operator.GlintCorrectionOperator;
-import org.esa.beam.atmosphere.operator.MerisFlightDirection;
+import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrection;
+import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrectionOperator;
+import org.esa.beam.coastcolour.glint.atmosphere.operator.MerisFlightDirection;
 import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
@@ -19,8 +19,8 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VirtualBandOpImage;
-import org.esa.beam.meris.case2.RegionalWaterOp;
-import org.esa.beam.meris.case2.water.WaterAlgorithm;
+import org.esa.beam.coastcolour.case2.RegionalWaterOp;
+import org.esa.beam.coastcolour.case2.water.WaterAlgorithm;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 import org.esa.beam.util.SystemUtils;
@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @OperatorMetadata(alias = "CoastColour.L2W",
-                  version = "1.6.7",
+                  version = "1.7",
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +

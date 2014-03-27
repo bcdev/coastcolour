@@ -40,7 +40,7 @@ import java.util.Map;
                   authors = "Marco Peters, Norman Fomferra",
                   copyright = "(c) 2011 Brockmann Consult",
                   description = "Computes a refinement of top of atmosphere radiance and " +
-                                "pixel characterization information.")
+                          "pixel characterization information.")
 public class L1POp extends Operator {
 
     public static final String CC_LAND_FLAG_NAME = "CC_LAND";
@@ -72,12 +72,12 @@ public class L1POp extends Operator {
     private static final String RADIOMETRY_OPERATOR_ALIAS = "Meris.CorrectRadiometry";
     private static final String CLOUD_FLAG_BAND_NAME = "cloud_classif_flags";
 
-    @SourceProduct(alias = "l1b", description = "MERIS L1b (N1) product")
+    @SourceProduct(alias = "MERIS_L1b", description = "MERIS L1b product")
     private Product sourceProduct;
 
     @Parameter(defaultValue = "false",
                label = "Perform ICOL correction",
-               description = "Whether to perform ICOL correction.")
+               description = "Whether to perform ICOL correction (time-consuming for large products!).")
     private boolean doIcol;
 
     @Parameter(defaultValue = "true",
@@ -94,10 +94,6 @@ public class L1POp extends Operator {
                label = "Perform equalization",
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
-
-    @Parameter(defaultValue = "true",
-               description = "Performs pixel classification if enabled.")
-    private boolean useIdepix;
 
     @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03",
                description = "Threshold used by the brightness test in the CoastColour cloud screening.")
@@ -130,16 +126,14 @@ public class L1POp extends Operator {
             attachFileTileCache(l1pProduct);
         }
 
-        if (useIdepix) {
-            HashMap<String, Object> idepixParams = createIdepixParameterMap();
-            idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, idepixParams, radiometryProduct);
+        HashMap<String, Object> idepixParams = createIdepixParameterMap();
+        idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, idepixParams, radiometryProduct);
 
-            checkForExistingFlagBand(idepixProduct, CLOUD_FLAG_BAND_NAME);
-            cloudFlagBand = idepixProduct.getBand(CLOUD_FLAG_BAND_NAME);
+        checkForExistingFlagBand(idepixProduct, CLOUD_FLAG_BAND_NAME);
+        cloudFlagBand = idepixProduct.getBand(CLOUD_FLAG_BAND_NAME);
 
-            attachFlagBandL1P(l1pProduct);
-            sortFlagCodings(l1pProduct);
-        }
+        attachFlagBandL1P(l1pProduct);
+        sortFlagCodings(l1pProduct);
 
         updateL1BMasks(l1pProduct);
         reorderBands(l1pProduct);

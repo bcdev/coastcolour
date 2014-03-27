@@ -112,25 +112,6 @@ public class L1POpTest {
         assertTrue(target.containsBand("altitude"));
     }
 
-    @Test
-    public void testCreateProductWithoutIdepix() throws OperatorException, ParseException {
-
-        Product source = createL1bProduct();
-        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
-        l1pParams.put("useIdepix", false);
-        target = GPF.createProduct("CoastColour.L1P", l1pParams, source);
-        assertNotNull(target);
-
-        Band[] sourceBands = source.getBands();
-        for (Band sourceBand : sourceBands) {
-            assertNotNull("Target band missing: " + sourceBand.getName(), target.getBand(sourceBand.getName()));
-        }
-
-        // Tests l1p_flags does not exist
-        assertFalse("l1p_flags is not expected in target product. Idepix is disabled.",
-                    target.containsBand("l1p_flags"));
-    }
-
     public static void testFlags(Product target, String flagsBandName) {
         Band flagsBand = target.getBand(flagsBandName);
         assertNotNull("Target band missing: " + flagsBandName, flagsBand);

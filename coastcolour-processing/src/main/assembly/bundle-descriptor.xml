@@ -124,8 +124,6 @@
     <doSmile>true</doSmile>
     <!-- Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products. -->
     <doEqualization>true</doEqualization>
-    <!-- Performs pixel classification if enabled. -->
-    <useIdepix>true</useIdepix>
     <!-- Wavelength of the band used by the brightness test in the CoastColour cloud screening. -->
     <brightTestWavelength>865</brightTestWavelength>
     <!-- Threshold used by the brightness test in the CoastColour cloud screening. -->

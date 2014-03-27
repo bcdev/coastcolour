@@ -41,23 +41,34 @@ public class L2ROp extends Operator {
 //    private static final String ATMO_AANN_NET = "atmo_aann/21x5x21_20.4.net";
     private static final String ATMO_AANN_NET = GlintCorrectionOperator.ATMO_AANN_EXTREME_NET_NAME;
 
-    @SourceProduct(description = "MERIS L1B or L1P product")
+    @SourceProduct(alias = "CC_L1P", description = "CC L1P or MERIS L1b product")
     private Product sourceProduct;
 
     @Parameter(defaultValue = "true",
-               label = "Perform calibration",
+               label = "[L1P] Perform calibration",
                description = "Whether to perform the calibration.")
     private boolean doCalibration;
 
     @Parameter(defaultValue = "true",
-               label = "Perform Smile-effect correction",
+               label = "[L1P] Perform Smile-effect correction",
                description = "Whether to perform MERIS Smile-effect correction.")
     private boolean doSmile;
 
     @Parameter(defaultValue = "true",
-               label = "Perform equalization",
+               label = "[L1P] Perform equalization",
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
+
+    @Parameter(label = "[L1P] Bright Test Threshold ", defaultValue = "0.03")
+    private double brightTestThreshold;
+
+    @Parameter(label = "[L1P] Bright Test Reference Wavelength [nm]", defaultValue = "865",
+               valueSet = {
+                       "412", "442", "490", "510", "560",
+                       "620", "665", "681", "705", "753",
+                       "760", "775", "865", "890", "900"
+               })
+    private int brightTestWavelength;
 
     @Parameter(label = "Use climatology map for salinity and temperature", defaultValue = "true",
                description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
@@ -103,17 +114,6 @@ public class L2ROp extends Operator {
                description = "The arithmetic expression used for cloud/ice detection.",
                notEmpty = true, notNull = true)
     private String cloudIceExpression;
-
-    @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03")
-    private double brightTestThreshold;
-
-    @Parameter(label = "Bright Test Reference Wavelength [nm]", defaultValue = "865",
-               valueSet = {
-                       "412", "442", "490", "510", "560",
-                       "620", "665", "681", "705", "753",
-                       "760", "775", "865", "890", "900"
-               })
-    private int brightTestWavelength;
 
     @Parameter(defaultValue = "false", label = "Output TOSA reflectance",
                description = "Toggles the output of Top of Standard Atmosphere reflectance.")

@@ -4,6 +4,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrection;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.MerisFlightDirection;
+import org.esa.beam.coastcolour.glint.atmosphere.operator.ReflectanceEnum;
 import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
@@ -53,31 +54,31 @@ public class L2WOp extends Operator {
     // compile time switch (RD)
     static final boolean ENABLE_OWT_CONC_BANDS = false;
 
-    @SourceProduct(description = "MERIS L1B, L1P or L2R product")
+    @SourceProduct(alias = "CC_L2R", description = "CC L2R, CC L1P or MERIS L1b product")
     private Product sourceProduct;
 
     //@SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)", optional = true)
     private Product classMembershipProduct;
 
     @Parameter(defaultValue = "true",
-               label = "Perform calibration",
+               label = "[L1P] Perform calibration",
                description = "Whether to perform the calibration.")
     private boolean doCalibration;
 
     @Parameter(defaultValue = "true",
-               label = "Perform Smile-effect correction",
+               label = "[L1P] Perform Smile-effect correction",
                description = "Whether to perform MERIS Smile-effect correction.")
     private boolean doSmile;
 
     @Parameter(defaultValue = "true",
-               label = "Perform equalization",
+               label = "[L1P] Perform equalization",
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
 
-    @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03")
+    @Parameter(label = "[L1P] Bright Test Threshold ", defaultValue = "0.03")
     private double brightTestThreshold;
 
-    @Parameter(label = "Bright Test Reference Wavelength [nm]", defaultValue = "865",
+    @Parameter(label = "[L1P] Bright Test Reference Wavelength [nm]", defaultValue = "865",
                valueSet = {
                        "412", "442", "490", "510", "560",
                        "620", "665", "681", "705", "753",
@@ -86,34 +87,57 @@ public class L2WOp extends Operator {
     private int brightTestWavelength;
 
 
-    @Parameter(label = "Use climatology map for salinity and temperature", defaultValue = "true",
+    @Parameter(label = "[L2R] Use climatology map for salinity and temperature", defaultValue = "true",
                description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
                              "for the whole scene.")
     private boolean useSnTMap;
 
-    @Parameter(label = "Use NNs for extreme ranges of coastcolour IOPs", defaultValue = "true",
+    @Parameter(label = "[L2R] Use NNs for extreme ranges of coastcolour IOPs", defaultValue = "true",
                description = "Use special set of NNs to finally derive water IOPs in extreme ranges.")
     private boolean useExtremeCaseMode;
 
-    @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU",
+    @Parameter(label = "[L2R] Average salinity", defaultValue = "35", unit = "PSU",
                description = "The average salinity of the water in the region to be processed.")
     private double averageSalinity;
 
-    @Parameter(label = "Average temperature", defaultValue = "15", unit = "C",
+    @Parameter(label = "[L2R] Average temperature", defaultValue = "15", unit = "C",
                description = "The average temperature of the water in the region to be processed.")
     private double averageTemperature;
 
-    @Parameter(label = "MERIS net (full path required for other than default)",
+    @Parameter(label = "[L2R] MERIS net (full path required for other than default)",
                defaultValue = GlintCorrectionOperator.MERIS_ATMOSPHERIC_EXTREME_NET_NAME,
                description = "The file of the atmospheric net to be used instead of the default neural net.",
                notNull = false)
     private File atmoNetMerisFile;
 
-    @Parameter(label = "Autoassociatve net (full path required for other than default)",
+    @Parameter(label = "[L2R] Autoassociatve net (full path required for other than default)",
                defaultValue = GlintCorrectionOperator.ATMO_AANN_EXTREME_NET_NAME,
                description = "The file of the autoassociative net used for error computed instead of the default neural net.",
                notNull = false)
     private File autoassociativeNetFile;
+
+    @Parameter(defaultValue = "l1p_flags.CC_LAND",
+               label = "[L2R] Land detection expression",
+               description = "The arithmetic expression used for land detection.",
+               notEmpty = true, notNull = true)
+    private String landExpression;
+
+    @Parameter(defaultValue = "(l1p_flags.CC_CLOUD && not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE",
+               label = "[L2R] Cloud/Ice detection expression",
+               description = "The arithmetic expression used for cloud/ice detection.",
+               notEmpty = true, notNull = true)
+    private String cloudIceExpression;
+
+    @Parameter(defaultValue = "false",
+               label = "[L2R] Output water leaving reflectance",
+               description = "Toggles the output of water leaving reflectance.")
+    private boolean outputReflec;
+
+    @Parameter(defaultValue = "RADIANCE_REFLECTANCES", valueSet = {"RADIANCE_REFLECTANCES", "IRRADIANCE_REFLECTANCES"},
+               label = "[L2R] Output water leaving reflectance as",
+               description = "Select if reflectances shall be written as radiances or irradiances. " +
+                       "The irradiances are compatible with standard MERIS product.")
+    private ReflectanceEnum outputReflecAs;
 
     @Parameter(label = "Alternative inverse IOP neural net (optional)",
                description = "The file of the inverse IOP neural net to be used instead of the default.")
@@ -125,25 +149,9 @@ public class L2WOp extends Operator {
                description = "The file of the forward IOP neural net to be used instead of the default.")
     private File forwardIopNnFile;
 
-    @Parameter(defaultValue = "l1p_flags.CC_LAND",
-               label = "Land detection expression",
-               description = "The arithmetic expression used for land detection.",
-               notEmpty = true, notNull = true)
-    private String landExpression;
-
-    @Parameter(defaultValue = "(l1p_flags.CC_CLOUD && not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE",
-               label = "Cloud/Ice detection expression",
-               description = "The arithmetic expression used for cloud/ice detection.",
-               notEmpty = true, notNull = true)
-    private String cloudIceExpression;
-
     @Parameter(defaultValue = "l2r_flags.INPUT_INVALID",
                description = "Expression defining pixels not considered for L2W processing")
     private String invalidPixelExpression;
-
-    @Parameter(defaultValue = "false", label = "Output water leaving reflectance",
-               description = "Toggles the output of water leaving reflectance.")
-    private boolean outputReflec;
 
     @Parameter(defaultValue = "false", label = "Output A_Poc",
                description = "Toggles the output of absorption by particulate organic matter.")
@@ -907,7 +915,7 @@ public class L2WOp extends Operator {
         l2rParams.put("landExpression", landExpression);
         l2rParams.put("cloudIceExpression", cloudIceExpression);
         l2rParams.put("outputNormReflec", true);
-        l2rParams.put("outputReflecAs", "RADIANCE_REFLECTANCES");
+        l2rParams.put("outputReflecAs", outputReflecAs);
         return l2rParams;
     }
 

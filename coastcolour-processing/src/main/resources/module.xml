@@ -79,34 +79,50 @@
 
     <extension point="beam-ui:actions">
         <action>
+            <id>coastcolour</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>CoastColour Processor (MERIS) ...</text>
+            <shortDescr>
+                The MERIS CoastColour Processor (Preprocessing, Atmospheric Correction, and L2 Water Processing)
+            </shortDescr>
+            <mnemonic/>
+            <parent>tool</parent>
+            <helpID>ccProcessor</helpID>
+            <placeAfter/>
+        </action>
+
+        <action>
             <id>coastColourProcessingL1P</id>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
             <operatorName>CoastColour.L1P</operatorName>
-            <text>CoastColour L1P...</text>
-            <dialogTitle>CoastColour L1P Processor</dialogTitle>
+            <text>CoastColour Preprocessing and Pixel Classification...</text>
+            <shortDescr>CoastColour Preprocessing and Pixel Classification (L1P)</shortDescr>
+            <dialogTitle>CoastColour Preprocessing and Pixel Classification</dialogTitle>
             <targetProductNameSuffix>_L1P</targetProductNameSuffix>
             <mnemonic/>
-            <parent>tools</parent>
+            <parent>coastcolour</parent>
         </action>
         <action>
             <id>coastColourProcessingL2R</id>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
             <operatorName>CoastColour.L2R</operatorName>
-            <text>CoastColour L2R...</text>
-            <dialogTitle>CoastColour L2R Processor</dialogTitle>
+            <text>CoastColour Atmospheric Correction...</text>
+            <shortDescr>CoastColour Atmospheric Correction (L2R)</shortDescr>
+            <dialogTitle>CoastColour Atmospheric Correction</dialogTitle>
             <targetProductNameSuffix>_L2R</targetProductNameSuffix>
             <mnemonic/>
-            <parent>tools</parent>
+            <parent>coastcolour</parent>
         </action>
         <action>
             <id>coastColourProcessingL2W</id>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
             <operatorName>CoastColour.L2W</operatorName>
-            <text>CoastColour L2W...</text>
-            <dialogTitle>CoastColour L2W Processor</dialogTitle>
+            <text>CoastColour L2 Water Processor...</text>
+            <shortDescr>CoastColour L2 Water Processor (L2W)</shortDescr>
+            <dialogTitle>CoastColour L2 Water Processor</dialogTitle>
             <targetProductNameSuffix>_L2W</targetProductNameSuffix>
             <mnemonic/>
-            <parent>tools</parent>
+            <parent>coastcolour</parent>
         </action>
     </extension>
 

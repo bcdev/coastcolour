@@ -108,6 +108,31 @@ public enum OWT_TYPE {
         double[] mapMembershipsToClasses(double[] memberships) {
             return memberships;
         }
+    },
+    INLAND_WITHOUT_443 {
+
+        private float[] wavelength = new float[]{412, 490, 510, 560, 620, 665, 680, 709, 754};
+
+        @Override
+        AuxdataFactory getAuxdataFactory() {
+            return new InlandAuxdataFactory(wavelength);
+        }
+
+        @Override
+        float[] getWavelengths() {
+            return wavelength;
+
+        }
+
+        @Override
+        int getClassCount() {
+            return 7;
+        }
+
+        @Override
+        double[] mapMembershipsToClasses(double[] memberships) {
+            return memberships;
+        }
     };
 
     abstract AuxdataFactory getAuxdataFactory();

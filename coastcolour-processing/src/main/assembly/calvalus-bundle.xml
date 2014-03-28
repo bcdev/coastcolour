@@ -34,9 +34,9 @@
                 <include>*:beam-flhmci*</include>
                 <include>*:beam-meris-sdr*</include>
                 <include>*:beam-netcdf*</include>
+                <include>*:beam-owt-classification*</include>
                 <include>*:coastcolour-processing*</include>
                 <include>*:coastcolour-util*</include>
-                <include>*:coastcolour-fuzzy-classification*</include>
                 <include>*:flint-processor*</include>
             </includes>
         </dependencySet>

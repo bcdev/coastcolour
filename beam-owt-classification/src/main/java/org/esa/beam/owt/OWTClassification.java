@@ -6,7 +6,7 @@ import com.bc.ceres.core.Assert;
 /**
  * Computes fractional class memberships for a spectrum.
  */
-public class FuzzyClassification {
+public class OWTClassification {
 
     private final double[][] uReflecMeans;
     private final double[][][] invCovMatrix;
@@ -24,7 +24,7 @@ public class FuzzyClassification {
      *                               the second and third dimensions build up the squared matrix defined by
      *                               the number of wavelength.
      */
-    public FuzzyClassification(double[][] reflectanceMeans, double[][][] invertedClassCovMatrix) {
+    public OWTClassification(double[][] reflectanceMeans, double[][][] invertedClassCovMatrix) {
         wavelengthCount = reflectanceMeans.length;
         classCount = reflectanceMeans[0].length;
         final String pattern = "Number of %s of reflectanceMeans [%d] and invertedClassCovMatrix [%d] do not match.";

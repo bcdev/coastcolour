@@ -46,7 +46,7 @@ public class OWTClassificationOp extends PixelOperator {
     @Parameter(defaultValue = "false")
     private boolean writeInputReflectances;
 
-    private FuzzyClassification fuzzyClassification;
+    private OWTClassification owtClassification;
     private Auxdata auxdata;
 
     @Override
@@ -96,7 +96,7 @@ public class OWTClassificationOp extends PixelOperator {
 
     @Override
     protected void configureSourceSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
-        fuzzyClassification = new FuzzyClassification(auxdata.getSpectralMeans(),
+        owtClassification = new OWTClassification(auxdata.getSpectralMeans(),
                                                       auxdata.getInvertedCovarianceMatrices());
         float[] wavelengths = owtType.getWavelengths();
         for (int i = 0; i < wavelengths.length; i++) {
@@ -141,7 +141,7 @@ public class OWTClassificationOp extends PixelOperator {
             rrsBelowWater[i] = convertToSubsurfaceWaterRrs(sourceSamples[i].getDouble());
         }
 
-        double[] classMemberships = fuzzyClassification.computeClassMemberships(rrsBelowWater);
+        double[] classMemberships = owtClassification.computeClassMemberships(rrsBelowWater);
         double[] classes = owtType.mapMembershipsToClasses(classMemberships);
         for (int i = 0; i < classes.length; i++) {
             targetSamples[i].set(classes[i]);

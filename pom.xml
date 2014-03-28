@@ -73,7 +73,7 @@
     <modules>
         <module>coastcolour-bootstrap</module>
         <module>coastcolour-util</module>
-        <module>coastcolour-fuzzy-classification</module>
+        <module>beam-owt-classification</module>
         <module>coastcolour-processing</module>
         <!-- because of Calvalus changes it does not compile currently -->
         <!--<module>coastcolour-stx</module>-->

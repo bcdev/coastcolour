@@ -1,0 +1,59 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>beam-owt-classification</symbolicName>
+    <version>1.3</version>
+    <name>Optical Water Type Classification Operator</name>
+    <packaging>dir</packaging>
+
+    <description>
+        Performs an optical water type classification based on atmospherically corrected reflectances.
+    </description>
+
+    <changelog>
+        <![CDATA[
+        Changes in 1.3<br/>
+            Renamed module and operator
+            Introduced different OWT types which change the classification.
+        Changes in 1.2.1<br/>
+            Updated dependency version of netcdf and Jama
+                ]]>
+    </changelog>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2014 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-envisat-reader</module>
+    </dependency>
+    <dependency>
+        <module>beam-netcdf</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat-rcp</module>
+        <optional>true</optional>
+    </dependency>
+
+    <categories>Processing,MERIS</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>owtClassification</id>
+            <helpId>owtClassification</helpId>
+            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+            <parent>tools</parent>
+            <text>OWT Classification (MERIS)...</text>
+            <mnemonic>O</mnemonic>
+            <operatorName>OWTClassification</operatorName>
+            <dialogTitle>Optical Water Type Classification</dialogTitle>
+            <targetProductNameSuffix>_owt-class</targetProductNameSuffix>
+        </action>
+    </extension>
+
+
+</module>

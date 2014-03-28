@@ -1,8 +1,6 @@
 package org.esa.beam.coastcolour.processing;
 
 import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrection;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.processor.ProcessorException;
 import org.esa.beam.processor.flh_mci.BaselineAlgorithm;
 
 // TODO (mp, 07.07.2011) - Not clear yet which algorithm to use. None of the new algos seems to work as expected.
@@ -29,13 +27,9 @@ class FLHAlgorithm {
             @Override
             protected BaselineAlgorithm initialValue() {
                 BaselineAlgorithm baselineAlgo = new BaselineAlgorithm();
-                try {
-                    baselineAlgo.setWavelengths((float) FLHAlgorithm.this.lowBandWavelength,
-                                                (float) FLHAlgorithm.this.highBandWavelength,
-                                                (float) FLHAlgorithm.this.signalBandWavelength);
-                } catch (ProcessorException e) {
-                    throw new OperatorException(e);
-                }
+                baselineAlgo.setWavelengths((float) FLHAlgorithm.this.lowBandWavelength,
+                                            (float) FLHAlgorithm.this.highBandWavelength,
+                                            (float) FLHAlgorithm.this.signalBandWavelength);
                 return baselineAlgo;
             }
         };
@@ -51,13 +45,10 @@ class FLHAlgorithm {
         double flh681FromNN = computeStdFlh(reflec);
 
         BaselineAlgorithm gowerAlgorithm = gowerAlgorithmProvider.get();
-        float[] normOldFlh = gowerAlgorithm.process(new float[]{(float) reflec[0]}, new float[]{(float) reflec[2]},
-                                                    new float[]{(float) reflec[1]}, new boolean[]{true}, null);
-        float[] alterOldFlh = gowerAlgorithm.process(new float[]{(float) reflecFromPath[0]},
-                                                     new float[]{(float) reflecFromPath[2]},
-                                                     new float[]{(float) reflecFromPath[1]}, new boolean[]{true}, null);
+        double normOldFlh = gowerAlgorithm.computeLineHeight(reflec[0], reflec[2], reflec[1]);
+        double alterOldFlh = gowerAlgorithm.computeLineHeight(reflecFromPath[0], reflecFromPath[2], reflecFromPath[1]);
 
-        return new double[]{flh681, normOldFlh[0], alterOldFlh[0], flh681FromNN, flh681FromPath};
+        return new double[]{flh681, normOldFlh, alterOldFlh, flh681FromNN, flh681FromPath};
     }
 
     private double computeStdFlh(double[] reflecFromPath) {

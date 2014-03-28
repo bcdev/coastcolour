@@ -51,7 +51,7 @@
             <mnemonic>O</mnemonic>
             <operatorName>OWTClassification</operatorName>
             <dialogTitle>Optical Water Type Classification</dialogTitle>
-            <targetProductNameSuffix>_owt-class</targetProductNameSuffix>
+            <targetProductNameSuffix>_owt</targetProductNameSuffix>
         </action>
     </extension>
 

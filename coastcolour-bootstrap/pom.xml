@@ -34,8 +34,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.esa.beam.coastcolour</groupId>
-            <artifactId>coastcolour-fuzzy-classification</artifactId>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-owt-classification</artifactId>
         </dependency>
     </dependencies>
 

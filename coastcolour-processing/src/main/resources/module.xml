@@ -81,9 +81,9 @@
         <action>
             <id>coastcolour</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
-            <text>CoastColour Processor (MERIS) ...</text>
+            <text>CoastColour Processors (MERIS) ...</text>
             <shortDescr>
-                The MERIS CoastColour Processor (Preprocessing, Atmospheric Correction, and L2 Water Processing)
+                The MERIS CoastColour Processors (Preprocessing, Atmospheric Correction, and In-Water Processing)
             </shortDescr>
             <mnemonic/>
             <parent>tool</parent>
@@ -111,6 +111,7 @@
             <dialogTitle>CoastColour Atmospheric Correction</dialogTitle>
             <targetProductNameSuffix>_L2R</targetProductNameSuffix>
             <mnemonic/>
+            <placeAfter>coastColourProcessingL1P</placeAfter>
             <parent>coastcolour</parent>
         </action>
         <action>
@@ -118,10 +119,11 @@
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
             <operatorName>CoastColour.L2W</operatorName>
             <text>CoastColour L2 Water Processor...</text>
-            <shortDescr>CoastColour L2 Water Processor (L2W)</shortDescr>
-            <dialogTitle>CoastColour L2 Water Processor</dialogTitle>
+            <shortDescr>CoastColour In-Water Processing (L2W)</shortDescr>
+            <dialogTitle>CoastColour In-Water Processing</dialogTitle>
             <targetProductNameSuffix>_L2W</targetProductNameSuffix>
             <mnemonic/>
+            <placeAfter>coastColourProcessingL2R</placeAfter>
             <parent>coastcolour</parent>
         </action>
     </extension>

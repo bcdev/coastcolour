@@ -77,12 +77,12 @@ public class L1POp extends Operator {
 
     @Parameter(defaultValue = "false",
                label = "Perform ICOL correction",
-               description = "Whether to perform ICOL correction (time-consuming for large products!).")
+               description = "Whether to perform ICOL correction (can be time- and memory-consuming for large products!).")
     private boolean doIcol;
 
     @Parameter(defaultValue = "true",
-               label = "Perform calibration",
-               description = "Whether to perform the calibration.")
+               label = "Perform re-calibration",
+               description = "Applies correction from MERIS 2nd to 3rd reprocessing quality.")
     private boolean doCalibration;
 
     @Parameter(defaultValue = "true",

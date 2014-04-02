@@ -174,6 +174,7 @@ public class Case2IOPOperator extends Operator {
 
         if (doAtmosphericCorrection) {
             Operator atmoCorOp = new GlintCorrectionOperator();
+            atmoCorOp.setParameterDefaultValues();
             atmoCorOp.setParameter("doSmileCorrection", doSmileCorrection);
             if (atmoNetFile != null) {
                 atmoCorOp.setParameter("atmoNetMerisFile", atmoNetFile);
@@ -194,7 +195,7 @@ public class Case2IOPOperator extends Operator {
         }
 
         Operator case2Op = new RegionalWaterOp();
-
+        case2Op.setParameterDefaultValues();
         case2Op.setParameter("useSnTMap", useSnTMap);
         case2Op.setParameter("outputSnT", outputSnT);
         case2Op.setParameter("averageSalinity", averageSalinity);

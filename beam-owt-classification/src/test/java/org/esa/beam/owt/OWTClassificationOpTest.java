@@ -19,6 +19,7 @@ public class OWTClassificationOpTest {
     @Test
     public void testTheOpWithDefaults() throws Exception {
         Operator fuzzyOp = new OWTClassificationOp();
+        fuzzyOp.setParameterDefaultValues();
         fuzzyOp.setSourceProduct(createSourceProduct());
         Product targetProduct = fuzzyOp.getTargetProduct();
 
@@ -44,6 +45,7 @@ public class OWTClassificationOpTest {
     @Test
     public void testTheOpWithInputReflectances() throws Exception {
         Operator fuzzyOp = new OWTClassificationOp();
+        fuzzyOp.setParameterDefaultValues();
         fuzzyOp.setSourceProduct(createSourceProduct());
         fuzzyOp.setParameter("writeInputReflectances", true);
         Product targetProduct = fuzzyOp.getTargetProduct();
@@ -73,30 +75,28 @@ public class OWTClassificationOpTest {
     @Test
     public void testTheOpWithInlandAuxdata() throws Exception {
         Operator fuzzyOp = new OWTClassificationOp();
+        fuzzyOp.setParameterDefaultValues();
         fuzzyOp.setSourceProduct(createSourceProduct());
         fuzzyOp.setParameter("owtType", "INLAND");
         Product targetProduct = fuzzyOp.getTargetProduct();
 
-//        assertEquals(26, targetProduct.getNumBands());
-//
-//        // test some band names
-//        List<String> bandNames = Arrays.asList(targetProduct.getBandNames());
-//        assertTrue(bandNames.contains("class_4"));
-//        assertTrue(bandNames.contains("class_9"));
-//        assertTrue(bandNames.contains("norm_class_2"));
-//        assertTrue(bandNames.contains("norm_class_7"));
-//        assertTrue(bandNames.contains("dominant_class"));
-//        assertTrue(bandNames.contains("class_sum"));
-//        assertTrue(bandNames.contains("norm_class_sum"));
-//        assertTrue(bandNames.contains("reflec_1"));
-//        assertTrue(bandNames.contains("reflec_3"));
-//        assertTrue(bandNames.contains("reflec_5"));
-//
-//        Band dominant_class = targetProduct.getBand("dominant_class");
-//        assertTrue(dominant_class.isIndexBand());
-//        IndexCoding indexCoding = dominant_class.getIndexCoding();
-//        assertEquals("Dominant_Classes", indexCoding.getName());
-//        assertEquals(9, indexCoding.getIndexNames().length);
+        assertEquals(17, targetProduct.getNumBands());
+
+        // test some band names
+        List<String> bandNames = Arrays.asList(targetProduct.getBandNames());
+        assertTrue(bandNames.contains("class_4"));
+        assertTrue(bandNames.contains("class_6"));
+        assertTrue(bandNames.contains("norm_class_2"));
+        assertTrue(bandNames.contains("norm_class_7"));
+        assertTrue(bandNames.contains("dominant_class"));
+        assertTrue(bandNames.contains("class_sum"));
+        assertTrue(bandNames.contains("norm_class_sum"));
+
+        Band dominant_class = targetProduct.getBand("dominant_class");
+        assertTrue(dominant_class.isIndexBand());
+        IndexCoding indexCoding = dominant_class.getIndexCoding();
+        assertEquals("Dominant_Classes", indexCoding.getName());
+        assertEquals(7, indexCoding.getIndexNames().length);
     }
 
     @Test

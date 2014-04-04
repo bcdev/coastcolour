@@ -10,10 +10,8 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -26,7 +24,8 @@ import java.util.Properties;
                   description = "tbd",
                   authors = "Olaf Danne, Thomas Storm (Brockmann Consult)",
                   copyright = "(c) 2012 by Brockmann Consult",
-                  version = "0.1")
+                  version = "0.1",
+                  internal = true)
 public class WavelengthMappingOp extends Operator {
 
     @SourceProduct(alias = "source")

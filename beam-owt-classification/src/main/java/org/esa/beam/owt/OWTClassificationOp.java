@@ -16,13 +16,13 @@ import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
 import org.esa.beam.framework.gpf.pointop.WritableSample;
 import org.esa.beam.util.ProductUtils;
 
-// todo - (mp;28.02.2014) discuss with CB,KS,AR if sum bands can be removed. Have no additional use to the user. At least the norm_class_sum band
-// todo - (mp;22.11.2010) convertToSubsurfaceWaterRrs should be configurable; should be discussed with CB,KS,AR
-// todo - (mp;28.02.2014) description should be checked by CB,KS,AR
-// todo - (mp;10.03.2014) help is missing
-// todo - (cb;15.03.2014) provide a text field to enter a "valid pixel expression".
-// todo -                 Currently the OWT is calculated everywhere, including land and clouds.
-// todo -                 If a valid pixel expression would be provided the calculation would be restricted to those pixels
+// todo 1 - (mp;28.02.2014) discuss with CB,KS,AR if sum bands can be removed. Have no additional use to the user. At least the norm_class_sum band
+// todo 2 - (mp;22.11.2010) convertToSubsurfaceWaterRrs should be configurable; should be discussed with CB,KS,AR
+// todo 3 - (mp;28.02.2014) description should be checked by CB,KS,AR
+// todo 4 - (mp;10.03.2014) help is missing
+// todo 5 - (cb;15.03.2014) provide a text field to enter a "valid pixel expression".
+// todo   -                 Currently the OWT is calculated everywhere, including land and clouds.
+// todo   -                 If a valid pixel expression would be provided the calculation would be restricted to those pixels
 
 @OperatorMetadata(alias = "OWTClassification",
                   description = "Performs an optical water type classification based on atmospherically corrected reflectances.",
@@ -246,6 +246,7 @@ public class OWTClassificationOp extends PixelOperator {
         return true;
     }
 
+    // todo 2
     private double convertToSubsurfaceWaterRrs(double merisL2Reflec) {
         // convert to remote sensing reflectances
         final double rrsAboveWater = merisL2Reflec / Math.PI;

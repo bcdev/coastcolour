@@ -28,7 +28,8 @@ import org.esa.beam.util.ProductUtils;
                   description = "Performs an optical water type classification based on atmospherically corrected reflectances.",
                   authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
                   copyright = "(c) 2014 by Timothy Moore (University of New Hampshire) and Brockmann Consult",
-                  version = "1.3")
+                  version = "1.3",
+                  internal = true)
 public class OWTClassificationOp extends PixelOperator {
 
     private static final int DOMINANT_CLASS_NO_DATA_VALUE = -1;
@@ -97,7 +98,7 @@ public class OWTClassificationOp extends PixelOperator {
     @Override
     protected void configureSourceSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
         owtClassification = new OWTClassification(auxdata.getSpectralMeans(),
-                                                      auxdata.getInvertedCovarianceMatrices());
+                                                  auxdata.getInvertedCovarianceMatrices());
         float[] wavelengths = owtType.getWavelengths();
         for (int i = 0; i < wavelengths.length; i++) {
             final String bandName = getSourceBandName(reflectancesPrefix, wavelengths[i]);
@@ -219,7 +220,8 @@ public class OWTClassificationOp extends PixelOperator {
         if (bestBandName == null) {
             throw new OperatorException(
                     String.format("Not able to find band with prefix '%s' and wavelength '%4.3f'.",
-                                  reflectancesPrefix, wavelength));
+                                  reflectancesPrefix, wavelength)
+            );
         }
         return bestBandName;
     }

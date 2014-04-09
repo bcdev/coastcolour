@@ -8,6 +8,7 @@ package org.esa.beam.coastcolour.glint.atmosphere.operator;
  */
 public class GlintResult {
 
+    private double[] toaReflec;
     private double[] tosaReflec;
     private double[] reflec;
     private double tosaQualityIndicator;
@@ -25,6 +26,7 @@ public class GlintResult {
     private double[] autoTosaReflec;
 
     public GlintResult() {
+        toaReflec = new double[12];
         tosaReflec = new double[12];
         autoTosaReflec = new double[12];
         reflec = new double[12];
@@ -48,6 +50,14 @@ public class GlintResult {
 
     public double[] getTosaReflec() {
         return tosaReflec;
+    }
+
+    public double[] getToaReflec() {
+        return toaReflec;
+    }
+
+    public void setToaReflec(double[] toaReflec) {
+        this.toaReflec = toaReflec;
     }
 
     public void setAutoTosaReflec(double[] autoTosaReflec) {

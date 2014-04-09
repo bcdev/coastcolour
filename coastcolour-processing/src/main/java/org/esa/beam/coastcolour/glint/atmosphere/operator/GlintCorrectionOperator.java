@@ -36,13 +36,11 @@ import static org.esa.beam.dataio.envisat.EnvisatConstants.*;
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized", "MismatchedReadAndWriteOfArray"})
 @OperatorMetadata(alias = "MerisCC.GlintCorrection",
                   version = "1.7-SNAPSHOT",
-                  internal= true,
+                  internal = true,
                   authors = "Marco Peters, Roland Doerffer, Olaf Danne",
                   copyright = "(c) 2008 by Brockmann Consult",
                   description = "MERIS atmospheric correction using a neural net.")
 public class GlintCorrectionOperator extends Operator {
-
-    public static final String GLINT_CORRECTION_VERSION = "1.4.5-CC";
 
     public static final int COASTLINE_BIT_INDEX = 1;
     public static final int CLOUD_BIT_INDEX = 2;
@@ -53,54 +51,22 @@ public class GlintCorrectionOperator extends Operator {
     public static final int MIXEDPIXEL_BIT_INDEX = 7;
     public static final int GLINTRISK_BIT_INDEX = 8;
 
+    public static final double TOSA_OOS_THRESH = 0.05;
+
     public static final String L1P_FLAG_BAND_NAME = "l1p_flags";
     public static final String AGC_FLAG_BAND_NAME = "agc_flags";
     private static final String RADIANCE_MERIS_BAND_NAME = "result_radiance_rr89";
     private static final String VALID_EXPRESSION = String.format("!%s.INPUT_INVALID", AGC_FLAG_BAND_NAME);
 
-    // !!!!!!
-    // 'final' state at start of Coastcolour mass production (2012/08/02):
-    // use neural nets which were used on 2012/06/28 (new AC net 31x47x37_57596.9.net provided by RD on that day)
-    // !!!!!!
-
-    // another new net from RD, 2012/07/06:  (changed again to rw_logrtosa)
-//    public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_1618.6.net";
-    // another new net from RD, 2012/07/06:  (logrw_logrtosa)
-//    public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_21434.7.net";
-    // another new net from RD, 2012/06/28: more training!!!
-//    public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_29804.7.net";
-    // another new net from RD, 2012/10/01: less "Rauschen" :-)
-//    public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_120805.4.net";
-    // another new net from RD, 2012/11/28:
-//    public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_134765.0.net";
-    // another new net from RD, 2013/03/08:
     public static final String MERIS_ATMOSPHERIC_EXTREME_NET_NAME = "atmo_correct_meris/37x77x97_100157.4.net";
     public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x77_103733.7.net";
-    // another new net from RD, 2012/06/28:
-//    public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_57596.9.net";
-    // another new net from RD, 2012/06/18:
-//    public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_26651.6.net";
-    // another new net from RD, 2012/06/08:
-//    public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_72066.8.net";
-    public static final String FLINT_ATMOSPHERIC_NET_NAME = "atmo_correct_flint/25x30x40_6936.3.net";
 
-
-    // new net from RD, 2013/03/25:
     public static final String INV_AOT_ANG_NET_NAME = "inv_aotang/97x77x37_326185.2.net";
-//    public static final String INV_AOT_ANG_NET_NAME = "inv_aotang/31x47x37_31103.9.net";
 
-    // finally, switched back to the old NORMALIZATION NET (2012/08/02)
     public static final String NORMALIZATION_NET_NAME = "atmo_normalization/90_2.8.net";
-    // new net from RD, 2012/07/16:
-//    public static final String NORMALIZATION_NET_NAME = "atmo_normalization/23x17_29.6.net";
 
-    // finally (again): new net from RD, 2013/03/25:
     public static final String ATMO_AANN_EXTREME_NET_NAME = "atmo_aann/21x5x21_643.4.net";
     public static final String ATMO_AANN_NET_NAME = "atmo_aann/21x5x21_262.5.net";
-    // finally, switched back to the old AANN NET (2012/08/02)
-//    public static final String ATMO_AANN_NET_NAME = "atmo_aann/21x5x21_20.4.net";
-    // new net from RD, 2012/07/16:
-//    public static final String ATMO_AANN_NET_NAME = "atmo_aann/23x5x23_96.0.net";
 
     public static final String[] REQUIRED_MERIS_TPG_NAMES = {
             MERIS_SUN_ZENITH_DS_NAME,
@@ -116,12 +82,17 @@ public class GlintCorrectionOperator extends Operator {
 
     public static final String ANG_443_865 = "ang_443_865";
     public static final String TAU_550 = "tau_550";
-    public static final String TAU_778 = "tau_778";      // currently not used
-    public static final String TAU_865 = "tau_865";      // currently not used
     public static final String GLINT_RATIO = "glint_ratio";
-    public static final String FLINT_VALUE = "flint_value";
     public static final String BTSM = "b_tsm";
     public static final String ATOT = "a_tot";
+
+    public static final String[] TOA_REFLEC_BAND_NAMES = {
+            "toa_reflec_1", "toa_reflec_2", "toa_reflec_3", "toa_reflec_4", "toa_reflec_5",
+            "toa_reflec_6", "toa_reflec_7", "toa_reflec_8", "toa_reflec_9", "toa_reflec_10",
+            null,
+            "toa_reflec_12", "toa_reflec_13",
+            null, null
+    };
     public static final String[] TOSA_REFLEC_BAND_NAMES = {
             "tosa_reflec_1", "tosa_reflec_2", "tosa_reflec_3", "tosa_reflec_4", "tosa_reflec_5",
             "tosa_reflec_6", "tosa_reflec_7", "tosa_reflec_8", "tosa_reflec_9", "tosa_reflec_10",
@@ -137,7 +108,6 @@ public class GlintCorrectionOperator extends Operator {
             "tosa_reflec_auto_12", "tosa_reflec_auto_13",
             null, null
     };
-    public static final String QUALITY_INDICATOR_BAND_NAME = "quality_indicator";
     public static final String[] REFLEC_BAND_NAMES = {
             "reflec_1", "reflec_2", "reflec_3", "reflec_4", "reflec_5",
             "reflec_6", "reflec_7", "reflec_8", "reflec_9", "reflec_10",
@@ -179,16 +149,12 @@ public class GlintCorrectionOperator extends Operator {
 
     @Parameter(defaultValue = "false",
                label = "Perform Smile-effect correction",
-               description = "Whether to performFlint Smile-effect correction.")
+               description = "Whether to perform Smile-effect correction.")
     private boolean doSmileCorrection;
 
-    @Parameter(defaultValue = "true", label = "Output TOSA reflectance",
+    @Parameter(defaultValue = "true", label = "Output TOA reflectance",
                description = "Toggles the output of Top of Standard Atmosphere reflectance.")
-    private boolean outputTosa;
-
-    @Parameter(defaultValue = "true", label = "Output TOSA Quality Indicator",
-               description = "Toggles the output of Top of Standard Atmosphere reflectance quality indicator.")
-    private boolean outputTosaQualityIndicator;
+    private boolean outputToa;
 
     @Parameter(defaultValue = "false", label = "Output TOSA reflectance of auto assoc. neural net",
                description = "Toggles the output of Top of Standard Atmosphere reflectance calculated by an auto associative neural net.")
@@ -245,10 +211,6 @@ public class GlintCorrectionOperator extends Operator {
     @Parameter(label = "Average temperature", defaultValue = "15", unit = "°C", description = "The Water temperature")
     private double averageTemperature;
 
-    @Parameter(label = "TOSA OOS Threshold", defaultValue = "0.05",
-               description = "TOSA out of scope threshold: If chi_square_error is larger, TOSA_OOS flag is raised.")
-    private double tosaOosThresh;
-
     @Parameter(label = "MERIS net (full path required for other than default)",
                defaultValue = MERIS_ATMOSPHERIC_EXTREME_NET_NAME,
                description = "The file of the atmospheric net to be used instead of the default neural net.",
@@ -267,22 +229,11 @@ public class GlintCorrectionOperator extends Operator {
                notNull = false)
     private File autoassociativeNetFile;
 
-    @Parameter(defaultValue = "false", label = "Use FLINT value in neural net (requires AATSR L1b source product)",
-               description = "Toggles the usage of a FLINT value in neural net.")
-    private boolean useFlint;
-
-    @Parameter(label = "FLINT net (full path required for other than default)",
-               defaultValue = FLINT_ATMOSPHERIC_NET_NAME,
-               description = "The file of the atmospheric net to be used instead of the default neural net.",
-               notNull = false)
-    private File atmoNetFlintFile;
-
     private Band validationBand;
 
     public static final double NO_FLINT_VALUE = -1.0;
     private String merisNeuralNetString;
     private String invAotAngNeuralNetString;
-    private String flintNeuralNetString;
     private String normalizationNeuralNetString;
     private String atmoAaNeuralNetString;
     private SmileCorrectionAuxdata smileAuxData;
@@ -301,7 +252,6 @@ public class GlintCorrectionOperator extends Operator {
     private boolean isFullResolution;
     private Date date;
     private AuxdataProvider snTProvider;
-    private Product flintProduct;
     private Product collocateProduct;
     private Product toaValidationProduct;
 
@@ -309,10 +259,6 @@ public class GlintCorrectionOperator extends Operator {
     @Override
     public void initialize() throws OperatorException {
         validateMerisProduct(merisProduct);
-        if (useFlint && aatsrProduct == null) {
-            throw new OperatorException("Missing required AATSR L1b product for FLINT computation.");
-        }
-        validateAatsrProduct(aatsrProduct);
 
         l1pFlagsNode = merisProduct.getRasterDataNode(L1P_FLAG_BAND_NAME);
         l1FlagsNode = merisProduct.getRasterDataNode(MERIS_L1B_FLAGS_DS_NAME);
@@ -341,8 +287,8 @@ public class GlintCorrectionOperator extends Operator {
         // copy altitude band if it exists and 'beam.envisat.usePixelGeoCoding' is set to true
         if (Boolean.getBoolean("beam.envisat.usePixelGeoCoding") &&
                 merisProduct.containsBand(EnvisatConstants.MERIS_AMORGOS_L1B_ALTIUDE_BAND_NAME)) {
-            Band targetBand = ProductUtils.copyBand(EnvisatConstants.MERIS_AMORGOS_L1B_ALTIUDE_BAND_NAME, merisProduct,
-                                                    outputProduct, true);
+            ProductUtils.copyBand(EnvisatConstants.MERIS_AMORGOS_L1B_ALTIUDE_BAND_NAME, merisProduct,
+                                  outputProduct, true);
         }
 
         setTargetProduct(outputProduct);
@@ -367,10 +313,6 @@ public class GlintCorrectionOperator extends Operator {
         InputStream invAotAngNeuralNetStream = getNeuralNetStream(INV_AOT_ANG_NET_NAME, invAotAngNetFile);
         invAotAngNeuralNetString = readNeuralNetFromStream(invAotAngNeuralNetStream);
 
-        if (useFlint && aatsrProduct != null) {
-            InputStream neuralNetStream = getNeuralNetStream(FLINT_ATMOSPHERIC_NET_NAME, atmoNetFlintFile);
-            flintNeuralNetString = readNeuralNetFromStream(neuralNetStream);
-        }
         if (outputNormReflec) {
             final InputStream neuralNetStream = getClass().getResourceAsStream(NORMALIZATION_NET_NAME);
             normalizationNeuralNetString = readNeuralNetFromStream(neuralNetStream);
@@ -405,10 +347,6 @@ public class GlintCorrectionOperator extends Operator {
 
     @Override
     public void dispose() {
-        if (flintProduct != null) {
-            flintProduct.dispose();
-            flintProduct = null;
-        }
         if (collocateProduct != null) {
             collocateProduct.dispose();
             collocateProduct = null;
@@ -450,7 +388,6 @@ public class GlintCorrectionOperator extends Operator {
                     final int pixelIndex = lineIndex + x;
                     final PixelData inputData = loadMerisPixelData(merisSampleDataMap, pixelIndex);
                     final int pixelX = targetRectangle.x + x;
-                    inputData.flintValue = getFlintValue(pixelX, pixelY);
                     inputData.pixelX = pixelX;
                     inputData.pixelY = pixelY;
 
@@ -472,9 +409,13 @@ public class GlintCorrectionOperator extends Operator {
                         temperature = averageTemperature;
                     }
 
-                    GlintResult glintResult = merisGlintCorrection.perform(inputData, deriveRwFromPath, temperature, salinity, tosaOosThresh);
+                    GlintResult glintResult = merisGlintCorrection.perform(inputData,
+                                                                           deriveRwFromPath,
+                                                                           temperature,
+                                                                           salinity,
+                                                                           TOSA_OOS_THRESH);
 
-                    fillTargetSampleData(targetSampleDataMap, pixelIndex, inputData, glintResult);
+                    fillTargetSampleData(targetSampleDataMap, pixelIndex, glintResult);
                 }
                 pm.worked(1);
             }
@@ -500,27 +441,8 @@ public class GlintCorrectionOperator extends Operator {
         return productType.contains("FR") || productType.contains("FSG");
     }
 
-    private double getFlintValue(int pixelX, int pixelY) {
-        if (flintProduct == null) {
-            return NO_FLINT_VALUE;
-        }
-
-        GeoPos geoPos = targetProduct.getGeoCoding().getGeoPos(new PixelPos(pixelX + 0.5f, pixelY + 0.5f), null);
-        PixelPos pixelPos = flintProduct.getGeoCoding().getPixelPos(geoPos, null);
-        if (!pixelPos.isValid() || pixelPos.x < 0.0f || pixelPos.y < 0.0f) {
-            return NO_FLINT_VALUE;
-        }
-        Band flintBand = flintProduct.getBand(RADIANCE_MERIS_BAND_NAME);
-        Rectangle rect = new Rectangle((int) Math.floor(pixelPos.x), (int) Math.floor(pixelPos.y), 1, 1);
-        Raster data = flintBand.getGeophysicalImage().getData(rect);
-        if (!flintBand.isPixelValid(rect.x, rect.y)) {
-            return NO_FLINT_VALUE;
-        }
-        return data.getSampleDouble(rect.x, rect.y, 0);
-    }
-
     private static Map<String, ProductData> getTargetSampleData(Map<Band, Tile> targetTiles) {
-        final Map<String, ProductData> map = new HashMap<String, ProductData>(targetTiles.size());
+        final Map<String, ProductData> map = new HashMap<>(targetTiles.size());
         for (Map.Entry<Band, Tile> bandTileEntry : targetTiles.entrySet()) {
             final Band band = bandTileEntry.getKey();
             final Tile tile = bandTileEntry.getValue();
@@ -538,7 +460,7 @@ public class GlintCorrectionOperator extends Operator {
 
     }
 
-    private void fillTargetSampleData(Map<String, ProductData> targetSampleData, int pixelIndex, PixelData inputData,
+    private void fillTargetSampleData(Map<String, ProductData> targetSampleData, int pixelIndex,
                                       GlintResult glintResult) {
         final ProductData agcFlagTile = targetSampleData.get(AGC_FLAG_BAND_NAME);
         agcFlagTile.setElemIntAt(pixelIndex, glintResult.getFlag());
@@ -546,29 +468,15 @@ public class GlintCorrectionOperator extends Operator {
         angTile.setElemDoubleAt(pixelIndex, glintResult.getAngstrom());
         final ProductData tau550Tile = targetSampleData.get(TAU_550);
         tau550Tile.setElemDoubleAt(pixelIndex, glintResult.getTau550());
-//        final ProductData tau778Tile = targetSampleData.get(TAU_778);
-//        tau778Tile.setElemDoubleAt(pixelIndex, glintResult.getTau778());
-//        final ProductData tau865Tile = targetSampleData.get(TAU_865);
-//        tau865Tile.setElemDoubleAt(pixelIndex, glintResult.getTau865());
-        if (flintProduct == null) {
-            // glint ratio available as output only for 'non-flint' case (RD, 28.10.09)
-            final ProductData glintTile = targetSampleData.get(GLINT_RATIO);
-            glintTile.setElemDoubleAt(pixelIndex, glintResult.getGlintRatio());
-        } else {
-            final ProductData flintTile = targetSampleData.get(FLINT_VALUE);
-            flintTile.setElemDoubleAt(pixelIndex, inputData.flintValue);
-        }
+        final ProductData glintTile = targetSampleData.get(GLINT_RATIO);
+        glintTile.setElemDoubleAt(pixelIndex, glintResult.getGlintRatio());
         final ProductData btsmTile = targetSampleData.get(BTSM);
         btsmTile.setElemDoubleAt(pixelIndex, glintResult.getBtsm());
         final ProductData atotTile = targetSampleData.get(ATOT);
         atotTile.setElemDoubleAt(pixelIndex, glintResult.getAtot());
 
-        if (outputTosa) {
-            fillTargetSample(TOSA_REFLEC_BAND_NAMES, pixelIndex, targetSampleData, glintResult.getTosaReflec());
-        }
-        if (outputTosa || outputTosaQualityIndicator) {
-            final ProductData quality = targetSampleData.get(QUALITY_INDICATOR_BAND_NAME);
-            quality.setElemDoubleAt(pixelIndex, glintResult.getTosaQualityIndicator());
+        if (outputToa) {
+            fillTargetSample(TOA_REFLEC_BAND_NAMES, pixelIndex, targetSampleData, glintResult.getTosaReflec());
         }
         if (outputAutoTosa) {
             fillTargetSample(AUTO_TOSA_REFLEC_BAND_NAMES, pixelIndex, targetSampleData,
@@ -580,7 +488,7 @@ public class GlintCorrectionOperator extends Operator {
         if (outputNormReflec) {
             fillTargetSample(NORM_REFLEC_BAND_NAMES, pixelIndex, targetSampleData, glintResult.getNormReflec());
         }
-        if (outputPath && useFlint) {
+        if (outputPath) {
             fillTargetSample(PATH_BAND_NAMES, pixelIndex, targetSampleData, glintResult.getPath());
         }
         if (outputTransmittance) {
@@ -639,7 +547,7 @@ public class GlintCorrectionOperator extends Operator {
     }
 
     private Map<String, ProductData> preLoadMerisSources(Rectangle targetRectangle) {
-        final Map<String, ProductData> map = new HashMap<String, ProductData>(27);
+        final Map<String, ProductData> map = new HashMap<>(27);
 
         final Tile validationTile = getSourceTile(validationBand, targetRectangle);
         map.put(validationBand.getName(), validationTile.getRawSamples());
@@ -696,8 +604,6 @@ public class GlintCorrectionOperator extends Operator {
         addFlagAttribute(flagCoding, "SOLZEN", "Large solar zenith angle", GlintCorrection.SOLZEN);
         addFlagAttribute(flagCoding, "ANCIL", "Missing/OOR auxiliary data", GlintCorrection.ANCIL);
         addFlagAttribute(flagCoding, "SUNGLINT", "Risk of sun glint", GlintCorrection.SUNGLINT);
-        addFlagAttribute(flagCoding, "HAS_FLINT", "Flint value available (pixel covered by MERIS/AATSR)",
-                         GlintCorrection.HAS_FLINT);
         addFlagAttribute(flagCoding, "INPUT_INVALID", "Invalid input pixels (LAND || CLOUD_ICE || l1_flags.INVALID)",
                          GlintCorrection.INPUT_INVALID);
         addFlagAttribute(flagCoding, "L2R_INVALID",
@@ -722,9 +628,9 @@ public class GlintCorrectionOperator extends Operator {
         if (outputAutoTosa) {
             groupList.add("tosa_reflec_auto");
         }
-        if (outputTosa) {
-            addSpectralTargetBands(product, TOSA_REFLEC_BAND_NAMES, "TOSA Reflectance at {0} nm", "sr^-1");
-            groupList.add("tosa_reflec");
+        if (outputToa) {
+            addSpectralTargetBands(product, TOA_REFLEC_BAND_NAMES, "TOA Reflectance at {0} nm", "sr^-1");
+            groupList.add("toa_reflec");
         }
         if (outputAutoTosa) {
             addSpectralTargetBands(product, AUTO_TOSA_REFLEC_BAND_NAMES, "TOSA Reflectance at {0} nm", "sr^-1");
@@ -749,7 +655,7 @@ public class GlintCorrectionOperator extends Operator {
             addSpectralTargetBands(product, NORM_REFLEC_BAND_NAMES, descriptionPattern, "sr^-1");
             groupList.add("norm_reflec");
         }
-        if (outputPath && useFlint) {
+        if (outputPath) {
             addSpectralTargetBands(product, PATH_BAND_NAMES, "Water leaving radiance reflectance path at {0} nm",
                                    "dxd");
             groupList.add("path");
@@ -770,21 +676,8 @@ public class GlintCorrectionOperator extends Operator {
         product.setAutoGrouping(sb.toString());
         final Band tau550 = addNonSpectralTargetBand(product, TAU_550, "Spectral aerosol optical depth at 550", "dl");
         tau550.setSpectralWavelength(550);
-//        final Band tau778 = addNonSpectralTargetBand(product, TAU_778, "Spectral aerosol optical depth at 778", "dl");
-//        tau778.setSpectralWavelength(778);
-//        final Band tau865 = addNonSpectralTargetBand(product, TAU_865, "Spectral aerosol optical depth at 865", "dl");
-//        tau865.setSpectralWavelength(865);
 
-        if (outputTosa || outputTosaQualityIndicator) {
-            addNonSpectralTargetBand(product, QUALITY_INDICATOR_BAND_NAME, "Input spectrum out of range check",
-                                     "dl");
-        }
-
-        if (flintProduct == null) {
-            addNonSpectralTargetBand(product, GLINT_RATIO, "Glint ratio", "dl");
-        } else {
-            addNonSpectralTargetBand(product, FLINT_VALUE, "Flint value", "1/sr");
-        }
+        addNonSpectralTargetBand(product, GLINT_RATIO, "Glint ratio", "dl");
 
         addNonSpectralTargetBand(product, BTSM, "Total suspended matter scattering", "m^-1");
         addNonSpectralTargetBand(product, ATOT, "Absorption at 443 nm of all water constituents", "m^-1");
@@ -824,8 +717,6 @@ public class GlintCorrectionOperator extends Operator {
         maskGroup.add(createMask(product, "solzen", "Large solar zenith angle", "agc_flags.SOLZEN", Color.DARK_GRAY, 0.5f));
         maskGroup.add(createMask(product, "ancil", "Missing/OOR auxiliary data", "agc_flags.ANCIL", Color.BLUE, 0.5f));
         maskGroup.add(createMask(product, "sunglint", "Risk of sun glint", "agc_flags.SUNGLINT", Color.YELLOW, 0.5f));
-        maskGroup.add(createMask(product, "has_flint", "Flint value computed (AATSR covered)", "agc_flags.HAS_FLINT",
-                                 Color.RED, 0.5f));
         maskGroup.add(createMask(product, "agc_invalid", "'AGC invalid' pixels (LAND || CLOUD_ICE || l1_flags.INVALID)",
                                  "agc_flags.INPUT_INVALID", Color.RED, 0.5f));
         maskGroup.add(createMask(product, "l2r_invalid", "'L2R invalid' pixels (quality indicator > 3 || CLOUD)",
@@ -898,33 +789,6 @@ public class GlintCorrectionOperator extends Operator {
         }
     }
 
-    private static void validateAatsrProduct(final Product aatsrProduct) {
-        if (aatsrProduct != null) {
-            final String missedBand = validateAatsrProductBands(aatsrProduct);
-            if (!missedBand.isEmpty()) {
-                String message = MessageFormat.format("Missing required band in product {0}: {1}",
-                                                      aatsrProduct.getName(), missedBand);
-                throw new OperatorException(message);
-            }
-            final String missedTPG = validateAatsrProductTpgs(aatsrProduct);
-            if (!missedTPG.isEmpty()) {
-                String message = MessageFormat.format("Missing required raster in product {0}: {1}",
-                                                      aatsrProduct.getName(), missedTPG);
-                throw new OperatorException(message);
-            }
-        }
-    }
-
-    private static void validateFlintProduct(final Product flintProduct) {
-        if (flintProduct != null) {
-            if (!flintProduct.containsBand(RADIANCE_MERIS_BAND_NAME)) {
-                String message = MessageFormat.format("Missing required band in product {0}: {1}",
-                                                      flintProduct.getName(), RADIANCE_MERIS_BAND_NAME);
-                throw new OperatorException(message);
-            }
-        }
-    }
-
     private static String validateMerisProductBands(Product product) {
         List<String> sourceBandNameList = Arrays.asList(product.getBandNames());
         for (String bandName : MERIS_L1B_SPECTRAL_BAND_NAMES) {
@@ -939,36 +803,11 @@ public class GlintCorrectionOperator extends Operator {
         return "";
     }
 
-    private static String validateAatsrProductBands(Product product) {
-        List<String> sourceBandNameList = Arrays.asList(product.getBandNames());
-        for (String bandName : AATSR_L1B_BAND_NAMES) {
-            if (!sourceBandNameList.contains(bandName)) {
-                return bandName;
-            }
-        }
-
-        return "";
-    }
-
-
     private static String validateMerisProductTpgs(Product product) {
         List<String> sourceNodeNameList = new ArrayList<String>();
         sourceNodeNameList.addAll(Arrays.asList(product.getTiePointGridNames()));
         sourceNodeNameList.addAll(Arrays.asList(product.getBandNames()));
         for (String tpgName : REQUIRED_MERIS_TPG_NAMES) {
-            if (!sourceNodeNameList.contains(tpgName)) {
-                return tpgName;
-            }
-        }
-
-        return "";
-    }
-
-    private static String validateAatsrProductTpgs(Product product) {
-        List<String> sourceNodeNameList = new ArrayList<String>();
-        sourceNodeNameList.addAll(Arrays.asList(product.getTiePointGridNames()));
-        sourceNodeNameList.addAll(Arrays.asList(product.getBandNames()));
-        for (String tpgName : REQUIRED_AATSR_TPG_NAMES) {
             if (!sourceNodeNameList.contains(tpgName)) {
                 return tpgName;
             }

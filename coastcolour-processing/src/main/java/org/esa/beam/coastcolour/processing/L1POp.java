@@ -20,6 +20,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.internal.OperatorImage;
+import org.esa.beam.idepix.IdepixProducts;
 import org.esa.beam.idepix.algorithms.coastcolour.CoastColourClassificationOp;
 import org.esa.beam.meris.icol.AeArea;
 import org.esa.beam.meris.icol.meris.MerisOp;
@@ -37,8 +38,8 @@ import java.util.Map;
 
 @OperatorMetadata(alias = "CoastColour.L1P",
                   version = "1.7",
-                  authors = "Marco Peters, Norman Fomferra",
-                  copyright = "(c) 2011 Brockmann Consult",
+                  authors = "C. Brockmann, M. Bouvet, R. Santer, H. Schiller, M. Peters, O. Danne",
+                  copyright = "(c) 2011-2013 Brockmann Consult",
                   description = "Computes a refinement of top of atmosphere radiance and " +
                           "pixel characterization information.")
 public class L1POp extends Operator {
@@ -68,13 +69,16 @@ public class L1POp extends Operator {
 
     private static final long MEGABYTE = 1024L * 1024L;
 
-    private static final String IDEPIX_OPERATOR_ALIAS = "idepix.coastcolour";
+    private static final String IDEPIX_OPERATOR_ALIAS = "Idepix.Water";
     private static final String RADIOMETRY_OPERATOR_ALIAS = "Meris.CorrectRadiometry";
     private static final String CLOUD_FLAG_BAND_NAME = "cloud_classif_flags";
 
-    @SourceProduct(alias = "MERIS_L1b", description = "MERIS L1b product")
+    @SourceProduct(alias = "merisL1B",
+                   label = "MERIS L1B product",
+                   description = "The MERIS L1B input product")
     private Product sourceProduct;
 
+    // CoastColour L1P parameters
     @Parameter(defaultValue = "false",
                label = "Perform ICOL correction",
                description = "Whether to perform ICOL correction (can be time- and memory-consuming for large products!).")
@@ -95,17 +99,27 @@ public class L1POp extends Operator {
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
 
-    @Parameter(label = "Bright Test Threshold ", defaultValue = "0.03",
-               description = "Threshold used by the brightness test in the CoastColour cloud screening.")
-    private double brightTestThreshold;
-    @Parameter(label = "Bright Test Reference Wavelength [nm]", defaultValue = "865",
-               description = "Wavelength of the band used by the brightness test in the CoastColour cloud screening.",
-               valueSet = {
-                       "412", "442", "490", "510", "560",
-                       "620", "665", "681", "705", "753",
-                       "760", "775", "865", "890", "900"
-               })
-    private int brightTestWavelength;
+    // IdePix parameters
+    @Parameter(defaultValue = "2",
+               description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy.",
+               label = "Width of cloud buffer (# of pixels)")
+    private int ccCloudBufferWidth;
+
+    @Parameter(defaultValue = "false",
+               description = "Write Cloud Probability Feature Value to the target product.",
+               label = " Write Cloud Probability Feature Value to the target product")
+    private boolean ccOutputCloudProbabilityFeatureValue = false;
+
+    @Parameter(defaultValue = "1.4",
+               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous.",
+               label = "Cloud screening 'ambiguous' threshold" )
+    private double ccCloudScreeningAmbiguous = 1.4;      // Schiller
+
+    @Parameter(defaultValue = "1.8",
+               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as sure.",
+               label = "Cloud screening 'sure' threshold")
+    private double ccCloudScreeningSure = 1.8;       // Schiller
+
 
     private Band cloudFlagBand;
     private Product idepixProduct;
@@ -119,8 +133,7 @@ public class L1POp extends Operator {
 
         Product l1pProduct = createL1PProduct(radiometryProduct);
 
-        // todo: it is likely not a good idea to put the 'heavy' ICOL on top of the L1P process.
-        // maybe better do ICOL in a separate processing step, invoke it from an empty wrapper operator, e.g. L1PIcolOp
+        // this is time and memory consuming, but was required...
         if (doIcol) {
             l1pProduct = createIcolProduct(l1pProduct);
             attachFileTileCache(l1pProduct);
@@ -128,6 +141,10 @@ public class L1POp extends Operator {
 
         HashMap<String, Object> idepixParams = createIdepixParameterMap();
         idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, idepixParams, radiometryProduct);
+
+        if (ccOutputCloudProbabilityFeatureValue) {
+            ProductUtils.copyBand(CoastColourClassificationOp.CLOUD_PROBABILITY_VALUE, idepixProduct, l1pProduct, true);
+        }
 
         checkForExistingFlagBand(idepixProduct, CLOUD_FLAG_BAND_NAME);
         cloudFlagBand = idepixProduct.getBand(CLOUD_FLAG_BAND_NAME);
@@ -159,15 +176,12 @@ public class L1POp extends Operator {
         }
     }
 
-
     private HashMap<String, Object> createIdepixParameterMap() {
         HashMap<String, Object> idepixParams = new HashMap<String, Object>();
-        idepixParams.put("ccUserDefinedRhoToa442Threshold", brightTestThreshold);
-        idepixParams.put("ccRhoAgReferenceWavelength", brightTestWavelength);
-        idepixParams.put("ccMixedPixel", true);
-        idepixParams.put("ccOutputL2CloudDetection", true);
-        idepixParams.put("ccOutputSchillerCloudValue", false);
-        idepixParams.put("ccOutputRayleigh", true); // required for mixed pixel
+        idepixParams.put("ccCloudBufferWidth", ccCloudBufferWidth);
+        idepixParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
+        idepixParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
+        idepixParams.put("ccOutputCloudProbabilityFeatureValue", ccOutputCloudProbabilityFeatureValue);
         return idepixParams;
     }
 

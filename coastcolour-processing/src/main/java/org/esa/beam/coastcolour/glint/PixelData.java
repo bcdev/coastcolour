@@ -29,7 +29,4 @@ public class PixelData {
     public int validation;
     public int detectorIndex;
 
-    // todo - find better name
-    public double flintValue = GlintCorrectionOperator.NO_FLINT_VALUE;   /* value of the FLINT processor */
-
 }

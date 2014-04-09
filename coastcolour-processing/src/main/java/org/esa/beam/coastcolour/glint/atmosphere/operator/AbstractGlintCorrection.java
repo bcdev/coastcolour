@@ -28,8 +28,6 @@ abstract class AbstractGlintCorrection {
     static final int SOLZEN = 0x40;
     static final int ANCIL = 0x80;
     static final int SUNGLINT = 0x100;
-    static final int HAS_FLINT = 0x200;
-    static final int REFL_INVALID = 0x400;  // todo: define when to raise, currently unused
     static final int INPUT_INVALID = 0x800;  // LAND || CLOUD_ICE || l1_flags.INVALID
     static final int L2R_INVALID = 0x1000;  // quality indicator > 3 || 100% clouds
     static final int L2R_SUSPECT = 0x2000;  // quality indicator > 1 || cloud/buffer/shadow || mixed pixel
@@ -141,19 +139,6 @@ abstract class AbstractGlintCorrection {
         return chi_sum / numDiffs;
     }
 
-    /**
-     * This method checks if the given Flint value is valid
-     * (i.e., not equal to 0.0 or NO_FLINT_VALUE)
-     *
-     * @param flintValue - the value
-     *
-     * @return boolean
-     */
-    static boolean isFlintValueValid(double flintValue) {
-        return (flintValue != GlintCorrectionOperator.NO_FLINT_VALUE &&
-                flintValue != 0.0);
-    }
-
     static boolean isRlToaOor(PixelData pixel) {
         return (pixel.validation & ToaReflectanceValidationOp.RLTOA_OOR_FLAG_MASK) == ToaReflectanceValidationOp.RLTOA_OOR_FLAG_MASK;
     }
@@ -171,9 +156,8 @@ abstract class AbstractGlintCorrection {
      **  with band_nu 17/3/05 R.D.
     --------------------------------------------------------------------------*/
 
-    static boolean isTosaReflectanceValid(double[] tosaRefl, NNffbpAlphaTabFast atmosphereNet,
-                                                  boolean isFlintMode) {
-        int tosaOffset = isFlintMode ? 4 : 6;
+    static boolean isTosaReflectanceValid(double[] tosaRefl, NNffbpAlphaTabFast atmosphereNet) {
+        int tosaOffset = 6;
         double[] inmax = atmosphereNet.getInmax();
         double[] inmin = atmosphereNet.getInmin();
         for (int i = 0; i < tosaRefl.length; i++) {

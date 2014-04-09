@@ -31,22 +31,17 @@ public class L2ROp extends Operator {
     private static final String AGC_FLAGS_NAME = "agc_flags";
     private static final String L2R_FLAGS_NAME = "l2r_flags";
 
-    // another new net from RD, 2012/06/28:
-    // 31x47x37_57596.9.net
-    public static final String MERIS_ATMOSPHERIC_NET_NAME = GlintCorrectionOperator.MERIS_ATMOSPHERIC_EXTREME_NET_NAME;
-    // another new net from RD, 2012/06/18:
-//    public static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_26651.6.net";
-    // another new net from RD, 2012/06/08:
-//    private static final String MERIS_ATMOSPHERIC_NET_NAME = "atmo_correct_meris/31x47x37_72066.8.net";
-//    private static final String ATMO_AANN_NET = "atmo_aann/21x5x21_20.4.net";
-    private static final String ATMO_AANN_NET = GlintCorrectionOperator.ATMO_AANN_EXTREME_NET_NAME;
+    private File atmoNetMerisFile;
+    private File autoassociativeNetFile;
 
-    @SourceProduct(alias = "CC_L1P", description = "CC L1P or MERIS L1b product")
+    @SourceProduct(alias = "ccL1P",
+                   label = "CC L1P or MERIS L1b product",
+                   description = "The CC L1P or MERIS L1b input product")
     private Product sourceProduct;
 
     @Parameter(defaultValue = "true",
-               label = "[L1P] Perform calibration",
-               description = "Whether to perform the calibration.")
+               label = "[L1P] Perform re-calibration",
+               description = "Applies correction from MERIS 2nd to 3rd reprocessing quality.")
     private boolean doCalibration;
 
     @Parameter(defaultValue = "true",
@@ -59,49 +54,27 @@ public class L2ROp extends Operator {
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
 
-    @Parameter(label = "[L1P] Bright Test Threshold ", defaultValue = "0.03")
-    private double brightTestThreshold;
 
-    @Parameter(label = "[L1P] Bright Test Reference Wavelength [nm]", defaultValue = "865",
-               valueSet = {
-                       "412", "442", "490", "510", "560",
-                       "620", "665", "681", "705", "753",
-                       "760", "775", "865", "890", "900"
-               })
-    private int brightTestWavelength;
-
-    @Parameter(label = "Use climatology map for salinity and temperature", defaultValue = "true",
+    @Parameter(defaultValue = "true",
+               label = "Use climatology map for salinity and temperature",
                description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
                        "for the whole scene.")
     private boolean useSnTMap;
 
-    @Parameter(label = "Use NNs for extreme ranges of coastcolour IOPs", defaultValue = "true",
-               description = "Use special set of NNs to finally derive water IOPs in extreme ranges.")
-    private boolean useExtremeCaseMode;
-
-    @Parameter(label = "Average salinity", defaultValue = "35", unit = "PSU",
-               description = "The average salinity of the water in the region to be processed.")
+    @Parameter(defaultValue = "35", unit = "PSU",
+               label = "Average salinity",
+               description = "If no climatology is used, the average salinity of the water in the region to be processed is taken.")
     private double averageSalinity;
 
-    @Parameter(label = "Average temperature", defaultValue = "15", unit = "C",
-               description = "The average temperature of the water in the region to be processed.")
+    @Parameter(defaultValue = "15", unit = "C",
+               label = "Average temperature",
+               description = "If no climatology is used, the average temperature of the water in the region to be processed is taken.")
     private double averageTemperature;
 
-    @Parameter(label = "TOSA OOS Threshold", defaultValue = "0.05",
-               description = "TOSA out of scope threshold: If chi_square_error is larger, TOSA_OOS flag is raised.")
-    private double tosaOosThresh;
-
-    @Parameter(label = "MERIS net (full path required for other than default)",
-               defaultValue = MERIS_ATMOSPHERIC_NET_NAME,
-               description = "The file of the atmospheric net to be used instead of the default neural net.",
-               notNull = false)
-    private File atmoNetMerisFile;
-
-    @Parameter(label = "Autoassociative net (full path required for other than default)",
-               defaultValue = ATMO_AANN_NET,
-               description = "The file of the autoassociative net used for error computed instead of the default neural net.",
-               notNull = false)
-    private File autoassociativeNetFile;
+    @Parameter(defaultValue = "true",
+               label = "Use NNs for extreme ranges of coastcolour IOPs",
+               description = "Use special set of NNs to finally derive water IOPs in extreme ranges.")
+    private boolean useExtremeCaseMode;
 
     @Parameter(defaultValue = "l1p_flags.CC_LAND",
                label = "Land detection expression",
@@ -115,19 +88,13 @@ public class L2ROp extends Operator {
                notEmpty = true, notNull = true)
     private String cloudIceExpression;
 
-    @Parameter(defaultValue = "false", label = "Output TOSA reflectance",
-               description = "Toggles the output of Top of Standard Atmosphere reflectance.")
-    private boolean outputTosa;
+    @Parameter(defaultValue = "false",
+               label = "Output TOA reflectance",
+               description = "Toggles the output of Top of Atmosphere reflectance.")
+    private boolean outputToa;
 
-    // no longer a user option because path and transmittance are no longer output from atmospheric net
-//    @Parameter(defaultValue = "false", label = "Output path reflectance",
-//               description = "Toggles the output of water leaving path reflectance.")
-//    private boolean outputPath;
-//
-//    @Parameter(defaultValue = "false", label = "Output transmittance",
-//               description = "Toggles the output of downwelling irradiance transmittance.")
-//    private boolean outputTransmittance;
-
+    //  RADIANCE_REFLECTANCES   : x
+    //  IRRADIANCE_REFLECTANCES : x * PI      (see GlintCorrection.perform)
     @Parameter(defaultValue = "RADIANCE_REFLECTANCES", valueSet = {"RADIANCE_REFLECTANCES", "IRRADIANCE_REFLECTANCES"},
                label = "Output water leaving reflectance as",
                description = "Select if reflectances shall be written as radiances or irradiances. " +
@@ -147,7 +114,7 @@ public class L2ROp extends Operator {
             l1pProduct = sourceProduct;
         }
 
-        HashMap<String, Product> sourceProducts = new HashMap<String, Product>();
+        HashMap<String, Product> sourceProducts = new HashMap<>();
         sourceProducts.put("merisProduct", l1pProduct);
 
         HashMap<String, Object> glintParameters = createGlintAcParameterMap();
@@ -158,10 +125,9 @@ public class L2ROp extends Operator {
     }
 
     private HashMap<String, Object> createGlintAcParameterMap() {
-        HashMap<String, Object> glintParameters = new HashMap<String, Object>();
+        HashMap<String, Object> glintParameters = new HashMap<>();
         glintParameters.put("doSmileCorrection", false);
-        glintParameters.put("outputTosa", outputTosa);
-        glintParameters.put("outputTosaQualityIndicator", true);
+        glintParameters.put("outputToa", outputToa);
         glintParameters.put("outputReflec", true);
         glintParameters.put("outputNormReflec", true);
         glintParameters.put("outputReflecAs", outputReflecAs);
@@ -171,8 +137,10 @@ public class L2ROp extends Operator {
         glintParameters.put("useSnTMap", useSnTMap);
         glintParameters.put("averageSalinity", averageSalinity);
         glintParameters.put("averageTemperature", averageTemperature);
-        glintParameters.put("tosaOosThresh", tosaOosThresh);
-        if (!useExtremeCaseMode) {
+        if (useExtremeCaseMode) {
+            atmoNetMerisFile = new File(GlintCorrectionOperator.MERIS_ATMOSPHERIC_EXTREME_NET_NAME);
+            autoassociativeNetFile = new File(GlintCorrectionOperator.ATMO_AANN_EXTREME_NET_NAME);
+        } else {
             atmoNetMerisFile = new File(GlintCorrectionOperator.MERIS_ATMOSPHERIC_NET_NAME);
             autoassociativeNetFile = new File(GlintCorrectionOperator.ATMO_AANN_NET_NAME);
         }
@@ -180,18 +148,15 @@ public class L2ROp extends Operator {
         glintParameters.put("autoassociativeNetFile", autoassociativeNetFile);
         glintParameters.put("landExpression", landExpression);
         glintParameters.put("cloudIceExpression", cloudIceExpression);
-        glintParameters.put("useFlint", false);
         return glintParameters;
     }
 
     private HashMap<String, Object> createL1pParameterMap() {
-        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+        HashMap<String, Object> l1pParams = new HashMap<>();
         l1pParams.put("doCalibration", doCalibration);
         l1pParams.put("doSmile", doSmile);
         l1pParams.put("doEqualization", doEqualization);
         l1pParams.put("useIdepix", true);
-        l1pParams.put("brightTestThreshold", brightTestThreshold);
-        l1pParams.put("brightTestWavelength", brightTestWavelength);
         return l1pParams;
     }
 
@@ -320,7 +285,6 @@ public class L2ROp extends Operator {
         FlagCoding l2rFlags = flagCodingGroup.get(L2R_FLAGS_NAME);
         l2rFlags.removeAttribute(l2rFlags.getFlag("LAND"));
         l2rFlags.removeAttribute(l2rFlags.getFlag("CLOUD_ICE"));
-        l2rFlags.removeAttribute(l2rFlags.getFlag("HAS_FLINT"));
         String invalidDescr = "'Input invalid' pixels (" + landExpression + " || " + cloudIceExpression + " || l1_flags.INVALID)";
         l2rFlags.getFlag("INPUT_INVALID").setDescription(invalidDescr);
         String glintDescription = "High sun glint retrieved";
@@ -341,7 +305,6 @@ public class L2ROp extends Operator {
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
         maskGroup.remove(maskGroup.get("agc_land"));
         maskGroup.remove(maskGroup.get("cloud_ice"));
-        maskGroup.remove(maskGroup.get("has_flint"));
         maskGroup.get("aot560_oor").setName("l2r_cc_aot560_oor");
         maskGroup.get("toa_oor").setDescription(toaDescription);
         maskGroup.get("toa_oor").setName("l2r_cc_toa_oor");

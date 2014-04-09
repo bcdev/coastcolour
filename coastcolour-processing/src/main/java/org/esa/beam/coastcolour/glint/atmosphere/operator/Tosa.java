@@ -36,6 +36,7 @@ class Tosa {
     private double[] ed_toa;
     private double[] edTosa;
     private double[] lTosa;
+    private double[] lToa;
     private SmileCorrectionAuxdata smileAuxdata;
 
     /**
@@ -59,6 +60,7 @@ class Tosa {
         lrcPath = new double[length];
         ed_toa = new double[length];
         edTosa = new double[length];
+        lToa = new double[length];
         lTosa = new double[length];
     }
 
@@ -83,7 +85,7 @@ class Tosa {
             sun_toa = retrieveToaFrom(pixel.solar_flux);
         }
 
-        double[] lToa = retrieveToaFrom(pixel.toa_radiance);
+        lToa = retrieveToaFrom(pixel.toa_radiance);
 
         /* calculate relative airmass rayleigh correction for correction layer*/
         if (pixel.altitude < 1.0f) {
@@ -155,6 +157,10 @@ class Tosa {
         rlTosa[8] = correctRlTosa9forWaterVapour(pixel, rlTosa[8]);
 
         return rlTosa;
+    }
+
+    public double[] getlToa() {
+        return lToa;
     }
 
     private double correctRlTosa9forWaterVapour(PixelData pixel, double rlTosa9) {

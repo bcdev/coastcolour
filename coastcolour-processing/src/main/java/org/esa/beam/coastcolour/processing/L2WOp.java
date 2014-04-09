@@ -54,15 +54,17 @@ public class L2WOp extends Operator {
     // compile time switch (RD)
     static final boolean ENABLE_OWT_CONC_BANDS = false;
 
-    @SourceProduct(alias = "CC_L2R", description = "CC L2R, CC L1P or MERIS L1b product")
+    @SourceProduct(alias = "ccL2R",
+                   label = "CC L2R, CC L1P or MERIS L1b product",
+                   description = "CC L2R, CC L1P or MERIS L1b input product")
     private Product sourceProduct;
 
     //@SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)", optional = true)
     private Product classMembershipProduct;
 
     @Parameter(defaultValue = "true",
-               label = "[L1P] Perform calibration",
-               description = "Whether to perform the calibration.")
+               label = "[L1P] Perform re-calibration",
+               description = "Applies correction from MERIS 2nd to 3rd reprocessing quality.")
     private boolean doCalibration;
 
     @Parameter(defaultValue = "true",
@@ -75,46 +77,26 @@ public class L2WOp extends Operator {
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
 
-    @Parameter(label = "[L1P] Bright Test Threshold ", defaultValue = "0.03")
-    private double brightTestThreshold;
-
-    @Parameter(label = "[L1P] Bright Test Reference Wavelength [nm]", defaultValue = "865",
-               valueSet = {
-                       "412", "442", "490", "510", "560",
-                       "620", "665", "681", "705", "753",
-                       "760", "775", "865", "890", "900"
-               })
-    private int brightTestWavelength;
-
-
-    @Parameter(label = "[L2R] Use climatology map for salinity and temperature", defaultValue = "true",
+    @Parameter(defaultValue = "true",
+               label = "[L2R] Use climatology map for salinity and temperature",
                description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
-                             "for the whole scene.")
+                       "for the whole scene.")
     private boolean useSnTMap;
 
-    @Parameter(label = "[L2R] Use NNs for extreme ranges of coastcolour IOPs", defaultValue = "true",
-               description = "Use special set of NNs to finally derive water IOPs in extreme ranges.")
-    private boolean useExtremeCaseMode;
-
-    @Parameter(label = "[L2R] Average salinity", defaultValue = "35", unit = "PSU",
-               description = "The average salinity of the water in the region to be processed.")
+    @Parameter(defaultValue = "35", unit = "PSU",
+               label = "[L2R] Average salinity",
+               description = "If no climatology is used, the average salinity of the water in the region to be processed is taken.")
     private double averageSalinity;
 
-    @Parameter(label = "[L2R] Average temperature", defaultValue = "15", unit = "C",
-               description = "The average temperature of the water in the region to be processed.")
+    @Parameter(defaultValue = "15", unit = "C",
+               label = "[L2R] Average temperature",
+               description = "If no climatology is used, the average temperature of the water in the region to be processed is taken.")
     private double averageTemperature;
 
-    @Parameter(label = "[L2R] MERIS net (full path required for other than default)",
-               defaultValue = GlintCorrectionOperator.MERIS_ATMOSPHERIC_EXTREME_NET_NAME,
-               description = "The file of the atmospheric net to be used instead of the default neural net.",
-               notNull = false)
-    private File atmoNetMerisFile;
-
-    @Parameter(label = "[L2R] Autoassociatve net (full path required for other than default)",
-               defaultValue = GlintCorrectionOperator.ATMO_AANN_EXTREME_NET_NAME,
-               description = "The file of the autoassociative net used for error computed instead of the default neural net.",
-               notNull = false)
-    private File autoassociativeNetFile;
+    @Parameter(defaultValue = "true",
+               label = "[L2R] Use NNs for extreme ranges of coastcolour IOPs",
+               description = "Use special set of NNs to finally derive water IOPs in extreme ranges.")
+    private boolean useExtremeCaseMode;
 
     @Parameter(defaultValue = "l1p_flags.CC_LAND",
                label = "[L2R] Land detection expression",
@@ -129,25 +111,18 @@ public class L2WOp extends Operator {
     private String cloudIceExpression;
 
     @Parameter(defaultValue = "false",
-               label = "[L2R] Output water leaving reflectance",
-               description = "Toggles the output of water leaving reflectance.")
-    private boolean outputReflec;
+               label = "[L2R] Output TOA reflectance",
+               description = "Toggles the output of Top of Atmosphere reflectance.")
+    private boolean outputToa;
 
+    //  RADIANCE_REFLECTANCES   : x
+    //  IRRADIANCE_REFLECTANCES : x * PI      (see GlintCorrection.perform)
     @Parameter(defaultValue = "RADIANCE_REFLECTANCES", valueSet = {"RADIANCE_REFLECTANCES", "IRRADIANCE_REFLECTANCES"},
                label = "[L2R] Output water leaving reflectance as",
                description = "Select if reflectances shall be written as radiances or irradiances. " +
                        "The irradiances are compatible with standard MERIS product.")
-    private ReflectanceEnum outputReflecAs;
+    private ReflectanceEnum outputReflecAs;      // todo: check consistency L2R/L2W!
 
-    @Parameter(label = "Alternative inverse IOP neural net (optional)",
-               description = "The file of the inverse IOP neural net to be used instead of the default.")
-    private File inverseIopNnFile;
-    @Parameter(label = "Alternative inverse Kd neural net (optional)",
-               description = "The file of the inverse Kd neural net to be used instead of the default.")
-    private File inverseKdNnFile;
-    @Parameter(label = "Alternative forward IOP neural net (optional)",
-               description = "The file of the forward IOP neural net to be used instead of the default.")
-    private File forwardIopNnFile;
 
     @Parameter(defaultValue = "l2r_flags.INPUT_INVALID",
                description = "Expression defining pixels not considered for L2W processing")
@@ -162,51 +137,41 @@ public class L2WOp extends Operator {
                              "If disabled only Kd_490 is added to the output.")
     private boolean outputKdSpectrum;
 
-    @Parameter(defaultValue = "false", label = "Output experimental FLH",
-               description = "Toggles the output of the experimental fluorescence line height.")
-    private boolean outputFLH;
-
-    @Parameter(defaultValue = "false", label = "Use QAA for IOP and concentration computation",
-               description = "If enabled IOPs are computed by QAA instead of Case-2-Regional. " +
-                             "Concentrations of chlorophyll and total suspended matter will be derived from the IOPs.")
-    private boolean useQaaForIops;
-
-    @Parameter(defaultValue = "-0.02", label = "'A_TOTAL' lower bound",
-               description = "The lower bound of the valid value range.")
-    private float qaaATotalLower;
-    @Parameter(defaultValue = "5.0", label = "'A_TOTAL' upper bound",
-               description = "The upper bound of the valid value range.")
-    private float qaaATotalUpper;
-    @Parameter(defaultValue = "-0.2", label = "'BB_SPM' lower bound",
-               description = "The lower bound of the valid value range.")
-    private float qaaBbSpmLower;
-    @Parameter(defaultValue = "5.0", label = "'BB_SPM' upper bound",
-               description = "The upper bound of the valid value range.")
-    private float qaaBbSpmUpper;
-    @Parameter(defaultValue = "-0.02", label = "'A_PIG' lower bound",
-               description = "The lower bound of the valid value range.")
-    private float qaaAPigLower;
-    @Parameter(defaultValue = "3.0", label = "'A_PIG' upper bound",
-               description = "The upper bound of the valid value range.")
-    private float qaaAPigUpper;
-    @Parameter(defaultValue = "1.0", label = "'A_YS' upper bound",
-               description = "The upper bound of the valid value range. The lower bound is always 0.")
-    private float qaaAYsUpper;
+//    @Parameter(defaultValue = "-0.02", label = "'A_TOTAL' lower bound",
+//               description = "The lower bound of the valid value range.")
+    private float qaaATotalLower = -0.02f;
+//    @Parameter(defaultValue = "5.0", label = "'A_TOTAL' upper bound",
+//               description = "The upper bound of the valid value range.")
+    private float qaaATotalUpper = 5.0f;
+//    @Parameter(defaultValue = "-0.2", label = "'BB_SPM' lower bound",
+//               description = "The lower bound of the valid value range.")
+    private float qaaBbSpmLower = -0.2f;
+//    @Parameter(defaultValue = "5.0", label = "'BB_SPM' upper bound",
+//               description = "The upper bound of the valid value range.")
+    private float qaaBbSpmUpper = 5.0f;
+//    @Parameter(defaultValue = "-0.02", label = "'A_PIG' lower bound",
+//               description = "The lower bound of the valid value range.")
+    private float qaaAPigLower = -0.02f;
+//    @Parameter(defaultValue = "3.0", label = "'A_PIG' upper bound",
+//               description = "The upper bound of the valid value range.")
+    private float qaaAPigUpper = 3.0f;
+//    @Parameter(defaultValue = "1.0", label = "'A_YS' upper bound",
+//               description = "The upper bound of the valid value range. The lower bound is always 0.")
+    private float qaaAYsUpper = 1.0f;
     @Parameter(defaultValue = "false", label = "Divide source Rrs by PI(3.14)",
                description = "If selected the source remote reflectances are divided by PI.")
     private boolean qaaDivideByPI;
 
-    @Parameter(defaultValue = "0.8", label = "Membership class sum threshold",
-               description = "Threshold for the sum of the class memberships.")
-    private double membershipClassSumThresh;
-
     private int nadirColumnIndex;
-    private FLHAlgorithm flhAlgorithm;
     private Product l2rProduct;
     private Product qaaProduct;
     private Product case2rProduct;
     private VirtualBandOpImage invalidOpImage;
     private VirtualBandOpImage invalidL2wImage;
+
+    private File inverseIopNnFile;
+    private File inverseKdNnFile;
+    private File forwardIopNnFile;
 
     private static final String[] iopForwardNets =
             new String[]{
@@ -254,20 +219,12 @@ public class L2WOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        if (outputFLH && isL2RSourceProduct(sourceProduct)) {
-            throw new OperatorException("In order to compute 'FLH' the input must be L1B or L1P.");
-        }
         nadirColumnIndex = MerisFlightDirection.findNadirColumnIndex(sourceProduct);
 
         l2rProduct = sourceProduct;
         if (!isL2RSourceProduct(l2rProduct)) {
             HashMap<String, Object> l2rParams = createL2RParameterMap();
             l2rProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
-        }
-
-        if (outputFLH) {
-            float[] bandWavelengths = getWavelengths(l2rProduct, FLH_INPUT_BAND_NUMBERS);
-            flhAlgorithm = new FLHAlgorithm(bandWavelengths[0], bandWavelengths[1], bandWavelengths[2]);
         }
 
         Operator case2Op = new RegionalWaterOp.Spi().createOperator();
@@ -295,9 +252,9 @@ public class L2WOp extends Operator {
         l2wProductFactory = new Case2rL2WProductFactory(l2rProduct, case2rProduct);
 
         l2wProductFactory.setInvalidPixelExpression(invalidPixelExpression);
-        l2wProductFactory.setOutputFLH(outputFLH);
+        l2wProductFactory.setOutputFLH(false);
         l2wProductFactory.setOutputKdSpectrum(outputKdSpectrum);
-        l2wProductFactory.setOutputReflectance(outputReflec);
+        l2wProductFactory.setOutputReflectance(true);
 
         ((QaaL2WProductFactory) l2wQaaIopProductFactory).setIopBandsOnly(true);  // we only need to have the iop bands in this product...
         l2wQaaIopProductFactory.setInvalidPixelExpression(invalidPixelExpression);
@@ -326,7 +283,7 @@ public class L2WOp extends Operator {
                 throw new RuntimeException("Unable to install auxdata of the costcolour module");
             }
             if (ENABLE_OWT_CONC_BANDS) {
-                computeSingleCase2RProductsFromFuzzyApproach(auxDataDir, l2WProduct);
+                computeSingleCase2RProductsFromFuzzyApproach(auxDataDir);
             }
 
             Band concTsmNnBand = ProductUtils.copyBand("tsm", case2rProduct, "conc_tsm", l2WProduct, true);
@@ -392,7 +349,7 @@ public class L2WOp extends Operator {
         setTargetProduct(l2WProduct);
     }
 
-    private void computeSingleCase2RProductsFromFuzzyApproach(File auxDataDir, Product l2WProduct) {
+    private void computeSingleCase2RProductsFromFuzzyApproach(File auxDataDir) {
         c2rSingleProducts = new Product[NUMBER_OF_WATER_NETS];
         for (int i = 0; i < NUMBER_OF_WATER_NETS; i++) {
             Operator case2Op = new RegionalWaterOp.Spi().createOperator();
@@ -401,10 +358,6 @@ public class L2WOp extends Operator {
             inverseKdNnFile = new File(auxDataDir, kdInverseNets[i]);
             setCase2rParameters(case2Op);
             c2rSingleProducts[i] = case2Op.getTargetProduct();
-//            Band band = ProductUtils.copyBand("tsm", c2rSingleProducts[i], "conc_tsm_m" + (i + 1), l2WProduct, true);
-//            band.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
-//            band = ProductUtils.copyBand("chl_conc", c2rSingleProducts[i], "conc_chl_m" + (i+1), l2WProduct, true);
-//            band.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
         }
     }
 
@@ -434,34 +387,7 @@ public class L2WOp extends Operator {
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws
                                                                                                              OperatorException {
-        Tile satzen = null;
-        Tile solzen = null;
-        Tile[] flhReflecTiles = null;
-        Tile[] tosaReflecTiles = null;
-        Tile[] pathTiles = null;
-        Tile[] transTiles = null;
-        Tile flhTile = null;
-        Tile flhOldNormTile = null;
-        Tile flhOldAltTile = null;
-        Tile flhAltTile = null;
-        Tile flhNormTile = null;
         final Product targetProduct = getTargetProduct();
-        if (outputFLH) {
-            RasterDataNode satzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME);
-            RasterDataNode solzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
-            satzen = getSourceTile(satzenNode, targetRectangle);
-            solzen = getSourceTile(solzenNode, targetRectangle);
-
-            flhReflecTiles = getTiles(targetRectangle, FLH_INPUT_BAND_NUMBERS, "reflec_");
-            tosaReflecTiles = getTiles(targetRectangle, FLH_INPUT_BAND_NUMBERS, "tosa_reflec_");
-            pathTiles = getTiles(targetRectangle, FLH_INPUT_BAND_NUMBERS, "path_");
-            transTiles = getTiles(targetRectangle, FLH_INPUT_BAND_NUMBERS, "trans_");
-            flhTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_681_NAME));
-            flhOldNormTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_NORM_OLD_681_NAME));
-            flhOldAltTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_ALT_OLD_681_NAME));
-            flhAltTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_681_ALT_NAME));
-            flhNormTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.EXP_FLH_681_NORM_NAME));
-        }
 
         Tile l2wFlagTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.L2W_FLAGS_NAME));
         Tile oc4Tile = targetTiles.get(concChlOc4Band);
@@ -480,17 +406,11 @@ public class L2WOp extends Operator {
         double[] membershipTileValues;
         double[] chlSingleTileValues;
         double[] tsmSingleTileValues;
-        Tile chlTile = null;
-        Tile tsmTile = null;
-        Tile c2rChlTile = null;
-        Tile c2rTsmTile = null;
         Tile[] chlSingleTiles;
         Tile[] tsmSingleTiles;
         Tile[] membershipTiles;
 
         if (ENABLE_OWT_CONC_BANDS) {
-//            chlTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.OWT_CONC_CHL_NAME));
-//            tsmTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.OWT_CONC_TSM_NAME));
 
             chlSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
             tsmSingleTiles = new Tile[NUMBER_OF_WATER_NETS];
@@ -507,61 +427,10 @@ public class L2WOp extends Operator {
             }
         }
 
-
-//        if (useQaaForIops) {
-//            final Tile rho620Tile = getSourceTile(l2rProduct.getBand("reflec_6"), targetRectangle);
-//            // Maybe problematic: get a source tile from the target product. Weird.
-//            final Tile bbSPM443Tile = getSourceTile(targetProduct.getBand(L2WProductFactory.IOP_BB_SPM_443_NAME),
-//                                                    targetRectangle);
-//            final Tile aPig443Tile = getSourceTile(targetProduct.getBand(L2WProductFactory.IOP_A_PIG_443_NAME),
-//                                                   targetRectangle);
-//            final Tile aYs443Tile = getSourceTile(targetProduct.getBand(L2WProductFactory.IOP_A_YS_443_NAME),
-//                                                  targetRectangle);
-//
-//            final Tile kMinTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.K_MIN_NAME));
-//            final Tile z90Tile = targetTiles.get(targetProduct.getBand(L2WProductFactory.Z90_MAX_NAME));
-//            final Tile turbidityTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.TURBIDITY_NAME));
-//            Tile[] kdTiles = new Tile[L2WProductFactory.KD_LAMBDAS.length];
-//            for (int i = 0; i < L2WProductFactory.KD_LAMBDAS.length; i++) {
-//                kdTiles[i] = targetTiles.get(targetProduct.getBand("Kd_" + L2WProductFactory.KD_LAMBDAS[i]));
-//            }
-//        }
-//
-
         Raster invalidL2wRaster = invalidL2wImage.getData(targetRectangle);
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                final boolean isSampleInvalid = isSampleInvalid(x, y);
-                if (outputFLH && !isSampleInvalid) {
-                    computeFLHValues(x, y, satzen, solzen, flhReflecTiles, tosaReflecTiles, pathTiles, transTiles, flhTile,
-                                     flhOldNormTile, flhOldAltTile, flhAltTile, flhNormTile, isSampleInvalid);
-                }
-
-//                if (useQaaForIops) {
-//                    final double bTsm443 = bbSPM443Tile.getSampleDouble(x, y) / WaterAlgorithm.BTSM_TO_SPM_FACTOR;
-//                    final double aPig443 = aPig443Tile.getSampleDouble(x, y);
-//                    final double aYs443 = aYs443Tile.getSampleDouble(x, y);
-//                    KMin kMin = new KMin(bTsm443, aPig443, aYs443);
-//                    final double kMinValue = kMin.computeKMinValue();
-//                    kMinTile.setSample(x, y, isSampleInvalid ? Double.NaN : kMinValue);
-//                    if (outputKdSpectrum) {
-//                        double[] kds = new double[kdTiles.length];
-//                        if (isSampleInvalid) {
-//                            Arrays.fill(kds, Double.NaN);
-//                        } else {
-//                            kds = kMin.computeKdSpectrum();
-//                        }
-//                        for (int i = 0; i < kds.length; i++) {
-//                            kdTiles[i].setSample(x, y, kds[i]);
-//                        }
-//                    } else {
-//                        kdTiles[2].setSample(x, y, isSampleInvalid ? Double.NaN : kMin.computeKd490());
-//                    }
-//                    z90Tile.setSample(x, y, isSampleInvalid ? Double.NaN : -1 / kMinValue);
-//                    final double turbidityValue = computeTurbidity(rho620Tile.getSampleDouble(x, y));
-//                    turbidityTile.setSample(x, y, isSampleInvalid ? Double.NaN : turbidityValue);
-//                }
 
                 double[] reflec = new double[REFLEC_BAND_NUMBERS.length];
                 for (int i = 0; i < reflec.length; i++) {
@@ -612,15 +481,6 @@ public class L2WOp extends Operator {
                         chlSingleTileValues[k] = chlSingleTiles[k].getSampleDouble(x, y);
                         tsmSingleTileValues[k] = tsmSingleTiles[k].getSampleDouble(x, y);
                     }
-//                    double[] relevantMemberships = getRelevantMembershipClasses(membershipTileValues, membershipClassSumThresh);
-                    // get weighted CHL and TSM
-//                    double weightedChl = getWeightedConc(relevantMemberships, chlSingleTileValues);
-//                    chlTile.setSample(x, y, weightedChl);
-//                    double weightedTsm = getWeightedConc(relevantMemberships, tsmSingleTileValues);
-//                    tsmTile.setSample(x, y, weightedTsm);
-//                } else {
-//                    chlTile.setSample(x, y, c2rChlTile.getSampleDouble(x, y));
-//                    tsmTile.setSample(x, y, c2rTsmTile.getSampleDouble(x, y));
                 }
             }
         }
@@ -629,8 +489,7 @@ public class L2WOp extends Operator {
     private double computeMCIRrel(double[] reflec) {
         double baseline = reflec[7] + (reflec[7] - reflec[9]) * (709.0 - 681.0) / (779.0 - 681.0);
         double MCI_abs = reflec[8] - baseline;
-        double MCI_rel = 100 * MCI_abs / baseline;
-        return MCI_rel;
+        return 100 * MCI_abs / baseline;
     }
 
     private double computeMaxRefle(double[] reflec) {
@@ -735,115 +594,9 @@ public class L2WOp extends Operator {
             l2wFlags.setSample(x, y, 4, _qaa_imaginary);
             final boolean _qaa_negative_ays = qaaFlags.getSampleBit(x, y, 1);
             l2wFlags.setSample(x, y, 5, _qaa_negative_ays);
-            //isInvalid = isInvalid || _qaa_imaginary || _qaa_negative_ays;
         }
 
         l2wFlags.setSample(x, y, 6, isInvalid);
-    }
-
-    private double computeTurbidity(double rlw620) {
-        if (rlw620 > TURBIDITY_RLW620_MAX) {  // maximum value for computing the turbidity Index
-            rlw620 = TURBIDITY_RLW620_MAX;
-        }
-        double rho = rlw620 * Math.PI;
-        return TURBIDITY_AT * rho / (1 - rho / TURBIDITY_C) + TURBIDITY_BT;
-    }
-
-    private boolean isSampleInvalid(int x, int y) {
-        return invalidOpImage.getData(new Rectangle(x, y, 1, 1)).getSample(x, y, 0) != 0;
-    }
-
-    private void computeFLHValues(int x, int y, Tile satzen, Tile solzen, Tile[] reflecTiles, Tile[] tosaReflecTiles,
-                                  Tile[] pathTiles, Tile[] transTiles, Tile flhTile, Tile flhOldNormTile,
-                                  Tile flhOldAltTile, Tile flhAltTile, Tile flhNormTile, boolean sampleInvalid) {
-        double[] flhValues = new double[5];
-        if (sampleInvalid) {
-            Arrays.fill(flhValues, Double.NaN);
-        } else {
-            double cosTetaViewSurfRad = getCosTetaViewSurfRad(satzen, x, y);
-            double cosTetaSunSurfRad = getCosTetaSunSurfRad(solzen, x, y);
-
-            double[] reflec = getValuesAt(x, y, reflecTiles);
-            double[] tosa = getValuesAt(x, y, tosaReflecTiles);
-            double[] path = getValuesAt(x, y, pathTiles);
-            double[] trans = getValuesAt(x, y, transTiles);
-            flhValues = flhAlgorithm.computeFLH681(reflec, tosa, path, trans,
-                                                   cosTetaViewSurfRad, cosTetaSunSurfRad);
-
-        }
-        flhTile.setSample(x, y, flhValues[0]);
-        flhOldNormTile.setSample(x, y, flhValues[1]);
-        flhOldAltTile.setSample(x, y, flhValues[2]);
-        flhNormTile.setSample(x, y, flhValues[3]);
-        flhAltTile.setSample(x, y, flhValues[4]);
-    }
-
-    // this should be the real implementation of for computing FLH; but for testing we've implemented computeTileStack
-//    @Override
-//    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-//        final Rectangle rectangle = targetTile.getRectangle();
-//        RasterDataNode satzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME);
-//        RasterDataNode solzenNode = l2rProduct.getRasterDataNode(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
-//        Tile satzen = getSourceTile(satzenNode, rectangle);
-//        Tile solzen = getSourceTile(solzenNode, rectangle);
-//
-//        final Tile[] reflecTiles = getTiles(rectangle, "reflec_");
-//        final Tile[] tosaReflecTiles = getTiles(rectangle, "tosa_reflec_");
-//        final Tile[] pathTiles = getTiles(rectangle, "path_");
-//        final Tile[] transTiles = getTiles(rectangle, "trans_");
-//
-//        for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
-//            checkForCancellation();
-//            for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-//                float flh;
-//                if(!isSampleValid(reflecTiles[0], x, y)) {
-//                    flh = Float.NaN;
-//                } else {
-//                    double cosTetaViewSurfRad = getCosTetaViewSurfRad(satzen, x, y);
-//                    double cosTetaSunSurfRad = getCosTetaSunSurfRad(solzen, x, y);
-//
-//                    double[] reflec = getValuesAt(x, y, reflecTiles);
-//                    double[] tosa = getValuesAt(x, y, tosaReflecTiles);
-//                    double[] path = getValuesAt(x, y, pathTiles);
-//                    double[] trans = getValuesAt(x, y, transTiles);
-//                    flh = (float) computeFLH681(reflec, tosa, path, trans, cosTetaViewSurfRad,
-//                                               cosTetaSunSurfRad);
-//                }
-//                targetTile.setSample(x, y, flh);
-//            }
-//        }
-//
-//    }
-
-    private float[] getWavelengths(Product l2rProduct, int[] flhInputBandNumbers) {
-        float[] wavelengths = new float[flhInputBandNumbers.length];
-        for (int i = 0; i < flhInputBandNumbers.length; i++) {
-            Band band = l2rProduct.getBand("reflec_" + flhInputBandNumbers[i]);
-            wavelengths[i] = band.getSpectralWavelength();
-        }
-        return wavelengths;
-    }
-
-    private double getCosTetaViewSurfRad(Tile satzen, int x, int y) {
-        double tetaViewSurfDeg = GlintCorrection.correctViewAngle(satzen.getSampleDouble(x, y), x,
-                                                                  nadirColumnIndex, true);
-        double tetaViewSurfRad = Math.toRadians(tetaViewSurfDeg);
-        return Math.cos(tetaViewSurfRad);
-    }
-
-    private double getCosTetaSunSurfRad(Tile solzen, int x, int y) {
-        double tetaSunSurfDeg = solzen.getSampleDouble(x, y);
-        double tetaSunSurfRad = Math.toRadians(tetaSunSurfDeg);
-        return Math.cos(tetaSunSurfRad);
-    }
-
-    private double[] getValuesAt(int x, int y, Tile[] reflecTiles) {
-        double[] values = new double[reflecTiles.length];
-        for (int i = 0; i < reflecTiles.length; i++) {
-            Tile reflecTile = reflecTiles[i];
-            values[i] = reflecTile.getSampleDouble(x, y);
-        }
-        return values;
     }
 
     private Tile[] getTiles(Rectangle rectangle, int[] bandNumbers, String bandNamePrefix) {
@@ -873,7 +626,7 @@ public class L2WOp extends Operator {
     }
 
     private HashMap<String, Object> createQaaParameterMap() {
-        HashMap<String, Object> qaaParams = new HashMap<String, Object>();
+        HashMap<String, Object> qaaParams = new HashMap<>();
         qaaParams.put("invalidPixelExpression", invalidPixelExpression);
         qaaParams.put("aTotalLower", qaaATotalLower);
         qaaParams.put("aTotalUpper", qaaATotalUpper);
@@ -886,32 +639,18 @@ public class L2WOp extends Operator {
     }
 
     private HashMap<String, Object> createL2RParameterMap() {
-        HashMap<String, Object> l2rParams = createBaseL2RParameterMap();
-        if (outputFLH) {
-            l2rParams.put("outputTosa", true);
-            l2rParams.put("outputTransmittance", true);
-            l2rParams.put("outputPath", true);
-        }
-        return l2rParams;
+        return createBaseL2RParameterMap();
     }
 
     private HashMap<String, Object> createBaseL2RParameterMap() {
-        HashMap<String, Object> l2rParams = new HashMap<String, Object>();
+        HashMap<String, Object> l2rParams = new HashMap<>();
         l2rParams.put("doCalibration", doCalibration);
         l2rParams.put("doSmile", doSmile);
         l2rParams.put("doEqualization", doEqualization);
         l2rParams.put("useIdepix", true);
-        l2rParams.put("brightTestThreshold", brightTestThreshold);
-        l2rParams.put("brightTestWavelength", brightTestWavelength);
         l2rParams.put("useSnTMap", useSnTMap);
         l2rParams.put("averageSalinity", averageSalinity);
         l2rParams.put("averageTemperature", averageTemperature);
-        if (!useExtremeCaseMode) {
-            atmoNetMerisFile = new File(GlintCorrectionOperator.MERIS_ATMOSPHERIC_NET_NAME);
-            autoassociativeNetFile = new File(GlintCorrectionOperator.ATMO_AANN_NET_NAME);
-        }
-        l2rParams.put("atmoNetMerisFile", atmoNetMerisFile);
-        l2rParams.put("autoassociativeNetFile", autoassociativeNetFile);
         l2rParams.put("landExpression", landExpression);
         l2rParams.put("cloudIceExpression", cloudIceExpression);
         l2rParams.put("outputNormReflec", true);

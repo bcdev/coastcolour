@@ -77,9 +77,10 @@ public class GlintCorrection extends AbstractGlintCorrection {
         tosa.init();
         final double[] rlTosa = tosa.perform(pixel, tetaViewSurfRad, tetaSunSurfRad);
         glintResult.setTosaReflec(rlTosa.clone());
+        glintResult.setToaReflec(tosa.getlToa().clone());
 
         /* test if tosa reflectances are out of training range */
-        if (!isTosaReflectanceValid(rlTosa, atmosphereNet, false)) {
+        if (!isTosaReflectanceValid(rlTosa, atmosphereNet)) {
             glintResult.raiseFlag(TOSA_OOR);
         }
 
@@ -187,7 +188,6 @@ public class GlintCorrection extends AbstractGlintCorrection {
             final double[] normOutNet = normalizationNet.calc(normInNet);
             final double[] normReflec = new double[reflec.length];
             for (int i = 0; i < 12; i++) {
-//                normReflec[i] = Math.exp(normOutNet[i]);
                 normReflec[i] = Math.exp(normOutNet[i]) / Math.PI;   // norm reflec must be WITHOUT PI (see mail from CB, 20130320)!
             }
             glintResult.setNormReflec(normReflec);

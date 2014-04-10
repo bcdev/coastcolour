@@ -35,8 +35,8 @@ public class L2ROp extends Operator {
     private File autoassociativeNetFile;
 
     @SourceProduct(alias = "ccL1P",
-                   label = "CC L1P or MERIS L1b product",
-                   description = "The CC L1P or MERIS L1b input product")
+                   label = "CC L1P or MERIS L1B product",
+                   description = "The CC L1P or MERIS L1B input product")
     private Product sourceProduct;
 
     @Parameter(defaultValue = "true",

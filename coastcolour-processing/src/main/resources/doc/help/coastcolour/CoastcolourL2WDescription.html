@@ -1,0 +1,321 @@
+<!--
+  ~ Copyright (C) 2013 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>CoastColour In-Water Processing</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            In-Water Processing
+        </td>
+        <td class="header" align="right"><a href="../general/BeamOverview.html"><img src="../images/BeamHeader.jpg"
+                                                                                     border=0></a>
+        </td>
+    </tr>
+</table>
+
+<!-------- Atmospheric Correction --------------------------------------->
+<h3>Atmospheric Correction</h3>
+
+<h4>I/O Parameters</h4>
+
+<p>
+    Selecting the <b>CoastColour Processors (MERIS)...</b> entry from the VISAT
+    'Processing --> Thematic Water Processing' sub-menu opens another
+    sub-menu with the three entries 'Pre-Processing and Pixel Classification...',
+    'Atmospheric Correction...', and 'In-Water Processing...'. Selecting 'In-Water Processing...'
+    from this sub-menu pops up the 'In-Water Processing' dialog:
+</p>
+
+<p align="center">
+    <img src="images/CoastcolourL2WProcessingDialog_io.png" alt="Coastcolour L2W Processing Dialog"/>
+</p>
+
+<h5>Source Products</h5>
+
+<p class="i1">
+    <b>CC L2R, CC L1P or MERIS L1B product:</b>
+
+<p>
+    Here the user specifies the CC L2R, CC L1P or the MERIS L1b source product.
+    A 'CC L1P' product is the result product of a previous CoastColour L1P
+    'Pre-Processing and Pixel Classification' step.
+    A 'CC L1R' product is the result product of a previous CoastColour L2R
+    'Atmospheric Correction' step.
+    If the source product is a CC L1P product, the L2R 'Atmospheric Correction' step will be
+    automatically carried out internally before the L2W 'In-Water Processing' step.
+    If the source product is a MERIS L1b product, both L1P and L2R processing steps will be
+    automatically carried out internally before the L2W step.
+    However, in these cases, no intermediate CC L1P and CC L2R products, but only
+    an L2W target product will be produced.
+</p>
+<p>
+    The combo box presents
+    a list of all products open in VISAT. The user may select one of these
+    or, by clicking on the button next to the combo box, choose a product
+    from the file system.
+</p>
+</p>
+
+<h5>Target Product Group</h5>
+
+<p class="i1">
+    <b>Name:</b>
+    Used to specify the name of the target product.
+</p>
+
+<p class="i1">
+    <b>Save to:</b>
+    Used to specify whether the target product should be saved to the file system. The
+    combo box presents a list of file formats, currently BEAM-DIMAP, GeoTIFF, and HDF5.
+</p>
+
+<p class="i1">
+    <b>Open in VISAT:</b>
+    Used to specify whether the target product should be opened in VISAT. When the
+    the target product is not saved, it is opened in VISAT automatically.
+</p>
+
+
+<h4>Processing Parameters</h4>
+
+<p>
+    Selecting the <b>Processing Parameters</b> tab in the
+    'In-Water Processing' dialog switches to the following view:
+</p>
+
+<p align="center">
+    <img src="images/CoastcolourL2WProcessingDialog_procparms.png" alt="Coastcolour L2W Processing Parameters"/>
+</p>
+
+<h5>Parameters</h5>
+
+<p>
+    TODO!!
+</p>
+
+<p class="i1">
+    <b>Write TOA radiances to the target product:</b>
+    This checkbox indicates if the TOA radiances shall be written to the target product.
+</p>
+
+<p class="i1">
+    <b>Write TOA reflectances to the target product:</b>
+    This checkbox indicates if the TOA reflectances shall be written to the target product.
+</p>
+
+<p class="i1">
+    <b>Write Rayleigh corrected reflectances to the target product:</b>
+    This checkbox indicates if the Rayleigh corrected reflectances shall be written to the target product.
+</p>
+
+<p class="i1">
+    <b>Write Feature values to the target product:</b>
+    This checkbox indicates if the feature values for a pixel shall be written to the target product.
+    In the land classification algorithm, a feature value (e.g. the 'brightness value') is a probabilistic
+    quantity that the corresponding feature (e.g. 'brightness') is true or not. The probabilistic combination
+    of features, using internal thresholds of the feature values, leads to the final classification
+    of the pixel attributes (e.g. 'is_cloudy'). See [7] for more details.
+</p>
+
+<p class="i1">
+    <b>CTP value to use in MERIS cloud shadow algorithm:</b>
+    This value is the CTP (cloud top pressure) in hPa to use in the MERIS cloud shadow algorithm. This can be
+    derived from a neural net or set as a constant number.
+</p>
+
+<p class="i1">
+    <b>Use GETASSE30 DEM for Barometric Pressure Computation:</b>
+    This checkbox indicates if the GETASSE30 DEM shall be used for Barometric Pressure Computation. If the checkbox
+    is not selected or GETASSE is not installed, tie point altitudes will be used instead.
+</p>
+
+<p class="i1">
+    <b>Write input annotation bands to the target product (VGT only):</b>
+    This checkbox indicates if input annotation bands shall be written to the target product
+    (has only effect for VGT L1b products).
+</p>
+
+<p class="i1">
+    <b>Width of cloud buffer (# of pixels):</b>
+    This value is the width of a cloud 'safety buffer' around a pixel which was classified as cloudy.
+</p>
+
+<p class="i1">
+    <b>Resolution of used land-water mask in m/pixel:</b>
+    This value is the resolution of the used SRTM (Shuttle Radar Topography Mission, see [8]) land-water mask in
+    m/pixel.
+</p>
+
+<p class="i1">
+    <b>Use land-water flag from L1b product instead:</b>
+    This checkbox indicates if the land-water flag from the L1b product shall be used instead of the SRTM mask.
+</p>
+
+<br>
+
+<h4>Menu Bar</h4>
+<h5>'File' Menu</h5>
+
+<p>
+    Selecting the <b>File</b> entry in the Menu Bar opens the following view:
+</p>
+
+<p align="center">
+    <img src="images/file_menu.png" alt="File Menu"/>
+</p>
+
+<p class="i1">
+    <b>Open Parameters...:</b>
+    When this entry is selected, an 'Open File' dialog will appear.
+    Here, a BEAM GPF parameters XML file can be selected, containing
+    'In-Water Processing' parameters which were saved earlier.
+    These parameters will be loaded and applied for an upcoming processing.
+</p>
+
+<p class="i1">
+    <b>Save Parameters...:</b>
+    When this entry is selected, a 'Save File' dialog will appear.
+    Here, the current set of 'In-Water Processing' parameters can be saved into a
+    BEAM GPF parameters XML file for later re-usage.
+</p>
+
+<p class="i1">
+    <b>Display Parameters...:</b>
+    When this entry is selected, the current set of 'In-Water Processing' parameters
+    will be displayed in XML format (see below).
+</p>
+
+<p align="center">
+    <img src="images/l2w_file_menu_display_params.png" alt="L2W File Menu Display Parms"/>
+</p>
+
+
+<h5>'Help' Menu</h5>
+
+<p>
+    Selecting the <b>Help</b> entry in the Menu Bar opens the following view:
+</p>
+
+<p align="center">
+    <img src="images/help_menu.png" alt="Help Menu"/>
+</p>
+
+<p class="i1">
+    <b>Help:</b>
+    When this entry is selected, this online help is opened
+    in a separate window.
+</p>
+
+<p class="i1">
+    <b>About...:</b>
+    When this entry is selected, an 'About' dialog for the current
+    processor is opened (see below).
+</p>
+
+<p align="center">
+    <img src="images/l2w_help_menu_about.png" alt="L2R Help Menu About"/>
+</p>
+
+
+<h4>Button Group</h4>
+
+<p align="center">
+    <img src="images/button_group.png" alt="Button Group"/>
+</p>
+
+<p class="i1">
+    <b>Run:</b>
+    When this button is clicked, the processing will be started with the selected
+    parameters.
+</p>
+
+<p class="i1">
+    <b>Close:</b>
+    When this button is clicked, the processor tool window will be closed.
+</p>
+
+
+<br>
+<hr>
+
+<!-------- Command line --------------------------------------->
+<h3>Processing from Command Line</h3>
+
+Since the CoastColour processors make use of the BEAM graph processing framework, they can be
+used also with the 'gpt' command line tool outside BEAM-VISAT. The graph processing is invoked
+by the command
+<div class="itemizedlist">
+    <ul type="bullet">
+        <li style="list-style-type: disc">
+            ${BEAM-INSTALL-DIR}/bin/gpt
+        </li>
+    </ul>
+</div>
+
+To obtain general help on the graph processing, use the command
+<div class="itemizedlist">
+    <ul type="bullet">
+        <li style="list-style-type: disc">
+            ${BEAM-INSTALL-DIR}/bin/gpt -h
+        </li>
+    </ul>
+</div>
+
+Specific help on the 'In-Water Processing' can be obtained with
+<div class="itemizedlist">
+    <ul type="bullet">
+        <li style="list-style-type: disc">
+            ${BEAM-INSTALL-DIR}/bin/gpt -h CoastColour.L2W
+        </li>
+    </ul>
+</div>
+Information on the usage and a list of all available parameters are given.
+
+<p align="center">
+    <img src="images/gpt_cc_l2w.png" alt="CC L2W parameters"/>
+</p>
+<br>
+
+<br><br>
+The processing from the command line can also be invoked using graph XML files.
+For example, a CoastColour in-water processing could be started with
+<div class="itemizedlist">
+    <ul type="bullet">
+        <li style="list-style-type: disc">
+            ${BEAM-INSTALL-DIR}/bin/gpt test_cc_l2w.xml -SccL2W=./MER_CC_l2r_test.dim
+
+        </li>
+    </ul>
+</div>
+with a CoastColour L2R input file 'MER_cc_l2r_test.dim'
+(processed earlier in L1P 'Pre-processing and Pixel Classification' and
+L2R 'Atmospheric Correction' steps, given in BEAM Dimap format)
+in the current directory, and a graph XML file 'test_cc_l2r.xml' as shown below.
+
+<p align="center">
+    <img src="images/gpt_cc_l2w_xml.png" alt="CC L2W xml"/>
+</p>
+
+<hr>
+</body>
+</html>

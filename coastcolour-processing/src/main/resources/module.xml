@@ -74,6 +74,10 @@
         <module>beam-meris-icol</module>
     </dependency>
 
+    <dependency>
+        <module>beam-waterradiance-auxdata</module>
+    </dependency>
+
 
     <categories>Processor,MERIS</categories>
 
@@ -83,11 +87,12 @@
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>CoastColour Processors (MERIS) ...</text>
             <shortDescr>
-                The MERIS CoastColour Processors (Preprocessing, Atmospheric Correction, and In-Water Processing)
+                The MERIS CoastColour Processors (Pre-Processing, Atmospheric Correction, and In-Water Processing)
             </shortDescr>
             <mnemonic/>
-            <parent>tool</parent>
-            <helpID>ccProcessor</helpID>
+            <!--<parent>tool</parent>-->
+            <parent>processing.thematicWater</parent>
+            <helpID>CoastcolourPlugIn</helpID>
             <placeAfter/>
         </action>
 
@@ -95,12 +100,13 @@
             <id>coastColourProcessingL1P</id>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
             <operatorName>CoastColour.L1P</operatorName>
-            <text>CoastColour Preprocessing and Pixel Classification...</text>
-            <shortDescr>CoastColour Preprocessing and Pixel Classification (L1P)</shortDescr>
-            <dialogTitle>CoastColour Preprocessing and Pixel Classification</dialogTitle>
+            <text>CoastColour Pre-Processing and Pixel Classification...</text>
+            <shortDescr>CoastColour Pre-Processing and Pixel Classification (L1P)</shortDescr>
+            <dialogTitle>CoastColour Pre-Processing and Pixel Classification - v1.7</dialogTitle>
             <targetProductNameSuffix>_L1P</targetProductNameSuffix>
             <mnemonic/>
             <parent>coastcolour</parent>
+            <helpId>CoastcolourPlugIn</helpId>
         </action>
         <action>
             <id>coastColourProcessingL2R</id>
@@ -108,24 +114,33 @@
             <operatorName>CoastColour.L2R</operatorName>
             <text>CoastColour Atmospheric Correction...</text>
             <shortDescr>CoastColour Atmospheric Correction (L2R)</shortDescr>
-            <dialogTitle>CoastColour Atmospheric Correction</dialogTitle>
+            <dialogTitle>CoastColour Atmospheric Correction - v1.7</dialogTitle>
             <targetProductNameSuffix>_L2R</targetProductNameSuffix>
             <mnemonic/>
             <placeAfter>coastColourProcessingL1P</placeAfter>
             <parent>coastcolour</parent>
+            <helpId>CoastcolourPlugIn</helpId>
         </action>
         <action>
             <id>coastColourProcessingL2W</id>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
             <operatorName>CoastColour.L2W</operatorName>
-            <text>CoastColour L2 Water Processor...</text>
+            <text>CoastColour In-Water Processing...</text>
             <shortDescr>CoastColour In-Water Processing (L2W)</shortDescr>
-            <dialogTitle>CoastColour In-Water Processing</dialogTitle>
+            <dialogTitle>CoastColour In-Water Processing - v1.7</dialogTitle>
             <targetProductNameSuffix>_L2W</targetProductNameSuffix>
             <mnemonic/>
             <placeAfter>coastColourProcessingL2R</placeAfter>
             <parent>coastcolour</parent>
+            <helpId>CoastcolourPlugIn</helpId>
         </action>
+    </extension>
+
+    <extension point="beam-ui:helpSets">
+        <helpSet>
+            <parent>beam-help</parent>
+            <path>doc/help/coastcolour.hs</path>
+        </helpSet>
     </extension>
 
 </module>

@@ -47,8 +47,8 @@ public class L2WOp extends Operator {
     static final boolean ENABLE_OWT_CONC_BANDS = false;
 
     @SourceProduct(alias = "ccL2R",
-                   label = "CC L2R, CC L1P or MERIS L1b product",
-                   description = "CC L2R, CC L1P or MERIS L1b input product")
+                   label = "CC L2R, CC L1P or MERIS L1B product",
+                   description = "CC L2R, CC L1P or MERIS L1B input product")
     private Product sourceProduct;
 
     //@SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)", optional = true)
@@ -156,9 +156,9 @@ public class L2WOp extends Operator {
                description = "Expression defining pixels not considered for L2W processing")
     private String invalidPixelExpression;
 
-    @Parameter(defaultValue = "false", label = "Divide source Rrs by PI(3.14)",
-               description = "If selected the source remote reflectances are divided by PI. " +
-                       "This is necessary if the source reflectances were written as IRRADIANCE_REFLECTANCES !")
+    @Parameter(defaultValue = "false", label = "Divide source remote reflectances by PI (3.141592)",
+               description = "Select if the source remote reflectances shall be divided by PI. " +
+                       "It is consistent to do this if the source reflectances were written as IRRADIANCE_REFLECTANCES !")
     private boolean qaaDivideByPI;
 
     @Parameter(defaultValue = "false", label = "Write water leaving reflectance to the CC L2W product",

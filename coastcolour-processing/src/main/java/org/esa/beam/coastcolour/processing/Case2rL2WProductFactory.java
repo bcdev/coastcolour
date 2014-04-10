@@ -45,9 +45,6 @@ class Case2rL2WProductFactory extends L2WProductFactory {
         if (isOutputKdSpectrum()) {
             addPatternToAutoGrouping(l2wProduct, "Kd");
         }
-        if (isOutputFLH()) {
-            addFLHBands(l2wProduct);
-        }
         ProductUtils.copyFlagBands(l2rProduct, l2wProduct, true);
 
         renameIops(l2wProduct);

@@ -40,65 +40,93 @@ public class L2ROp extends Operator {
     private Product sourceProduct;
 
     @Parameter(defaultValue = "true",
-               label = "[L1P] Perform re-calibration",
-               description = "Applies correction from MERIS 2nd to 3rd reprocessing quality.")
+               label = " [L1P] Perform re-calibration",
+               description = "Applies correction from MERIS 2nd to 3rd reprocessing quality. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
     private boolean doCalibration;
 
     @Parameter(defaultValue = "true",
-               label = "[L1P] Perform Smile-effect correction",
-               description = "Whether to perform MERIS Smile-effect correction.")
+               label = " [L1P] Perform Smile-effect correction",
+               description = "Whether to perform MERIS Smile-effect correction. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
     private boolean doSmile;
 
     @Parameter(defaultValue = "true",
-               label = "[L1P] Perform equalization",
-               description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
+               label = " [L1P] Perform equalization",
+               description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
     private boolean doEqualization;
 
 
+    // IdePix parameters  from L1P
+    @Parameter(defaultValue = "2", interval = "[0,100]",
+               description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
+               label = " [L1P] Width of cloud buffer (# of pixels)")
+    private int ccCloudBufferWidth;
+
+    @Parameter(defaultValue = "false",
+               description = "Write Cloud Probability Feature Value to the CC L1P product. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
+               label = " [L1P] Write Cloud Probability Feature Value to the CC L1P product")
+    private boolean ccOutputCloudProbabilityFeatureValue = false;
+
+    @Parameter(defaultValue = "1.4",
+               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
+               label = " [L1P] Cloud screening 'ambiguous' threshold" )
+    private double ccCloudScreeningAmbiguous = 1.4;      // Schiller
+
+    @Parameter(defaultValue = "1.8",
+               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as sure. " +
+                       "This is a L1P option and has only effectt if the source product is a MERIS L1b product.",
+               label = " [L1P] Cloud screening 'sure' threshold")
+    private double ccCloudScreeningSure = 1.8;       // Schiller
+
     @Parameter(defaultValue = "true",
-               label = "Use climatology map for salinity and temperature",
+               label = " Use climatology map for salinity and temperature",
                description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
                        "for the whole scene.")
     private boolean useSnTMap;
 
     @Parameter(defaultValue = "35", unit = "PSU",
-               label = "Average salinity",
+               label = " Average salinity",
                description = "If no climatology is used, the average salinity of the water in the region to be processed is taken.")
     private double averageSalinity;
 
     @Parameter(defaultValue = "15", unit = "C",
-               label = "Average temperature",
+               label = " Average temperature",
                description = "If no climatology is used, the average temperature of the water in the region to be processed is taken.")
     private double averageTemperature;
 
     @Parameter(defaultValue = "true",
-               label = "Use NNs for extreme ranges of coastcolour IOPs",
+               label = " Use NNs for extreme ranges of coastcolour IOPs",
                description = "Use special set of NNs to finally derive water IOPs in extreme ranges.")
     private boolean useExtremeCaseMode;
 
     @Parameter(defaultValue = "l1p_flags.CC_LAND",
-               label = "Land detection expression",
+               label = " Land detection expression",
                description = "The arithmetic expression used for land detection.",
                notEmpty = true, notNull = true)
     private String landExpression;
 
     @Parameter(defaultValue = "(l1p_flags.CC_CLOUD && not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE",
-               label = "Cloud/Ice detection expression",
+               label = " Cloud/Ice detection expression",
                description = "The arithmetic expression used for cloud/ice detection.",
                notEmpty = true, notNull = true)
     private String cloudIceExpression;
 
     @Parameter(defaultValue = "false",
-               label = "Output TOA reflectance",
-               description = "Toggles the output of Top of Atmosphere reflectance.")
+               label = " Write TOA reflectances to the CC L2R target product",
+               description = "Writes the Top of Atmosphere reflectances to the CC L2R target product.")
     private boolean outputToa;
 
     //  RADIANCE_REFLECTANCES   : x
     //  IRRADIANCE_REFLECTANCES : x * PI      (see GlintCorrection.perform)
     @Parameter(defaultValue = "RADIANCE_REFLECTANCES", valueSet = {"RADIANCE_REFLECTANCES", "IRRADIANCE_REFLECTANCES"},
-               label = "Output water leaving reflectance as",
-               description = "Select if reflectances shall be written as radiances or irradiances. " +
-                       "The irradiances are compatible with standard MERIS product.")
+               label = " Write water leaving reflectances as",
+               description = "Select if water leaving reflectances shall be written as radiances or irradiances. " +
+                       "The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.")
     private ReflectanceEnum outputReflecAs;
 
     private Product glintProduct;
@@ -157,6 +185,10 @@ public class L2ROp extends Operator {
         l1pParams.put("doSmile", doSmile);
         l1pParams.put("doEqualization", doEqualization);
         l1pParams.put("useIdepix", true);
+        l1pParams.put("ccCloudBufferWidth", ccCloudBufferWidth);
+        l1pParams.put("ccOutputCloudProbabilityFeatureValue", ccOutputCloudProbabilityFeatureValue);
+        l1pParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
+        l1pParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
         return l1pParams;
     }
 

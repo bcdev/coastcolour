@@ -39,11 +39,6 @@ abstract class L2WProductFactory {
     public static final String OWT_CONC_CHL_NAME = "owt_conc_chl";
 
     static final String L2W_FLAGS_NAME = "l2w_flags";
-    static final String EXP_FLH_681_NAME = "exp_FLH_681";
-    static final String EXP_FLH_681_NORM_NAME = "exp_FLH_681_norm";
-    static final String EXP_FLH_681_ALT_NAME = "exp_FLH_681_alt";
-    static final String EXP_FLH_NORM_OLD_681_NAME = "exp_FLH_norm_old_681";
-    static final String EXP_FLH_ALT_OLD_681_NAME = "exp_FLH_alt_old_681";
     static final String K_MIN_NAME = "K_min";
     static final String KD_MIN_NAME = "Kd_min";
     static final int[] KD_LAMBDAS = new int[]{412, 443, 490, 510, 560, 620, 664, 680};
@@ -71,7 +66,6 @@ abstract class L2WProductFactory {
 
 
     private boolean outputKdSpectrum;
-    private boolean outputFLH;
     private boolean outputReflectance;
     private String invalidPixelExpression;
 
@@ -84,14 +78,6 @@ abstract class L2WProductFactory {
 
     public boolean isOutputKdSpectrum() {
         return outputKdSpectrum;
-    }
-
-    public void setOutputFLH(boolean outputFLH) {
-        this.outputFLH = outputFLH;
-    }
-
-    public boolean isOutputFLH() {
-        return outputFLH;
     }
 
     public void setOutputReflectance(boolean outputReflectance) {
@@ -227,28 +213,6 @@ abstract class L2WProductFactory {
         Mask mask = Mask.BandMathsType.create(maskName, maskDescription, width, height,
                                               maskExpression, maskColor, transparency);
         maskGroup.add(index, mask);
-    }
-
-    protected void addFLHBands(Product target) {
-        Band flhBand = target.addBand(EXP_FLH_681_NAME, ProductData.TYPE_FLOAT32);
-        flhBand.setDescription("Fluorescence line height at 681 nm");
-        flhBand.setNoDataValue(Float.NaN);
-        flhBand.setNoDataValueUsed(true);
-        flhBand = target.addBand(EXP_FLH_681_NORM_NAME, ProductData.TYPE_FLOAT32);
-        flhBand.setNoDataValue(Float.NaN);
-        flhBand.setNoDataValueUsed(true);
-        flhBand = target.addBand(EXP_FLH_681_ALT_NAME, ProductData.TYPE_FLOAT32);
-        flhBand.setNoDataValue(Float.NaN);
-        flhBand.setNoDataValueUsed(true);
-        flhBand = target.addBand(EXP_FLH_NORM_OLD_681_NAME, ProductData.TYPE_FLOAT32);
-        flhBand.setDescription("Fluorescence line height at 681 nm");
-        flhBand.setNoDataValue(Float.NaN);
-        flhBand.setNoDataValueUsed(true);
-        flhBand = target.addBand(EXP_FLH_ALT_OLD_681_NAME, ProductData.TYPE_FLOAT32);
-        flhBand.setDescription("Fluorescence line height at 681 nm");
-        flhBand.setNoDataValue(Float.NaN);
-        flhBand.setNoDataValueUsed(true);
-        addPatternToAutoGrouping(target, "exp");
     }
 
     protected void addPatternToAutoGrouping(Product targetProduct, String groupPattern) {

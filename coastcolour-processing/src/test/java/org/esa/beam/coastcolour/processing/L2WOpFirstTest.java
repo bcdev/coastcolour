@@ -38,13 +38,11 @@ public class L2WOpFirstTest {
     }
 
     @Test
-    @Ignore
     public void testCreateProductFromL1B() throws OperatorException, ParseException {
-        // todo : check!!
         final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl_nn", "turbidity"};
         target = L2WOpTestHelper.testTargetProduct(l1bProduct, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
 
-        String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
+        String[] notExpectedBandNames = new String[]{"toa_reflec_1", "toa_reflec_2", "toa_reflec_13"};
         for (String notExpectedBandName : notExpectedBandNames) {
             assertFalse("Product should not contain " + notExpectedBandName, target.containsBand(notExpectedBandName));
         }
@@ -52,14 +50,12 @@ public class L2WOpFirstTest {
     }
 
     @Test
-    @Ignore
     public void testCreateProductFromL1P() throws OperatorException, ParseException {
-        // todo: check!!
         Product source = getL1pProduct(l1bProduct);
         final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl_nn", "turbidity"};
         target = L2WOpTestHelper.testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
 
-        String[] notExpectedBandNames = new String[]{"reflec_1", "reflec_2", "reflec_13"};
+        String[] notExpectedBandNames = new String[]{"toa_reflec_1", "toa_reflec_2", "toa_reflec_13"};
         for (String notExpectedBandName : notExpectedBandNames) {
             assertFalse("Product should not contain " + notExpectedBandName, target.containsBand(notExpectedBandName));
         }

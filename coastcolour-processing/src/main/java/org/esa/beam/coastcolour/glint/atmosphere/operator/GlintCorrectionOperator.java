@@ -152,7 +152,7 @@ public class GlintCorrectionOperator extends Operator {
                description = "Whether to perform Smile-effect correction.")
     private boolean doSmileCorrection;
 
-    @Parameter(defaultValue = "true", label = "Output TOA reflectance",
+    @Parameter(defaultValue = "false", label = "Output TOA reflectance",
                description = "Toggles the output of Top of Standard Atmosphere reflectance.")
     private boolean outputToa;
 

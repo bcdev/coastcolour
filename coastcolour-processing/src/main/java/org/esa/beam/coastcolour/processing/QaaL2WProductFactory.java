@@ -62,9 +62,6 @@ class QaaL2WProductFactory extends L2WProductFactory {
             addZ90Band(l2wProduct);
             addTurbidityBand(l2wProduct);
 
-            if (isOutputFLH()) {
-                addFLHBands(l2wProduct);
-            }
             copyMasks(l2rProduct, l2wProduct);
             ProductUtils.copyFlagBands(l2rProduct, l2wProduct, true);
             ProductUtils.copyTiePointGrids(qaaProduct, l2wProduct);

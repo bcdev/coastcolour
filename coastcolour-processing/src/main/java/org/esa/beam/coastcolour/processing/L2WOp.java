@@ -1,15 +1,12 @@
 package org.esa.beam.coastcolour.processing;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrection;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.MerisFlightDirection;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.ReflectanceEnum;
-import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -44,12 +41,7 @@ import java.util.Map;
                                 "other variables")
 public class L2WOp extends Operator {
 
-    private static final int[] FLH_INPUT_BAND_NUMBERS = new int[]{6, 8, 10};
     private static final int[] REFLEC_BAND_NUMBERS = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    private static final double TURBIDITY_RLW620_MAX = 0.03823;
-    private static final double TURBIDITY_AT = 174.41;
-    private static final double TURBIDITY_BT = 0.39;
-    private static final double TURBIDITY_C = 0.1533;
 
     // compile time switch (RD)
     static final boolean ENABLE_OWT_CONC_BANDS = false;
@@ -64,103 +56,132 @@ public class L2WOp extends Operator {
 
     @Parameter(defaultValue = "true",
                label = "[L1P] Perform re-calibration",
-               description = "Applies correction from MERIS 2nd to 3rd reprocessing quality.")
+               description = "Applies correction from MERIS 2nd to 3rd reprocessing quality. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
     private boolean doCalibration;
 
     @Parameter(defaultValue = "true",
                label = "[L1P] Perform Smile-effect correction",
-               description = "Whether to perform MERIS Smile-effect correction.")
+               description = "Whether to perform MERIS Smile-effect correction. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
     private boolean doSmile;
 
     @Parameter(defaultValue = "true",
                label = "[L1P] Perform equalization",
-               description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
+               description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
     private boolean doEqualization;
+
+    // IdePix parameters  from L1P
+    @Parameter(defaultValue = "2", interval = "[0,100]",
+               description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
+               label = " [L1P] Width of cloud buffer (# of pixels)")
+    private int ccCloudBufferWidth;
+
+    @Parameter(defaultValue = "false",
+               description = "Write Cloud Probability Feature Value to the CC L1P product. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
+               label = " [L1P]  Write Cloud Probability Feature Value to the target product")
+    private boolean ccOutputCloudProbabilityFeatureValue = false;
+
+    @Parameter(defaultValue = "1.4",
+               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
+               label = " [L1P] Cloud screening 'ambiguous' threshold" )
+    private double ccCloudScreeningAmbiguous = 1.4;      // Schiller
+
+    @Parameter(defaultValue = "1.8",
+               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as sure. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
+               label = " [L1P] Cloud screening 'sure' threshold")
+    private double ccCloudScreeningSure = 1.8;       // Schiller
+
 
     @Parameter(defaultValue = "true",
                label = "[L2R] Use climatology map for salinity and temperature",
                description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
-                       "for the whole scene.")
+                       "for the whole scene. This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product.")
     private boolean useSnTMap;
 
     @Parameter(defaultValue = "35", unit = "PSU",
                label = "[L2R] Average salinity",
-               description = "If no climatology is used, the average salinity of the water in the region to be processed is taken.")
+               description = "If no climatology is used, the average salinity of the water in the region to be processed is taken. " +
+                       "This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product.")
     private double averageSalinity;
 
     @Parameter(defaultValue = "15", unit = "C",
                label = "[L2R] Average temperature",
-               description = "If no climatology is used, the average temperature of the water in the region to be processed is taken.")
+               description = "If no climatology is used, the average temperature of the water in the region to be processed is taken. " +
+                       "This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product.")
     private double averageTemperature;
 
     @Parameter(defaultValue = "true",
                label = "[L2R] Use NNs for extreme ranges of coastcolour IOPs",
-               description = "Use special set of NNs to finally derive water IOPs in extreme ranges.")
+               description = "Use special set of NNs to finally derive water IOPs in extreme ranges. " +
+                       "This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product.")
     private boolean useExtremeCaseMode;
 
     @Parameter(defaultValue = "l1p_flags.CC_LAND",
                label = "[L2R] Land detection expression",
-               description = "The arithmetic expression used for land detection.",
+               description = "The arithmetic expression used for land detection. " +
+                       "This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product). ",
                notEmpty = true, notNull = true)
     private String landExpression;
 
     @Parameter(defaultValue = "(l1p_flags.CC_CLOUD && not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE",
                label = "[L2R] Cloud/Ice detection expression",
-               description = "The arithmetic expression used for cloud/ice detection.",
+               description = "The arithmetic expression used for cloud/ice detection. " +
+                       "This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product.",
                notEmpty = true, notNull = true)
     private String cloudIceExpression;
 
     @Parameter(defaultValue = "false",
-               label = "[L2R] Output TOA reflectance",
-               description = "Toggles the output of Top of Atmosphere reflectance.")
+               label = "[L2R] Write TOA reflectances to the CC L2R product",
+               description = "Writes the Top of Atmosphere reflectances to the CC L2R product. " +
+                       "This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product.")
     private boolean outputToa;
 
     //  RADIANCE_REFLECTANCES   : x
     //  IRRADIANCE_REFLECTANCES : x * PI      (see GlintCorrection.perform)
     @Parameter(defaultValue = "RADIANCE_REFLECTANCES", valueSet = {"RADIANCE_REFLECTANCES", "IRRADIANCE_REFLECTANCES"},
-               label = "[L2R] Output water leaving reflectance as",
-               description = "Select if reflectances shall be written as radiances or irradiances. " +
-                       "The irradiances are compatible with standard MERIS product.")
-    private ReflectanceEnum outputReflecAs;      // todo: check consistency L2R/L2W!
+               label = "[L2R] Write water leaving reflectance in CC L2R product as",
+               description = "Select if reflectances shall be written to the CC L2R product as radiances or irradiances. " +
+                       "The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product. " +
+                       "This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product.")
+    private ReflectanceEnum outputReflecAs;
 
 
     @Parameter(defaultValue = "l2r_flags.INPUT_INVALID",
                description = "Expression defining pixels not considered for L2W processing")
     private String invalidPixelExpression;
 
-    @Parameter(defaultValue = "false", label = "Output A_Poc",
-               description = "Toggles the output of absorption by particulate organic matter.")
+    @Parameter(defaultValue = "false", label = "Divide source Rrs by PI(3.14)",
+               description = "If selected the source remote reflectances are divided by PI. " +
+                       "This is necessary if the source reflectances were written as IRRADIANCE_REFLECTANCES !")
+    private boolean qaaDivideByPI;
+
+    @Parameter(defaultValue = "false", label = "Write water leaving reflectance to the CC L2W product",
+               description = "Write the water leaving reflectance to the final CC L2W product.")
+    private boolean outputReflec;
+
+    @Parameter(defaultValue = "false", label = "Write A_Poc to the target product",
+               description = "Write absorption by particulate organic matter (A_Poc) to the CC L2W target product.")
     private boolean outputAPoc;
 
-    @Parameter(defaultValue = "true", label = "Output Kd spectrum",
-               description = "Toggles the output of downwelling irradiance attenuation coefficients. " +
+    @Parameter(defaultValue = "true", label = "Write Kd spectrum to the target product",
+               description = "Write the output of downwelling irradiance attenuation coefficients (Kd) to the CC L2W target product. " +
                              "If disabled only Kd_490 is added to the output.")
     private boolean outputKdSpectrum;
 
-//    @Parameter(defaultValue = "-0.02", label = "'A_TOTAL' lower bound",
-//               description = "The lower bound of the valid value range.")
+
+
     private float qaaATotalLower = -0.02f;
-//    @Parameter(defaultValue = "5.0", label = "'A_TOTAL' upper bound",
-//               description = "The upper bound of the valid value range.")
     private float qaaATotalUpper = 5.0f;
-//    @Parameter(defaultValue = "-0.2", label = "'BB_SPM' lower bound",
-//               description = "The lower bound of the valid value range.")
     private float qaaBbSpmLower = -0.2f;
-//    @Parameter(defaultValue = "5.0", label = "'BB_SPM' upper bound",
-//               description = "The upper bound of the valid value range.")
     private float qaaBbSpmUpper = 5.0f;
-//    @Parameter(defaultValue = "-0.02", label = "'A_PIG' lower bound",
-//               description = "The lower bound of the valid value range.")
     private float qaaAPigLower = -0.02f;
-//    @Parameter(defaultValue = "3.0", label = "'A_PIG' upper bound",
-//               description = "The upper bound of the valid value range.")
     private float qaaAPigUpper = 3.0f;
-//    @Parameter(defaultValue = "1.0", label = "'A_YS' upper bound",
-//               description = "The upper bound of the valid value range. The lower bound is always 0.")
-    private float qaaAYsUpper = 1.0f;
-    @Parameter(defaultValue = "false", label = "Divide source Rrs by PI(3.14)",
-               description = "If selected the source remote reflectances are divided by PI.")
-    private boolean qaaDivideByPI;
 
     private int nadirColumnIndex;
     private Product l2rProduct;
@@ -252,13 +273,11 @@ public class L2WOp extends Operator {
         l2wProductFactory = new Case2rL2WProductFactory(l2rProduct, case2rProduct);
 
         l2wProductFactory.setInvalidPixelExpression(invalidPixelExpression);
-        l2wProductFactory.setOutputFLH(false);
         l2wProductFactory.setOutputKdSpectrum(outputKdSpectrum);
-        l2wProductFactory.setOutputReflectance(true);
+        l2wProductFactory.setOutputReflectance(outputReflec);
 
         ((QaaL2WProductFactory) l2wQaaIopProductFactory).setIopBandsOnly(true);  // we only need to have the iop bands in this product...
         l2wQaaIopProductFactory.setInvalidPixelExpression(invalidPixelExpression);
-        l2wQaaIopProductFactory.setOutputFLH(false);
         l2wQaaIopProductFactory.setOutputKdSpectrum(false);
         l2wQaaIopProductFactory.setOutputReflectance(false);
 
@@ -648,12 +667,17 @@ public class L2WOp extends Operator {
         l2rParams.put("doSmile", doSmile);
         l2rParams.put("doEqualization", doEqualization);
         l2rParams.put("useIdepix", true);
+        l2rParams.put("ccCloudBufferWidth", ccCloudBufferWidth);
+        l2rParams.put("ccOutputCloudProbabilityFeatureValue", ccOutputCloudProbabilityFeatureValue);
+        l2rParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
+        l2rParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
         l2rParams.put("useSnTMap", useSnTMap);
         l2rParams.put("averageSalinity", averageSalinity);
         l2rParams.put("averageTemperature", averageTemperature);
         l2rParams.put("landExpression", landExpression);
         l2rParams.put("cloudIceExpression", cloudIceExpression);
         l2rParams.put("outputNormReflec", true);
+        l2rParams.put("outputToa", outputToa);
         l2rParams.put("outputReflecAs", outputReflecAs);
         return l2rParams;
     }

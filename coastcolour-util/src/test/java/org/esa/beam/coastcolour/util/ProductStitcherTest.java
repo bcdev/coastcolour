@@ -214,8 +214,4 @@ public class ProductStitcherTest {
         }
     }
 
-    @Test
-    public void testGetNcFileSubGroups() throws Exception {
-        // todo!!
-    }
 }

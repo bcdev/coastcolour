@@ -190,7 +190,4 @@ public class L2WOpSecondTest {
         assertEquals(3.57303, weightedConc, 1.E-5);
     }
 
-
-    // todo: add more tests for fuzzy approach!!!
-
 }

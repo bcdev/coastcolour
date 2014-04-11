@@ -35,8 +35,8 @@ import java.util.Map;
 
 @OperatorMetadata(alias = "CoastColour.L2W",
                   version = "1.7",
-                  authors = "Marco Peters, Norman Fomferra",
-                  copyright = "(c) 2011 Brockmann Consult",
+                  authors = "C. Brockmann, M. Bouvet, R. Santer, H. Schiller, M. Peters, O. Danne",
+                  copyright = "(c) 2011-2013 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +
                                 "other variables")
 public class L2WOp extends Operator {

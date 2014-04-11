@@ -37,7 +37,10 @@
 <h3>Summary</h3>
 
 <p>
-    The CoastColour Processors provide...
+    The CoastColour Processors were developed within the ESA DUE CoastColour Project, which was launched by the
+    European Space Agency to fully exploit the potential of the MERIS instrument
+    for remote sensing of the coastal zone. The CoastColour project website [1] serves as an entry point to
+    to all kinds of detailed information on the project.
 </p>
 
 <h3>User Interfaces</h3>
@@ -48,29 +51,31 @@
     the <b>CoastColour Processors (MERIS)...</b> entry, or in batch mode by using the command line
     tool <i><code>gpt</code></i> (Graph Processing Tool) which is located
     in the BEAM <code>bin</code> directory.
+
+</p>
+<p align="center">
+    <img src="images/cc_tools_menu.png" alt="CC tools menu"/>
 </p>
 
 <h3>Algorithms</h3>
 
 <p>
-    TODO: L1P  here
-
-    The IdePix tool for water pixel classification was developed in the frame of the ESA DUE project 'CoastColour' [1], and
-    the ESA OceanColour CCI project [2]. The classification is mainly based on the algorithms described in [3], chapter 5.
+    The 'Pre-Processing and Pixel Classification...' processor (also referred as 'L1P' processor throughout this
+    documentation) provides a refinement of top of atmosphere radiance and a pixel classification.
+    The pixel classification is based on the algorithm used in the
+    <it>IdePix tool</it> which was developed in the
+    frame of the CoastColour project and the ESA OceanColour CCI project [2]. The
+    <it>IdePix tool</it> is available as a separate BEAM processor.
 </p>
 
 <p>
-    TODO: L2R  here
-
-    The IdePix tool for water pixel classification was developed in the frame of the ESA DUE project 'CoastColour' [1], and
-    the ESA OceanColour CCI project [2]. The classification is mainly based on the algorithms described in [3], chapter 5.
+    The 'Atmospheric Correction...' processor (also referred as 'L2R' processor throughout this
+    documentation) provides an atmosphere and sun glint corection based on a neural network approach.
 </p>
 
 <p>
-    TODO: L2W  here
-
-    The IdePix tool for water pixel classification was developed in the frame of the ESA DUE project 'CoastColour' [1], and
-    the ESA OceanColour CCI project [2]. The classification is mainly based on the algorithms described in [3], chapter 5.
+    The 'In-Water Processing...' processor (also referred as 'L2W' processor throughout this
+    documentation) provides water properties in Case 2 waters derived from various neural network approaches.
 </p>
 
 
@@ -82,7 +87,8 @@
     <b>[1]</b>
     CoastColour Project Web Site: <a href="http://www.coastcolour.org">www.coastcolour.org</a><br><br>
 
-    TODO: continue
+    <b>[2]</b>
+    OceanColour Project Web Site: <a href="http://www.esa-oceancolour-cci.org/">www.esa-oceancolour-cci.org</a><br><br>
 </p>
 <br>
 

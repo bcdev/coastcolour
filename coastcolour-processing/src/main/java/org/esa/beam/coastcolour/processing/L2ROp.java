@@ -22,9 +22,9 @@ import java.util.HashMap;
 
 @OperatorMetadata(alias = "CoastColour.L2R",
                   version = "1.7",
-                  authors = "Marco Peters, Norman Fomferra",
-                  copyright = "(c) 2011 Brockmann Consult",
-                  description = "Performs a atmospheric correction. The result contains (normalised) water leaving " +
+                  authors = "C. Brockmann, M. Bouvet, R. Santer, H. Schiller, M. Peters, O. Danne",
+                  copyright = "(c) 2011-2013 Brockmann Consult",
+                  description = "Performs an atmospheric correction. The result contains (normalised) water leaving " +
                           "reflectance and information about atmospheric properties")
 public class L2ROp extends Operator {
 

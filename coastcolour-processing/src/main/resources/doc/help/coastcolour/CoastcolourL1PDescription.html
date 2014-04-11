@@ -93,50 +93,26 @@
 
 <h5>Parameters</h5>
 
-<p>
-    TODO!!
+<p class="i1">
+    <b>Perform ICOL correction:</b>
+    This checkbox indicates if the ICOL adjacency effect correction shall in addition be applied on the input radiances.
+    This additional step can be time- and memory-consuming for large products!
 </p>
 
 <p class="i1">
-    <b>Write TOA radiances to the target product:</b>
-This checkbox indicates if the TOA radiances shall be written to the target product.
+    <b>Perform re-calibration:</b>
+    This checkbox indicates if the correction from MERIS 2nd to 3rd reprocessing quality shall be applied.
 </p>
 
 <p class="i1">
-    <b>Write TOA reflectances to the target product:</b>
-    This checkbox indicates if the TOA reflectances shall be written to the target product.
+    <b>Perform Smile-effect correction:</b>
+    This checkbox indicates if the MERIS Smile-effect correction shall be applied.
 </p>
 
 <p class="i1">
-    <b>Write Rayleigh corrected reflectances to the target product:</b>
-    This checkbox indicates if the Rayleigh corrected reflectances shall be written to the target product.
-</p>
-
-<p class="i1">
-    <b>Write Feature values to the target product:</b>
-    This checkbox indicates if the feature values for a pixel shall be written to the target product.
-    In the land classification algorithm, a feature value (e.g. the 'brightness value') is a probabilistic
-    quantity that the corresponding feature (e.g. 'brightness') is true or not. The probabilistic combination
-    of features, using internal thresholds of the feature values, leads to the final classification
-    of the pixel attributes (e.g. 'is_cloudy'). See [7] for more details.
-</p>
-
-<p class="i1">
-    <b>CTP value to use in MERIS cloud shadow algorithm:</b>
-    This value is the CTP (cloud top pressure) in hPa to use in the MERIS cloud shadow algorithm. This can be
-    derived from a neural net or set as a constant number.
-</p>
-
-<p class="i1">
-    <b>Use GETASSE30 DEM for Barometric Pressure Computation:</b>
-    This checkbox indicates if the GETASSE30 DEM shall be used for Barometric Pressure Computation. If the checkbox
-    is not selected or GETASSE is not installed, tie point altitudes will be used instead.
-</p>
-
-<p class="i1">
-    <b>Write input annotation bands to the target product (VGT only):</b>
-    This checkbox indicates if input annotation bands shall be written to the target product
-    (has only effect for VGT L1b products).
+    <b>Perform equalization:</b>
+    This checkbox indicates if the detector-to-detector
+    systematic radiometric differences in MERIS L1b data products shall be removed.
 </p>
 
 <p class="i1">
@@ -145,13 +121,25 @@ This checkbox indicates if the TOA radiances shall be written to the target prod
 </p>
 
 <p class="i1">
-    <b>Resolution of used land-water mask in m/pixel:</b>
-    This value is the resolution of the used SRTM (Shuttle Radar Topography Mission, see [8]) land-water mask in m/pixel.
+    <b>Write Cloud Probability Feature Value to the CC L1P target product:</b>
+    This checkbox indicates if the Cloud Probability Feature Value shall be written to the target product.
+    This value is a floating point number in the interval [1.0, 2.0] describing the increasing probability of a pixel
+    being cloudy (1.0 = certainly clear, 2.0 = certainly cloudy).
 </p>
 
 <p class="i1">
-    <b>Use land-water flag from L1b product instead:</b>
-    This checkbox indicates if the land-water flag from the L1b product shall be used instead of the SRTM mask.
+    <b>Width of cloud buffer (# of pixels):</b>
+    This value is the width of a cloud 'safety buffer' around a pixel which was classified as cloudy.
+</p>
+
+<p class="i1">
+    <b>Cloud screening 'ambiguous' threshold:</b>
+    This value is the threshold of Cloud Probability Feature Value above which a cloud is regarded as still ambiguous.
+</p>
+
+<p class="i1">
+    <b>Cloud screening 'sure' threshold:</b>
+    This value is the threshold of Cloud Probability Feature Value above which a cloud is regarded as sure.
 </p>
 
 <br>
@@ -291,11 +279,7 @@ For example, a CoastColour pre-processing and pixel classification could be star
     </ul>
 </div>
 with a MERIS L1b input file 'MER_cc_l1b_test.dim' (given in BEAM Dimap format) in the current directory,
-and a graph XML file 'test_cc_l1p.xml' as shown below.
-
-<p align="center">
-    <img src="images/gpt_cc_l1p_xml.png" alt="CC L1P xml"/>
-</p>
+and a graph XML file 'test_cc_l1p.xml' in the XML format as shown in the figure above.
 
 <hr>
 </body>

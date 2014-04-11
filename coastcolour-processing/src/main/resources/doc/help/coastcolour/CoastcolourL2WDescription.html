@@ -109,67 +109,49 @@
 
 <h5>Parameters</h5>
 
-<p>
-    TODO!!
+<p class="i1">
+    <b>[L1P]...:</b>
+    All options starting with '[L1P]...' have the same meaning as described in the documentation for the
+    L1P 'Pre-Processing and Pixel Classification' processing. These parameters have effect only if an L1P
+    processing step will be performed in
+    advance (i.e. if the source product is neither a CC L1P nor a CC L2R, but a MERIS L1B product).
 </p>
 
 <p class="i1">
-    <b>Write TOA radiances to the target product:</b>
-    This checkbox indicates if the TOA radiances shall be written to the target product.
+    <b>[L2R]...:</b>
+    All options starting with '[L2R]...' have the same meaning as described in the documentation for the
+    L2R 'Atmospheric Correction' processing. These parameters have effect only if an L2R
+    processing step will be performed in
+    advance (i.e. if the source product is not a CC L2R but a CC L1P or a MERIS L1B product).
 </p>
 
 <p class="i1">
-    <b>Write TOA reflectances to the target product:</b>
-    This checkbox indicates if the TOA reflectances shall be written to the target product.
+    <b>Invalid pixel expressions:</b>
+    This is the arithmetic expression used for invalid pixel detection.
 </p>
 
 <p class="i1">
-    <b>Write Rayleigh corrected reflectances to the target product:</b>
-    This checkbox indicates if the Rayleigh corrected reflectances shall be written to the target product.
+    <b>Divide source remote reflectances by PI (3.141592):</b>
+    This checkbox indicates if the source remote reflectances shall be divided by PI.
+    It is consistent to do this if the source reflectances were written as irradiances ( = radiances multiplied by PI)!
 </p>
 
 <p class="i1">
-    <b>Write Feature values to the target product:</b>
-    This checkbox indicates if the feature values for a pixel shall be written to the target product.
-    In the land classification algorithm, a feature value (e.g. the 'brightness value') is a probabilistic
-    quantity that the corresponding feature (e.g. 'brightness') is true or not. The probabilistic combination
-    of features, using internal thresholds of the feature values, leads to the final classification
-    of the pixel attributes (e.g. 'is_cloudy'). See [7] for more details.
+    <b>Write water leaving reflectances to the CC L2W target product:</b>
+    This checkbox indicates if the water leaving reflectances shall be written to the CC L2W target product.
 </p>
 
 <p class="i1">
-    <b>CTP value to use in MERIS cloud shadow algorithm:</b>
-    This value is the CTP (cloud top pressure) in hPa to use in the MERIS cloud shadow algorithm. This can be
-    derived from a neural net or set as a constant number.
+    <b>Write A_Poc to the CC L2W target product:</b>
+    This checkbox indicates if the absorption by particulate organic matter (A_Poc) shall be written to the CC L2W target product.
 </p>
 
 <p class="i1">
-    <b>Use GETASSE30 DEM for Barometric Pressure Computation:</b>
-    This checkbox indicates if the GETASSE30 DEM shall be used for Barometric Pressure Computation. If the checkbox
-    is not selected or GETASSE is not installed, tie point altitudes will be used instead.
+    <b>Write Kd spectrum to the CC L2W target product:</b>
+    This checkbox indicates if the output of downwelling irradiance attenuation coefficients (Kd)
+    shall be written to the CC L2W target product.
 </p>
 
-<p class="i1">
-    <b>Write input annotation bands to the target product (VGT only):</b>
-    This checkbox indicates if input annotation bands shall be written to the target product
-    (has only effect for VGT L1b products).
-</p>
-
-<p class="i1">
-    <b>Width of cloud buffer (# of pixels):</b>
-    This value is the width of a cloud 'safety buffer' around a pixel which was classified as cloudy.
-</p>
-
-<p class="i1">
-    <b>Resolution of used land-water mask in m/pixel:</b>
-    This value is the resolution of the used SRTM (Shuttle Radar Topography Mission, see [8]) land-water mask in
-    m/pixel.
-</p>
-
-<p class="i1">
-    <b>Use land-water flag from L1b product instead:</b>
-    This checkbox indicates if the land-water flag from the L1b product shall be used instead of the SRTM mask.
-</p>
 
 <br>
 
@@ -310,11 +292,7 @@ For example, a CoastColour in-water processing could be started with
 with a CoastColour L2R input file 'MER_cc_l2r_test.dim'
 (processed earlier in L1P 'Pre-processing and Pixel Classification' and
 L2R 'Atmospheric Correction' steps, given in BEAM Dimap format)
-in the current directory, and a graph XML file 'test_cc_l2r.xml' as shown below.
-
-<p align="center">
-    <img src="images/gpt_cc_l2w_xml.png" alt="CC L2W xml"/>
-</p>
+in the current directory, and a graph XML file 'test_cc_l2r.xml' in the XML format as shown in the figure above.
 
 <hr>
 </body>

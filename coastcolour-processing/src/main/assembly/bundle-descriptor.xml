@@ -1,135 +1,74 @@
 <bundleDescriptor>
     <bundleName>coastcolour-processing</bundleName>
     <bundleVersion>1.7-SNAPSHOT</bundleVersion>
-
-     <processorDescriptors>
-        <processorDescriptor>
-            <executableName>Meris.CorrectRadiometry</executableName>
-            <processorName>MERIS Radiometric Corrections</processorName>
-            <processorVersion>1.1-SNAPSHOT</processorVersion>
-            <defaultParameters><![CDATA[<parameters>
-    <!-- Whether to perform the calibration. -->
-    <doCalibration>true</doCalibration>
-    <!-- Whether to perform MERIS Smile-effect correction. -->
-    <doSmile>true</doSmile>
-    <!-- Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products. -->
-    <doEqualization>true</doEqualization>
-    <!-- Perform radiance-to-reflectance conversion. -->
-    <doRadToRefl>false</doRadToRefl>
-    </parameters>]]></defaultParameters>
-            <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
-            <descriptionHtml>
-                <![CDATA[<p>
-                            Performs radiometric corrections on MERIS L1b data products.</p>
-                            ]]>
-            </descriptionHtml>
-            <inputProductTypes>MERIS_L1B</inputProductTypes>
-            <outputProductType>MERIS_L1P</outputProductType>
-            <validMaskExpression>!l1p_flags.INVALID</validMaskExpression>
-            <outputVariables>
-                <outputVariable>
-                    <name>radiance_1</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_2</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_3</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_4</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_5</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-              <outputVariable>
-                    <name>radiance_6</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_7</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_8</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_9</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_10</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_11</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_12</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_13</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-              <outputVariable>
-                    <name>radiance_14</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_15</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>detector_index</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>l1_flags</name>
-                </outputVariable>
-            </outputVariables>
-        </processorDescriptor>
+    <processorDescriptors>
 
         <processorDescriptor>
             <executableName>CoastColour.L1P</executableName>
             <processorName>MERIS CoastColour L1P</processorName>
             <processorVersion>1.7-SNAPSHOT</processorVersion>
-            <defaultParameters><![CDATA[<parameters>
-    <!-- Whether to perform the calibration. -->
-    <doCalibration>true</doCalibration>
-    <!-- Whether to perform MERIS Smile-effect correction. -->
-    <doSmile>true</doSmile>
-    <!-- Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products. -->
-    <doEqualization>true</doEqualization>
-    <!-- Wavelength of the band used by the brightness test in the CoastColour cloud screening. -->
-    <brightTestWavelength>865</brightTestWavelength>
-    <!-- Threshold used by the brightness test in the CoastColour cloud screening. -->
-    <brightTestThreshold>0.03</brightTestThreshold>
-</parameters>]]></defaultParameters>
-            <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
+            <parameterDescriptors>
+                <!-- CoastColour L1P parameters -->
+                <parameterDescriptor>
+                    <name>doIcol</name>
+                    <type>boolean</type>
+                    <description>Whether to perform ICOL correction (can be time- and memory-consuming for large
+                        products!)
+                    </description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>doCalibration</name>
+                    <type>boolean</type>
+                    <description>Applies correction from MERIS 2nd to 3rd reprocessing quality</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>doSmile</name>
+                    <type>boolean</type>
+                    <description>Whether to perform MERIS Smile-effect correction</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>doEqualization</name>
+                    <type>boolean</type>
+                    <description>Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b
+                        data products
+                    </description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <!-- IdePix parameters -->
+                <parameterDescriptor>
+                    <name>ccCloudBufferWidth</name>
+                    <type>string</type>
+                    <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy,
+                        [0,100]
+                    </description>
+                    <defaultValue>2</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccOutputCloudProbabilityFeatureValue</name>
+                    <type>boolean</type>
+                    <description>Write Cloud Probability Feature Value to the CC L1P target product</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccCloudScreeningAmbiguous</name>
+                    <type>string</type>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still
+                        ambiguous
+                    </description>
+                    <defaultValue>1.4</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccCloudScreeningSure</name>
+                    <type>string</type>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure
+                    </description>
+                    <defaultValue>1.8</defaultValue>
+                </parameterDescriptor>
+            </parameterDescriptors>
+            <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
                             This processor performs radiometric correction and pixel classification. It has been
@@ -235,7 +174,7 @@
             <processorName>MERIS CoastColour L1P ICOL</processorName>
             <processorVersion>1.7-SNAPSHOT</processorVersion>
             <defaultParameters><![CDATA[]]></defaultParameters>
-            <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
+            <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
                             This processor performs ICOL correction on L1P products.</p>
@@ -243,7 +182,7 @@
             </descriptionHtml>
             <inputProductTypes>MERIS_CC_L1P</inputProductTypes>
             <outputProductType>MERIS_CC_L1P</outputProductType>
-            <validMaskExpression>!l1p_flags.INVALID</validMaskExpression>
+            <validMaskExpression>!l1_flags.INVALID</validMaskExpression>
 
             <jobConfig>
                 <jobParameter>
@@ -350,36 +289,103 @@
             <executableName>CoastColour.L2R</executableName>
             <processorName>MERIS CoastColour L2R</processorName>
             <processorVersion>1.7-SNAPSHOT</processorVersion>
-            <defaultParameters><![CDATA[<parameters>
-    <!-- Whether to perform the calibration. -->
-    <doCalibration>true</doCalibration>
-    <!-- Whether to perform MERIS Smile-effect correction. -->
-    <doSmile>true</doSmile>
-    <!-- Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products. -->
-    <doEqualization>true</doEqualization>
-    <!-- Wavelength of the band used by the brightness test in the CoastColour cloud screening. -->
-    <brightTestWavelength>865</brightTestWavelength>
-    <!-- Threshold used by the brightness test in the CoastColour cloud screening. -->
-    <brightTestThreshold>0.03</brightTestThreshold>
-    <!-- Use climatology map for salinity and temperature. -->
-    <useSnTMap>true</useSnTMap>
-    <!-- Use NNs for extreme ranges of coastcolour IOPs. -->
-    <useExtremeCaseMode>true</useExtremeCaseMode>
-    <!-- The average salinity of the water in the region to be processed. -->
-    <averageSalinity>35.0</averageSalinity>
-    <!-- The average temperature of the water in the region to be processed. -->
-    <averageTemperature>15.0</averageTemperature>
-    <!-- The arithmetic expression used for land detection. -->
-    <landExpression>l1p_flags.CC_LAND</landExpression>
-    <!-- The arithmetic expression used for cloud/ice detection. -->
-    <cloudIceExpression>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</cloudIceExpression>
-    <!-- Toggles the output of Top of Standard Atmosphere reflectance. -->
-    <outputTosa>false</outputTosa>
-    <!-- Defines if reflectances shall be written as radiances or irradiances. Must be RADIANCE_REFLECTANCES or IRRADIANCE_REFLECTANCES. -->
-    <outputReflecAs>RADIANCE_REFLECTANCES</outputReflecAs>
-
-</parameters>]]></defaultParameters>
-            <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
+            <parameterDescriptors>
+                <!-- CoastColour L1P parameters -->
+                <parameterDescriptor>
+                    <name>doCalibration</name>
+                    <type>boolean</type>
+                    <description>Applies correction from MERIS 2nd to 3rd reprocessing quality</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>doSmile</name>
+                    <type>boolean</type>
+                    <description>Whether to perform MERIS Smile-effect correction</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>doEqualization</name>
+                    <type>boolean</type>
+                    <description>Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <!-- IdePix parameters -->
+                <parameterDescriptor>
+                    <name>ccCloudBufferWidth</name>
+                    <type>string</type>
+                    <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy, [0,100]</description>
+                    <defaultValue>2</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccOutputCloudProbabilityFeatureValue</name>
+                    <type>boolean</type>
+                    <description>Write Cloud Probability Feature Value to the CC L1P target product</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccCloudScreeningAmbiguous</name>
+                    <type>string</type>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous</description>
+                    <defaultValue>1.4</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccCloudScreeningSure</name>
+                    <type>string</type>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure</description>
+                    <defaultValue>1.8</defaultValue>
+                </parameterDescriptor>
+                <!-- L2R parameters -->
+                <parameterDescriptor>
+                    <name>useSnTMap</name>
+                    <type>boolean</type>
+                    <description>By default a climatology map is used. If set to 'false' the specified average values are used for the whole scene</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>averageSalinity</name>
+                    <type>string</type>
+                    <description>If no climatology is used, the average salinity [PSU] of the water in the region to be processed is taken</description>
+                    <defaultValue>35</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>averageTemperature</name>
+                    <type>string</type>
+                    <description>If no climatology is used, the average temperature [C] of the water in the region to be processed is taken</description>
+                    <defaultValue>15</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>useExtremeCaseMode</name>
+                    <type>boolean</type>
+                    <description>Use special set of NNs to finally derive water IOPs in extreme ranges</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>landExpression</name>
+                    <type>string</type>
+                    <description>The arithmetic expression used for land detection</description>
+                    <defaultValue>l1p_flags.CC_LAND</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>cloudIceExpression</name>
+                    <type>string</type>
+                    <description>The arithmetic expression used for cloud/ice detection</description>
+                    <defaultValue>(l1p_flags.CC_CLOUD &amp;&amp; not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>outputToa</name>
+                    <type>boolean</type>
+                    <description>Writes the Top of Atmosphere reflectances to the CC L2R target product</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>outputReflecAs</name>
+                    <type>stringArray</type>
+                    <description>Select if water leaving reflectances shall be written as radiances or irradiances. The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.</description>
+                    <defaultValue>RADIANCE_REFLECTANCES</defaultValue>
+                    <valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>
+                </parameterDescriptor>
+            </parameterDescriptors>
+            <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
                     This processor performs an atmospheric correction.
@@ -564,55 +570,134 @@
             <executableName>CoastColour.L2W</executableName>
             <processorName>MERIS CoastColour L2W</processorName>
             <processorVersion>1.7-SNAPSHOT</processorVersion>
-            <defaultParameters>
-                <![CDATA[<parameters>
-    <!-- Whether to perform the calibration. -->
-    <doCalibration>true</doCalibration>
-    <!-- Whether to perform MERIS Smile-effect correction. -->
-    <doSmile>true</doSmile>
-    <!-- Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products. -->
-    <doEqualization>true</doEqualization>
-    <!-- Wavelength of the band used by the brightness test in the CoastColour cloud screening. -->
-    <brightTestWavelength>865</brightTestWavelength>
-    <!-- Threshold used by the brightness test in the CoastColour cloud screening. -->
-    <brightTestThreshold>0.03</brightTestThreshold>
-    <!-- Use climatology map for salinity and temperature. -->
-    <useSnTMap>true</useSnTMap>
-    <!-- Use NNs for extreme ranges of coastcolour IOPs. -->
-    <useExtremeCaseMode>true</useExtremeCaseMode>
-    <!-- The average salinity of the water in the region to be processed. -->
-    <averageSalinity>35.0</averageSalinity>
-    <!-- The average temperature of the water in the region to be processed. -->
-    <averageTemperature>15.0</averageTemperature>
-    <!-- The arithmetic expression used for land detection. -->
-    <landExpression>l1p_flags.CC_LAND</landExpression>
-    <!-- The arithmetic expression used for cloud/ice detection. -->
-    <cloudIceExpression>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</cloudIceExpression>
-    <!-- Toggles the output of water leaving reflectance. -->
-    <outputReflec>false</outputReflec>
-    <!-- The arithmetic expression defining pixels not considered for water processing -->
-    <invalidPixelExpression>l2r_flags.INPUT_INVALID</invalidPixelExpression>
-    <!-- If enabled IOPs are computed by QAA instead of Case-2-Regional. Concentrations of chlorophyll and
-    total suspended matter will be derived from the IOPs. -->
-    <useQaaForIops>false</useQaaForIops>
-    <!-- The lower bound of the valid value range of 'A_TOTAL'. -->
-    <qaaATotalLower>-0.2</qaaATotalLower>
-    <!-- The upper bound of the valid value range of 'A_TOTAL'. -->
-    <qaaATotalUpper>5.0</qaaATotalUpper>
-    <!-- The lower bound of the valid value range of 'BB_SPM'. -->
-    <qaaBbSpmLower>-0.2</qaaBbSpmLower>
-    <!-- The upper bound of the valid value range of 'BB_SPM'. -->
-    <qaaBbSpmUpper>5.0</qaaBbSpmUpper>
-    <!-- The lower bound of the valid value range of 'A_PIG'. -->
-    <qaaAPigLower>-0.02</qaaAPigLower>
-    <!-- The upper bound of the valid value range of 'A_PIG'. -->
-    <qaaAPigUpper>3.0</qaaAPigUpper>
-    <!-- The upper bound of the valid value range of 'A_YS'. The lower bound is always 0.-->
-    <qaaAYsUpper>1.0</qaaAYsUpper>
-    <!-- If selected the source remote reflectances are divided by PI. -->
-    <qaaDivideByPI>false</qaaDivideByPI>
-</parameters>]]></defaultParameters>
-            <outputFormats>BEAM-DIMAP,NetCDF,GeoTIFF</outputFormats>
+            <parameterDescriptors>
+                <!-- CoastColour L1P parameters -->
+                <parameterDescriptor>
+                    <name>doCalibration</name>
+                    <type>boolean</type>
+                    <description>Applies correction from MERIS 2nd to 3rd reprocessing quality</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>doSmile</name>
+                    <type>boolean</type>
+                    <description>Whether to perform MERIS Smile-effect correction</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>doEqualization</name>
+                    <type>boolean</type>
+                    <description>Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <!-- IdePix parameters -->
+                <parameterDescriptor>
+                    <name>ccCloudBufferWidth</name>
+                    <type>string</type>
+                    <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy, [0,100]</description>
+                    <defaultValue>2</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccOutputCloudProbabilityFeatureValue</name>
+                    <type>boolean</type>
+                    <description>Write Cloud Probability Feature Value to the CC L1P target product</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccCloudScreeningAmbiguous</name>
+                    <type>string</type>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous</description>
+                    <defaultValue>1.4</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccCloudScreeningSure</name>
+                    <type>string</type>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure</description>
+                    <defaultValue>1.8</defaultValue>
+                </parameterDescriptor>
+                <!-- L2R parameters -->
+                <parameterDescriptor>
+                    <name>useSnTMap</name>
+                    <type>boolean</type>
+                    <description>By default a climatology map is used. If set to 'false' the specified average values are used for the whole scene</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>averageSalinity</name>
+                    <type>string</type>
+                    <description>If no climatology is used, the average salinity [PSU] of the water in the region to be processed is taken</description>
+                    <defaultValue>35</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>averageTemperature</name>
+                    <type>string</type>
+                    <description>If no climatology is used, the average temperature [C] of the water in the region to be processed is taken</description>
+                    <defaultValue>15</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>useExtremeCaseMode</name>
+                    <type>boolean</type>
+                    <description>Use special set of NNs to finally derive water IOPs in extreme ranges</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>landExpression</name>
+                    <type>string</type>
+                    <description>The arithmetic expression used for land detection</description>
+                    <defaultValue>l1p_flags.CC_LAND</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>cloudIceExpression</name>
+                    <type>string</type>
+                    <description>The arithmetic expression used for cloud/ice detection</description>
+                    <defaultValue>(l1p_flags.CC_CLOUD &amp;&amp; not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>outputToa</name>
+                    <type>boolean</type>
+                    <description>Writes the Top of Atmosphere reflectances to the CC L2R target product</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>outputReflecAs</name>
+                    <type>stringArray</type>
+                    <description>Select if water leaving reflectances shall be written as radiances or irradiances. The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.</description>
+                    <defaultValue>RADIANCE_REFLECTANCES</defaultValue>
+                    <valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>
+                </parameterDescriptor>
+                <!-- L2W parameters -->
+                <parameterDescriptor>
+                    <name>invalidPixelExpression</name>
+                    <type>string</type>
+                    <description>Expression defining pixels not considered for L2W processing</description>
+                    <defaultValue>l2r_flags.INPUT_INVALID</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>qaaDivideByPI</name>
+                    <type>boolean</type>
+                    <description>Select if the source remote reflectances shall be divided by PI. It is consistent to do this if the source reflectances were written as IRRADIANCE_REFLECTANCES !</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>outputReflec</name>
+                    <type>boolean</type>
+                    <description>Write the water leaving reflectance to the final CC L2W product</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>outputAPoc</name>
+                    <type>boolean</type>
+                    <description>Write absorption by particulate organic matter (A_Poc) to the CC L2W target product</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>outputKdSpectrum</name>
+                    <type>boolean</type>
+                    <description>Write the output of downwelling irradiance attenuation coefficients (Kd) to the CC L2W target product. If disabled only Kd_490 is added to the output.</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+            </parameterDescriptors>
+            <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
                 This processor computes water constituents and IOPs optimized for coastal zones.
@@ -636,6 +721,7 @@
                 <li>l2r_flags - CoastColour L2R atmospheric correction quality flags.</li>
                 <li>l2w_flags - CoastColour L2W water constituents and IOPs retrieval quality flags.</li>
                 </ul>
+                Do not apply this processor to MERIS L1B unless the input region is small. Use the L1P processor first, then apply L2R to the output set, then apply L2W.
                 </p>]]></descriptionHtml>
             <inputProductTypes>MERIS_L1B,MERIS_CC_L1P,MERIS_CC_L2R</inputProductTypes>
             <outputProductType>MERIS_CC_L2W</outputProductType>
@@ -765,5 +851,140 @@
                 </outputVariable>
             </outputVariables>
         </processorDescriptor>
+
+
+        <processorDescriptor>
+            <executableName>Meris.CorrectRadiometry</executableName>
+            <processorName>MERIS Radiometric Corrections</processorName>
+            <processorVersion>1.1-SNAPSHOT</processorVersion>
+            <parameterDescriptors>
+                <parameterDescriptor>
+                    <name>doCalibration</name>
+                    <type>boolean</type>
+                    <description>Whether to perform the calibration</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>doSmile</name>
+                    <type>boolean</type>
+                    <description>Whether to perform Smile-effect correction</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>doEqualization</name>
+                    <type>boolean</type>
+                    <description>Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>reproVersion</name>
+                    <type>stringArray</type>
+                    <description>The version of the reprocessing the product comes from. Is only used if equalisation is enabled</description>
+                    <defaultValue>REPROCESSING_3</defaultValue>
+                    <valueSet>AUTO_DETECT,REPROCESSING_2,REPROCESSING_3</valueSet>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>doRadToRefl</name>
+                    <type>boolean</type>
+                    <description>Whether to perform radiance-to-reflectance conversion</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+            </parameterDescriptors>
+            <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
+            <descriptionHtml>
+                <![CDATA[<p>
+                            Performs radiometric corrections on MERIS L1b data products.</p>
+                            ]]>
+            </descriptionHtml>
+            <inputProductTypes>MERIS_L1B</inputProductTypes>
+            <outputProductType>MERIS_L1P</outputProductType>
+            <validMaskExpression>!l1p_flags.INVALID</validMaskExpression>
+            <outputVariables>
+                <outputVariable>
+                    <name>radiance_1</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_2</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_3</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_4</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_5</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_6</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_7</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_8</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_9</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_10</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_11</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_12</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_13</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_14</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>radiance_15</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>detector_index</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>l1_flags</name>
+                </outputVariable>
+            </outputVariables>
+        </processorDescriptor>
+
     </processorDescriptors>
 </bundleDescriptor>

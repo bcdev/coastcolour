@@ -35,7 +35,7 @@ import static org.esa.beam.dataio.envisat.EnvisatConstants.*;
  */
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized", "MismatchedReadAndWriteOfArray"})
 @OperatorMetadata(alias = "MerisCC.GlintCorrection",
-                  version = "1.7-SNAPSHOT",
+                  version = "1.8",
                   internal = true,
                   authors = "Marco Peters, Roland Doerffer, Olaf Danne",
                   copyright = "(c) 2008 by Brockmann Consult",

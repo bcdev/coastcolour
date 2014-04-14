@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.esa.beam.coastcolour</groupId>
         <artifactId>coastcolour</artifactId>
-        <version>1.7-SNAPSHOT</version>
+        <version>1.8-SNAPSHOT</version>
     </parent>
 
     <name>Optical Water Type Classification Operator</name>

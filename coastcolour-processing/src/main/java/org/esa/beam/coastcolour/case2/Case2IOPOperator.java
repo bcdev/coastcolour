@@ -36,7 +36,7 @@ import java.io.File;
                   authors = "Roland Doerffer (GKSS); Marco Peters (Brockmann Consult)",
                   copyright = "(c) 2011 by Brockmann Consult",
                   internal = true,
-                  version = "1.7-SNAPSHOT")
+                  version = "1.8")
 public class Case2IOPOperator extends Operator {
 
     @SourceProduct(alias = "source", label = "Name", description = "The source product.")

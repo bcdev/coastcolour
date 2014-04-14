@@ -9,14 +9,15 @@
             <processorVersion>1.7</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
-                <parameterDescriptor>
-                    <name>doIcol</name>
-                    <type>boolean</type>
-                    <description>Whether to perform ICOL correction (can be time- and memory-consuming for large
-                        products!)
-                    </description>
-                    <defaultValue>false</defaultValue>
-                </parameterDescriptor>
+                <!-- Disable ICOL here, processing will usually lead to problems if we have too large products -->
+                <!--<parameterDescriptor>-->
+                    <!--<name>doIcol</name>-->
+                    <!--<type>boolean</type>-->
+                    <!--<description>Whether to perform ICOL correction (can be time- and memory-consuming for large-->
+                        <!--products!)-->
+                    <!--</description>-->
+                    <!--<defaultValue>false</defaultValue>-->
+                <!--</parameterDescriptor>-->
                 <parameterDescriptor>
                     <name>doCalibration</name>
                     <type>boolean</type>

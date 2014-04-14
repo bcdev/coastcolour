@@ -68,6 +68,16 @@
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
             </parameterDescriptors>
+            <jobConfig>
+                <jobParameter>
+                    <name>calvalus.output.regex</name>
+                    <value>.+(MER_..._)1.....(.+)</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.output.replacement</name>
+                    <value>$1CCL1P_$2</value>
+                </jobParameter>
+            </jobConfig>
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
@@ -174,6 +184,16 @@
             <processorName>MERIS CoastColour L1P ICOL</processorName>
             <processorVersion>1.8-SNAPSHOT</processorVersion>
             <defaultParameters><![CDATA[]]></defaultParameters>
+            <jobConfig>
+                <jobParameter>
+                    <name>calvalus.output.regex</name>
+                    <value>.+(MER_..._)1.....(.+)</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.output.replacement</name>
+                    <value>$1CCL1P_$2</value>
+                </jobParameter>
+            </jobConfig>
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
@@ -385,6 +405,16 @@
                     <valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>
                 </parameterDescriptor>
             </parameterDescriptors>
+            <jobConfig>
+                <jobParameter>
+                    <name>calvalus.output.regex</name>
+                    <value>.+(MER_..._)1.....(.+)</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.output.replacement</name>
+                    <value>$1CCL1P_$2</value>
+                </jobParameter>
+            </jobConfig>
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
@@ -697,6 +727,16 @@
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
             </parameterDescriptors>
+            <jobConfig>
+                <jobParameter>
+                    <name>calvalus.output.regex</name>
+                    <value>.+(MER_..._)1.....(.+)</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.output.replacement</name>
+                    <value>$1CCL1P_$2</value>
+                </jobParameter>
+            </jobConfig>
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
@@ -848,140 +888,6 @@
                 </outputVariable>
                 <outputVariable>
                     <name>l2w_flags</name>
-                </outputVariable>
-            </outputVariables>
-        </processorDescriptor>
-
-
-        <processorDescriptor>
-            <executableName>Meris.CorrectRadiometry</executableName>
-            <processorName>MERIS Radiometric Corrections</processorName>
-            <processorVersion>1.1-SNAPSHOT</processorVersion>
-            <parameterDescriptors>
-                <parameterDescriptor>
-                    <name>doCalibration</name>
-                    <type>boolean</type>
-                    <description>Whether to perform the calibration</description>
-                    <defaultValue>true</defaultValue>
-                </parameterDescriptor>
-                <parameterDescriptor>
-                    <name>doSmile</name>
-                    <type>boolean</type>
-                    <description>Whether to perform Smile-effect correction</description>
-                    <defaultValue>true</defaultValue>
-                </parameterDescriptor>
-                <parameterDescriptor>
-                    <name>doEqualization</name>
-                    <type>boolean</type>
-                    <description>Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products</description>
-                    <defaultValue>true</defaultValue>
-                </parameterDescriptor>
-                <parameterDescriptor>
-                    <name>reproVersion</name>
-                    <type>stringArray</type>
-                    <description>The version of the reprocessing the product comes from. Is only used if equalisation is enabled</description>
-                    <defaultValue>REPROCESSING_3</defaultValue>
-                    <valueSet>AUTO_DETECT,REPROCESSING_2,REPROCESSING_3</valueSet>
-                </parameterDescriptor>
-                <parameterDescriptor>
-                    <name>doRadToRefl</name>
-                    <type>boolean</type>
-                    <description>Whether to perform radiance-to-reflectance conversion</description>
-                    <defaultValue>false</defaultValue>
-                </parameterDescriptor>
-            </parameterDescriptors>
-            <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
-            <descriptionHtml>
-                <![CDATA[<p>
-                            Performs radiometric corrections on MERIS L1b data products.</p>
-                            ]]>
-            </descriptionHtml>
-            <inputProductTypes>MERIS_L1B</inputProductTypes>
-            <outputProductType>MERIS_L1P</outputProductType>
-            <validMaskExpression>!l1p_flags.INVALID</validMaskExpression>
-            <outputVariables>
-                <outputVariable>
-                    <name>radiance_1</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_2</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_3</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_4</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_5</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_6</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_7</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_8</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_9</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_10</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_11</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_12</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_13</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_14</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>radiance_15</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>detector_index</name>
-                    <defaultAggregator>AVG</defaultAggregator>
-                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
-                </outputVariable>
-                <outputVariable>
-                    <name>l1_flags</name>
                 </outputVariable>
             </outputVariables>
         </processorDescriptor>

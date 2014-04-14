@@ -142,7 +142,7 @@ public class L2ROp extends Operator {
             l1pProduct = sourceProduct;
         }
 
-        HashMap<String, Product> sourceProducts = new HashMap<>();
+        HashMap<String, Product> sourceProducts = new HashMap<String, Product>();
         sourceProducts.put("merisProduct", l1pProduct);
 
         HashMap<String, Object> glintParameters = createGlintAcParameterMap();
@@ -153,7 +153,7 @@ public class L2ROp extends Operator {
     }
 
     private HashMap<String, Object> createGlintAcParameterMap() {
-        HashMap<String, Object> glintParameters = new HashMap<>();
+        HashMap<String, Object> glintParameters = new HashMap<String, Object>();
         glintParameters.put("doSmileCorrection", false);
         glintParameters.put("outputToa", outputToa);
         glintParameters.put("outputReflec", true);
@@ -180,7 +180,7 @@ public class L2ROp extends Operator {
     }
 
     private HashMap<String, Object> createL1pParameterMap() {
-        HashMap<String, Object> l1pParams = new HashMap<>();
+        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
         l1pParams.put("doCalibration", doCalibration);
         l1pParams.put("doSmile", doSmile);
         l1pParams.put("doEqualization", doEqualization);

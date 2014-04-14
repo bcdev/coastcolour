@@ -645,7 +645,7 @@ public class L2WOp extends Operator {
     }
 
     private HashMap<String, Object> createQaaParameterMap() {
-        HashMap<String, Object> qaaParams = new HashMap<>();
+        HashMap<String, Object> qaaParams = new HashMap<String, Object>();
         qaaParams.put("invalidPixelExpression", invalidPixelExpression);
         qaaParams.put("aTotalLower", qaaATotalLower);
         qaaParams.put("aTotalUpper", qaaATotalUpper);
@@ -662,7 +662,7 @@ public class L2WOp extends Operator {
     }
 
     private HashMap<String, Object> createBaseL2RParameterMap() {
-        HashMap<String, Object> l2rParams = new HashMap<>();
+        HashMap<String, Object> l2rParams = new HashMap<String, Object>();
         l2rParams.put("doCalibration", doCalibration);
         l2rParams.put("doSmile", doSmile);
         l2rParams.put("doEqualization", doEqualization);

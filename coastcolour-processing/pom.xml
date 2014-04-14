@@ -5,7 +5,7 @@
     <parent>
         <artifactId>coastcolour</artifactId>
         <groupId>org.esa.beam.coastcolour</groupId>
-        <version>1.7-SNAPSHOT</version>
+        <version>1.7</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-flhmci</artifactId>
-            <version>1.7.${beamVersion}-SNAPSHOT</version>
+            <version>1.6.103</version>
         </dependency>
 
         <dependency>

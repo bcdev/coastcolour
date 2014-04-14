@@ -19,7 +19,6 @@ public class OWTClassificationOpTest {
     @Test
     public void testTheOpWithDefaults() throws Exception {
         Operator fuzzyOp = new OWTClassificationOp();
-        fuzzyOp.setParameterDefaultValues();
         fuzzyOp.setSourceProduct(createSourceProduct());
         Product targetProduct = fuzzyOp.getTargetProduct();
 
@@ -45,7 +44,6 @@ public class OWTClassificationOpTest {
     @Test
     public void testTheOpWithInputReflectances() throws Exception {
         Operator fuzzyOp = new OWTClassificationOp();
-        fuzzyOp.setParameterDefaultValues();
         fuzzyOp.setSourceProduct(createSourceProduct());
         fuzzyOp.setParameter("writeInputReflectances", true);
         Product targetProduct = fuzzyOp.getTargetProduct();
@@ -75,7 +73,6 @@ public class OWTClassificationOpTest {
     @Test
     public void testTheOpWithInlandAuxdata() throws Exception {
         Operator fuzzyOp = new OWTClassificationOp();
-        fuzzyOp.setParameterDefaultValues();
         fuzzyOp.setSourceProduct(createSourceProduct());
         fuzzyOp.setParameter("owtType", "INLAND");
         Product targetProduct = fuzzyOp.getTargetProduct();

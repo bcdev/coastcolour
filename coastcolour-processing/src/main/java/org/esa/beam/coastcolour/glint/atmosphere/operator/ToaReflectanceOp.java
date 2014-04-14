@@ -32,7 +32,7 @@ import java.util.Map;
  */
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized", "FieldCanBeLocal"})
 @OperatorMetadata(alias = "MerisCC.AgcRad2Refl",
-                  version = "1.7-SNAPSHOT",
+                  version = "1.7",
                   internal = true,
                   authors = "Marco Peters",
                   copyright = "(c) 2008 by Brockmann Consult",
@@ -55,7 +55,6 @@ public class ToaReflectanceOp extends Operator {
     public static ToaReflectanceOp create(Product sourceProduct) {
 
         final ToaReflectanceOp op = new ToaReflectanceOp();
-        op.setParameterDefaultValues();
         op.sourceProduct = sourceProduct;
         return op;
     }

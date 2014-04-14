@@ -36,7 +36,7 @@ import java.io.File;
                   authors = "Roland Doerffer (GKSS); Marco Peters (Brockmann Consult)",
                   copyright = "(c) 2011 by Brockmann Consult",
                   internal = true,
-                  version = "1.7-SNAPSHOT")
+                  version = "1.7")
 public class Case2IOPOperator extends Operator {
 
     @SourceProduct(alias = "source", label = "Name", description = "The source product.")
@@ -174,7 +174,6 @@ public class Case2IOPOperator extends Operator {
 
         if (doAtmosphericCorrection) {
             Operator atmoCorOp = new GlintCorrectionOperator();
-            atmoCorOp.setParameterDefaultValues();
             atmoCorOp.setParameter("doSmileCorrection", doSmileCorrection);
             if (atmoNetFile != null) {
                 atmoCorOp.setParameter("atmoNetMerisFile", atmoNetFile);
@@ -195,7 +194,6 @@ public class Case2IOPOperator extends Operator {
         }
 
         Operator case2Op = new RegionalWaterOp();
-        case2Op.setParameterDefaultValues();
         case2Op.setParameter("useSnTMap", useSnTMap);
         case2Op.setParameter("outputSnT", outputSnT);
         case2Op.setParameter("averageSalinity", averageSalinity);

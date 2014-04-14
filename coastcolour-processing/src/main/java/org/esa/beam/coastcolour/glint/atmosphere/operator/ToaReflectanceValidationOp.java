@@ -31,7 +31,7 @@ import java.util.List;
  */
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized", "FieldCanBeLocal"})
 @OperatorMetadata(alias = "MerisCC.AgcToaReflValid",
-                  version = "1.7-SNAPSHOT",
+                  version = "1.7",
                   internal = true,
                   authors = "Marco Peters",
                   copyright = "(c) 2007 by Brockmann Consult",
@@ -66,7 +66,6 @@ public class ToaReflectanceValidationOp extends Operator {
     public static ToaReflectanceValidationOp create(Product sourceProduct, String landExpression,
                                                     String cloudIceExpression) {
         final ToaReflectanceValidationOp validationOp = new ToaReflectanceValidationOp();
-        validationOp.setParameterDefaultValues();
         validationOp.sourceProduct = sourceProduct;
         validationOp.landExpression = landExpression;
         validationOp.cloudIceExpression = cloudIceExpression;

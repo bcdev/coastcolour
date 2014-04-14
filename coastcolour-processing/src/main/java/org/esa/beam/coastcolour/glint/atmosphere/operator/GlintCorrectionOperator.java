@@ -35,7 +35,7 @@ import static org.esa.beam.dataio.envisat.EnvisatConstants.*;
  */
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized", "MismatchedReadAndWriteOfArray"})
 @OperatorMetadata(alias = "MerisCC.GlintCorrection",
-                  version = "1.7-SNAPSHOT",
+                  version = "1.7",
                   internal = true,
                   authors = "Marco Peters, Roland Doerffer, Olaf Danne",
                   copyright = "(c) 2008 by Brockmann Consult",
@@ -442,7 +442,7 @@ public class GlintCorrectionOperator extends Operator {
     }
 
     private static Map<String, ProductData> getTargetSampleData(Map<Band, Tile> targetTiles) {
-        final Map<String, ProductData> map = new HashMap<>(targetTiles.size());
+        final Map<String, ProductData> map = new HashMap<String, ProductData>(targetTiles.size());
         for (Map.Entry<Band, Tile> bandTileEntry : targetTiles.entrySet()) {
             final Band band = bandTileEntry.getKey();
             final Tile tile = bandTileEntry.getValue();
@@ -547,7 +547,7 @@ public class GlintCorrectionOperator extends Operator {
     }
 
     private Map<String, ProductData> preLoadMerisSources(Rectangle targetRectangle) {
-        final Map<String, ProductData> map = new HashMap<>(27);
+        final Map<String, ProductData> map = new HashMap<String, ProductData>(27);
 
         final Tile validationTile = getSourceTile(validationBand, targetRectangle);
         map.put(validationBand.getName(), validationTile.getRawSamples());

@@ -6,7 +6,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L1P</executableName>
             <processorName>MERIS CoastColour L1P</processorName>
-            <processorVersion>1.8-SNAPSHOT</processorVersion>
+            <processorVersion>1.7</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
                 <parameterDescriptor>
@@ -182,7 +182,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L1P.Icol</executableName>
             <processorName>MERIS CoastColour L1P ICOL</processorName>
-            <processorVersion>1.8-SNAPSHOT</processorVersion>
+            <processorVersion>1.7</processorVersion>
             <defaultParameters><![CDATA[]]></defaultParameters>
             <jobConfig>
                 <jobParameter>
@@ -308,7 +308,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2R</executableName>
             <processorName>MERIS CoastColour L2R</processorName>
-            <processorVersion>1.8-SNAPSHOT</processorVersion>
+            <processorVersion>1.7</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
                 <parameterDescriptor>
@@ -599,7 +599,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2W</executableName>
             <processorName>MERIS CoastColour L2W</processorName>
-            <processorVersion>1.8-SNAPSHOT</processorVersion>
+            <processorVersion>1.7</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
                 <parameterDescriptor>

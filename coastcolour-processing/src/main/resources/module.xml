@@ -75,6 +75,10 @@
     </dependency>
 
     <dependency>
+        <module>beam-owt-classification</module>
+    </dependency>
+
+    <dependency>
         <module>beam-waterradiance-auxdata</module>
     </dependency>
 
@@ -110,7 +114,8 @@
         </action>
         <action>
             <id>coastColourProcessingL2R</id>
-            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+            <!--<class>org.esa.beam.visat.actions.DefaultOperatorAction</class>-->
+            <class>org.esa.beam.coastcolour.processing.ui.L2RAction</class>
             <operatorName>CoastColour.L2R</operatorName>
             <text>CoastColour Atmospheric Correction...</text>
             <shortDescr>CoastColour Atmospheric Correction (L2R)</shortDescr>
@@ -123,7 +128,8 @@
         </action>
         <action>
             <id>coastColourProcessingL2W</id>
-            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+            <!--<class>org.esa.beam.visat.actions.DefaultOperatorAction</class>-->
+            <class>org.esa.beam.coastcolour.processing.ui.L2RAction</class>
             <operatorName>CoastColour.L2W</operatorName>
             <text>CoastColour In-Water Processing...</text>
             <shortDescr>CoastColour In-Water Processing (L2W)</shortDescr>

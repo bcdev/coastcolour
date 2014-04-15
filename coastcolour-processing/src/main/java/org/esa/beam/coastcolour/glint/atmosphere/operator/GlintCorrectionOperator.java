@@ -5,10 +5,7 @@ import org.esa.beam.coastcolour.glint.PixelData;
 import org.esa.beam.coastcolour.glint.nn.NNffbpAlphaTabFast;
 import org.esa.beam.dataio.envisat.EnvisatConstants;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.Tile;
+import org.esa.beam.framework.gpf.*;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
@@ -152,10 +149,6 @@ public class GlintCorrectionOperator extends Operator {
                description = "Whether to perform Smile-effect correction.")
     private boolean doSmileCorrection;
 
-    @Parameter(defaultValue = "false", label = "Output TOA reflectance",
-               description = "Toggles the output of Top of Standard Atmosphere reflectance.")
-    private boolean outputToa;
-
     @Parameter(defaultValue = "false", label = "Output TOSA reflectance of auto assoc. neural net",
                description = "Toggles the output of Top of Standard Atmosphere reflectance calculated by an auto associative neural net.")
     private boolean outputAutoTosa;
@@ -231,7 +224,6 @@ public class GlintCorrectionOperator extends Operator {
 
     private Band validationBand;
 
-    public static final double NO_FLINT_VALUE = -1.0;
     private String merisNeuralNetString;
     private String invAotAngNeuralNetString;
     private String normalizationNeuralNetString;
@@ -475,9 +467,6 @@ public class GlintCorrectionOperator extends Operator {
         final ProductData atotTile = targetSampleData.get(ATOT);
         atotTile.setElemDoubleAt(pixelIndex, glintResult.getAtot());
 
-        if (outputToa) {
-            fillTargetSample(TOA_REFLEC_BAND_NAMES, pixelIndex, targetSampleData, glintResult.getTosaReflec());
-        }
         if (outputAutoTosa) {
             fillTargetSample(AUTO_TOSA_REFLEC_BAND_NAMES, pixelIndex, targetSampleData,
                              glintResult.getAutoTosaReflec());
@@ -628,10 +617,6 @@ public class GlintCorrectionOperator extends Operator {
         if (outputAutoTosa) {
             groupList.add("tosa_reflec_auto");
         }
-        if (outputToa) {
-            addSpectralTargetBands(product, TOA_REFLEC_BAND_NAMES, "TOA Reflectance at {0} nm", "sr^-1");
-            groupList.add("toa_reflec");
-        }
         if (outputAutoTosa) {
             addSpectralTargetBands(product, AUTO_TOSA_REFLEC_BAND_NAMES, "TOSA Reflectance at {0} nm", "sr^-1");
         }
@@ -651,10 +636,20 @@ public class GlintCorrectionOperator extends Operator {
 
         }
         if (outputNormReflec) {
-            String descriptionPattern = "Normalised water leaving radiance reflectance at {0} nm";
-            addSpectralTargetBands(product, NORM_REFLEC_BAND_NAMES, descriptionPattern, "sr^-1");
+            final String reflecUnit;
+            String reflecType;
+            if (ReflectanceEnum.RADIANCE_REFLECTANCES.equals(outputReflecAs)) {
+                reflecType = "radiance";
+                reflecUnit = "sr^-1";
+            } else {
+                reflecType = "irradiance";
+                reflecUnit = "dl";
+            }
+            String descriptionPattern = "Normalised water leaving " + reflecType + " reflectance at {0} nm";
+            addSpectralTargetBands(product, NORM_REFLEC_BAND_NAMES, descriptionPattern, reflecUnit);
             groupList.add("norm_reflec");
         }
+        groupList.add("toa_reflec");
         if (outputPath) {
             addSpectralTargetBands(product, PATH_BAND_NAMES, "Water leaving radiance reflectance path at {0} nm",
                                    "dxd");

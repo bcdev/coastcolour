@@ -5,22 +5,12 @@ import com.bc.ceres.jai.tilecache.DefaultSwapSpace;
 import com.bc.ceres.jai.tilecache.SwappingTileCache;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.dataio.envisat.EnvisatConstants;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.FlagCoding;
-import org.esa.beam.framework.datamodel.Mask;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.Tile;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.gpf.*;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.internal.OperatorImage;
-import org.esa.beam.idepix.IdepixProducts;
 import org.esa.beam.idepix.algorithms.coastcolour.CoastColourClassificationOp;
 import org.esa.beam.meris.icol.AeArea;
 import org.esa.beam.meris.icol.meris.MerisOp;
@@ -29,8 +19,7 @@ import org.esa.beam.util.ProductUtils;
 
 import javax.media.jai.OpImage;
 import javax.media.jai.TileCache;
-import java.awt.Color;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.util.HashMap;
@@ -81,7 +70,7 @@ public class L1POp extends Operator {
     // CoastColour L1P parameters
     @Parameter(defaultValue = "false",
                label = " Perform ICOL correction",
-               description = "Whether to perform ICOL correction (can be time- and memory-consuming for large products!).")
+               description = "Whether to perform ICOL correction (NOTE: This step is very time- and memory-consuming in case of large products!).")
     private boolean doIcol;
 
     @Parameter(defaultValue = "true",
@@ -127,6 +116,12 @@ public class L1POp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
+
+        if (!ProductValidator.isValidL1PInputProduct(sourceProduct)) {
+            final String message = String.format("Input product '%s' is not a valid source for L1P processing",
+                                                  sourceProduct.getName());
+            throw new OperatorException(message);
+        }
 
         final Map<String, Object> rcParams = createRadiometryParameterMap();
         Product radiometryProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);

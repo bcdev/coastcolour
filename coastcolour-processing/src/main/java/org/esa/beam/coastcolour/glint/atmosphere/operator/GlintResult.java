@@ -8,7 +8,6 @@ package org.esa.beam.coastcolour.glint.atmosphere.operator;
  */
 public class GlintResult {
 
-    private double[] toaReflec;
     private double[] tosaReflec;
     private double[] reflec;
     private double tosaQualityIndicator;
@@ -26,7 +25,6 @@ public class GlintResult {
     private double[] autoTosaReflec;
 
     public GlintResult() {
-        toaReflec = new double[12];
         tosaReflec = new double[12];
         autoTosaReflec = new double[12];
         reflec = new double[12];
@@ -48,18 +46,6 @@ public class GlintResult {
         this.tosaReflec = tosaReflec;
     }
 
-    public double[] getTosaReflec() {
-        return tosaReflec;
-    }
-
-    public double[] getToaReflec() {
-        return toaReflec;
-    }
-
-    public void setToaReflec(double[] toaReflec) {
-        this.toaReflec = toaReflec;
-    }
-
     public void setAutoTosaReflec(double[] autoTosaReflec) {
         this.autoTosaReflec = autoTosaReflec;
     }
@@ -67,7 +53,6 @@ public class GlintResult {
     public double[] getAutoTosaReflec() {
         return this.autoTosaReflec;
     }
-
 
     public void setReflec(double[] reflec) {
         this.reflec = reflec;
@@ -93,17 +78,8 @@ public class GlintResult {
         return normReflec;
     }
 
-
-    public void setPath(double[] path) {
-        this.path = path;
-    }
-
     public double[] getPath() {
         return path;
-    }
-
-    public void setTrans(double[] trans) {
-        this.trans = trans;
     }
 
     public double[] getTrans() {
@@ -130,16 +106,8 @@ public class GlintResult {
         this.tau778 = tau778;
     }
 
-    public double getTau778() {
-        return tau778;
-    }
-
     public void setTau865(double tau865) {
         this.tau865 = tau865;
-    }
-
-    public double getTau865() {
-        return tau865;
     }
 
     public void setGlintRatio(double glintRatio) {

@@ -77,7 +77,7 @@ public class GlintCorrection extends AbstractGlintCorrection {
         tosa.init();
         final double[] rlTosa = tosa.perform(pixel, tetaViewSurfRad, tetaSunSurfRad);
         glintResult.setTosaReflec(rlTosa.clone());
-        glintResult.setToaReflec(tosa.getlToa().clone());
+//        glintResult.setToaReflec(tosa.getlToa().clone());
 
         /* test if tosa reflectances are out of training range */
         if (!isTosaReflectanceValid(rlTosa, atmosphereNet)) {
@@ -183,14 +183,22 @@ public class GlintCorrection extends AbstractGlintCorrection {
             normInNet[1] = tetaViewSurfDeg;
             normInNet[2] = aziDiffSurfDeg;  // new net 20120716
             for (int i = 0; i < 12; i++) {
-                normInNet[i + 3] = Math.log(reflec[i] * Math.PI); // log_rlw into 90_2.8.net
+//                normInNet[i + 3] = Math.log(reflec[i] * Math.PI); // log_rlw into 90_2.8.net
+                normInNet[i + 3] = Math.log(reflec[i]); //  for CB it seems that this would be better (20140415)
             }
             final double[] normOutNet = normalizationNet.calc(normInNet);
             final double[] normReflec = new double[reflec.length];
             for (int i = 0; i < 12; i++) {
                 normReflec[i] = Math.exp(normOutNet[i]) / Math.PI;   // norm reflec must be WITHOUT PI (see mail from CB, 20130320)!
             }
-            glintResult.setNormReflec(normReflec);
+//            glintResult.setNormReflec(normReflec);
+            // now CB asked for this to be in line with reflec and toa_reflec (20140415):
+            if (ReflectanceEnum.IRRADIANCE_REFLECTANCES.equals(outputReflecAs)) {
+                glintResult.setNormReflec(NeuralNetIOConverter.multiplyPi(normReflec));
+            } else {
+                glintResult.setNormReflec(normReflec);
+            }
+
         }
 
         glintResult.setTau550(aot560);
@@ -219,24 +227,24 @@ public class GlintCorrection extends AbstractGlintCorrection {
                 (isCloud || isCloudBuffer || isCloudShadow || isSnowIce || isMixedPixel);
     }
 
-    private void writeDebugOutput(PixelData pixel, double[] normInNet, double[] normOutNet, double[] reflec, double[] normReflec, double aziDiffSurfDeg) {
-        System.out.println("pixel.satazi = " + pixel.satazi);
-        System.out.println("pixel.satzen = " + pixel.satzen);
-        System.out.println("pixel.solazi = " + pixel.solazi);
-        System.out.println("pixel.solzen = " + pixel.solzen);
-        System.out.println("azimuth diff = " + aziDiffSurfDeg);
-        for (int i = 0; i < reflec.length; i++) {
-            System.out.println("reflec[" + i + "] = " + reflec[i]);
-        }
-        for (int i = 0; i < normInNet.length; i++) {
-            System.out.println("normInNet[" + i + "] = " + normInNet[i]);
-        }
-        for (int i = 0; i < normOutNet.length; i++) {
-            System.out.println("normOutNet[" + i + "] = " + normOutNet[i]);
-        }
-        for (int i = 0; i < normReflec.length; i++) {
-            System.out.println("normReflec[" + i + "] = " + normReflec[i]);
-        }
-    }
+//    private void writeDebugOutput(PixelData pixel, double[] normInNet, double[] normOutNet, double[] reflec, double[] normReflec, double aziDiffSurfDeg) {
+//        System.out.println("pixel.satazi = " + pixel.satazi);
+//        System.out.println("pixel.satzen = " + pixel.satzen);
+//        System.out.println("pixel.solazi = " + pixel.solazi);
+//        System.out.println("pixel.solzen = " + pixel.solzen);
+//        System.out.println("azimuth diff = " + aziDiffSurfDeg);
+//        for (int i = 0; i < reflec.length; i++) {
+//            System.out.println("reflec[" + i + "] = " + reflec[i]);
+//        }
+//        for (int i = 0; i < normInNet.length; i++) {
+//            System.out.println("normInNet[" + i + "] = " + normInNet[i]);
+//        }
+//        for (int i = 0; i < normOutNet.length; i++) {
+//            System.out.println("normOutNet[" + i + "] = " + normOutNet[i]);
+//        }
+//        for (int i = 0; i < normReflec.length; i++) {
+//            System.out.println("normReflec[" + i + "] = " + normReflec[i]);
+//        }
+//    }
 
 }

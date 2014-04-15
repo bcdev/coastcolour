@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>coastcolour-processing</symbolicName>
-    <version>1.7</version>
+    <version>1.8-SNAPSHOT</version>
     <name>BEAM CoastColour Processing</name>
 
     <description>
@@ -106,7 +106,7 @@
             <operatorName>CoastColour.L1P</operatorName>
             <text>CoastColour Pre-Processing and Pixel Classification...</text>
             <shortDescr>CoastColour Pre-Processing and Pixel Classification (L1P)</shortDescr>
-            <dialogTitle>CoastColour Pre-Processing and Pixel Classification - v1.7</dialogTitle>
+            <dialogTitle>CoastColour Pre-Processing and Pixel Classification - v1.8-SNAPSHOT</dialogTitle>
             <targetProductNameSuffix>_L1P</targetProductNameSuffix>
             <mnemonic/>
             <parent>coastcolour</parent>
@@ -119,7 +119,7 @@
             <operatorName>CoastColour.L2R</operatorName>
             <text>CoastColour Atmospheric Correction...</text>
             <shortDescr>CoastColour Atmospheric Correction (L2R)</shortDescr>
-            <dialogTitle>CoastColour Atmospheric Correction - v1.7</dialogTitle>
+            <dialogTitle>CoastColour Atmospheric Correction - v1.8-SNAPSHOT</dialogTitle>
             <targetProductNameSuffix>_L2R</targetProductNameSuffix>
             <mnemonic/>
             <placeAfter>coastColourProcessingL1P</placeAfter>
@@ -133,7 +133,7 @@
             <operatorName>CoastColour.L2W</operatorName>
             <text>CoastColour In-Water Processing...</text>
             <shortDescr>CoastColour In-Water Processing (L2W)</shortDescr>
-            <dialogTitle>CoastColour In-Water Processing - v1.7</dialogTitle>
+            <dialogTitle>CoastColour In-Water Processing - v1.8-SNAPSHOT</dialogTitle>
             <targetProductNameSuffix>_L2W</targetProductNameSuffix>
             <mnemonic/>
             <placeAfter>coastColourProcessingL2R</placeAfter>

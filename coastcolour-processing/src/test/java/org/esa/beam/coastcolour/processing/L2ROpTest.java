@@ -71,7 +71,7 @@ public class L2ROpTest {
         Map<String, Object> l2rParams = new HashMap<String, Object>();
         l2rParams.put("outputToa", true);
         target = testDefaultTargetProduct(source, l2rParams, "MER_FR__CCL2R");
-        assertProductContainsBands(target, "toa_reflec_1", "toa_reflec_8", "toa_reflec_13");
+        assertProductContainsBands(target, "rho_toa_1", "rho_toa_8", "rho_toa_13");
         source.dispose();
     }
 

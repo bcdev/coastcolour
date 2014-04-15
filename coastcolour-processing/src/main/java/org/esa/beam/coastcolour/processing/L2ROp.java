@@ -1,12 +1,9 @@
 package org.esa.beam.coastcolour.processing;
 
+import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.ReflectanceEnum;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.FlagCoding;
-import org.esa.beam.framework.datamodel.Mask;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -17,14 +14,20 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.ConstantDescriptor;
+import javax.media.jai.operator.MultiplyConstDescriptor;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 @OperatorMetadata(alias = "CoastColour.L2R",
                   version = "1.7",
-                  authors = "Marco Peters, Norman Fomferra",
-                  copyright = "(c) 2011 Brockmann Consult",
-                  description = "Performs a atmospheric correction. The result contains (normalised) water leaving " +
+                  authors = "C. Brockmann, M. Bouvet, R. Santer, H. Schiller, M. Peters, O. Danne",
+                  copyright = "(c) 2011-2013 Brockmann Consult",
+                  description = "Performs an atmospheric correction. The result contains (normalised) water leaving " +
                           "reflectance and information about atmospheric properties")
 public class L2ROp extends Operator {
 
@@ -35,8 +38,8 @@ public class L2ROp extends Operator {
     private File autoassociativeNetFile;
 
     @SourceProduct(alias = "ccL1P",
-                   label = "CC L1P or MERIS L1b product",
-                   description = "The CC L1P or MERIS L1b input product")
+                   label = "CC L1P or MERIS L1B product",
+                   description = "The CC L1P or MERIS L1B input product")
     private Product sourceProduct;
 
     @Parameter(defaultValue = "true",
@@ -74,7 +77,7 @@ public class L2ROp extends Operator {
     @Parameter(defaultValue = "1.4",
                description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous. " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
-               label = " [L1P] Cloud screening 'ambiguous' threshold" )
+               label = " [L1P] Cloud screening 'ambiguous' threshold")
     private double ccCloudScreeningAmbiguous = 1.4;      // Schiller
 
     @Parameter(defaultValue = "1.8",
@@ -130,11 +133,19 @@ public class L2ROp extends Operator {
     private ReflectanceEnum outputReflecAs;
 
     private Product glintProduct;
+    private Product toaReflProduct;
     private Product l1pProduct;
 
 
     @Override
     public void initialize() throws OperatorException {
+
+        if (!ProductValidator.isValidL2RInputProduct(sourceProduct)) {
+            final String message = String.format("Input product '%s' is not a valid source for L2R processing",
+                                                 sourceProduct.getName());
+            throw new OperatorException(message);
+        }
+
         if (!isL1PSourceProduct(sourceProduct)) {
             HashMap<String, Object> l1pParams = createL1pParameterMap();
             l1pProduct = GPF.createProduct("CoastColour.L1P", l1pParams, sourceProduct);
@@ -142,11 +153,17 @@ public class L2ROp extends Operator {
             l1pProduct = sourceProduct;
         }
 
-        HashMap<String, Product> sourceProducts = new HashMap<String, Product>();
-        sourceProducts.put("merisProduct", l1pProduct);
+        HashMap<String, Product> glintSourceProducts = new HashMap<String, Product>();
+        glintSourceProducts.put("merisProduct", l1pProduct);
 
         HashMap<String, Object> glintParameters = createGlintAcParameterMap();
-        glintProduct = GPF.createProduct("MerisCC.GlintCorrection", glintParameters, sourceProducts);
+        glintProduct = GPF.createProduct("MerisCC.GlintCorrection", glintParameters, glintSourceProducts);
+
+        if (outputToa) {
+            HashMap<String, Product> rad2reflSourceProducts = new HashMap<String, Product>();
+            rad2reflSourceProducts.put("sourceProduct", l1pProduct);
+            toaReflProduct = GPF.createProduct("Meris.Rad2Refl", GPF.NO_PARAMS, rad2reflSourceProducts);
+        }
 
         Product targetProduct = createL2RProduct();
         setTargetProduct(targetProduct);
@@ -157,7 +174,9 @@ public class L2ROp extends Operator {
         glintParameters.put("doSmileCorrection", false);
         glintParameters.put("outputToa", outputToa);
         glintParameters.put("outputReflec", true);
-        glintParameters.put("outputNormReflec", true);
+//        glintParameters.put("outputNormReflec", true);
+//        glintParameters.put("outputNormReflec", false);  // CB, 20140414
+        glintParameters.put("outputNormReflec", true);  // CB, 20140415 :-)
         glintParameters.put("outputReflecAs", outputReflecAs);
         glintParameters.put("outputPath", false);
         glintParameters.put("outputTransmittance", false);
@@ -202,12 +221,16 @@ public class L2ROp extends Operator {
         l2rProduct.setEndTime(glintProduct.getEndTime());
         ProductUtils.copyMetadata(glintProduct, l2rProduct);
         ProductUtils.copyMasks(glintProduct, l2rProduct);
-        copyBands(glintProduct, l2rProduct);
+        if (outputToa) {
+            copyRad2ReflProductBands(toaReflProduct, l2rProduct);
+        }
+        copyGlintProductBands(glintProduct, l2rProduct);
         ProductUtils.copyFlagBands(glintProduct, l2rProduct, true);
         ProductUtils.copyTiePointGrids(glintProduct, l2rProduct);
         ProductUtils.copyGeoCoding(glintProduct, l2rProduct);
 
-        l2rProduct.setAutoGrouping(glintProduct.getAutoGrouping());
+        final String autoGrouping = getAutogroupingPattern();
+        l2rProduct.setAutoGrouping(autoGrouping);
         changeAgcFlags(l2rProduct);
         removeFlagsAndMasks(l2rProduct);
         sortMasks(l2rProduct);
@@ -242,13 +265,66 @@ public class L2ROp extends Operator {
         super.dispose();
     }
 
-    private void copyBands(Product glintProduct, Product l2rProduct) {
+    private void copyGlintProductBands(Product glintProduct, Product l2rProduct) {
         final Band[] radiometryBands = glintProduct.getBands();
         for (Band band : radiometryBands) {
             if (!band.isFlagBand()) {
                 ProductUtils.copyBand(band.getName(), glintProduct, l2rProduct, true);
             }
         }
+    }
+
+    private void copyRad2ReflProductBands(Product rad2reflProduct, Product l2rProduct) {
+
+//        final int width = rad2reflProduct.getSceneRasterWidth();
+//        final int height = rad2reflProduct.getSceneRasterHeight();
+//        final RenderedOp piImage = ConstantDescriptor.create((float) width, (float) height, new Float[]{(float) Math.PI}, null);
+
+        final Band[] toaReflBands = rad2reflProduct.getBands();
+//        for (Band band : toaReflBands) {
+//            if (!band.isFlagBand() && band.getSpectralBandIndex() != 10 && band.getSpectralBandIndex() != 14) {
+//                band.setUnit("dl");
+//                ProductUtils.copyBand(band.getName(), rad2reflProduct, l2rProduct, true);
+//            }
+//        }
+
+        for (Band band : toaReflBands) {
+            if (!band.isFlagBand() && band.getSpectralBandIndex() != 10 && band.getSpectralBandIndex() != 14) {
+                if (ReflectanceEnum.RADIANCE_REFLECTANCES.equals(outputReflecAs)) {
+                    // we have to divide by PI:
+                    final MultiLevelImage sourceImage = band.getSourceImage();
+                    final double constFactor = 1.0 / Math.PI;
+                    final RenderedOp dividedByPiImage =
+                            MultiplyConstDescriptor.create(sourceImage, new double[]{constFactor}, null);
+                    ProductUtils.copyBand(band.getName(), rad2reflProduct, l2rProduct, false);
+                    l2rProduct.getBand(band.getName()).setSourceImage(dividedByPiImage);
+                    l2rProduct.getBand(band.getName()).setUnit("sr^-1");
+                } else {
+                    // rad2refl output is already multiplied by PI
+                    ProductUtils.copyBand(band.getName(), rad2reflProduct, l2rProduct, true);
+                    l2rProduct.getBand(band.getName()).setUnit("dl");
+                }
+            }
+        }
+    }
+
+    private String getAutogroupingPattern() {
+        final List<String> groupList = new ArrayList<String>();
+        if (outputToa) {
+            groupList.add("rho_toa");
+        }
+        groupList.add("reflec");
+//        groupList.add("norm_reflec");  // CB, 20140414
+        groupList.add("norm_reflec");  // CB, 20140415
+        final StringBuilder sb = new StringBuilder();
+        final Iterator<String> iterator = groupList.iterator();
+        while (iterator.hasNext()) {
+            sb.append(iterator.next());
+            if (iterator.hasNext()) {
+                sb.append(":");
+            }
+        }
+        return sb.toString();
     }
 
     private void removeUnwantedBands(Product targetProduct) {

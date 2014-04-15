@@ -1,29 +1,24 @@
 package org.esa.beam.coastcolour.processing;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrectionOperator;
+import org.esa.beam.coastcolour.case2.RegionalWaterOp;
+import org.esa.beam.coastcolour.case2.water.WaterAlgorithm;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.MerisFlightDirection;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.ReflectanceEnum;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.Tile;
+import org.esa.beam.framework.gpf.*;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VirtualBandOpImage;
-import org.esa.beam.coastcolour.case2.RegionalWaterOp;
-import org.esa.beam.coastcolour.case2.water.WaterAlgorithm;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 import org.esa.beam.util.SystemUtils;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
@@ -35,8 +30,8 @@ import java.util.Map;
 
 @OperatorMetadata(alias = "CoastColour.L2W",
                   version = "1.7",
-                  authors = "Marco Peters, Norman Fomferra",
-                  copyright = "(c) 2011 Brockmann Consult",
+                  authors = "C. Brockmann, M. Bouvet, R. Santer, H. Schiller, M. Peters, O. Danne",
+                  copyright = "(c) 2011-2013 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +
                                 "other variables")
 public class L2WOp extends Operator {
@@ -47,8 +42,8 @@ public class L2WOp extends Operator {
     static final boolean ENABLE_OWT_CONC_BANDS = false;
 
     @SourceProduct(alias = "ccL2R",
-                   label = "CC L2R, CC L1P or MERIS L1b product",
-                   description = "CC L2R, CC L1P or MERIS L1b input product")
+                   label = "CC L2R, CC L1P or MERIS L1B product",
+                   description = "CC L2R, CC L1P or MERIS L1B input product")
     private Product sourceProduct;
 
     //@SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)", optional = true)
@@ -156,9 +151,9 @@ public class L2WOp extends Operator {
                description = "Expression defining pixels not considered for L2W processing")
     private String invalidPixelExpression;
 
-    @Parameter(defaultValue = "false", label = "Divide source Rrs by PI(3.14)",
-               description = "If selected the source remote reflectances are divided by PI. " +
-                       "This is necessary if the source reflectances were written as IRRADIANCE_REFLECTANCES !")
+    @Parameter(defaultValue = "false", label = "Divide source remote reflectances by PI (3.141592)",
+               description = "Select if the source remote reflectances shall be divided by PI. " +
+                       "It is consistent to do this if the source reflectances were written as IRRADIANCE_REFLECTANCES !")
     private boolean qaaDivideByPI;
 
     @Parameter(defaultValue = "false", label = "Write water leaving reflectance to the CC L2W product",
@@ -183,11 +178,9 @@ public class L2WOp extends Operator {
     private float qaaAPigLower = -0.02f;
     private float qaaAPigUpper = 3.0f;
 
-    private int nadirColumnIndex;
     private Product l2rProduct;
     private Product qaaProduct;
     private Product case2rProduct;
-    private VirtualBandOpImage invalidOpImage;
     private VirtualBandOpImage invalidL2wImage;
 
     private File inverseIopNnFile;
@@ -240,7 +233,12 @@ public class L2WOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        nadirColumnIndex = MerisFlightDirection.findNadirColumnIndex(sourceProduct);
+
+        if (!ProductValidator.isValidL2WInputProduct(sourceProduct)) {
+            final String message = String.format("Input product '%s' is not a valid source for L2W processing",
+                                                  sourceProduct.getName());
+            throw new OperatorException(message);
+        }
 
         l2rProduct = sourceProduct;
         if (!isL2RSourceProduct(l2rProduct)) {
@@ -251,10 +249,6 @@ public class L2WOp extends Operator {
         Operator case2Op = new RegionalWaterOp.Spi().createOperator();
         setCase2rParameters(case2Op);
         case2rProduct = case2Op.getTargetProduct();
-
-        invalidOpImage = VirtualBandOpImage.createMask(invalidPixelExpression,
-                                                       l2rProduct,
-                                                       ResolutionLevel.MAXRES);
 
         String invalidL2wExpression = "l1p_flags.CC_LAND || l1p_flags.CC_CLOUD || l1p_flags.CC_MIXEDPIXEL";
         if (invalidPixelExpression != null && !invalidPixelExpression.isEmpty()) {

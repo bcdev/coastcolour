@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @OperatorMetadata(alias = "CoastColour.L2W",
-                  version = "1.7",
+                  version = "1.8",
                   authors = "C. Brockmann, M. Bouvet, R. Santer, H. Schiller, M. Peters, O. Danne",
                   copyright = "(c) 2011-2013 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +

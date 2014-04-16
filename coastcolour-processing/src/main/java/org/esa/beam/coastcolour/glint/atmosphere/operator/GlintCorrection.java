@@ -181,20 +181,22 @@ public class GlintCorrection extends AbstractGlintCorrection {
             double[] normInNet = new double[15];
             normInNet[0] = tetaSunSurfDeg;
             normInNet[1] = tetaViewSurfDeg;
-            normInNet[2] = aziDiffSurfDeg;  // new net 20120716
+            normInNet[2] = aziDiffSurfDeg;
             for (int i = 0; i < 12; i++) {
 //                normInNet[i + 3] = Math.log(reflec[i] * Math.PI); // log_rlw into 90_2.8.net
-                normInNet[i + 3] = Math.log(reflec[i]); //  for CB it seems that this would be better (20140415)
+//                normInNet[i + 3] = Math.log(reflec[i]); //  for CB it seems that this would be better (20140415)
+                normInNet[i + 3] = Math.log(reflec[i] * Math.PI); // back to this (CB, 20140416)
             }
             final double[] normOutNet = normalizationNet.calc(normInNet);
             final double[] normReflec = new double[reflec.length];
             for (int i = 0; i < 12; i++) {
-                normReflec[i] = Math.exp(normOutNet[i]) / Math.PI;   // norm reflec must be WITHOUT PI (see mail from CB, 20130320)!
+//                normReflec[i] = Math.exp(normOutNet[i]) / Math.PI;   // norm reflec must be WITHOUT PI (see mail from CB, 20130320)!
+                normReflec[i] = Math.exp(normOutNet[i]); // CB, 20140416
             }
-//            glintResult.setNormReflec(normReflec);
-            // now CB asked for this to be in line with reflec and toa_reflec (20140415):
-            if (ReflectanceEnum.IRRADIANCE_REFLECTANCES.equals(outputReflecAs)) {
-                glintResult.setNormReflec(NeuralNetIOConverter.multiplyPi(normReflec));
+            // we assume that we get irradiance_refl out of the net. So this should now be in line
+            // with the user option (20140416):
+            if (ReflectanceEnum.RADIANCE_REFLECTANCES.equals(outputReflecAs)) {
+                glintResult.setNormReflec(NeuralNetIOConverter.dividePi(normReflec));
             } else {
                 glintResult.setNormReflec(normReflec);
             }

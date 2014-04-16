@@ -11,6 +11,7 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.idepix.algorithms.coastcolour.CoastColourClassificationOp;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 
@@ -42,7 +43,7 @@ public class L2ROp extends Operator {
                    description = "The CC L1P or MERIS L1B input product")
     private Product sourceProduct;
 
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
                label = " [L1P] Perform re-calibration",
                description = "Applies correction from MERIS 2nd to 3rd reprocessing quality. " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
@@ -54,7 +55,7 @@ public class L2ROp extends Operator {
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
     private boolean doSmile;
 
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
                label = " [L1P] Perform equalization",
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products. " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
@@ -68,27 +69,30 @@ public class L2ROp extends Operator {
                label = " [L1P] Width of cloud buffer (# of pixels)")
     private int ccCloudBufferWidth;
 
-    @Parameter(defaultValue = "false",
-               description = "Write Cloud Probability Feature Value to the CC L1P product. " +
-                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
-               label = " [L1P] Write Cloud Probability Feature Value to the CC L1P product")
-    private boolean ccOutputCloudProbabilityFeatureValue = false;
-
     @Parameter(defaultValue = "1.4",
-               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous. " +
+               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as still " +
+                       "ambiguous (i.e. a higher value results in fewer ambiguous clouds). " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
                label = " [L1P] Cloud screening 'ambiguous' threshold")
     private double ccCloudScreeningAmbiguous = 1.4;      // Schiller
 
     @Parameter(defaultValue = "1.8",
-               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as sure. " +
+               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded " +
+                       "as sure (i.e. a higher value results in fewer sure clouds). " +
                        "This is a L1P option and has only effectt if the source product is a MERIS L1b product.",
                label = " [L1P] Cloud screening 'sure' threshold")
     private double ccCloudScreeningSure = 1.8;       // Schiller
 
+    @Parameter(defaultValue = "false",
+            description = "Write Cloud Probability Feature Value to the target product. " +
+                    "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
+            label = " [L1P] Write Cloud Probability Feature Value to the target product")
+    private boolean ccOutputCloudProbabilityFeatureValue = false;     // todo: copy to target product
+
     @Parameter(defaultValue = "true",
                label = " Use climatology map for salinity and temperature",
-               description = "By default a climatology map is used. If set to 'false' the specified average values are used " +
+               description = "By default a climatology map is used. " +
+                       "If set to 'false' the specified average values are used " +
                        "for the whole scene.")
     private boolean useSnTMap;
 
@@ -108,27 +112,27 @@ public class L2ROp extends Operator {
     private boolean useExtremeCaseMode;
 
     @Parameter(defaultValue = "l1p_flags.CC_LAND",
-               label = " Land detection expression",
-               description = "The arithmetic expression used for land detection.",
+               label = " Land masking expression",
+               description = "The arithmetic expression used for land masking.",
                notEmpty = true, notNull = true)
     private String landExpression;
 
     @Parameter(defaultValue = "(l1p_flags.CC_CLOUD && not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE",
-               label = " Cloud/Ice detection expression",
-               description = "The arithmetic expression used for cloud/ice detection.",
+               label = " Cloud/Ice masking expression",
+               description = "The arithmetic expression used for cloud/ice masking.",
                notEmpty = true, notNull = true)
     private String cloudIceExpression;
 
     @Parameter(defaultValue = "false",
-               label = " Write TOA reflectances to the CC L2R target product",
+               label = " Write TOA reflectances to the target product",
                description = "Writes the Top of Atmosphere reflectances to the CC L2R target product.")
     private boolean outputToa;
 
     //  RADIANCE_REFLECTANCES   : x
     //  IRRADIANCE_REFLECTANCES : x * PI      (see GlintCorrection.perform)
     @Parameter(defaultValue = "RADIANCE_REFLECTANCES", valueSet = {"RADIANCE_REFLECTANCES", "IRRADIANCE_REFLECTANCES"},
-               label = " Write water leaving reflectances as",
-               description = "Select if water leaving reflectances shall be written as radiances or irradiances. " +
+               label = " Write reflectances as",
+               description = "Select if all output reflectances shall be written as radiances or irradiances. " +
                        "The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.")
     private ReflectanceEnum outputReflecAs;
 
@@ -205,9 +209,9 @@ public class L2ROp extends Operator {
         l1pParams.put("doEqualization", doEqualization);
         l1pParams.put("useIdepix", true);
         l1pParams.put("ccCloudBufferWidth", ccCloudBufferWidth);
-        l1pParams.put("ccOutputCloudProbabilityFeatureValue", ccOutputCloudProbabilityFeatureValue);
         l1pParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
         l1pParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
+        l1pParams.put("ccOutputCloudProbabilityFeatureValue", ccOutputCloudProbabilityFeatureValue);
         return l1pParams;
     }
 
@@ -224,7 +228,13 @@ public class L2ROp extends Operator {
         if (outputToa) {
             copyRad2ReflProductBands(toaReflProduct, l2rProduct);
         }
+
         copyGlintProductBands(glintProduct, l2rProduct);
+        final Band cloudProbFeatureValueBand = l1pProduct.getBand(CoastColourClassificationOp.CLOUD_PROBABILITY_VALUE);
+        if (cloudProbFeatureValueBand != null) {
+            ProductUtils.copyBand(cloudProbFeatureValueBand.getName(), l1pProduct, l2rProduct, true);
+        }
+
         ProductUtils.copyFlagBands(glintProduct, l2rProduct, true);
         ProductUtils.copyTiePointGrids(glintProduct, l2rProduct);
         ProductUtils.copyGeoCoding(glintProduct, l2rProduct);
@@ -276,17 +286,7 @@ public class L2ROp extends Operator {
 
     private void copyRad2ReflProductBands(Product rad2reflProduct, Product l2rProduct) {
 
-//        final int width = rad2reflProduct.getSceneRasterWidth();
-//        final int height = rad2reflProduct.getSceneRasterHeight();
-//        final RenderedOp piImage = ConstantDescriptor.create((float) width, (float) height, new Float[]{(float) Math.PI}, null);
-
         final Band[] toaReflBands = rad2reflProduct.getBands();
-//        for (Band band : toaReflBands) {
-//            if (!band.isFlagBand() && band.getSpectralBandIndex() != 10 && band.getSpectralBandIndex() != 14) {
-//                band.setUnit("dl");
-//                ProductUtils.copyBand(band.getName(), rad2reflProduct, l2rProduct, true);
-//            }
-//        }
 
         for (Band band : toaReflBands) {
             if (!band.isFlagBand() && band.getSpectralBandIndex() != 10 && band.getSpectralBandIndex() != 14) {

@@ -39,8 +39,10 @@ public class L2WOpFirstTest {
 
     @Test
     public void testCreateProductFromL1B() throws OperatorException, ParseException {
+        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+        l1pParams.put("doEqualization", false);
         final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl_nn", "turbidity"};
-        target = L2WOpTestHelper.testTargetProduct(l1bProduct, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
+        target = L2WOpTestHelper.testTargetProduct(l1bProduct, "MER_FR__CCL2W", expectedBandNames, l1pParams);
 
         String[] notExpectedBandNames = new String[]{"toa_reflec_1", "toa_reflec_2", "toa_reflec_13"};
         for (String notExpectedBandName : notExpectedBandNames) {
@@ -51,9 +53,11 @@ public class L2WOpFirstTest {
 
     @Test
     public void testCreateProductFromL1P() throws OperatorException, ParseException {
+        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+        l1pParams.put("doEqualization", false);
         Product source = getL1pProduct(l1bProduct);
         final String[] expectedBandNames = {"iop_a_ys_443", "conc_tsm", "conc_chl_nn", "turbidity"};
-        target = L2WOpTestHelper.testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, GPF.NO_PARAMS);
+        target = L2WOpTestHelper.testTargetProduct(source, "MER_FR__CCL2W", expectedBandNames, l1pParams);
 
         String[] notExpectedBandNames = new String[]{"toa_reflec_1", "toa_reflec_2", "toa_reflec_13"};
         for (String notExpectedBandName : notExpectedBandNames) {
@@ -90,7 +94,9 @@ public class L2WOpFirstTest {
     }
 
     private Product getL1pProduct(Product source) {
-        return GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
+        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+        l1pParams.put("doEqualization", false);
+        return GPF.createProduct("CoastColour.L1P", l1pParams, source);
     }
 
 }

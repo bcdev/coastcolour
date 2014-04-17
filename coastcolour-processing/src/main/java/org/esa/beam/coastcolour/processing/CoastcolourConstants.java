@@ -14,14 +14,14 @@ public class CoastcolourConstants {
 
     public static final String[] L1P_PARAMETER_NAMES = new String[] {
             "doIcol", "doCalibration", "doSmile", "doEqualization",
-            "ccCloudBufferWidth", "ccOutputCloudProbabilityFeatureValue",
-            "ccCloudScreeningAmbiguous", "ccCloudScreeningSure"
+            "ccCloudBufferWidth",
+            "ccCloudScreeningAmbiguous", "ccCloudScreeningSure", "ccOutputCloudProbabilityFeatureValue"
     };
 
     public static final String[] L2R_PARAMETER_NAMES = new String[] {
             "useSnTMap", "averageSalinity", "averageTemperature", "useExtremeCaseMode",
             "landExpression", "cloudIceExpression",
-            "outputToa", "outputReflecAs"
+            "outputL2RToa", "outputL2RReflecAs"
     };
 
     public static Pattern MERIS_CCL1P_TYPE_PATTERN = Pattern.compile("MER_..._CCL1P");

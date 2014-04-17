@@ -52,8 +52,9 @@ public class L1POpTest {
 
     @Test
     public void testCreateProduct() throws OperatorException, ParseException {
-
-        target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
+        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+        l1pParams.put("doEqualization", false);
+        target = GPF.createProduct("CoastColour.L1P", l1pParams, l1bProduct);
         assertNotNull(target);
 
         // enable for debugging
@@ -105,7 +106,9 @@ public class L1POpTest {
         GeoCoding geoCoding = new PixelGeoCoding(corr_latitude, corr_longitude, "NOT l1_flags.INVALID", 6);
         l1bProduct.setGeoCoding(geoCoding);
 
-        target = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
+        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+        l1pParams.put("doEqualization", false);
+        target = GPF.createProduct("CoastColour.L1P", l1pParams, l1bProduct);
         assertEquals("MER_FSG_CCL1P", target.getProductType());
         assertTrue(target.containsBand("corr_longitude"));
         assertTrue(target.containsBand("corr_latitude"));

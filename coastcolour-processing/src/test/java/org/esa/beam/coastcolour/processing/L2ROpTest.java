@@ -55,21 +55,27 @@ public class L2ROpTest {
 
     @Test
     public void testCreateProductFromL1B() throws OperatorException, ParseException {
-        target = testDefaultTargetProduct(l1bProduct, GPF.NO_PARAMS, "MER_FR__CCL2R");
+        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+        l1pParams.put("doEqualization", false);
+        target = testDefaultTargetProduct(l1bProduct, l1pParams, "MER_FR__CCL2R");
     }
 
     @Test
     public void testCreateProductFromL1P() throws OperatorException, ParseException {
-        Product source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
+        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+        l1pParams.put("doEqualization", false);
+        Product source = GPF.createProduct("CoastColour.L1P", l1pParams, l1bProduct);
         target = testDefaultTargetProduct(source, GPF.NO_PARAMS, "MER_FR__CCL2R");
         source.dispose();
     }
 
     @Test
     public void testCreateProduct_WithMoreOutput() throws OperatorException, ParseException {
-        Product source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
+        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+        l1pParams.put("doEqualization", false);
+        Product source = GPF.createProduct("CoastColour.L1P", l1pParams, l1bProduct);
         Map<String, Object> l2rParams = new HashMap<String, Object>();
-        l2rParams.put("outputToa", true);
+        l2rParams.put("outputL2RToa", true);
         target = testDefaultTargetProduct(source, l2rParams, "MER_FR__CCL2R");
         assertProductContainsBands(target, "rho_toa_1", "rho_toa_8", "rho_toa_13");
         source.dispose();
@@ -92,7 +98,9 @@ public class L2ROpTest {
             GeoCoding geoCoding = new PixelGeoCoding(corr_latitude, corr_longitude, "NOT l1_flags.INVALID", 6);
             l1bProduct.setGeoCoding(geoCoding);
 
-            Product l1pProduct = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
+            HashMap<String, Object> l1pParams = new HashMap<String, Object>();
+            l1pParams.put("doEqualization", false);
+            Product l1pProduct = GPF.createProduct("CoastColour.L1P", l1pParams, l1bProduct);
             target = testDefaultTargetProduct(l1pProduct, GPF.NO_PARAMS, "MER_FSG_CCL2R");
 
             assertTrue("Expected band 'corr_longitude'", target.containsBand("corr_longitude"));

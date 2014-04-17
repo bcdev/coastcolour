@@ -14,8 +14,8 @@ public class CoastcolourConstants {
 
     public static final String[] L1P_PARAMETER_NAMES = new String[] {
             "doIcol", "doCalibration", "doSmile", "doEqualization",
-            "ccCloudBufferWidth", "ccOutputCloudProbabilityFeatureValue",
-            "ccCloudScreeningAmbiguous", "ccCloudScreeningSure"
+            "ccCloudBufferWidth",
+            "ccCloudScreeningAmbiguous", "ccCloudScreeningSure", "ccOutputCloudProbabilityFeatureValue"
     };
 
     public static final String[] L2R_PARAMETER_NAMES = new String[] {

@@ -129,16 +129,6 @@ abstract class L2WProductFactory {
     }
 
     protected void copyReflecBandsIfRequired(Product sourceProduct, Product targetProduct) {
-//        if (isOutputReflectance()) {
-//            Band[] bands = sourceProduct.getBands();
-//            for (Band band : bands) {
-//                if (band.getName().startsWith("reflec_")) {
-//                    ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, true);
-//                }
-//            }
-//            addPatternToAutoGrouping(targetProduct, "reflec");
-//        }
-
         if (isOutputReflectance()) {
             Band[] bands = sourceProduct.getBands();
             for (Band band : bands) {
@@ -155,23 +145,36 @@ abstract class L2WProductFactory {
                                     (ReflectanceEnum.IRRADIANCE_REFLECTANCES.equals(getOutputReflectanceAs())))) {
                         // just copy, keep as is
                         ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, true);
-                    } else if ((ReflectanceEnum.RADIANCE_REFLECTANCES.equals(getInputReflectanceIs()) &&
-                            (ReflectanceEnum.IRRADIANCE_REFLECTANCES.equals(getOutputReflectanceAs())))) {
-                        // multiply by PI
-                        final double constFactor = Math.PI;
-                        final RenderedOp multiplyByPiImage =
-                                MultiplyConstDescriptor.create(sourceImage, new double[]{constFactor}, null);
-                        ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, false);
-                        targetProduct.getBand(band.getName()).setSourceImage(multiplyByPiImage);
-                        targetProduct.getBand(band.getName()).setUnit("dl");
                     } else {
-                        // divide by PI
-                        final double constFactor = 1.0 / Math.PI;
-                        final RenderedOp dividedByPiImage =
-                                MultiplyConstDescriptor.create(sourceImage, new double[]{constFactor}, null);
-                        ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, false);
-                        targetProduct.getBand(band.getName()).setSourceImage(dividedByPiImage);
-                        targetProduct.getBand(band.getName()).setUnit("sr^-1");
+                        if ((ReflectanceEnum.RADIANCE_REFLECTANCES.equals(getInputReflectanceIs()) &&
+                                (ReflectanceEnum.IRRADIANCE_REFLECTANCES.equals(getOutputReflectanceAs())))) {
+                            // multiply by PI
+                            final double constFactor = Math.PI;
+                            final RenderedOp multiplyByPiImage =
+                                    MultiplyConstDescriptor.create(sourceImage, new double[]{constFactor}, null);
+                            ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, false);
+                            Band targetBand = targetProduct.getBand(band.getName());
+                            targetBand.setSourceImage(multiplyByPiImage);
+                            targetBand.setUnit("dl");
+                            if (targetBand.getDescription().contains("Water leaving radiance")) {
+                                targetBand.setDescription(targetBand.getDescription().
+                                        replace("Water leaving radiance", "Water leaving irradiance"));
+                            }
+                            System.out.println("getDescription = " + targetBand.getDescription());
+                        } else {
+                            // divide by PI
+                            final double constFactor = 1.0 / Math.PI;
+                            final RenderedOp dividedByPiImage =
+                                    MultiplyConstDescriptor.create(sourceImage, new double[]{constFactor}, null);
+                            ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, false);
+                            Band targetBand = targetProduct.getBand(band.getName());
+                            targetBand.setSourceImage(dividedByPiImage);
+                            targetBand.setUnit("sr^-1");
+                            if (targetBand.getDescription().contains("Water leaving irradiance")) {
+                                targetBand.setDescription(targetBand.getDescription().
+                                        replace("Water leaving radiance", "Water leaving radiance"));
+                            }
+                        }
                     }
                 }
             }
@@ -271,7 +274,7 @@ abstract class L2WProductFactory {
         int width = maskGroup.getProduct().getSceneRasterWidth();
         int height = maskGroup.getProduct().getSceneRasterHeight();
         Mask mask = Mask.BandMathsType.create(maskName, maskDescription, width, height,
-                maskExpression, maskColor, transparency);
+                                              maskExpression, maskColor, transparency);
         maskGroup.add(index, mask);
     }
 

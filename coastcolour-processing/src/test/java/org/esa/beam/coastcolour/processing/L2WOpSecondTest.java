@@ -50,7 +50,9 @@ public class L2WOpSecondTest {
             System.setProperty("beam.envisat.usePixelGeoCoding", "true");
             Product l1bProduct = createFsgL1bProduct();
 
-            Product l2rProduct = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, l1bProduct);
+            HashMap<String, Object> l2rParams = new HashMap<>();
+            l2rParams.put("doEqualization", false);
+            Product l2rProduct = GPF.createProduct("CoastColour.L2R", l2rParams, l1bProduct);
             target = testTargetProduct(l2rProduct, "MER_FSG_CCL2W",
                                        new String[]{"corr_longitude", "corr_latitude", "altitude", "turbidity"},
                                        GPF.NO_PARAMS);
@@ -76,7 +78,9 @@ public class L2WOpSecondTest {
             System.setProperty("beam.envisat.usePixelGeoCoding", "true");
             Product l1bProduct = createFsgL1bProduct();
 
-            Product l2rProduct = GPF.createProduct("CoastColour.L2R", GPF.NO_PARAMS, l1bProduct);
+            HashMap<String, Object> l2rParams = new HashMap<>();
+            l2rParams.put("doEqualization", false);
+            Product l2rProduct = GPF.createProduct("CoastColour.L2R", l2rParams, l1bProduct);
             HashMap<String, Object> l2wParams = new HashMap<String, Object>();
             l2wParams.put("useQaaForIops", true);
             target = testTargetProduct(l2rProduct, "MER_FSG_CCL2W",
@@ -157,10 +161,6 @@ public class L2WOpSecondTest {
         assertEquals(l1FlagsBandIndex + 3, target.getBandIndex("l2w_flags"));
 
         return target;
-    }
-
-    private Product getL1pProduct(Product source) {
-        return GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, source);
     }
 
     @Test

@@ -54,7 +54,7 @@ public class L2ROp extends Operator {
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
     private boolean doSmile;
 
-    @Parameter(defaultValue = "false",
+    @Parameter(defaultValue = "true",
                label = " [L1P] Perform equalization",
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products. " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
@@ -83,10 +83,10 @@ public class L2ROp extends Operator {
     private double ccCloudScreeningSure = 1.8;       // Schiller
 
     @Parameter(defaultValue = "false",
-            description = "Write Cloud Probability Feature Value to the target product. " +
-                    "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
-            label = " [L1P] Write Cloud Probability Feature Value to the target product")
-    private boolean ccOutputCloudProbabilityFeatureValue = false;     // todo: copy to target product
+               description = "Write Cloud Probability Feature Value to the target product. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
+               label = " [L1P] Write Cloud Probability Feature Value to the target product")
+    private boolean ccOutputCloudProbabilityFeatureValue = false;
 
     @Parameter(defaultValue = "true",
                label = " Use climatology map for salinity and temperature",
@@ -288,7 +288,10 @@ public class L2ROp extends Operator {
         final Band[] toaReflBands = rad2reflProduct.getBands();
 
         for (Band band : toaReflBands) {
-            if (!band.isFlagBand() && band.getSpectralBandIndex() != 10 && band.getSpectralBandIndex() != 14) {
+            if (!band.isFlagBand() &&
+                    band.getSpectralBandIndex() != 10 &&
+                    band.getSpectralBandIndex() != 13 &&
+                    band.getSpectralBandIndex() != 14) {
                 if (ReflectanceEnum.RADIANCE_REFLECTANCES.equals(outputL2RReflecAs)) {
                     // we have to divide by PI:
                     final MultiLevelImage sourceImage = band.getSourceImage();

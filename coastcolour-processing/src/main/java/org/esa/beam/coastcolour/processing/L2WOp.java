@@ -60,7 +60,7 @@ public class L2WOp extends Operator {
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
     private boolean doSmile;
 
-    @Parameter(defaultValue = "false",
+    @Parameter(defaultValue = "true",
                label = "[L1P] Perform equalization",
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products. " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
@@ -130,14 +130,6 @@ public class L2WOp extends Operator {
                description = "Expression defining pixels not considered for L2W processing")
     private String invalidPixelExpression;
 
-    //  RADIANCE_REFLECTANCES   : x
-    //  IRRADIANCE_REFLECTANCES : x * PI      (see GlintCorrection.perform)
-//    @Parameter(defaultValue = "RADIANCE_REFLECTANCES", valueSet = {"RADIANCE_REFLECTANCES", "IRRADIANCE_REFLECTANCES"},
-//               label = " Input water leaving reflectances from the CC L2R product are",
-//               description = "Specifies if input reflectances from CC L2R product are radiances or irradiances. " +
-//                       "The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.")
-    private ReflectanceEnum inputReflecIs;
-
     @Parameter(defaultValue = "false",
                label = "Write water leaving reflectance to the target product",
                description = "Write the water leaving reflectance to the CC L2W target product.")
@@ -176,6 +168,8 @@ public class L2WOp extends Operator {
     private File inverseIopNnFile;
     private File inverseKdNnFile;
     private File forwardIopNnFile;
+
+    private ReflectanceEnum inputReflecIs;
 
     private static final String[] iopForwardNets =
             new String[]{

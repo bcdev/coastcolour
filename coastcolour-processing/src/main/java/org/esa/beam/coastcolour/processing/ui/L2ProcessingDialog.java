@@ -48,7 +48,7 @@ public class L2ProcessingDialog extends SingleTargetProductDialog {
     private ProductChangedHandler productChangedHandler;
     private JPanel parametersPanel;
     private JCheckBox useSalinTempCheckBox;
-    private JCheckBox writeWaterReflCheckBox;
+    private JCheckBox writeWaterReflCheckBox;  // relevant for L2W only
 
 
     public L2ProcessingDialog(String operatorName, AppContext appContext, String title, String helpID) {
@@ -249,6 +249,9 @@ public class L2ProcessingDialog extends SingleTargetProductDialog {
         }
 
         private void checkComponentsToDisable(final String productType) {
+            // checks which parameters (i.e. their corresponding Swing components) shall be disabled in the
+            // currently given context
+
             if (form == null) {
                 initForm();
             }
@@ -256,39 +259,38 @@ public class L2ProcessingDialog extends SingleTargetProductDialog {
             if (parametersPanel != null && parametersPanel.getComponents() != null) {
                 Component[] components = parametersPanel.getComponents();
                 for (int i = 0; i < components.length - 1; i++) {
+                    // add listener to useSalinityTemperature checkbox (L2R, L2W)
                     if (components[i].getName() != null && components[i].getName().equals("useSnTMap")) {
                         if (useSalinTempCheckBox == null) {
                             useSalinTempCheckBox = (JCheckBox) components[i];
                             ActionListener useSalinTempCheckBoxListener = new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-//                                    checkComponentsToDisable(productType);
                                     checkComponentsToDisable(currentProduct.getProductType());
                                 }
                             };
                             useSalinTempCheckBox.addActionListener(useSalinTempCheckBoxListener);
                         }
                     }
+                    // add listener to outputReflec checkbox (L2W)
                     if (components[i].getName() != null && components[i].getName().equals("outputReflec")) {
                         if (writeWaterReflCheckBox == null) {
                             writeWaterReflCheckBox = (JCheckBox) components[i];
                             ActionListener writeWaterReflCheckBoxListener = new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-//                                    checkComponentsToDisable(productType);
                                     checkComponentsToDisable(currentProduct.getProductType());
                                 }
                             };
                             writeWaterReflCheckBox.addActionListener(writeWaterReflCheckBoxListener);
                         }
                     }
-//                    if (i == 0) {  // test!!
-                        if (isComponentToDisable(productType, components[i])) {
-                            components[i].setEnabled(false);
-                        } else {
-                            components[i].setEnabled(true);
-                        }
-//                    }
+                    // go through components and enable/disable
+                    if (isComponentToDisable(productType, components[i])) {
+                        components[i].setEnabled(false);
+                    } else {
+                        components[i].setEnabled(true);
+                    }
                 }
             }
         }
@@ -303,7 +305,7 @@ public class L2ProcessingDialog extends SingleTargetProductDialog {
                             isSpecificL2RComponentToDisable(component);
 
             final boolean l2wComponentToDisable =
-                    isSpecificL2WComponentToDisable(component, productType);
+                    isSpecificL2WComponentToDisable(component);
 
             return (operatorName.equals("CoastColour.L2R") && (l1pComponentToDisable || l2rComponentToDisable)) ||
                     (operatorName.equals("CoastColour.L2W") &&
@@ -315,42 +317,27 @@ public class L2ProcessingDialog extends SingleTargetProductDialog {
 
             final boolean compNameAve = component.getName() != null && component.getName().startsWith("average");
             final boolean compTextAverage = component instanceof JLabel && ((JLabel) component).getText().contains("Average");
-            boolean disable1 = isUseSalinTempCheckboxSelected &&
-                    (compNameAve ||
-                            compTextAverage);
 
-            return disable1;
+            return isUseSalinTempCheckboxSelected && (compNameAve || compTextAverage);
         }
 
-        private boolean isSpecificL2WComponentToDisable(Component component, String productType) {
-            final boolean labelToDisable = component instanceof JLabel &&
-                    ((JLabel) component).getText().contains("CC L2R product");
-            final boolean checkboxToDisable =
-                    component.getName() != null && component.getName().equals("inputReflecIs");
-
-            boolean disable1 = !isCoastcolourL2RProduct(productType) &&
-                    (labelToDisable || checkboxToDisable);
-
+        private boolean isSpecificL2WComponentToDisable(Component component) {
+            // Average salinity/temperature text fields shall be enabled if useSalinTempCheckBox is selected (and v.v.)
             final boolean isUseSalinTempCheckboxSelected = useSalinTempCheckBox != null && useSalinTempCheckBox.isSelected();
-            boolean disable2 = isUseSalinTempCheckboxSelected &&
+            boolean disable1 = isUseSalinTempCheckboxSelected &&
                     (component.getName() != null && component.getName().startsWith("average") ||
                             (component instanceof JLabel && ((JLabel) component).getText().contains("Average")));
 
+            // 'Write water leaving reflectances as' combo box shall be enabled if writeWaterReflCheckBox is selected (and v.v.)
             final boolean isWriteWaterReflCheckboxSelected = writeWaterReflCheckBox != null && writeWaterReflCheckBox.isSelected();
             final boolean compTextOutputReflecAs = component.getName() != null && component.getName().equals("outputL2WReflecAs");
             final boolean compLabelWriteWaterLeavingAs = component instanceof JLabel &&
                     ((JLabel) component).getText().contains(" Write water leaving reflectances as");
-            boolean disable3 = !isWriteWaterReflCheckboxSelected &&
+            boolean disable2 = !isWriteWaterReflCheckboxSelected &&
                     (compTextOutputReflecAs || compLabelWriteWaterLeavingAs);
 
-            System.out.println("disable3 = " + isWriteWaterReflCheckboxSelected + "," + compTextOutputReflecAs + "," +
-                                       compLabelWriteWaterLeavingAs + "," + disable3);
-
-            boolean disable = disable1 || disable2 || disable3;
-
-            return disable;
+            return disable1 || disable2;
         }
-
 
         private synchronized boolean isCoastcolourL1PProduct(String productType) {
             return productType != null && productType.endsWith("CCL1P");
@@ -367,10 +354,7 @@ public class L2ProcessingDialog extends SingleTargetProductDialog {
                     return true;
                 }
             }
-            if (component instanceof JLabel && ((JLabel) component).getText().contains("[L1P]")) {
-                return true;
-            }
-            return false;
+            return component instanceof JLabel && ((JLabel) component).getText().contains("[L1P]");
         }
 
         private boolean isComponentofL2RParameter(Component component) {
@@ -380,13 +364,7 @@ public class L2ProcessingDialog extends SingleTargetProductDialog {
                     return true;
                 }
             }
-            if (component instanceof JLabel && ((JLabel) component).getText().contains("[L2R]")) {
-                return true;
-            }
-            return false;
+            return component instanceof JLabel && ((JLabel) component).getText().contains("[L2R]");
         }
-
     }
-
-
 }

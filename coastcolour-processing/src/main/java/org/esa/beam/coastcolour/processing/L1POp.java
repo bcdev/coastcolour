@@ -83,7 +83,7 @@ public class L1POp extends Operator {
             description = "Whether to perform MERIS Smile-effect correction.")
     private boolean doSmile;
 
-    @Parameter(defaultValue = "false",
+    @Parameter(defaultValue = "true",
             label = " Perform equalization",
             description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;

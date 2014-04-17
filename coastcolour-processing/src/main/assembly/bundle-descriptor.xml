@@ -1,23 +1,14 @@
 <bundleDescriptor>
     <bundleName>coastcolour-processing</bundleName>
-    <bundleVersion>1.8-SNAPSHOT</bundleVersion>
+    <bundleVersion>1.7</bundleVersion>
     <processorDescriptors>
 
         <processorDescriptor>
             <executableName>CoastColour.L1P</executableName>
             <processorName>MERIS CoastColour L1P</processorName>
-            <processorVersion>1.8-SNAPSHOT</processorVersion>
+            <processorVersion>1.7</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
-                <!-- Disable ICOL here, processing will usually lead to problems if we have too large products -->
-                <!--<parameterDescriptor>-->
-                    <!--<name>doIcol</name>-->
-                    <!--<type>boolean</type>-->
-                    <!--<description>Whether to perform ICOL correction (can be time- and memory-consuming for large-->
-                        <!--products!)-->
-                    <!--</description>-->
-                    <!--<defaultValue>false</defaultValue>-->
-                <!--</parameterDescriptor>-->
                 <parameterDescriptor>
                     <name>doCalibration</name>
                     <type>boolean</type>
@@ -48,25 +39,24 @@
                     <defaultValue>2</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
-                    <name>ccOutputCloudProbabilityFeatureValue</name>
-                    <type>boolean</type>
-                    <description>Write Cloud Probability Feature Value to the CC L1P target product</description>
-                    <defaultValue>false</defaultValue>
-                </parameterDescriptor>
-                <parameterDescriptor>
                     <name>ccCloudScreeningAmbiguous</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still
-                        ambiguous
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous (i.e. a higher value results in fewer ambiguous clouds)
                     </description>
                     <defaultValue>1.4</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>ccCloudScreeningSure</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure (i.e. a higher value results in fewer sure clouds)
                     </description>
                     <defaultValue>1.8</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccOutputCloudProbabilityFeatureValue</name>
+                    <type>boolean</type>
+                    <description>Write Cloud Probability Feature Value to the CC L1P target product</description>
+                    <defaultValue>false</defaultValue>
                 </parameterDescriptor>
             </parameterDescriptors>
             <jobConfig>
@@ -81,9 +71,24 @@
             </jobConfig>
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
-                <![CDATA[<p>
-                            This processor performs radiometric correction and pixel classification. It has been
-                            developed in the frame of the CoastColour project.</p>
+                <![CDATA[
+                    <p>This processor performs the L1P processing steps. These are:<br>
+                    <ul>
+                         <li>Calibration: correction from MERIS 2nd to 3rd reprocessing quality</li>
+                         <li>Smile: perform MERIS Smile-effect correction</li>
+                         <li> Equalization: removal of detector-to-detector systematic radiometric differences in MERIS L1b data products</li>
+                         <li> Pixel Classification: detection of e.g. clouds, land, and improved coastline</li>
+                    </ul>
+                    <b>The output bands are:</b>
+                    <ul>
+                        <li>radiance_&lt;#&gt; - Corrected radiance of all 15 MERIS bands.</li>
+                        <li>detector_index - MERIS L1b detector index.</li>
+                        <li>l1_flags - Level 1b classification and quality flags.</li>
+                        <li>l1p_flags - CoastColour L1P pixel classification.</li>
+                    </ul>
+                    Processor input: MERIS L1b products (RR, FR, FRS, RRG, FRG, FSG) as N1<br>
+                    Processor output: MERIS L1P products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)
+                    </p>
                             ]]>
             </descriptionHtml>
             <inputProductTypes>MERIS_L1B</inputProductTypes>
@@ -183,7 +188,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L1P.Icol</executableName>
             <processorName>MERIS CoastColour L1P ICOL</processorName>
-            <processorVersion>1.8-SNAPSHOT</processorVersion>
+            <processorVersion>1.7</processorVersion>
             <defaultParameters><![CDATA[]]></defaultParameters>
             <jobConfig>
                 <jobParameter>
@@ -192,13 +197,17 @@
                 </jobParameter>
                 <jobParameter>
                     <name>calvalus.output.replacement</name>
-                    <value>$1CCL1P_$2</value>
+                    <value>$1CCL1P_ICOL_$2</value>
                 </jobParameter>
             </jobConfig>
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
-                <![CDATA[<p>
-                            This processor performs ICOL correction on L1P products.</p>
+                <![CDATA[
+                <p>
+                    The ICOL (Improved Contrast between Ocean and Land) processor enables adjacency correction of MERIS data at the radiance level.<br>
+                    Processor input: MERIS L1P products (RR, FR, FRS, RRG, FRG, FSG)<br>
+                    Processor output: MERIS L1P products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)
+                </p>
                             ]]>
             </descriptionHtml>
             <inputProductTypes>MERIS_CC_L1P</inputProductTypes>
@@ -309,13 +318,13 @@
         <processorDescriptor>
             <executableName>CoastColour.L2R</executableName>
             <processorName>MERIS CoastColour L2R</processorName>
-            <processorVersion>1.8-SNAPSHOT</processorVersion>
+            <processorVersion>1.7</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
                 <parameterDescriptor>
                     <name>doCalibration</name>
                     <type>boolean</type>
-                    <description>Applies correction from MERIS 2nd to 3rd reprocessing quality</description>
+                    <description>Applies correction from MERIS 2nd to 3rd reprocessing quality.</description>
                     <defaultValue>false</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
@@ -346,13 +355,13 @@
                 <parameterDescriptor>
                     <name>ccCloudScreeningAmbiguous</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous</description>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous (i.e. a higher value results in fewer ambiguous clouds)</description>
                     <defaultValue>1.4</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>ccCloudScreeningSure</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure</description>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure (i.e. a higher value results in fewer sure clouds)</description>
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
                 <!-- L2R parameters -->
@@ -383,14 +392,15 @@
                 <parameterDescriptor>
                     <name>landExpression</name>
                     <type>string</type>
-                    <description>The arithmetic expression used for land detection</description>
+                    <description>The arithmetic expression used for land masking</description>
                     <defaultValue>l1p_flags.CC_LAND</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>cloudIceExpression</name>
                     <type>string</type>
-                    <description>The arithmetic expression used for cloud/ice detection</description>
-                    <defaultValue>(l1p_flags.CC_CLOUD &amp;&amp; not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>
+                    <description>The arithmetic expression used for cloud/ice masking</description>
+                    <!--<defaultValue>(l1p_flags.CC_CLOUD &amp;&amp; not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>-->
+                    <defaultValue>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>outputToa</name>
@@ -413,32 +423,94 @@
                 </jobParameter>
                 <jobParameter>
                     <name>calvalus.output.replacement</name>
-                    <value>$1CCL1P_$2</value>
+                    <value>$1CCL2R_$2</value>
                 </jobParameter>
             </jobConfig>
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
-                <![CDATA[<p>
-                    This processor performs an atmospheric correction.
-                    It has been developed in the frame of the CoastColour project.
-                    <b>Output bands:</b>
+                <![CDATA[
+                <p>
+                    This processor performs an atmospheric correction based on a Neural Network approach.<br>
+                    <b>The output bands are:</b>
                     <ul>
-                    <li>reflec_&lt;#&gt; - Water leaving radiance reflectance, where &lt;#&gt is one of 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12 and 13.</li>
-                    <li>norm_refl_&lt;#&gt; - Normalised water leaving radiance reflectance, where &lt;#&gt is one of 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12 and 13.</li>
-                    <li>atm_tau_&lt;λ&gt; - Spectral aerosol optical depth at &lt;λ&gt;, where &lt;λ&gt; is one of 550, 778 and 865.</li>
-                    <li>ang_443_865 - Aerosol Angstrom coefficient at spectral wavelength 865.</li>
-                    <li>detector_index - MERIS L1B detector index.</li>
-                    <li>altitude - DEM altitude.</li>
-                    <li>l1_flags - Level 1b classification and quality flags.</li>
-                    <li>l1p_flags - CoastColour L1P pixel classification.</li>
-                    <li>l2r_flags - CoastColour L2R atmospheric correction quality flags.</li>
+                        <li>reflec_&lt;#&gt; - Water leaving radiance reflectance, where &lt;#&gt is one of 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12 and 13.</li>
+                        <li>norm_refl_&lt;#&gt; - Normalised water leaving radiance reflectance, where &lt;#&gt is one of 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12 and 13.</li>
+                        <li>atm_tau_&lt;λ&gt; - Spectral aerosol optical depth at &lt;λ&gt;, where &lt;λ&gt; is one of 550, 778 and 865.</li>
+                        <li>ang_443_865 - Aerosol Angstrom coefficient at spectral wavelength 865.</li>
+                        <li>detector_index - MERIS L1B detector index.</li>
+                        <li>altitude - DEM altitude.</li>
+                        <li>l1_flags - Level 1b classification and quality flags.</li>
+                        <li>l1p_flags - CoastColour L1P pixel classification.</li>
+                        <li>l2r_flags - CoastColour L2R atmospheric correction quality flags.</li>
                     </ul>
+                        Processor input: MERIS L1b and CoastColour L1P products <br>
+                        Processor output: CoastColour L2R products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)</p>
                 </p>]]></descriptionHtml>
             <inputProductTypes>MERIS_L1B,MERIS_CC_L1P</inputProductTypes>
             <outputProductType>MERIS_CC_L2R</outputProductType>
             <validMaskExpression>!l2r_flags.INPUT_INVALID</validMaskExpression>
 
             <outputVariables>
+                <outputVariable>
+                    <name>rho_toa_1</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>rho_toa_2</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>rho_toa_3</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>rho_toa_4</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>rho_toa_5</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>rho_toa_6</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>rho_toa_7</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>rho_toa_8</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>rho_toa_9</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>rho_toa_10</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>rho_toa_12</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>rho_toa_13</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
                 <outputVariable>
                     <name>reflec_1</name>
                     <defaultAggregator>AVG</defaultAggregator>
@@ -600,7 +672,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2W</executableName>
             <processorName>MERIS CoastColour L2W</processorName>
-            <processorVersion>1.8-SNAPSHOT</processorVersion>
+            <processorVersion>1.7</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
                 <parameterDescriptor>
@@ -637,13 +709,13 @@
                 <parameterDescriptor>
                     <name>ccCloudScreeningAmbiguous</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous</description>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous (i.e. a higher value results in fewer ambiguous clouds)</description>
                     <defaultValue>1.4</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>ccCloudScreeningSure</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure</description>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure (i.e. a higher value results in fewer sure clouds)</description>
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
                 <!-- L2R parameters -->
@@ -674,14 +746,15 @@
                 <parameterDescriptor>
                     <name>landExpression</name>
                     <type>string</type>
-                    <description>The arithmetic expression used for land detection</description>
+                    <description>The arithmetic expression used for land masking</description>
                     <defaultValue>l1p_flags.CC_LAND</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>cloudIceExpression</name>
                     <type>string</type>
-                    <description>The arithmetic expression used for cloud/ice detection</description>
-                    <defaultValue>(l1p_flags.CC_CLOUD &amp;&amp; not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>
+                    <description>The arithmetic expression used for cloud/ice masking</description>
+                    <!--<defaultValue>(l1p_flags.CC_CLOUD &amp;&amp; not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>-->
+                    <defaultValue>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>outputToa</name>
@@ -704,22 +777,17 @@
                     <defaultValue>l2r_flags.INPUT_INVALID</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
-                    <name>qaaDivideByPI</name>
-                    <type>boolean</type>
-                    <description>Select if the source remote reflectances shall be divided by PI. It is consistent to do this if the source reflectances were written as IRRADIANCE_REFLECTANCES !</description>
-                    <defaultValue>false</defaultValue>
-                </parameterDescriptor>
-                <parameterDescriptor>
                     <name>outputReflec</name>
                     <type>boolean</type>
-                    <description>Write the water leaving reflectance to the final CC L2W product</description>
+                    <description>Write the water leaving reflectance to the CC L2W target product</description>
                     <defaultValue>false</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
-                    <name>outputAPoc</name>
-                    <type>boolean</type>
-                    <description>Write absorption by particulate organic matter (A_Poc) to the CC L2W target product</description>
-                    <defaultValue>false</defaultValue>
+                    <name>outputL2WReflecAs</name>
+                    <type>stringArray</type>
+                    <description>Select if water leaving reflectances shall be written as radiances or irradiances. The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.</description>
+                    <defaultValue>RADIANCE_REFLECTANCES</defaultValue>
+                    <valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>outputKdSpectrum</name>
@@ -735,14 +803,13 @@
                 </jobParameter>
                 <jobParameter>
                     <name>calvalus.output.replacement</name>
-                    <value>$1CCL1P_$2</value>
+                    <value>$1CCL2W_$2</value>
                 </jobParameter>
             </jobConfig>
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[<p>
-                This processor computes water constituents and IOPs optimized for coastal zones.
-                It has been developed in the frame of the CoastColour project.
+                This processor computes water constituents and IOPs optimized for coastal zones.<br>
                 <b>Output bands:</b>
                 <ul>
                 <li>iop_a_total_443 - Total absorption coefficient of all water constituents at 443 nm.</li>
@@ -762,12 +829,74 @@
                 <li>l2r_flags - CoastColour L2R atmospheric correction quality flags.</li>
                 <li>l2w_flags - CoastColour L2W water constituents and IOPs retrieval quality flags.</li>
                 </ul>
-                Do not apply this processor to MERIS L1B unless the input region is small. Use the L1P processor first, then apply L2R to the output set, then apply L2W.
+                Processor input: MERIS L1b, CoastColour L1P, or CoastColour L2R products <br>
+                Processor output: CoastColour L2W products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)</p>
+                <b>Do not apply this processor to MERIS L1B unless the input region is small. Use the L1P processor first, then apply L2R to the output set, then apply L2W.</b>
                 </p>]]></descriptionHtml>
             <inputProductTypes>MERIS_L1B,MERIS_CC_L1P,MERIS_CC_L2R</inputProductTypes>
             <outputProductType>MERIS_CC_L2W</outputProductType>
             <validMaskExpression>!l2w_flags.INVALID</validMaskExpression>
             <outputVariables>
+                <outputVariable>
+                    <name>reflec_1</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>reflec_2</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>reflec_3</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>reflec_4</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>reflec_5</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>reflec_6</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>reflec_7</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>reflec_8</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>reflec_9</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>reflec_10</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>reflec_12</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>reflec_13</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
                 <outputVariable>
                     <name>iop_a_total_443</name>
                     <defaultAggregator>AVG</defaultAggregator>
@@ -895,3 +1024,4 @@
 
     </processorDescriptors>
 </bundleDescriptor>
+

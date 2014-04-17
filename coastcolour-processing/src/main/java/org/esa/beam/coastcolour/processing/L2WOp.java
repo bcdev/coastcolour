@@ -3,7 +3,6 @@ package org.esa.beam.coastcolour.processing;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.coastcolour.case2.RegionalWaterOp;
 import org.esa.beam.coastcolour.case2.water.WaterAlgorithm;
-import org.esa.beam.coastcolour.glint.atmosphere.operator.MerisFlightDirection;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.ReflectanceEnum;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
@@ -29,11 +28,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @OperatorMetadata(alias = "CoastColour.L2W",
-                  version = "1.7",
+                  version = "1.8",
                   authors = "C. Brockmann, M. Bouvet, R. Santer, H. Schiller, M. Peters, O. Danne",
                   copyright = "(c) 2011-2013 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +
-                                "other variables")
+                          "other variables")
 public class L2WOp extends Operator {
 
     private static final int[] REFLEC_BAND_NUMBERS = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
@@ -49,7 +48,7 @@ public class L2WOp extends Operator {
     //@SourceProduct(description = "Class membership product from Fuzzy classification (FuzzyOp)", optional = true)
     private Product classMembershipProduct;
 
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
                label = "[L1P] Perform re-calibration",
                description = "Applies correction from MERIS 2nd to 3rd reprocessing quality. " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
@@ -61,7 +60,7 @@ public class L2WOp extends Operator {
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
     private boolean doSmile;
 
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
                label = "[L1P] Perform equalization",
                description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products. " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.")
@@ -74,20 +73,16 @@ public class L2WOp extends Operator {
                label = " [L1P] Width of cloud buffer (# of pixels)")
     private int ccCloudBufferWidth;
 
-    @Parameter(defaultValue = "false",
-               description = "Write Cloud Probability Feature Value to the CC L1P product. " +
-                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
-               label = " [L1P]  Write Cloud Probability Feature Value to the target product")
-    private boolean ccOutputCloudProbabilityFeatureValue = false;
-
     @Parameter(defaultValue = "1.4",
-               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous. " +
+               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as still " +
+                       "ambiguous (i.e. a higher value results in fewer ambiguous clouds). " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
-               label = " [L1P] Cloud screening 'ambiguous' threshold" )
+               label = " [L1P] Cloud screening 'ambiguous' threshold")
     private double ccCloudScreeningAmbiguous = 1.4;      // Schiller
 
     @Parameter(defaultValue = "1.8",
-               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as sure. " +
+               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as " +
+                       "sure (i.e. a higher value results in fewer sure clouds). " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
                label = " [L1P] Cloud screening 'sure' threshold")
     private double ccCloudScreeningSure = 1.8;       // Schiller
@@ -118,57 +113,52 @@ public class L2WOp extends Operator {
     private boolean useExtremeCaseMode;
 
     @Parameter(defaultValue = "l1p_flags.CC_LAND",
-               label = "[L2R] Land detection expression",
-               description = "The arithmetic expression used for land detection. " +
+               label = "[L2R] Land masking expression",
+               description = "The arithmetic expression used for land masking. " +
                        "This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product). ",
                notEmpty = true, notNull = true)
     private String landExpression;
 
     @Parameter(defaultValue = "(l1p_flags.CC_CLOUD && not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE",
-               label = "[L2R] Cloud/Ice detection expression",
-               description = "The arithmetic expression used for cloud/ice detection. " +
+               label = "[L2R] Cloud/Ice masking expression",
+               description = "The arithmetic expression used for cloud/ice masking. " +
                        "This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product.",
                notEmpty = true, notNull = true)
     private String cloudIceExpression;
-
-    @Parameter(defaultValue = "false",
-               label = "[L2R] Write TOA reflectances to the CC L2R product",
-               description = "Writes the Top of Atmosphere reflectances to the CC L2R product. " +
-                       "This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product.")
-    private boolean outputToa;
-
-    //  RADIANCE_REFLECTANCES   : x
-    //  IRRADIANCE_REFLECTANCES : x * PI      (see GlintCorrection.perform)
-    @Parameter(defaultValue = "RADIANCE_REFLECTANCES", valueSet = {"RADIANCE_REFLECTANCES", "IRRADIANCE_REFLECTANCES"},
-               label = "[L2R] Write water leaving reflectance in CC L2R product as",
-               description = "Select if reflectances shall be written to the CC L2R product as radiances or irradiances. " +
-                       "The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product. " +
-                       "This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product.")
-    private ReflectanceEnum outputReflecAs;
-
 
     @Parameter(defaultValue = "l2r_flags.INPUT_INVALID",
                description = "Expression defining pixels not considered for L2W processing")
     private String invalidPixelExpression;
 
-    @Parameter(defaultValue = "false", label = "Divide source remote reflectances by PI (3.141592)",
-               description = "Select if the source remote reflectances shall be divided by PI. " +
-                       "It is consistent to do this if the source reflectances were written as IRRADIANCE_REFLECTANCES !")
-    private boolean qaaDivideByPI;
+    //  RADIANCE_REFLECTANCES   : x
+    //  IRRADIANCE_REFLECTANCES : x * PI      (see GlintCorrection.perform)
+//    @Parameter(defaultValue = "RADIANCE_REFLECTANCES", valueSet = {"RADIANCE_REFLECTANCES", "IRRADIANCE_REFLECTANCES"},
+//               label = " Input water leaving reflectances from the CC L2R product are",
+//               description = "Specifies if input reflectances from CC L2R product are radiances or irradiances. " +
+//                       "The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.")
+    private ReflectanceEnum inputReflecIs;
 
-    @Parameter(defaultValue = "false", label = "Write water leaving reflectance to the CC L2W product",
-               description = "Write the water leaving reflectance to the final CC L2W product.")
+    @Parameter(defaultValue = "false",
+               label = "Write water leaving reflectance to the target product",
+               description = "Write the water leaving reflectance to the CC L2W target product.")
     private boolean outputReflec;
 
-    @Parameter(defaultValue = "false", label = "Write A_Poc to the target product",
-               description = "Write absorption by particulate organic matter (A_Poc) to the CC L2W target product.")
-    private boolean outputAPoc;
+    //  RADIANCE_REFLECTANCES   : x
+    //  IRRADIANCE_REFLECTANCES : x * PI      (see GlintCorrection.perform)
+    @Parameter(defaultValue = "RADIANCE_REFLECTANCES", valueSet = {"RADIANCE_REFLECTANCES", "IRRADIANCE_REFLECTANCES"},
+               label = " Write water leaving reflectances as",
+               description = "Select if water leaving reflectances shall be written as radiances or irradiances. " +
+                       "The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.")
+    private ReflectanceEnum outputL2WReflecAs;
+
+    //    @Parameter(defaultValue = "false", label = "Write A_Poc to the target product",
+//            description = "Write absorption by particulate organic matter (A_Poc) to the CC L2W target product.")
+    private boolean outputAPoc = false;
 
     @Parameter(defaultValue = "true", label = "Write Kd spectrum to the target product",
                description = "Write the output of downwelling irradiance attenuation coefficients (Kd) to the CC L2W target product. " +
-                             "If disabled only Kd_490 is added to the output.")
+                       "If disabled only Kd_490 is added to the output.")
     private boolean outputKdSpectrum;
-
 
 
     private float qaaATotalLower = -0.02f;
@@ -236,7 +226,7 @@ public class L2WOp extends Operator {
 
         if (!ProductValidator.isValidL2WInputProduct(sourceProduct)) {
             final String message = String.format("Input product '%s' is not a valid source for L2W processing",
-                                                  sourceProduct.getName());
+                                                 sourceProduct.getName());
             throw new OperatorException(message);
         }
 
@@ -245,6 +235,10 @@ public class L2WOp extends Operator {
             HashMap<String, Object> l2rParams = createL2RParameterMap();
             l2rProduct = GPF.createProduct("CoastColour.L2R", l2rParams, sourceProduct);
         }
+
+        inputReflecIs = (l2rProduct.getDescription().contains("IRRADIANCE_REFLECTANCES") ?
+                ReflectanceEnum.IRRADIANCE_REFLECTANCES :
+                ReflectanceEnum.RADIANCE_REFLECTANCES);
 
         Operator case2Op = new RegionalWaterOp.Spi().createOperator();
         setCase2rParameters(case2Op);
@@ -256,8 +250,8 @@ public class L2WOp extends Operator {
         }
         System.out.println("invalidL2wExpression = " + invalidL2wExpression);
         invalidL2wImage = VirtualBandOpImage.createMask(invalidL2wExpression,
-                                                       l2rProduct,
-                                                       ResolutionLevel.MAXRES);
+                                                        l2rProduct,
+                                                        ResolutionLevel.MAXRES);
 
         final L2WProductFactory l2wProductFactory;
         final L2WProductFactory l2wQaaIopProductFactory;   // we want to add the iop bands from the QAA...
@@ -269,6 +263,8 @@ public class L2WOp extends Operator {
         l2wProductFactory.setInvalidPixelExpression(invalidPixelExpression);
         l2wProductFactory.setOutputKdSpectrum(outputKdSpectrum);
         l2wProductFactory.setOutputReflectance(outputReflec);
+        l2wProductFactory.setOutputReflectanceAs(outputL2WReflecAs);
+        l2wProductFactory.setInputReflectanceIs(inputReflecIs);
 
         ((QaaL2WProductFactory) l2wQaaIopProductFactory).setIopBandsOnly(true);  // we only need to have the iop bands in this product...
         l2wQaaIopProductFactory.setInvalidPixelExpression(invalidPixelExpression);
@@ -350,11 +346,11 @@ public class L2WOp extends Operator {
         for (Band b : l2WProduct.getBands()) {
             String bandName = b.getName();
             if (bandName.startsWith("iop_") ||
-                bandName.startsWith("Kd_") ||
-                bandName.startsWith("conc_") ||
-                bandName.startsWith("qaa_") ||
-                bandName.equals("Z90_max") ||
-                bandName.equals("turbidity")) {
+                    bandName.startsWith("Kd_") ||
+                    bandName.startsWith("conc_") ||
+                    bandName.startsWith("qaa_") ||
+                    bandName.equals("Z90_max") ||
+                    bandName.equals("turbidity")) {
                 b.setValidPixelExpression(L2WProductFactory.L2W_VALID_EXPRESSION);
             }
         }
@@ -399,7 +395,7 @@ public class L2WOp extends Operator {
 
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws
-                                                                                                             OperatorException {
+            OperatorException {
         final Product targetProduct = getTargetProduct();
 
         Tile l2wFlagTile = targetTiles.get(targetProduct.getBand(L2WProductFactory.L2W_FLAGS_NAME));
@@ -481,7 +477,7 @@ public class L2WOp extends Operator {
                 final double slope = computeReflSlope(reflec);
                 double maxRefl = computeMaxRefle(reflec);
                 double MCIrel = computeMCIRrel(reflec);
-                boolean invalidSpectra = (slope > 0 && maxRefl < 0.01 && !(MCIrel > 10 && slope < 7)) || slope>=8;
+                boolean invalidSpectra = (slope > 0 && maxRefl < 0.01 && !(MCIrel > 10 && slope < 7)) || slope >= 8;
 
                 final boolean invalidFlagValue = invalidSpectra || (invalidL2wRaster.getSample(x, y, 0) != 0);
                 setL2wFlags(x, y, l2wFlagTile, c2rFlags, qaaFlags, invalidFlagValue);
@@ -647,7 +643,7 @@ public class L2WOp extends Operator {
         qaaParams.put("bbSpmUpper", qaaBbSpmUpper);
         qaaParams.put("aPigLower", qaaAPigLower);
         qaaParams.put("aPigUpper", qaaAPigUpper);
-        qaaParams.put("divideByPI", qaaDivideByPI);
+        qaaParams.put("divideByPI", ReflectanceEnum.IRRADIANCE_REFLECTANCES.equals(inputReflecIs));
         return qaaParams;
     }
 
@@ -662,7 +658,6 @@ public class L2WOp extends Operator {
         l2rParams.put("doEqualization", doEqualization);
         l2rParams.put("useIdepix", true);
         l2rParams.put("ccCloudBufferWidth", ccCloudBufferWidth);
-        l2rParams.put("ccOutputCloudProbabilityFeatureValue", ccOutputCloudProbabilityFeatureValue);
         l2rParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
         l2rParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
         l2rParams.put("useSnTMap", useSnTMap);
@@ -671,8 +666,6 @@ public class L2WOp extends Operator {
         l2rParams.put("landExpression", landExpression);
         l2rParams.put("cloudIceExpression", cloudIceExpression);
         l2rParams.put("outputNormReflec", true);
-        l2rParams.put("outputToa", outputToa);
-        l2rParams.put("outputReflecAs", outputReflecAs);
         return l2rParams;
     }
 

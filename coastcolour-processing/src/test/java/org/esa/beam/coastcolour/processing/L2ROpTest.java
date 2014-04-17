@@ -69,7 +69,7 @@ public class L2ROpTest {
     public void testCreateProduct_WithMoreOutput() throws OperatorException, ParseException {
         Product source = GPF.createProduct("CoastColour.L1P", GPF.NO_PARAMS, l1bProduct);
         Map<String, Object> l2rParams = new HashMap<String, Object>();
-        l2rParams.put("outputToa", true);
+        l2rParams.put("outputL2RToa", true);
         target = testDefaultTargetProduct(source, l2rParams, "MER_FR__CCL2R");
         assertProductContainsBands(target, "rho_toa_1", "rho_toa_8", "rho_toa_13");
         source.dispose();

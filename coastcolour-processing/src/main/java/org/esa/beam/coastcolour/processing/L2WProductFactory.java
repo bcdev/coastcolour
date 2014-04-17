@@ -1,8 +1,12 @@
 package org.esa.beam.coastcolour.processing;
 
+import com.bc.ceres.glevel.MultiLevelImage;
+import org.esa.beam.coastcolour.glint.atmosphere.operator.ReflectanceEnum;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.ProductUtils;
 
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.MultiplyConstDescriptor;
 import java.awt.*;
 
 /**
@@ -67,6 +71,8 @@ abstract class L2WProductFactory {
 
     private boolean outputKdSpectrum;
     private boolean outputReflectance;
+    private ReflectanceEnum outputReflectanceAs;
+    private ReflectanceEnum inputReflectanceIs;
     private String invalidPixelExpression;
 
 
@@ -88,6 +94,22 @@ abstract class L2WProductFactory {
         return outputReflectance;
     }
 
+    public ReflectanceEnum getOutputReflectanceAs() {
+        return outputReflectanceAs;
+    }
+
+    public void setOutputReflectanceAs(ReflectanceEnum outputReflectanceAs) {
+        this.outputReflectanceAs = outputReflectanceAs;
+    }
+
+    public ReflectanceEnum getInputReflectanceIs() {
+        return inputReflectanceIs;
+    }
+
+    public void setInputReflectanceIs(ReflectanceEnum inputReflectanceIs) {
+        this.inputReflectanceIs = inputReflectanceIs;
+    }
+
     public String getInvalidPixelExpression() {
         return invalidPixelExpression;
     }
@@ -107,16 +129,54 @@ abstract class L2WProductFactory {
     }
 
     protected void copyReflecBandsIfRequired(Product sourceProduct, Product targetProduct) {
+//        if (isOutputReflectance()) {
+//            Band[] bands = sourceProduct.getBands();
+//            for (Band band : bands) {
+//                if (band.getName().startsWith("reflec_")) {
+//                    ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, true);
+//                }
+//            }
+//            addPatternToAutoGrouping(targetProduct, "reflec");
+//        }
+
         if (isOutputReflectance()) {
             Band[] bands = sourceProduct.getBands();
             for (Band band : bands) {
                 if (band.getName().startsWith("reflec_")) {
-                    ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, true);
+                    // we have 4 cases:
+                    // - input from L2R is IRRAD, output shall be IRRAD --> keep as is
+                    // - input from L2R is IRRAD, output shall be RAD --> divide reflec by PI
+                    // - input from L2R is RAD, output shall be IRRAD --> multiply reflec by PI
+                    // - input from L2R is RAD, output shall be RAD --> keep as is
+                    final MultiLevelImage sourceImage = band.getSourceImage();
+                    if ((ReflectanceEnum.RADIANCE_REFLECTANCES.equals(getInputReflectanceIs()) &&
+                            (ReflectanceEnum.RADIANCE_REFLECTANCES.equals(getOutputReflectanceAs()))) ||
+                            (ReflectanceEnum.IRRADIANCE_REFLECTANCES.equals(getInputReflectanceIs()) &&
+                                    (ReflectanceEnum.IRRADIANCE_REFLECTANCES.equals(getOutputReflectanceAs())))) {
+                        // just copy, keep as is
+                        ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, true);
+                    } else if ((ReflectanceEnum.RADIANCE_REFLECTANCES.equals(getInputReflectanceIs()) &&
+                            (ReflectanceEnum.IRRADIANCE_REFLECTANCES.equals(getOutputReflectanceAs())))) {
+                        // multiply by PI
+                        final double constFactor = Math.PI;
+                        final RenderedOp multiplyByPiImage =
+                                MultiplyConstDescriptor.create(sourceImage, new double[]{constFactor}, null);
+                        ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, false);
+                        targetProduct.getBand(band.getName()).setSourceImage(multiplyByPiImage);
+                        targetProduct.getBand(band.getName()).setUnit("dl");
+                    } else {
+                        // divide by PI
+                        final double constFactor = 1.0 / Math.PI;
+                        final RenderedOp dividedByPiImage =
+                                MultiplyConstDescriptor.create(sourceImage, new double[]{constFactor}, null);
+                        ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct, false);
+                        targetProduct.getBand(band.getName()).setSourceImage(dividedByPiImage);
+                        targetProduct.getBand(band.getName()).setUnit("sr^-1");
+                    }
                 }
             }
             addPatternToAutoGrouping(targetProduct, "reflec");
         }
-
     }
 
     protected void renameIops(Product targetProduct) {
@@ -211,7 +271,7 @@ abstract class L2WProductFactory {
         int width = maskGroup.getProduct().getSceneRasterWidth();
         int height = maskGroup.getProduct().getSceneRasterHeight();
         Mask mask = Mask.BandMathsType.create(maskName, maskDescription, width, height,
-                                              maskExpression, maskColor, transparency);
+                maskExpression, maskColor, transparency);
         maskGroup.add(index, mask);
     }
 

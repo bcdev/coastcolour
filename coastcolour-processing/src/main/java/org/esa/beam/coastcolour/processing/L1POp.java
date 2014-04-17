@@ -26,11 +26,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @OperatorMetadata(alias = "CoastColour.L1P",
-                  version = "1.7",
-                  authors = "C. Brockmann, M. Bouvet, R. Santer, H. Schiller, M. Peters, O. Danne",
-                  copyright = "(c) 2011-2013 Brockmann Consult",
-                  description = "Computes a refinement of top of atmosphere radiance and " +
-                          "pixel characterization information.")
+        version = "1.8",
+        authors = "C. Brockmann, M. Bouvet, R. Santer, H. Schiller, M. Peters, O. Danne",
+        copyright = "(c) 2011-2013 Brockmann Consult",
+        description = "Computes a refinement of top of atmosphere radiance and " +
+                "pixel characterization information.")
 public class L1POp extends Operator {
 
     public static final String CC_LAND_FLAG_NAME = "CC_LAND";
@@ -63,51 +63,53 @@ public class L1POp extends Operator {
     private static final String CLOUD_FLAG_BAND_NAME = "cloud_classif_flags";
 
     @SourceProduct(alias = "merisL1B",
-                   label = "MERIS L1B product",
-                   description = "The MERIS L1B input product")
+            label = "MERIS L1B product",
+            description = "The MERIS L1B input product")
     private Product sourceProduct;
 
     // CoastColour L1P parameters
     @Parameter(defaultValue = "false",
-               label = " Perform ICOL correction",
-               description = "Whether to perform ICOL correction (NOTE: This step is very time- and memory-consuming in case of large products!).")
+            label = " Perform ICOL correction",
+            description = "Whether to perform ICOL correction (NOTE: This step is very time- and memory-consuming in case of large products!).")
     private boolean doIcol;
 
-    @Parameter(defaultValue = "true",
-               label = " Perform re-calibration",
-               description = "Applies correction from MERIS 2nd to 3rd reprocessing quality.")
+    @Parameter(defaultValue = "false",
+            label = " Perform re-calibration",
+            description = "Applies correction from MERIS 2nd to 3rd reprocessing quality.")
     private boolean doCalibration;
 
     @Parameter(defaultValue = "true",
-               label = " Perform Smile-effect correction",
-               description = "Whether to perform MERIS Smile-effect correction.")
+            label = " Perform Smile-effect correction",
+            description = "Whether to perform MERIS Smile-effect correction.")
     private boolean doSmile;
 
-    @Parameter(defaultValue = "true",
-               label = " Perform equalization",
-               description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
+    @Parameter(defaultValue = "false",
+            label = " Perform equalization",
+            description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
 
     // IdePix parameters
     @Parameter(defaultValue = "2", interval = "[0,100]",
-               description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy.",
-               label = " Width of cloud buffer (# of pixels)")
+            description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy.",
+            label = " Width of cloud buffer (# of pixels)")
     private int ccCloudBufferWidth;
 
-    @Parameter(defaultValue = "false",
-               description = "Write Cloud Probability Feature Value to the CC L1P target product.",
-               label = " Write Cloud Probability Feature Value to the CC L1P target product")
-    private boolean ccOutputCloudProbabilityFeatureValue = false;
-
     @Parameter(defaultValue = "1.4",
-               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous.",
-               label = " Cloud screening 'ambiguous' threshold" )
+            description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as still " +
+                    "ambiguous (i.e. a higher value results in fewer ambiguous clouds).",
+            label = " Cloud screening 'ambiguous' threshold")
     private double ccCloudScreeningAmbiguous = 1.4;      // Schiller
 
     @Parameter(defaultValue = "1.8",
-               description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as sure.",
-               label = " Cloud screening 'sure' threshold")
+            description = "Threshold of Cloud Probability Feature Value above which cloud is regarded as " +
+                    "sure (i.e. a higher value results in fewer sure clouds).",
+            label = " Cloud screening 'sure' threshold")
     private double ccCloudScreeningSure = 1.8;       // Schiller
+
+    @Parameter(defaultValue = "false",
+            description = "Write Cloud Probability Feature Value to the  CC L1P target product.",
+            label = " Write Cloud Probability Feature Value to the target product")
+    private boolean ccOutputCloudProbabilityFeatureValue = false;
 
 
     private Band cloudFlagBand;
@@ -119,7 +121,7 @@ public class L1POp extends Operator {
 
         if (!ProductValidator.isValidL1PInputProduct(sourceProduct)) {
             final String message = String.format("Input product '%s' is not a valid source for L1P processing",
-                                                  sourceProduct.getName());
+                    sourceProduct.getName());
             throw new OperatorException(message);
         }
 
@@ -295,15 +297,15 @@ public class L1POp extends Operator {
         l1pFC.addFlag(CC_COASTLINE_FLAG_NAME, BitSetter.setFlag(0, COASTLINE_BIT_INDEX), "Pixel masked as coastline");
         l1pFC.addFlag(CC_CLOUD_FLAG_NAME, BitSetter.setFlag(0, CLOUD_BIT_INDEX), "Pixel masked as cloud");
         l1pFC.addFlag(CC_CLOUD_AMBIGUOUS_FLAG_NAME, BitSetter.setFlag(0, CLOUD_AMBIGUOUS_BIT_INDEX),
-                      "Pixel masked as ambiguous cloud");
+                "Pixel masked as ambiguous cloud");
         l1pFC.addFlag(CC_CLOUD_BUFFER_FLAG_NAME, BitSetter.setFlag(0, CLOUD_BUFFER_BIT_INDEX),
-                      "Pixel masked as cloud buffer");
+                "Pixel masked as cloud buffer");
         l1pFC.addFlag(CC_CLOUD_SHADOW_FLAG_NAME, BitSetter.setFlag(0, CLOUD_SHADOW_BIT_INDEX),
-                      "Pixel masked as cloud shadow");
+                "Pixel masked as cloud shadow");
         l1pFC.addFlag(CC_SNOW_ICE_FLAG_NAME, BitSetter.setFlag(0, SNOW_ICE_BIT_INDEX), "Pixel masked as snow/ice");
         l1pFC.addFlag(CC_MIXEDPIXEL_FLAG_NAME, BitSetter.setFlag(0, MIXEDPIXEL_BIT_INDEX), "Potential land pixel");
         l1pFC.addFlag(CC_GLINTRISK_FLAG_NAME, BitSetter.setFlag(0, GLINTRISK_BIT_INDEX),
-                      "Risk that pixel is under glint");
+                "Risk that pixel is under glint");
 
         l1pProduct.getFlagCodingGroup().add(l1pFC);
         final Band l1pBand = l1pProduct.addBand(L1P_FLAG_BAND_NAME, ProductData.TYPE_INT16);
@@ -329,16 +331,16 @@ public class L1POp extends Operator {
         int height = sourceProduct.getSceneRasterHeight();
         String maskPrefix = "l1p_";
         Mask mask = Mask.BandMathsType.create(maskPrefix + flagName.toLowerCase(),
-                                              description, width, height,
-                                              L1P_FLAG_BAND_NAME + "." + flagName,
-                                              color, transparency);
+                description, width, height,
+                L1P_FLAG_BAND_NAME + "." + flagName,
+                color, transparency);
         maskGroup.add(mask);
     }
 
     private void checkForExistingFlagBand(Product idepixProduct, String flagBandName) {
         if (!idepixProduct.containsBand(flagBandName)) {
             String msg = String.format("Flag band '%1$s' is not generated by operator '%2$s' ",
-                                       flagBandName, IDEPIX_OPERATOR_ALIAS);
+                    flagBandName, IDEPIX_OPERATOR_ALIAS);
             throw new OperatorException(msg);
         }
     }
@@ -352,23 +354,23 @@ public class L1POp extends Operator {
             checkForCancellation();
             for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
                 targetTile.setSample(x, y, LAND_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_LAND));
+                        cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_LAND));
                 targetTile.setSample(x, y, COASTLINE_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_COASTLINE));
+                        cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_COASTLINE));
                 targetTile.setSample(x, y, CLOUD_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_CLOUD));
+                        cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_CLOUD));
                 targetTile.setSample(x, y, CLOUD_AMBIGUOUS_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_CLOUD_AMBIGUOUS));
+                        cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_CLOUD_AMBIGUOUS));
                 targetTile.setSample(x, y, CLOUD_BUFFER_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_CLOUD_BUFFER));
+                        cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_CLOUD_BUFFER));
                 targetTile.setSample(x, y, CLOUD_SHADOW_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_CLOUD_SHADOW));
+                        cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_CLOUD_SHADOW));
                 targetTile.setSample(x, y, SNOW_ICE_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_SNOW_ICE));
+                        cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_SNOW_ICE));
                 targetTile.setSample(x, y, MIXEDPIXEL_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_MIXED_PIXEL));
+                        cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_MIXED_PIXEL));
                 targetTile.setSample(x, y, GLINTRISK_BIT_INDEX,
-                                     cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_GLINTRISK));
+                        cloudTile.getSampleBit(x, y, CoastColourClassificationOp.F_GLINTRISK));
             }
         }
 

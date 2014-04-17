@@ -22,6 +22,8 @@ import org.esa.beam.framework.ui.UIUtils;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +47,8 @@ public class L2ProcessingDialog extends SingleTargetProductDialog {
     private String targetProductNameSuffix;
     private ProductChangedHandler productChangedHandler;
     private JPanel parametersPanel;
+    private JCheckBox useSalinTempCheckBox;
+    private JCheckBox writeWaterReflCheckBox;
 
 
     public L2ProcessingDialog(String operatorName, AppContext appContext, String title, String helpID) {
@@ -152,69 +156,6 @@ public class L2ProcessingDialog extends SingleTargetProductDialog {
         }
     }
 
-    private void checkComponentsToDisable(String productType) {
-        if (form == null) {
-            initForm();
-        }
-        if (parametersPanel != null && parametersPanel.getComponents() != null) {
-            Component[] components = parametersPanel.getComponents();
-            for (int i = 0; i < components.length - 1; i++) {
-                if (isComponentToDisable(productType, components[i])) {
-                    components[i].setEnabled(false);
-                } else {
-                    components[i].setEnabled(true);
-                }
-            }
-        }
-    }
-
-    private boolean isComponentToDisable(String productType, Component component) {
-        final boolean l1pComponentToDisable =
-                (isCoastcolourL1PProduct(productType) || isCoastcolourL2RProduct(productType)) &&
-                        isComponentofL1PParameter(component);
-        final boolean l2rComponentToDisable =
-                isCoastcolourL2RProduct(productType) &&
-                        isComponentofL2RParameter(component);
-
-        return (operatorName.equals("CoastColour.L2R") && l1pComponentToDisable) ||
-                (operatorName.equals("CoastColour.L2W") &&
-                        (l1pComponentToDisable || l2rComponentToDisable));
-    }
-
-    private synchronized boolean isCoastcolourL1PProduct(String productType) {
-        return productType != null && productType.endsWith("CCL1P");
-    }
-
-    private synchronized boolean isCoastcolourL2RProduct(String productType) {
-        return productType != null && productType.endsWith("CCL2R");
-    }
-
-    private boolean isComponentofL1PParameter(Component component) {
-        for (int i = 0; i < CoastcolourConstants.L1P_PARAMETER_NAMES.length; i++) {
-            String l1pParameterName = CoastcolourConstants.L1P_PARAMETER_NAMES[i];
-            if (component.getName() != null && component.getName().equals(l1pParameterName)) {
-                return true;
-            }
-        }
-        if (component instanceof JLabel && ((JLabel) component).getText().contains("[L1P]")) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isComponentofL2RParameter(Component component) {
-        for (int i = 0; i < CoastcolourConstants.L2R_PARAMETER_NAMES.length; i++) {
-            String l2rParameterName = CoastcolourConstants.L2R_PARAMETER_NAMES[i];
-            if (component.getName() != null && component.getName().equals(l2rParameterName)) {
-                return true;
-            }
-        }
-        if (component instanceof JLabel && ((JLabel) component).getText().contains("[L2R]")) {
-            return true;
-        }
-        return false;
-    }
-
 
     private class ProductChangedHandler extends AbstractSelectionChangeListener implements ProductNodeListener {
 
@@ -249,8 +190,6 @@ public class L2ProcessingDialog extends SingleTargetProductDialog {
                 }
             }
         }
-
-
 
 
         @Override
@@ -293,20 +232,161 @@ public class L2ProcessingDialog extends SingleTargetProductDialog {
                 }
             }
         }
-    }
 
-    private static void updateValueSet(PropertyDescriptor propertyDescriptor, Product product) {
-        String[] values = new String[0];
-        if (product != null) {
-            Object object = propertyDescriptor.getAttribute(RasterDataNodeValues.ATTRIBUTE_NAME);
-            if (object != null) {
-                @SuppressWarnings("unchecked")
-                Class<? extends RasterDataNode> rasterDataNodeType = (Class<? extends RasterDataNode>) object;
-                boolean includeEmptyValue = !propertyDescriptor.isNotNull() && !propertyDescriptor.isNotEmpty() &&
-                        !propertyDescriptor.getType().isArray();
-                values = RasterDataNodeValues.getNames(product, rasterDataNodeType, includeEmptyValue);
+        private void updateValueSet(PropertyDescriptor propertyDescriptor, Product product) {
+            String[] values = new String[0];
+            if (product != null) {
+                Object object = propertyDescriptor.getAttribute(RasterDataNodeValues.ATTRIBUTE_NAME);
+                if (object != null) {
+                    @SuppressWarnings("unchecked")
+                    Class<? extends RasterDataNode> rasterDataNodeType = (Class<? extends RasterDataNode>) object;
+                    boolean includeEmptyValue = !propertyDescriptor.isNotNull() && !propertyDescriptor.isNotEmpty() &&
+                            !propertyDescriptor.getType().isArray();
+                    values = RasterDataNodeValues.getNames(product, rasterDataNodeType, includeEmptyValue);
+                }
+            }
+            propertyDescriptor.setValueSet(new ValueSet(values));
+        }
+
+        private void checkComponentsToDisable(final String productType) {
+            if (form == null) {
+                initForm();
+            }
+
+            if (parametersPanel != null && parametersPanel.getComponents() != null) {
+                Component[] components = parametersPanel.getComponents();
+                for (int i = 0; i < components.length - 1; i++) {
+                    if (components[i].getName() != null && components[i].getName().equals("useSnTMap")) {
+                        if (useSalinTempCheckBox == null) {
+                            useSalinTempCheckBox = (JCheckBox) components[i];
+                            ActionListener useSalinTempCheckBoxListener = new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+//                                    checkComponentsToDisable(productType);
+                                    checkComponentsToDisable(currentProduct.getProductType());
+                                }
+                            };
+                            useSalinTempCheckBox.addActionListener(useSalinTempCheckBoxListener);
+                        }
+                    }
+                    if (components[i].getName() != null && components[i].getName().equals("outputReflec")) {
+                        if (writeWaterReflCheckBox == null) {
+                            writeWaterReflCheckBox = (JCheckBox) components[i];
+                            ActionListener writeWaterReflCheckBoxListener = new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+//                                    checkComponentsToDisable(productType);
+                                    checkComponentsToDisable(currentProduct.getProductType());
+                                }
+                            };
+                            writeWaterReflCheckBox.addActionListener(writeWaterReflCheckBoxListener);
+                        }
+                    }
+//                    if (i == 0) {  // test!!
+                        if (isComponentToDisable(productType, components[i])) {
+                            components[i].setEnabled(false);
+                        } else {
+                            components[i].setEnabled(true);
+                        }
+//                    }
+                }
             }
         }
-        propertyDescriptor.setValueSet(new ValueSet(values));
+
+        private boolean isComponentToDisable(String productType, Component component) {
+            final boolean l1pComponentToDisable =
+                    (isCoastcolourL1PProduct(productType) || isCoastcolourL2RProduct(productType)) &&
+                            isComponentofL1PParameter(component);
+            final boolean l2rComponentToDisable =
+                    (isCoastcolourL2RProduct(productType) &&
+                            isComponentofL2RParameter(component)) ||
+                            isSpecificL2RComponentToDisable(component);
+
+            final boolean l2wComponentToDisable =
+                    isSpecificL2WComponentToDisable(component, productType);
+
+            return (operatorName.equals("CoastColour.L2R") && (l1pComponentToDisable || l2rComponentToDisable)) ||
+                    (operatorName.equals("CoastColour.L2W") &&
+                            (l1pComponentToDisable || l2rComponentToDisable || l2wComponentToDisable));
+        }
+
+        private boolean isSpecificL2RComponentToDisable(Component component) {
+            final boolean isUseSalinTempCheckboxSelected = useSalinTempCheckBox != null && useSalinTempCheckBox.isSelected();
+
+            final boolean compNameAve = component.getName() != null && component.getName().startsWith("average");
+            final boolean compTextAverage = component instanceof JLabel && ((JLabel) component).getText().contains("Average");
+            boolean disable1 = isUseSalinTempCheckboxSelected &&
+                    (compNameAve ||
+                            compTextAverage);
+
+            return disable1;
+        }
+
+        private boolean isSpecificL2WComponentToDisable(Component component, String productType) {
+            final boolean labelToDisable = component instanceof JLabel &&
+                    ((JLabel) component).getText().contains("CC L2R product");
+            final boolean checkboxToDisable =
+                    component.getName() != null && component.getName().equals("inputReflecIs");
+
+            boolean disable1 = !isCoastcolourL2RProduct(productType) &&
+                    (labelToDisable || checkboxToDisable);
+
+            final boolean isUseSalinTempCheckboxSelected = useSalinTempCheckBox != null && useSalinTempCheckBox.isSelected();
+            boolean disable2 = isUseSalinTempCheckboxSelected &&
+                    (component.getName() != null && component.getName().startsWith("average") ||
+                            (component instanceof JLabel && ((JLabel) component).getText().contains("Average")));
+
+            final boolean isWriteWaterReflCheckboxSelected = writeWaterReflCheckBox != null && writeWaterReflCheckBox.isSelected();
+            final boolean compTextOutputReflecAs = component.getName() != null && component.getName().equals("outputL2WReflecAs");
+            final boolean compLabelWriteWaterLeavingAs = component instanceof JLabel &&
+                    ((JLabel) component).getText().contains(" Write water leaving reflectances as");
+            boolean disable3 = !isWriteWaterReflCheckboxSelected &&
+                    (compTextOutputReflecAs || compLabelWriteWaterLeavingAs);
+
+            System.out.println("disable3 = " + isWriteWaterReflCheckboxSelected + "," + compTextOutputReflecAs + "," +
+                                       compLabelWriteWaterLeavingAs + "," + disable3);
+
+            boolean disable = disable1 || disable2 || disable3;
+
+            return disable;
+        }
+
+
+        private synchronized boolean isCoastcolourL1PProduct(String productType) {
+            return productType != null && productType.endsWith("CCL1P");
+        }
+
+        private synchronized boolean isCoastcolourL2RProduct(String productType) {
+            return productType != null && productType.endsWith("CCL2R");
+        }
+
+        private boolean isComponentofL1PParameter(Component component) {
+            for (int i = 0; i < CoastcolourConstants.L1P_PARAMETER_NAMES.length; i++) {
+                String l1pParameterName = CoastcolourConstants.L1P_PARAMETER_NAMES[i];
+                if (component.getName() != null && component.getName().equals(l1pParameterName)) {
+                    return true;
+                }
+            }
+            if (component instanceof JLabel && ((JLabel) component).getText().contains("[L1P]")) {
+                return true;
+            }
+            return false;
+        }
+
+        private boolean isComponentofL2RParameter(Component component) {
+            for (int i = 0; i < CoastcolourConstants.L2R_PARAMETER_NAMES.length; i++) {
+                String l2rParameterName = CoastcolourConstants.L2R_PARAMETER_NAMES[i];
+                if (component.getName() != null && component.getName().equals(l2rParameterName)) {
+                    return true;
+                }
+            }
+            if (component instanceof JLabel && ((JLabel) component).getText().contains("[L2R]")) {
+                return true;
+            }
+            return false;
+        }
+
     }
+
+
 }

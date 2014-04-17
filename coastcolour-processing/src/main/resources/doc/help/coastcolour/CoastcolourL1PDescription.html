@@ -1,0 +1,309 @@
+<!--
+  ~ Copyright (C) 2013 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>CoastColour Pre-Processing and Pixel Classification</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            Pre-Processing and Pixel Classification
+        </td>
+        <td class="header" align="right"><a href="../general/BeamOverview.html"><img src="../images/BeamHeader.jpg"
+                                                                                     border=0></a>
+        </td>
+    </tr>
+</table>
+
+<!-------- Pre-Processing and Pixel Classification --------------------------------------->
+<h3>Pre-Processing and Pixel Classification</h3>
+
+<h4>I/O Parameters</h4>
+
+<p>
+    Selecting the <b>CoastColour Processors (MERIS)...</b> entry from the VISAT
+    'Processing --> Thematic Water Processing' sub-menu opens another
+    sub-menu with the three entries 'Pre-Processing and Pixel Classification...',
+    'Atmospheric Correction...', and 'In-Water Processing...'. Selecting 'Pre-Processing and Pixel Classification...'
+    from this sub-menu pops up the 'Pre-Processing and Pixel Classification' dialog:
+</p>
+
+<p align="center">
+    <img src="images/CoastcolourL1PProcessingDialog_io.png" alt="Coastcolour L1P Processing Dialog"/>
+</p>
+
+<h5>Source Products</h5>
+
+<p class="i1">
+    <b>MERIS L1B product:</b>
+    Here the user specifies the MERIS L1b source product. The combo box presents
+    a list of all products open in VISAT. The user may select one of these
+    or, by clicking on the button next to the combo box, choose a product
+    from the file system.
+</p>
+
+<h5>Target Product Group</h5>
+
+<p class="i1">
+    <b>Name:</b>
+    Used to specify the name of the target product.
+</p>
+
+<p class="i1">
+    <b>Save to:</b>
+    Used to specify whether the target product should be saved to the file system. The
+    combo box presents a list of file formats, currently BEAM-DIMAP, GeoTIFF, and HDF5.
+</p>
+
+<p class="i1">
+    <b>Open in VISAT:</b>
+    Used to specify whether the target product should be opened in VISAT. When the
+    the target product is not saved, it is opened in VISAT automatically.
+</p>
+
+
+<h4>Processing Parameters</h4>
+
+<p>
+    Selecting the <b>Processing Parameters</b> tab in the
+    'Pre-Processing and Pixel Classification' dialog switches to the following view:
+</p>
+
+<p align="center">
+    <img src="images/CoastcolourL1PProcessingDialog_procparms.png" alt="Coastcolour L1P Processing Parameters"/>
+</p>
+
+<h5>Parameters</h5>
+
+<p class="i1">
+    <b>Perform ICOL correction:</b>
+    This checkbox indicates if the ICOL adjacency effect correction shall in addition be applied on the input radiances.
+    NOTE: This additional step is very time- and memory-consuming for large products!
+</p>
+
+<p class="i1">
+    <b>Perform re-calibration:</b>
+    This checkbox indicates if the correction from MERIS 2nd to 3rd reprocessing quality shall be applied.
+</p>
+
+<p class="i1">
+    <b>Perform Smile-effect correction:</b>
+    This checkbox indicates if the MERIS Smile-effect correction shall be applied.
+</p>
+
+<p class="i1">
+    <b>Perform equalization:</b>
+    This checkbox indicates if the detector-to-detector
+    systematic radiometric differences in MERIS L1b data products shall be removed.
+</p>
+
+<p class="i1">
+    <b>Width of cloud buffer (# of pixels):</b>
+    This value is the width of a cloud 'safety buffer' around a pixel which was classified as cloudy.
+</p>
+
+<p class="i1">
+    <b>Write Cloud Probability Feature Value to the CC L1P target product:</b>
+    This checkbox indicates if the Cloud Probability Feature Value shall be written to the target product.
+    This value is a floating point number in the interval [1.0, 2.0] describing the increasing probability of a pixel
+    being cloudy (1.0 = certainly clear, 2.0 = certainly cloudy).
+</p>
+
+<p class="i1">
+    <b>Width of cloud buffer (# of pixels):</b>
+    This value is the width of a cloud 'safety buffer' around a pixel which was classified as cloudy.
+</p>
+
+<p class="i1">
+    <b>Cloud screening 'ambiguous' threshold:</b>
+    This value is the threshold of Cloud Probability Feature Value above which a cloud is regarded as still ambiguous.
+</p>
+
+<p class="i1">
+    <b>Cloud screening 'sure' threshold:</b>
+    This value is the threshold of Cloud Probability Feature Value above which a cloud is regarded as sure.
+</p>
+
+<br>
+
+
+<h4>Flag Codings</h4>
+
+<h5>MERIS L1B source product</h5>
+
+<p>
+    The 'l1_flags' band in the MERIS L1B source product has the standard coding as shown below:
+</p>
+
+<p align="center">
+    <img src="images/l1b_flags.png" alt="File Menu"/>
+</p>
+
+<h5>CC L1P target product</h5>
+
+<p>
+    The CC L1P target product provides an additional flag band 'l1p_flags' with a coding as shown below:
+</p>
+
+<p align="center">
+    <img src="images/l1p_flags.png" alt="File Menu"/>
+</p>
+
+
+<h4>Menu Bar</h4>
+<h5>'File' Menu</h5>
+
+<p>
+    Selecting the <b>File</b> entry in the Menu Bar opens the following view:
+</p>
+
+<p align="center">
+    <img src="images/file_menu.png" alt="File Menu"/>
+</p>
+
+<p class="i1">
+    <b>Open Parameters...:</b>
+    When this entry is selected, an 'Open File' dialog will appear.
+    Here, a BEAM GPF parameters XML file can be selected, containing
+    'Pre-Processing and Pixel Classification' parameters which were saved earlier.
+    These parameters will be loaded and applied for an upcoming processing.
+</p>
+
+<p class="i1">
+    <b>Save Parameters...:</b>
+    When this entry is selected, a 'Save File' dialog will appear.
+    Here, the current set of 'Pre-Processing and Pixel Classification' parameters can be saved into a
+    BEAM GPF parameters XML file for later re-usage.
+</p>
+
+<p class="i1">
+    <b>Display Parameters...:</b>
+    When this entry is selected, the current set of 'Pre-Processing and Pixel Classification' parameters
+    will be displayed in XML format (see below).
+</p>
+
+<p align="center">
+    <img src="images/l1p_file_menu_display_params.png" alt="L1P File Menu Display Parms"/>
+</p>
+
+
+<h5>'Help' Menu</h5>
+
+<p>
+    Selecting the <b>Help</b> entry in the Menu Bar opens the following view:
+</p>
+
+<p align="center">
+    <img src="images/help_menu.png" alt="Help Menu"/>
+</p>
+
+<p class="i1">
+    <b>Help:</b>
+    When this entry is selected, this online help is opened
+    in a separate window.
+</p>
+
+<p class="i1">
+    <b>About...:</b>
+    When this entry is selected, an 'About' dialog for the current
+    processor is opened (see below).
+</p>
+
+<p align="center">
+    <img src="images/l1p_help_menu_about.png" alt="L1P Help Menu About"/>
+</p>
+
+
+<h4>Button Group</h4>
+
+<p align="center">
+    <img src="images/button_group.png" alt="Button Group"/>
+</p>
+
+<p class="i1">
+    <b>Run:</b>
+    When this button is clicked, the processing will be started with the selected
+    parameters.
+</p>
+
+<p class="i1">
+    <b>Close:</b>
+    When this button is clicked, the processor tool window will be closed.
+</p>
+
+
+<br>
+<hr>
+
+<!-------- Command line --------------------------------------->
+<h3>Processing from Command Line</h3>
+
+Since the CoastColour processors make use of the BEAM graph processing framework, they can be
+used also with the 'gpt' command line tool outside BEAM-VISAT. The graph processing is invoked
+by the command
+<div class="itemizedlist">
+    <ul type="bullet">
+        <li style="list-style-type: disc">
+            ${BEAM-INSTALL-DIR}/bin/gpt
+        </li>
+    </ul>
+</div>
+
+To obtain general help on the graph processing, use the command
+<div class="itemizedlist">
+    <ul type="bullet">
+        <li style="list-style-type: disc">
+            ${BEAM-INSTALL-DIR}/bin/gpt -h
+        </li>
+    </ul>
+</div>
+
+Specific help on the 'Pre-Processing and Pixel Classification' can be obtained with
+<div class="itemizedlist">
+    <ul type="bullet">
+        <li style="list-style-type: disc">
+            ${BEAM-INSTALL-DIR}/bin/gpt -h CoastColour.L1P
+        </li>
+    </ul>
+</div>
+Information on the usage and a list of all available parameters are given.
+
+<p align="center">
+    <img src="images/gpt_cc_l1p.png" alt="CC L1P parameters"/>
+</p>
+<br>
+
+<br><br>
+The processing from the command line can also be invoked using graph XML files.
+For example, a CoastColour pre-processing and pixel classification could be started with
+<div class="itemizedlist">
+    <ul type="bullet">
+        <li style="list-style-type: disc">
+            ${BEAM-INSTALL-DIR}/bin/gpt test_cc_l1p.xml -SmerisL1B=./MER_CC_l1b_test.dim
+
+        </li>
+    </ul>
+</div>
+with a MERIS L1b input file 'MER_cc_l1b_test.dim' (given in BEAM Dimap format) in the current directory,
+and a graph XML file 'test_cc_l1p.xml' in the XML format as shown in the figure above.
+
+</body>
+</html>

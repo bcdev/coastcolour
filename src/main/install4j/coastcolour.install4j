@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="5.1.6" transformSequenceNumber="4">
-  <directoryPresets config="../../../../../../.beam/beam-ui/auxdata" />
+<install4j version="5.1.5" transformSequenceNumber="4">
+  <directoryPresets config="../resources" />
   <application name="BEAM COASTCOLOUR" distributionSourceDir="" applicationId="9847-8837-7763-8480" mediaDir="../../../target/installers" mediaFilePattern="${compiler:sys.shortName}_${compiler:sys.version}_${compiler:sys.platform}_installer" compression="6" lzmaCompression="false" pack200Compression="false" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="true" shortName="beam-coastcolour" publisher="Brockmann Consult" publisherWeb="http://www.brockmann-consult.de/" version="1.8-SNAPSHOT" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" macSignature="????" installerName="" javaMinVersion="1.6" javaMaxVersion="" allowBetaVM="false" jdkMode="runtimeJre" jdkName="">
     <languages skipLanguageSelection="false" languageSelectionInPrincipalLanguage="false">
       <principalLanguage id="en" customLocalizationFile="" />
@@ -25,8 +25,11 @@
       <mountPoint id="326" root="" location="lib" mode="755" />
       <mountPoint id="440" root="381" location=".beam" mode="755" />
       <mountPoint id="441" root="381" location=".beam/beam-ui" mode="755" />
-      <mountPoint id="442" root="381" location=".beam/beam-ui/auxdata" mode="755" />
+      <mountPoint id="442" root="381" location=".beam/beam-core" mode="755" />
+      <mountPoint id="443" root="381" location=".beam/beam-ui/auxdata" mode="755" />
+      <mountPoint id="444" root="381" location=".beam/beam-core/auxdata" mode="755" />
       <mountPoint id="382" root="381" location=".beam/beam-ui/auxdata/color-palettes" mode="755" />
+      <mountPoint id="383" root="381" location=".beam/beam-core/auxdata/rgb_profiles" mode="755" />
     </mountPoints>
     <entries>
       <dirEntry mountPoint="17" file="../../../target/coastcolour-1.8-SNAPSHOT-beam-bin/coastcolour-1.8-SNAPSHOT/modules" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" entryMode="direct" subDirectory="" excludeSuffixes="" dirMode="755" overrideDirMode="true">
@@ -36,6 +39,9 @@
         <exclude />
       </dirEntry>
       <dirEntry mountPoint="382" file="../resources/palettes" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="false" overrideOverwriteMode="false" overrideUninstallMode="false" entryMode="direct" subDirectory="" excludeSuffixes="" dirMode="755" overrideDirMode="false">
+        <exclude />
+      </dirEntry>
+      <dirEntry mountPoint="383" file="../resources/rgb_profiles" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="false" overrideOverwriteMode="false" overrideUninstallMode="false" entryMode="direct" subDirectory="" excludeSuffixes="" dirMode="755" overrideDirMode="false">
         <exclude />
       </dirEntry>
     </entries>

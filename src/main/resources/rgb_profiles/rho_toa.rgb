@@ -1,0 +1,6 @@
+#RGB-Image Profile
+#Thu Apr 17 13:33:09 CEST 2014
+blue=log(0.05 + 0.21 * rho_toa_1 + 1.75 * rho_toa_2 + 0.47 * rho_toa_3 + 0.16 * rho_toa_4)
+name=rho_toa
+green=log(0.05 + 0.21 * rho_toa_3 + 0.50 * rho_toa_4 + rho_toa_5 + 0.38 * rho_toa_6)
+red=log(0.05 + 0.35 * rho_toa_2 + 0.60 * rho_toa_5 + rho_toa_6 + 0.13 * rho_toa_7)

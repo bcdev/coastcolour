@@ -1,0 +1,6 @@
+#RGB-Image Profile
+#Thu Apr 17 13:33:09 CEST 2014
+blue=log(0.05 + 0.21 * norm_reflec_1 + 1.75 * norm_reflec_2 + 0.47 * norm_reflec_3 + 0.16 * norm_reflec_4)
+name=rho_norm
+green=log(0.05 + 0.21 * norm_reflec_3 + 0.50 * norm_reflec_4 + norm_reflec_5 + 0.38 * norm_reflec_6)
+red=log(0.05 + 0.35 * norm_reflec_2 + 0.60 * norm_reflec_5 + norm_reflec_6 + 0.13 * norm_reflec_7)

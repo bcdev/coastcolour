@@ -70,7 +70,7 @@ public class L1POp extends Operator {
     // CoastColour L1P parameters
     @Parameter(defaultValue = "false",
             label = " Perform ICOL correction",
-            description = "Whether to perform ICOL correction (NOTE: This step is very time- and memory-consuming in case of large products!).")
+            description = "Whether to perform ICOL correction (NOTE: This step can be very time- and memory-consuming in case of large products!).")
     private boolean doIcol;
 
     @Parameter(defaultValue = "false",
@@ -303,7 +303,7 @@ public class L1POp extends Operator {
         l1pFC.addFlag(CC_CLOUD_SHADOW_FLAG_NAME, BitSetter.setFlag(0, CLOUD_SHADOW_BIT_INDEX),
                 "Pixel masked as cloud shadow");
         l1pFC.addFlag(CC_SNOW_ICE_FLAG_NAME, BitSetter.setFlag(0, SNOW_ICE_BIT_INDEX), "Pixel masked as snow/ice");
-        l1pFC.addFlag(CC_MIXEDPIXEL_FLAG_NAME, BitSetter.setFlag(0, MIXEDPIXEL_BIT_INDEX), "Potential land pixel");
+        l1pFC.addFlag(CC_MIXEDPIXEL_FLAG_NAME, BitSetter.setFlag(0, MIXEDPIXEL_BIT_INDEX), "Mixture of water and land/floating vegetation");
         l1pFC.addFlag(CC_GLINTRISK_FLAG_NAME, BitSetter.setFlag(0, GLINTRISK_BIT_INDEX),
                 "Risk that pixel is under glint");
 
@@ -320,7 +320,7 @@ public class L1POp extends Operator {
         addMask(maskGroup, CC_CLOUD_BUFFER_FLAG_NAME, "Cloud buffer flag", Color.RED, 0.5f);
         addMask(maskGroup, CC_CLOUD_SHADOW_FLAG_NAME, "Cloud shadow flag", Color.BLUE, 0.5f);
         addMask(maskGroup, CC_SNOW_ICE_FLAG_NAME, "Snow/Ice flag", Color.CYAN, 0.5f);
-        addMask(maskGroup, CC_MIXEDPIXEL_FLAG_NAME, "Potential land pixel", Color.GREEN.darker().darker(), 0.5f);
+        addMask(maskGroup, CC_MIXEDPIXEL_FLAG_NAME, "Mixture of water and land/floating vegetation", Color.GREEN.darker().darker(), 0.5f);
         addMask(maskGroup, CC_GLINTRISK_FLAG_NAME, "Risk that pixel is under glint", Color.pink, 0.5f);
 
     }

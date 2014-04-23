@@ -386,7 +386,7 @@
                 <parameterDescriptor>
                     <name>useExtremeCaseMode</name>
                     <type>boolean</type>
-                    <description>Use special set of NNs to finally derive water IOPs in extreme ranges</description>
+                    <description>If set, a neural network for maximum range of concentrations and IOPs is used. Otherwise a neural net with limited ranges but less noisy for low concentration ranges is used. </description>
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
@@ -740,7 +740,7 @@
                 <parameterDescriptor>
                     <name>useExtremeCaseMode</name>
                     <type>boolean</type>
-                    <description>Use special set of NNs to finally derive water IOPs in extreme ranges</description>
+                    <description>If set, a neural network for maximum range of concentrations and IOPs is used. Otherwise a neural net with limited ranges but less noisy for low concentration ranges is used. </description>
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>

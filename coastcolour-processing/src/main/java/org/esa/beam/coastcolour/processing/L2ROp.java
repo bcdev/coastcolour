@@ -106,7 +106,7 @@ public class L2ROp extends Operator {
     private double averageTemperature;
 
     @Parameter(defaultValue = "true",
-               label = " Use NNs for maximum ranges of coastcolour IOPs",
+               label = " Use NNs for maximum ranges of CoastColour IOPs",
                description = "If selected a neural network for maximum range of concentrations and IOPs is used. " +
                        "If deselected a neural net with limited ranges but less noisy for low concentration ranges is used.")
     private boolean useExtremeCaseMode;

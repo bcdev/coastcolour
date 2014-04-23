@@ -107,7 +107,7 @@ public class L2WOp extends Operator {
     private double averageTemperature;
 
     @Parameter(defaultValue = "true",
-               label = "[L2R] Use NNs for maximum ranges of coastcolour IOPs",
+               label = "[L2R] Use NNs for maximum ranges of CoastColour IOPs",
                description = "If selected a neural network for maximum range of concentrations and IOPs is used. " +
                        "If deselected a neural net with limited ranges but less noisy for low concentration ranges is used. " +
                        "This is a L2R option and has only effect if the source product is a MERIS L1b or CC L1P product.")

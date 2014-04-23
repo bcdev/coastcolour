@@ -70,7 +70,7 @@ public class L1POp extends Operator {
     // CoastColour L1P parameters
     @Parameter(defaultValue = "false",
             label = " Perform ICOL correction",
-            description = "Whether to perform ICOL correction (NOTE: This step is very time- and memory-consuming in case of large products!).")
+            description = "Whether to perform ICOL correction (NOTE: This step can be very time- and memory-consuming! Please see help documentation for more details).")
     private boolean doIcol;
 
     @Parameter(defaultValue = "false",

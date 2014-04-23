@@ -96,7 +96,13 @@
 <p class="i1">
     <b>Perform ICOL correction:</b>
     This checkbox indicates if the ICOL adjacency effect correction shall in addition be applied on the input radiances.
-    NOTE: This additional step is very time- and memory-consuming for large products!
+    <b>NOTE:</b> This additional step becomes very time- and memory-consuming with increasing product size! We would recommend not to
+    run the ICOL step within CoastColour processing for products larger than about 1000x1000 pixel. In that case, the
+    ICOL standalone processor should instead be used with an L1P product as input. For this puropse, please install ICOL
+    through the BEAM Module Manager (see [L1P-1]).
+    However, this still might be slow. In any
+    case, we would recommend, if possible, to generate product subsets with the BEAM product sub-setting tool
+    (see [L1P-2]) before running ICOL.
 </p>
 
 <p class="i1">
@@ -251,7 +257,7 @@
 
 
 <br>
-<hr>
+<br>
 
 <!-------- Command line --------------------------------------->
 <h3>Processing from Command Line</h3>
@@ -304,6 +310,23 @@ For example, a CoastColour pre-processing and pixel classification could be star
 </div>
 with a MERIS L1b input file 'MER_cc_l1b_test.dim' (given in BEAM Dimap format) in the current directory,
 and a graph XML file 'test_cc_l1p.xml' in the XML format as shown in the figure above.
+
+<br>
+<br>
+
+<h3>References</h3>
+
+<p class="i1">
+    <b>[L1P-1]</b>
+    BEAM Module Manager Help Documentation:
+    <a href="http://www.brockmann-consult.de/beam/doc/help/visat/ModuleManager.html">www.brockmann-consult.de/beam/doc/help/visat/ModuleManager.html</a><br><br>
+
+    <b>[L1P-2]</b>
+    BEAM Product Subsetting Help Documentation:
+    <a href="http://www.brockmann-consult.de/beam/doc/help/visat/ProductSubsetDialog.html">www.brockmann-consult.de/beam/doc/help/visat/ProductSubsetDialog.html</a><br><br>
+
+</p>
+
 
 </body>
 </html>

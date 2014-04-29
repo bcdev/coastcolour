@@ -70,7 +70,7 @@ public class L1POp extends Operator {
     // CoastColour L1P parameters
     @Parameter(defaultValue = "false",
             label = " Perform ICOL correction",
-            description = "Whether to perform ICOL correction (NOTE: This step can be very time- and memory-consuming in case of large products!).")
+            description = "Whether to perform ICOL correction (NOTE: This step can be very time- and memory-consuming! Please see help documentation for more details).")
     private boolean doIcol;
 
     @Parameter(defaultValue = "false",
@@ -125,16 +125,19 @@ public class L1POp extends Operator {
             throw new OperatorException(message);
         }
 
+        Product l1pInputProduct;
+        if (doIcol) {
+            // this is time and memory consuming, but was required...
+            l1pInputProduct = createIcolProduct(sourceProduct);
+            attachFileTileCache(l1pInputProduct);
+        } else {
+            l1pInputProduct = sourceProduct;
+        }
+
         final Map<String, Object> rcParams = createRadiometryParameterMap();
-        Product radiometryProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, sourceProduct);
+        Product radiometryProduct = GPF.createProduct(RADIOMETRY_OPERATOR_ALIAS, rcParams, l1pInputProduct);
 
         Product l1pProduct = createL1PProduct(radiometryProduct);
-
-        // this is time and memory consuming, but was required...
-        if (doIcol) {
-            l1pProduct = createIcolProduct(l1pProduct);
-            attachFileTileCache(l1pProduct);
-        }
 
         HashMap<String, Object> idepixParams = createIdepixParameterMap();
         idepixProduct = GPF.createProduct(IDEPIX_OPERATOR_ALIAS, idepixParams, radiometryProduct);

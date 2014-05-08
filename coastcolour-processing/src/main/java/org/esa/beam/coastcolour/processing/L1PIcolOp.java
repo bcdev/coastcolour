@@ -42,6 +42,12 @@ public class L1PIcolOp extends Operator {
     private boolean doEqualization;
 
     // IdePix parameters
+    @Parameter(defaultValue = "false",
+               description = "Check for sea/lake ice also outside Sea Ice Climatology area.",
+               label = "Check for sea/lake ice also outside sea ice climatology area"
+    )
+    private boolean ccIgnoreSeaIceClimatology;
+
     @Parameter(defaultValue = "2", interval = "[0,100]",
                description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy.",
                label = " Width of cloud buffer (# of pixels)")
@@ -99,6 +105,7 @@ public class L1PIcolOp extends Operator {
         l1pParams.put("doEqualization", doEqualization);
         l1pParams.put("useIdepix", true);
         l1pParams.put("ccCloudBufferWidth", ccCloudBufferWidth);
+        l1pParams.put("ccIgnoreSeaIceClimatology", ccIgnoreSeaIceClimatology);
         l1pParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
         l1pParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
         l1pParams.put("ccOutputCloudProbabilityFeatureValue", ccOutputCloudProbabilityFeatureValue);

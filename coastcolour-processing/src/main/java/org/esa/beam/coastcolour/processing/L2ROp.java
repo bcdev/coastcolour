@@ -62,6 +62,13 @@ public class L2ROp extends Operator {
 
 
     // IdePix parameters  from L1P
+    @Parameter(defaultValue = "false",
+               description = "Check for sea/lake ice also outside Sea Ice Climatology area." +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
+               label = "[L1P] Check for sea/lake ice also outside sea ice climatology area"
+    )
+    private boolean ccIgnoreSeaIceClimatology;
+
     @Parameter(defaultValue = "2", interval = "[0,100]",
                description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy. " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
@@ -174,7 +181,7 @@ public class L2ROp extends Operator {
     }
 
     private HashMap<String, Object> createGlintAcParameterMap() {
-        HashMap<String, Object> glintParameters = new HashMap<>();
+        HashMap<String, Object> glintParameters = new HashMap<String, Object>();
         glintParameters.put("doSmileCorrection", false);
         glintParameters.put("outputReflec", true);
 //        glintParameters.put("outputNormReflec", true);
@@ -202,12 +209,13 @@ public class L2ROp extends Operator {
     }
 
     private HashMap<String, Object> createL1pParameterMap() {
-        HashMap<String, Object> l1pParams = new HashMap<>();
+        HashMap<String, Object> l1pParams = new HashMap<String, Object>();
         l1pParams.put("doCalibration", doCalibration);
         l1pParams.put("doSmile", doSmile);
         l1pParams.put("doEqualization", doEqualization);
         l1pParams.put("useIdepix", true);
         l1pParams.put("ccCloudBufferWidth", ccCloudBufferWidth);
+        l1pParams.put("ccIgnoreSeaIceClimatology", ccIgnoreSeaIceClimatology);
         l1pParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
         l1pParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
         l1pParams.put("ccOutputCloudProbabilityFeatureValue", ccOutputCloudProbabilityFeatureValue);

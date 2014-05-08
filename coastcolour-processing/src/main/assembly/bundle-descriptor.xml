@@ -31,6 +31,12 @@
                 </parameterDescriptor>
                 <!-- IdePix parameters -->
                 <parameterDescriptor>
+                    <name>ccIgnoreSeaIceClimatology</name>
+                    <type>boolean</type>
+                    <description>Whether to check for sea/lake ice also outside Sea Ice Climatology area</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
                     <name>ccCloudBufferWidth</name>
                     <type>string</type>
                     <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy,
@@ -72,22 +78,33 @@
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[
-                    <p>This processor performs the L1P processing steps. These are:<br>
-                    <ul>
-                         <li>Calibration: correction from MERIS 2nd to 3rd reprocessing quality</li>
-                         <li>Smile: perform MERIS Smile-effect correction</li>
-                         <li> Equalization: removal of detector-to-detector systematic radiometric differences in MERIS L1b data products</li>
-                         <li> Pixel Classification: detection of e.g. clouds, land, and improved coastline</li>
-                    </ul>
-                    <b>The output bands are:</b>
-                    <ul>
-                        <li>radiance_&lt;#&gt; - Corrected radiance of all 15 MERIS bands.</li>
-                        <li>detector_index - MERIS L1b detector index.</li>
-                        <li>l1_flags - Level 1b classification and quality flags.</li>
-                        <li>l1p_flags - CoastColour L1P pixel classification.</li>
-                    </ul>
-                    Processor input: MERIS L1b products (RR, FR, FRS, RRG, FRG, FSG) as N1<br>
-                    Processor output: MERIS L1P products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)
+                    <p>This processor performs the <strong>L1P</strong> processing steps. The editable processor parameters are:<br>
+                        <ul>
+                             <li>doCalibration: Whether to apply correction from MERIS 2nd to 3rd reprocessing quality.<br>
+                               Values: [true/false]. Default value: false</li>
+                             <li>doSmile: Whether to perform MERIS Smile-effect correction.<br>
+                               Values: [true/false]. Default value: true</li>
+                             <li>doEqualization: Whether to perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.<br>
+                               Values: [true/false]. Default value: true</li>
+                             <li> Pixel Classification parameters (detection of e.g. clouds, land, and improved coastline):
+                               <ul>
+                                 <li>ccCloudBufferWidth: The width of a cloud 'safety buffer' around a pixel which was classified as cloudy, [0,100]. Default value: 2</li>
+                                 <li>ccCloudScreeningAmbiguous: Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous (i.e. a higher value results in fewer ambiguous clouds). Default value: 1.4</li>
+                                 <li>ccCloudScreeningSure: Threshold of Cloud Probability Feature Value above which cloud is regarded as sure (i.e. a higher value results in fewer sure clouds). Default value: 1.8</li>
+                                 <li>ccOutputCloudProbabilityFeatureValue: Whether to write Cloud Probability Feature Value to the CC L1P target product.<br>
+                                   Values: [true/false]. Default value: false</li>
+                               </ul>
+                             </li>
+                        </ul>
+                        <b>The output bands are:</b>
+                        <ul>
+                            <li>radiance_&lt;#&gt; - Corrected radiance of all 15 MERIS bands.</li>
+                            <li>detector_index - MERIS L1b detector index.</li>
+                            <li>l1_flags - Level 1b classification and quality flags.</li>
+                            <li>l1p_flags - CoastColour L1P pixel classification.</li>
+                        </ul>
+                        Processor input: MERIS L1b products (RR, FR, FRS, RRG, FRG, FSG) as N1<br>
+                        Processor output: MERIS L1P products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)
                     </p>
                             ]]>
             </descriptionHtml>
@@ -189,7 +206,67 @@
             <executableName>CoastColour.L1P.Icol</executableName>
             <processorName>MERIS CoastColour L1P ICOL</processorName>
             <processorVersion>1.7</processorVersion>
-            <defaultParameters><![CDATA[]]></defaultParameters>
+            <!--<defaultParameters><![CDATA[]]></defaultParameters>-->
+
+            <parameterDescriptors>
+                <!-- CoastColour L1P parameters -->
+                <parameterDescriptor>
+                    <name>doCalibration</name>
+                    <type>boolean</type>
+                    <description>Applies correction from MERIS 2nd to 3rd reprocessing quality</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>doSmile</name>
+                    <type>boolean</type>
+                    <description>Whether to perform MERIS Smile-effect correction</description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>doEqualization</name>
+                    <type>boolean</type>
+                    <description>Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b
+                        data products
+                    </description>
+                    <defaultValue>true</defaultValue>
+                </parameterDescriptor>
+                <!-- IdePix parameters -->
+                <parameterDescriptor>
+                    <name>ccIgnoreSeaIceClimatology</name>
+                    <type>boolean</type>
+                    <description>Whether to check for sea/lake ice also outside Sea Ice Climatology area</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccCloudBufferWidth</name>
+                    <type>string</type>
+                    <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy,
+                        [0,100]
+                    </description>
+                    <defaultValue>2</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccCloudScreeningAmbiguous</name>
+                    <type>string</type>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous (i.e. a higher value results in fewer ambiguous clouds)
+                    </description>
+                    <defaultValue>1.4</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccCloudScreeningSure</name>
+                    <type>string</type>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure (i.e. a higher value results in fewer sure clouds)
+                    </description>
+                    <defaultValue>1.8</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccOutputCloudProbabilityFeatureValue</name>
+                    <type>boolean</type>
+                    <description>Write Cloud Probability Feature Value to the CC L1P target product</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+            </parameterDescriptors>
+
             <jobConfig>
                 <jobParameter>
                     <name>calvalus.output.regex</name>
@@ -205,12 +282,13 @@
                 <![CDATA[
                 <p>
                     The ICOL (Improved Contrast between Ocean and Land) processor enables adjacency correction of MERIS data at the radiance level.<br>
-                    Processor input: MERIS L1P products (RR, FR, FRS, RRG, FRG, FSG)<br>
-                    Processor output: MERIS L1P products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)
+                    Processor input: MERIS L1b products (RR, FR, FRS, RRG, FRG, FSG)<br>
+                    Processor output: MERIS L1P products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)<br>
+                <b>Do not apply this processor to MERIS L1B unless the input region is small. Use the L1P processor first, then apply L2R to the output set, then apply L2W.</b>
                 </p>
                             ]]>
             </descriptionHtml>
-            <inputProductTypes>MERIS_CC_L1P</inputProductTypes>
+            <inputProductTypes>MERIS_L1B</inputProductTypes>
             <outputProductType>MERIS_CC_L1P</outputProductType>
             <validMaskExpression>!l1_flags.INVALID</validMaskExpression>
 
@@ -341,17 +419,23 @@
                 </parameterDescriptor>
                 <!-- IdePix parameters -->
                 <parameterDescriptor>
+                    <name>ccIgnoreSeaIceClimatology</name>
+                    <type>boolean</type>
+                    <description>Whether to check for sea/lake ice also outside Sea Ice Climatology area</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
                     <name>ccCloudBufferWidth</name>
                     <type>string</type>
                     <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy, [0,100]</description>
                     <defaultValue>2</defaultValue>
                 </parameterDescriptor>
-                <parameterDescriptor>
-                    <name>ccOutputCloudProbabilityFeatureValue</name>
-                    <type>boolean</type>
-                    <description>Write Cloud Probability Feature Value to the CC L1P target product</description>
-                    <defaultValue>false</defaultValue>
-                </parameterDescriptor>
+                <!--<parameterDescriptor>-->
+                    <!--<name>ccOutputCloudProbabilityFeatureValue</name>-->
+                    <!--<type>boolean</type>-->
+                    <!--<description>Write Cloud Probability Feature Value to the CC L1P target product</description>-->
+                    <!--<defaultValue>false</defaultValue>-->
+                <!--</parameterDescriptor>-->
                 <parameterDescriptor>
                     <name>ccCloudScreeningAmbiguous</name>
                     <type>string</type>
@@ -403,13 +487,13 @@
                     <defaultValue>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
-                    <name>outputToa</name>
+                    <name>outputL2RToa</name>
                     <type>boolean</type>
                     <description>Writes the Top of Atmosphere reflectances to the CC L2R target product</description>
                     <defaultValue>false</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
-                    <name>outputReflecAs</name>
+                    <name>outputL2RReflecAs</name>
                     <type>stringArray</type>
                     <description>Select if water leaving reflectances shall be written as radiances or irradiances. The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.</description>
                     <defaultValue>RADIANCE_REFLECTANCES</defaultValue>
@@ -429,23 +513,38 @@
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[
-                <p>
-                    This processor performs an atmospheric correction based on a Neural Network approach.<br>
-                    <b>The output bands are:</b>
-                    <ul>
-                        <li>reflec_&lt;#&gt; - Water leaving radiance reflectance, where &lt;#&gt is one of 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12 and 13.</li>
-                        <li>norm_refl_&lt;#&gt; - Normalised water leaving radiance reflectance, where &lt;#&gt is one of 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12 and 13.</li>
-                        <li>atm_tau_&lt;λ&gt; - Spectral aerosol optical depth at &lt;λ&gt;, where &lt;λ&gt; is one of 550, 778 and 865.</li>
-                        <li>ang_443_865 - Aerosol Angstrom coefficient at spectral wavelength 865.</li>
-                        <li>detector_index - MERIS L1B detector index.</li>
-                        <li>altitude - DEM altitude.</li>
-                        <li>l1_flags - Level 1b classification and quality flags.</li>
-                        <li>l1p_flags - CoastColour L1P pixel classification.</li>
-                        <li>l2r_flags - CoastColour L2R atmospheric correction quality flags.</li>
-                    </ul>
+                <p>This processor performs an atmospheric correction based on a Neural Network approach.<br>
+                  Note that the processing steps of the L1P processor are implicitly included if processing starts from a MERIS L1b product. Please refer to  the   corresponding L1P processor parameters.
+                    <p><strong>L2R processing parameters</strong></p>
+                        <ul>
+                          <li>useSnTMap: By default a climatology map is used. If set to 'false' the specified average values are used for the whole scene.<br>
+                            Values: [true/false]. Default value: <em>true</em></li>
+                          <li>averageSalinity: If no climatology is used, the average salinity [PSU] of the water in the region to be processed is taken. Default value: <em>35</em></li>
+                          <li>averageTemperature: If no climatology is used, the average temperature [C] of the water in the region to be processed is taken. Default value: <em>15</em></li>
+                          <li>useExtremeCaseMode: Whether to use aspecial set of NNs to finally derive water IOPs in extreme ranges<br>
+                              Values: [true/false]. Default value: <em>true</em></li>
+                          <li>landExpression: The arithmetic expression used for land masking. Default value:<em> l1p_flags.CC_LAND</em></li>
+                          <li>cloudIceExpression: The arithmetic expression used for cloud/ice masking. Default value: <em>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</em></li>
+                          <li>outputL2RToa: Writes the Top of Atmosphere reflectances to the CC L2R target product.<br>Values: [true/false]. Default value: <em>true</em> </li>
+                          <li>outputL2RReflecAs: Select if water leaving reflectances shall be written as radiances or irradiances. The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.<br>
+                          Default value: <em>RADIANCE_REFLECTANCES</em> </li>
+                        </ul>
+                        <b>The output bands are:</b>
+                        <ul>
+                            <li>reflec_&lt;#&gt; - Water leaving radiance reflectance, where &lt;#&gt is one of 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12 and 13.</li>
+                            <li>norm_refl_&lt;#&gt; - Normalised water leaving radiance reflectance, where &lt;#&gt is one of 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12 and 13.</li>
+                            <li>atm_tau_&lt;λ&gt; - Spectral aerosol optical depth at &lt;λ&gt;, where &lt;λ&gt; is one of 550, 778 and 865.</li>
+                            <li>ang_443_865 - Aerosol Angstrom coefficient at spectral wavelength 865.</li>
+                            <li>detector_index - MERIS L1B detector index.</li>
+                            <li>altitude - DEM altitude.</li>
+                            <li>l1_flags - Level 1b classification and quality flags.</li>
+                            <li>l1p_flags - CoastColour L1P pixel classification.</li>
+                            <li>l2r_flags - CoastColour L2R atmospheric correction quality flags.</li>
+                        </ul>
                         Processor input: MERIS L1b and CoastColour L1P products <br>
-                        Processor output: CoastColour L2R products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)</p>
-                </p>]]></descriptionHtml>
+                        Processor output: CoastColour L2R products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)
+                </p>
+            ]]></descriptionHtml>
             <inputProductTypes>MERIS_L1B,MERIS_CC_L1P</inputProductTypes>
             <outputProductType>MERIS_CC_L2R</outputProductType>
             <validMaskExpression>!l2r_flags.INPUT_INVALID</validMaskExpression>
@@ -695,16 +794,16 @@
                 </parameterDescriptor>
                 <!-- IdePix parameters -->
                 <parameterDescriptor>
+                    <name>ccIgnoreSeaIceClimatology</name>
+                    <type>boolean</type>
+                    <description>Whether to check for sea/lake ice also outside Sea Ice Climatology area</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
                     <name>ccCloudBufferWidth</name>
                     <type>string</type>
                     <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy, [0,100]</description>
                     <defaultValue>2</defaultValue>
-                </parameterDescriptor>
-                <parameterDescriptor>
-                    <name>ccOutputCloudProbabilityFeatureValue</name>
-                    <type>boolean</type>
-                    <description>Write Cloud Probability Feature Value to the CC L1P target product</description>
-                    <defaultValue>false</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>ccCloudScreeningAmbiguous</name>
@@ -756,19 +855,20 @@
                     <!--<defaultValue>(l1p_flags.CC_CLOUD &amp;&amp; not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>-->
                     <defaultValue>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>
                 </parameterDescriptor>
-                <parameterDescriptor>
-                    <name>outputToa</name>
-                    <type>boolean</type>
-                    <description>Writes the Top of Atmosphere reflectances to the CC L2R target product</description>
-                    <defaultValue>false</defaultValue>
-                </parameterDescriptor>
-                <parameterDescriptor>
-                    <name>outputReflecAs</name>
-                    <type>stringArray</type>
-                    <description>Select if water leaving reflectances shall be written as radiances or irradiances. The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.</description>
-                    <defaultValue>RADIANCE_REFLECTANCES</defaultValue>
-                    <valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>
-                </parameterDescriptor>
+                <!--<parameterDescriptor>-->
+                    <!--<name>outputToa</name>-->
+                    <!--<type>boolean</type>-->
+                    <!--<description>Writes the Top of Atmosphere reflectances to the CC L2R target product</description>-->
+                    <!--<defaultValue>false</defaultValue>-->
+                <!--</parameterDescriptor>-->
+                <!--<parameterDescriptor>-->
+                    <!--<name>outputReflecAs</name>-->
+                    <!--<type>stringArray</type>-->
+                    <!--<description>Select if water leaving reflectances shall be written as radiances or irradiances. The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.</description>-->
+                    <!--<defaultValue>RADIANCE_REFLECTANCES</defaultValue>-->
+                    <!--<valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>-->
+                <!--</parameterDescriptor>-->
+
                 <!-- L2W parameters -->
                 <parameterDescriptor>
                     <name>invalidPixelExpression</name>
@@ -808,31 +908,48 @@
             </jobConfig>
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
-                <![CDATA[<p>
+                <![CDATA[
+               <p>
                 This processor computes water constituents and IOPs optimized for coastal zones.<br>
-                <b>Output bands:</b>
-                <ul>
-                <li>iop_a_total_443 - Total absorption coefficient of all water constituents at 443 nm.</li>
-                <li>iop_a_ys_443 - Yellow substance absorption coefficient at 443 nm.</li>
-                <li>iop_a_pig_443 - Pigment absorption coefficient at 443 nm.</li>
-                <li>iop_bb_spm_443 - Backscattering of suspended particulate matter at 443 nm.</li>
-                <li>iop_quality - Quality indicator for IOPs.</li>
-                <li>conc_tsm - Total suspended matter dry weight concentration.</li>
-                <li>conc_chl - Chlorophyll concentration.</li>
-                <li>K_min - Minimum downwelling irradiance attenuation coefficient.</li>
-                <li>Kd_&lt;λ&gt; - Downwelling irradiance attenuation coefficient at &lt;λ&gt;, where &lt;λ&gt; is one of 412, 443, 490, 510, 560, 620, 664 and 680</li>
-                <li>Z90_max - Maximum signal depth.</li>
-                <li>turbidity - Turbidity in FNU (Formazine Nephelometric Unit).</li>
-                <li>altitude - DEM altitude.</li>
-                <li>l1_flags - Level 1b classification and quality flags.</li>
-                <li>l1p_flags - CoastColour L1P pixel classification.</li>
-                <li>l2r_flags - CoastColour L2R atmospheric correction quality flags.</li>
-                <li>l2w_flags - CoastColour L2W water constituents and IOPs retrieval quality flags.</li>
-                </ul>
-                Processor input: MERIS L1b, CoastColour L1P, or CoastColour L2R products <br>
-                Processor output: CoastColour L2W products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)</p>
-                <b>Do not apply this processor to MERIS L1B unless the input region is small. Use the L1P processor first, then apply L2R to the output set, then apply L2W.</b>
-                </p>]]></descriptionHtml>
+                Important notes:
+                    <ul>
+                      <li>If the processing starts from a MERIS L1b product, both processing steps of the L1P <strong>and</strong> L2R processors are implicitly included. Please refer to the corresponding L1P and L2R processor parameters.</li>
+                      <li>If the processing starts from a L1P product, the processing steps of the L2R processors are implicitly included. Please refer to the corresponding L2R processor parameters.</li>
+                    </ul>
+                    <p><strong>L2W processing parameters</strong></p>
+                    <ul>
+                      <li>invalidPixelExpression: Expression defining pixels not considered for L2W processing.<br>
+                      Default value: <em>l2r_flags.INPUT_INVALID</em></li>
+                      <li>outputReflec: Whether to write the water leaving reflectance to the CC L2W target product.<br>
+                      Values: [true/false]. Default value: <em>false</em></li>
+                      <li>outputL2WReflecAs: Select if water leaving reflectances shall be written as radiances or irradiances. The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.<br>
+                      Values: [RADIANCE_REFLECTANCES/IRRADIANCE_REFLECTANCES]. Default value: <em>RADIANCE_REFLECTANCES</em></li>
+                      <li>outputKdSpectrum: Whether to write the output of downwelling irradiance attenuation coefficients (Kd) to the CC L2W target product. If disabled, only Kd_490 is added to the output. <br>
+                      Values: [true/false]. Default value: false</li>
+                    </ul>
+                    <p><b>Output bands:</b>
+                    <ul>
+                        <li>iop_a_total_443 - Total absorption coefficient of all water constituents at 443 nm.</li>
+                        <li>iop_a_ys_443 - Yellow substance absorption coefficient at 443 nm.</li>
+                        <li>iop_a_pig_443 - Pigment absorption coefficient at 443 nm.</li>
+                        <li>iop_bb_spm_443 - Backscattering of suspended particulate matter at 443 nm.</li>
+                        <li>iop_quality - Quality indicator for IOPs.</li>
+                        <li>conc_tsm - Total suspended matter dry weight concentration.</li>
+                        <li>conc_chl - Chlorophyll concentration.</li>
+                        <li>K_min - Minimum downwelling irradiance attenuation coefficient.</li>
+                        <li>Kd_&lt;λ&gt; - Downwelling irradiance attenuation coefficient at &lt;λ&gt;, where &lt;λ&gt; is one of 412, 443, 490, 510, 560, 620, 664 and 680</li>
+                        <li>Z90_max - Maximum signal depth.</li>
+                        <li>turbidity - Turbidity in FNU (Formazine Nephelometric Unit).</li>
+                        <li>altitude - DEM altitude.</li>
+                        <li>l1_flags - Level 1b classification and quality flags.</li>
+                        <li>l1p_flags - CoastColour L1P pixel classification.</li>
+                        <li>l2r_flags - CoastColour L2R atmospheric correction quality flags.</li>
+                        <li>l2w_flags - CoastColour L2W water constituents and IOPs retrieval quality flags.</li>
+                    </ul>
+                    Processor input: MERIS L1b, CoastColour L1P, or CoastColour L2R products <br>
+                    Processor output: CoastColour L2W products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)</p>
+                </p>
+                ]]></descriptionHtml>
             <inputProductTypes>MERIS_L1B,MERIS_CC_L1P,MERIS_CC_L2R</inputProductTypes>
             <outputProductType>MERIS_CC_L2W</outputProductType>
             <validMaskExpression>!l2w_flags.INVALID</validMaskExpression>

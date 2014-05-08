@@ -67,6 +67,13 @@ public class L2WOp extends Operator {
     private boolean doEqualization;
 
     // IdePix parameters  from L1P
+    @Parameter(defaultValue = "false",
+               description = "Check for sea/lake ice also outside Sea Ice Climatology area. " +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
+               label = "[L1P] Check for sea/lake ice also outside sea ice climatology area"
+    )
+    private boolean ccIgnoreSeaIceClimatology;
+
     @Parameter(defaultValue = "2", interval = "[0,100]",
                description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy. " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
@@ -630,7 +637,7 @@ public class L2WOp extends Operator {
     }
 
     private HashMap<String, Object> createQaaParameterMap() {
-        HashMap<String, Object> qaaParams = new HashMap<>();
+        HashMap<String, Object> qaaParams = new HashMap<String, Object>();
         qaaParams.put("invalidPixelExpression", invalidPixelExpression);
         qaaParams.put("aTotalLower", qaaATotalLower);
         qaaParams.put("aTotalUpper", qaaATotalUpper);
@@ -647,12 +654,13 @@ public class L2WOp extends Operator {
     }
 
     private HashMap<String, Object> createBaseL2RParameterMap() {
-        HashMap<String, Object> l2rParams = new HashMap<>();
+        HashMap<String, Object> l2rParams = new HashMap<String, Object>();
         l2rParams.put("doCalibration", doCalibration);
         l2rParams.put("doSmile", doSmile);
         l2rParams.put("doEqualization", doEqualization);
         l2rParams.put("useIdepix", true);
         l2rParams.put("ccCloudBufferWidth", ccCloudBufferWidth);
+        l2rParams.put("ccIgnoreSeaIceClimatology", ccIgnoreSeaIceClimatology);
         l2rParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
         l2rParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
         l2rParams.put("useSnTMap", useSnTMap);

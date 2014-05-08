@@ -62,6 +62,13 @@ public class L2ROp extends Operator {
 
 
     // IdePix parameters  from L1P
+    @Parameter(defaultValue = "false",
+               description = "Check for sea/lake ice also outside Sea Ice Climatology area." +
+                       "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
+               label = "Check for sea/lake ice also outside sea ice climatology area"
+    )
+    private boolean ccIgnoreSeaIceClimatology;
+
     @Parameter(defaultValue = "2", interval = "[0,100]",
                description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy. " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.",

@@ -31,6 +31,12 @@
                 </parameterDescriptor>
                 <!-- IdePix parameters -->
                 <parameterDescriptor>
+                    <name>ccIgnoreSeaIceClimatology</name>
+                    <type>boolean</type>
+                    <description>Whether to check for sea/lake ice also outside Sea Ice Climatology area</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
                     <name>ccCloudBufferWidth</name>
                     <type>string</type>
                     <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy,
@@ -226,6 +232,12 @@
                 </parameterDescriptor>
                 <!-- IdePix parameters -->
                 <parameterDescriptor>
+                    <name>ccIgnoreSeaIceClimatology</name>
+                    <type>boolean</type>
+                    <description>Whether to check for sea/lake ice also outside Sea Ice Climatology area</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
                     <name>ccCloudBufferWidth</name>
                     <type>string</type>
                     <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy,
@@ -406,6 +418,12 @@
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
                 <!-- IdePix parameters -->
+                <parameterDescriptor>
+                    <name>ccIgnoreSeaIceClimatology</name>
+                    <type>boolean</type>
+                    <description>Whether to check for sea/lake ice also outside Sea Ice Climatology area</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
                 <parameterDescriptor>
                     <name>ccCloudBufferWidth</name>
                     <type>string</type>
@@ -776,17 +794,17 @@
                 </parameterDescriptor>
                 <!-- IdePix parameters -->
                 <parameterDescriptor>
+                    <name>ccIgnoreSeaIceClimatology</name>
+                    <type>boolean</type>
+                    <description>Whether to check for sea/lake ice also outside Sea Ice Climatology area</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
                     <name>ccCloudBufferWidth</name>
                     <type>string</type>
                     <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy, [0,100]</description>
                     <defaultValue>2</defaultValue>
                 </parameterDescriptor>
-                <!--<parameterDescriptor>-->
-                    <!--<name>ccOutputCloudProbabilityFeatureValue</name>-->
-                    <!--<type>boolean</type>-->
-                    <!--<description>Write Cloud Probability Feature Value to the CC L1P target product</description>-->
-                    <!--<defaultValue>false</defaultValue>-->
-                <!--</parameterDescriptor>-->
                 <parameterDescriptor>
                     <name>ccCloudScreeningAmbiguous</name>
                     <type>string</type>

@@ -185,6 +185,7 @@ public class L1POp extends Operator {
     private HashMap<String, Object> createIdepixParameterMap() {
         HashMap<String, Object> idepixParams = new HashMap<String, Object>();
         idepixParams.put("ccCloudBufferWidth", ccCloudBufferWidth);
+        idepixParams.put("ccIgnoreSeaIceClimatology", ccIgnoreSeaIceClimatology);
         idepixParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
         idepixParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
         idepixParams.put("ccOutputCloudProbabilityFeatureValue", ccOutputCloudProbabilityFeatureValue);

@@ -660,6 +660,7 @@ public class L2WOp extends Operator {
         l2rParams.put("doEqualization", doEqualization);
         l2rParams.put("useIdepix", true);
         l2rParams.put("ccCloudBufferWidth", ccCloudBufferWidth);
+        l2rParams.put("ccIgnoreSeaIceClimatology", ccIgnoreSeaIceClimatology);
         l2rParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
         l2rParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
         l2rParams.put("useSnTMap", useSnTMap);

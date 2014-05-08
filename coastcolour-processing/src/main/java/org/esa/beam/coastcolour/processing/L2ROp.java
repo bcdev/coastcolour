@@ -215,6 +215,7 @@ public class L2ROp extends Operator {
         l1pParams.put("doEqualization", doEqualization);
         l1pParams.put("useIdepix", true);
         l1pParams.put("ccCloudBufferWidth", ccCloudBufferWidth);
+        l1pParams.put("ccIgnoreSeaIceClimatology", ccIgnoreSeaIceClimatology);
         l1pParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
         l1pParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
         l1pParams.put("ccOutputCloudProbabilityFeatureValue", ccOutputCloudProbabilityFeatureValue);

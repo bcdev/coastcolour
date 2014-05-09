@@ -65,7 +65,7 @@ public class L2ROp extends Operator {
     @Parameter(defaultValue = "false",
                description = "Check for sea/lake ice also outside Sea Ice Climatology area." +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
-               label = "[L1P] Check for sea/lake ice also outside sea ice climatology area"
+               label = " [L1P] Check for sea/lake ice also outside sea ice climatology area"
     )
     private boolean ccIgnoreSeaIceClimatology;
 

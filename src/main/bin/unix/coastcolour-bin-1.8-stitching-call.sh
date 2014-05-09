@@ -22,7 +22,7 @@ then
     exit 0
 elif [ $numberInputFiles = 1 ]; then
     echo "copying single file in orbit $orbitNumber"
-    /home/hadoop/opt/coastcolour/coastcolour-bin-1.8-SNAPSHOT/bin/reportprogress.sh &
+    /home/hadoop/opt/coastcolour/coastcolour-bin-1.8/bin/reportprogress.sh &
     trap 'kill %1' EXIT
     if hadoop fs -ls ${outputURL}/$(basename ${inputFiles}) 2> /dev/null; then
         hadoop fs -rm ${outputURL}/$(basename ${inputFiles})
@@ -31,7 +31,7 @@ elif [ $numberInputFiles = 1 ]; then
     hadoop fs -cp $inputFiles ${outputURL}/$(basename ${inputFiles})
 elif [ "$numberInputFiles" -gt 1 -a "$inputURL" = "$firstInputFile" ]; then
     echo "found $numberInputFiles input files to stitch for orbit $orbitNumber"
-    /home/hadoop/opt/coastcolour/coastcolour-bin-1.8-SNAPSHOT/bin/reportprogress.sh &
+    /home/hadoop/opt/coastcolour/coastcolour-bin-1.8/bin/reportprogress.sh &
     trap 'kill %1' EXIT
     mkdir in
     for p in $inputFiles; do
@@ -39,7 +39,7 @@ elif [ "$numberInputFiles" -gt 1 -a "$inputURL" = "$firstInputFile" ]; then
     done
     gunzip in/*gz
     mkdir out
-    /home/hadoop/opt/coastcolour/coastcolour-bin-1.8-SNAPSHOT/bin/cc_stitcher.sh in/*.nc -o out
+    /home/hadoop/opt/coastcolour/coastcolour-bin-1.8/bin/cc_stitcher.sh in/*.nc -o out
     gzip out/*.nc
     for resultFile in out/*.nc.gz; do
         if hadoop fs -ls ${outputURL}/$(basename ${resultFile}) 2> /dev/null; then

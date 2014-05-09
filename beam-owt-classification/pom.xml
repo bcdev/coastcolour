@@ -13,7 +13,7 @@
     <name>Optical Water Type Classification Operator</name>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-owt-classification</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.3</version>
 
     <dependencies>
         <dependency>

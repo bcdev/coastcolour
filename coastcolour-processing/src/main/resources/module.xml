@@ -89,7 +89,7 @@
         <action>
             <id>coastcolour</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
-            <text>CoastColour Processors (MERIS) ...</text>
+            <text>MERIS CoastColour Processors ...</text>
             <shortDescr>
                 The MERIS CoastColour Processors (Pre-Processing, Atmospheric Correction, and In-Water Processing)
             </shortDescr>

@@ -39,7 +39,7 @@ elif [ "$numberInputFiles" -gt 1 -a "$inputURL" = "$firstInputFile" ]; then
     done
     gunzip in/*gz
     mkdir out
-    /home/hadoop/opt/coastcolour/coastcolour-bin-1.8/bin/cc_stitcher.sh in/*.nc -o out
+    /home/hadoop/opt/coastcolour/coastcolour-bin-1.8.1/bin/cc_stitcher.sh in/*.nc -o out
     gzip out/*.nc
     for resultFile in out/*.nc.gz; do
         if hadoop fs -ls ${outputURL}/$(basename ${resultFile}) 2> /dev/null; then

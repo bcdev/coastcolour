@@ -1,6 +1,6 @@
 
-This is the source code repository for the data processors used in the **CoastColour project** of the
-European Space Agency (ESA).
+This is the source code repository for the data processors used in the **CoastColour project** supported and 
+funded by the European Space Agency (ESA).
 
 It provides these data processors as plugins to [BEAM](http://www.brockmann-consult.de/beam/) and to the
 [Calvalus on-demand processing system](http://www.coastcolour.org/ccprocessing/calvalus.jsp).

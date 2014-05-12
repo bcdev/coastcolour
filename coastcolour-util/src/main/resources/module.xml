@@ -2,22 +2,23 @@
     <manifestVersion>1.0.0</manifestVersion>
 
     <symbolicName>coastcolour-util</symbolicName>
-    <name>COASTCOLOUR Utilities</name>
+    <name>BEAM CoastColour Processing Utilities</name>
     <version>1.8.1</version>
     <description>
-        This module provides utilities used in the context of COASTCOLOUR.
+        This module provides software utilities used in the context of the CoastColour project.
     </description>
     <packaging>jar</packaging>
 
     <vendor>Brockmann Consult GmbH</vendor>
     <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
-    <copyright>(C) 2010 by Brockmann Consult GmbH</copyright>
-    <url>http://envisat.esa.int/beam/</url>
+    <copyright>(C) 2014 by Brockmann Consult GmbH</copyright>
+    <url>http://www.coastcolour.org/</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+    <funding>ESA</funding>
 
     <changelog/>
 
-    <categories>COASTCOLOUR</categories>
+    <categories>MERIS,CoastColour</categories>
 
     <dependency>
         <module>beam-core</module>

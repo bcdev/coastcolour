@@ -2,7 +2,7 @@
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-owt-classification</symbolicName>
     <version>1.3</version>
-    <name>Optical Water Type Classification Operator</name>
+    <name>MERIS Optical Water Type Classification</name>
     <packaging>dir</packaging>
 
     <description>
@@ -12,10 +12,10 @@
     <changelog>
         <![CDATA[
         Changes in 1.3<br/>
-            Renamed module and operator
-            Introduced different OWT types which change the classification.
+            Renamed module and operator.<br/>
+            Introduced different OWT types which change the classification.<br/>
         Changes in 1.2.1<br/>
-            Updated dependency version of netcdf and Jama
+            Updated dependency version of netcdf and Jama<br/>
                 ]]>
     </changelog>
 
@@ -41,19 +41,22 @@
 
     <categories>Processing,MERIS</categories>
 
+    <!-- As long 'OWTClassification' is internal, exclude from VISAT integration in BEAM 5 release -->
+
+    <!--
     <extension point="beam-ui:actions">
         <action>
             <id>owtClassification</id>
             <helpId>owtClassification</helpId>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
             <parent>tools</parent>
-            <text>OWT Classification (MERIS)...</text>
+            <text>MERIS OWT Classification...</text>
             <mnemonic>O</mnemonic>
             <operatorName>OWTClassification</operatorName>
             <dialogTitle>Optical Water Type Classification</dialogTitle>
             <targetProductNameSuffix>_owt</targetProductNameSuffix>
         </action>
     </extension>
-
+    -->
 
 </module>

@@ -5,34 +5,24 @@
     <name>BEAM CoastColour Processing</name>
 
     <description>
-        <![CDATA[
-
-                ]]>
+        CoastColour processing applies to Envisat MERIS data over water and includes a radiometric correction
+        and pixel classification (Level-1P processing), an atmospheric correction (Level-2R processing) and
+        retrieval of water parameters (Level-2W processing).
     </description>
 
     <vendor>Brockmann Consult GmbH</vendor>
     <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
-    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
-    <url>http://envisat.esa.int/beam</url>
+    <copyright>(C) 2014 by Brockmann Consult GmbH</copyright>
+    <url>http://www.coastcolour.org/</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+    <funding>ESA</funding>
 
     <changelog>
         <![CDATA[
-           Changes in 1.5<br/>
-           [CC-14] Integrate C2R and Glint-AC which consider salinity and temperature maps<br/>
-           Changes in 1.4<br/>
-           [CC-11] Remove log-scaling from iop bands in cas2r mode<br/>
-           [CC-8] Change default value of 'qaa.divideByPI' to false<br/>
-           Changes in 1.3<br/>
-           [CC-12] Rename 'turbidity_index' band to 'turbidity'<br/>
-           [CC-7] Integrate QAA in L2W processor<br/>
-           [CC-6] Above 60° North the L1P land/water mask is calculated wrong<br/>
-           [CC-5] Cloud shadow flag is dependent of the configured tile size<br/>
-           [CC-4] Cloud shadows are to far away from cloud<br/>
         ]]>
     </changelog>
 
-    <!-- BEAM Basics -->
+    <!-- BEAM dependencies -->
 
     <dependency>
         <module>beam-gpf</module>
@@ -48,7 +38,7 @@
         <optional>true</optional>
     </dependency>
 
-    <!-- Other Operators -->
+    <!-- Other Operator dependencies -->
 
     <dependency>
         <module>beam-meris-radiometry</module>
@@ -83,7 +73,7 @@
     </dependency>
 
 
-    <categories>Processor,MERIS</categories>
+    <categories>Processor,MERIS,CoastColour</categories>
 
     <extension point="beam-ui:actions">
         <action>

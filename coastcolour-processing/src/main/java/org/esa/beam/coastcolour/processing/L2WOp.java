@@ -681,7 +681,7 @@ public class L2WOp extends Operator {
 
         public Spi() {
             super(L2WOp.class);
-            AuxdataInstaller.installAuxdata(ResourceInstaller.getSourceUrl(L2WOp.class));
+            AuxdataInstaller.installAuxdata(L2WOp.class);
         }
     }
 }

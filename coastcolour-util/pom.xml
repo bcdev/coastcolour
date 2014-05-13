@@ -6,12 +6,11 @@
     <parent>
         <groupId>org.esa.beam.coastcolour</groupId>
         <artifactId>coastcolour</artifactId>
-        <version>1.8.1</version>
+        <version>1.8.2</version>
     </parent>
 
     <packaging>jar</packaging>
 
-    <groupId>org.esa.beam.coastcolour</groupId>
     <artifactId>coastcolour-util</artifactId>
     <name>CoastColour Utilities</name>
     <description>CoastColour Utilities</description>

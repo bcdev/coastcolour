@@ -3,7 +3,11 @@ package org.esa.beam.coastcolour.processing;
 import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.GlintCorrectionOperator;
 import org.esa.beam.coastcolour.glint.atmosphere.operator.ReflectanceEnum;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.FlagCoding;
+import org.esa.beam.framework.datamodel.Mask;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -13,7 +17,6 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.idepix.algorithms.coastcolour.CoastColourClassificationOp;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.ResourceInstaller;
 
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.MultiplyConstDescriptor;
@@ -454,9 +457,7 @@ public class L2ROp extends Operator {
 
         public Spi() {
             super(L2ROp.class);
-            AuxdataInstaller.installAuxdata(ResourceInstaller.getSourceUrl(L2ROp.class));
+            AuxdataInstaller.installAuxdata(L2ROp.class);
         }
-
-
     }
 }

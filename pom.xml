@@ -7,8 +7,8 @@
     <name>CoastColour</name>
     <groupId>org.esa.beam.coastcolour</groupId>
     <artifactId>coastcolour</artifactId>
-    <!-- if version is updated, the script for install4j needs to be updated too. -->
-    <version>1.8.1</version>
+    <!-- if version is updated, src/main/install4j/coastcolour.install4j must be updated too. -->
+    <version>1.8.2</version>
 
     <packaging>pom</packaging>
 

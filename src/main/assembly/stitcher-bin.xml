@@ -11,7 +11,7 @@
 
     <files>
         <file>
-            <source>README.txt</source>
+            <source>README.md</source>
             <lineEnding>unix</lineEnding>
             <fileMode>0444</fileMode>
             <filtered>true</filtered>

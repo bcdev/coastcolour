@@ -12,7 +12,6 @@
 
     <packaging>jar</packaging>
 
-    <groupId>org.esa.beam.coastcolour</groupId>
     <artifactId>coastcolour-bootstrap</artifactId>
     <name>CoastColour Bootstrap</name>
     <description>Provides the bootstrap classpath for all CoastColour modules</description>

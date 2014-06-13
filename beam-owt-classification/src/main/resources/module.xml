@@ -42,14 +42,13 @@
     <categories>Processing,MERIS</categories>
 
     <!-- As long 'OWTClassification' is internal, exclude from VISAT integration in BEAM 5 release -->
-
-    <!--
+    <!-- re-activated in new 1.4-SNAPSHOT version (CB, 20140613) -->
     <extension point="beam-ui:actions">
         <action>
             <id>owtClassification</id>
             <helpId>owtClassification</helpId>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
-            <parent>tools</parent>
+            <parent>processing.thematicWater</parent>
             <text>MERIS OWT Classification...</text>
             <mnemonic>O</mnemonic>
             <operatorName>OWTClassification</operatorName>
@@ -57,6 +56,6 @@
             <targetProductNameSuffix>_owt</targetProductNameSuffix>
         </action>
     </extension>
-    -->
+
 
 </module>

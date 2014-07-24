@@ -8,7 +8,7 @@
     <groupId>org.esa.beam.coastcolour</groupId>
     <artifactId>coastcolour</artifactId>
     <!-- if version is updated, src/main/install4j/coastcolour.install4j must be updated too. -->
-    <version>1.8.2</version>
+    <version>1.8.3</version>
 
     <packaging>pom</packaging>
 
@@ -166,7 +166,9 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-meris-radiometry</artifactId>
-                <version>${beamVersion}</version>
+                <!--<version>${beamVersion}</version>-->
+                <!--<version>[5.0,5.1-SNAPSHOT)</version>-->
+                <version>5.0.2</version>
             </dependency>
 
             <!-- CoastColour Libraries ############################################# -->
@@ -198,7 +200,7 @@
             <dependency>
                 <groupId>org.esa.beam.idepix</groupId>
                 <artifactId>beam-idepix-algorithms</artifactId>
-                <version>2.1.1</version>
+                <version>2.1.2</version>
             </dependency>
 
             <dependency>

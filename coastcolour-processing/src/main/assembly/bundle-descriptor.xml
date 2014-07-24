@@ -6,7 +6,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L1P</executableName>
             <processorName>MERIS CoastColour L1P</processorName>
-            <processorVersion>1.7</processorVersion>
+            <processorVersion>1.8.3</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
                 <parameterDescriptor>
@@ -47,14 +47,16 @@
                 <parameterDescriptor>
                     <name>ccCloudScreeningAmbiguous</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous (i.e. a higher value results in fewer ambiguous clouds)
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still
+                        ambiguous (i.e. a higher value results in fewer ambiguous clouds)
                     </description>
                     <defaultValue>1.4</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>ccCloudScreeningSure</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure (i.e. a higher value results in fewer sure clouds)
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure
+                        (i.e. a higher value results in fewer sure clouds)
                     </description>
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
@@ -106,6 +108,16 @@
                         Processor input: MERIS L1b products (RR, FR, FRS, RRG, FRG, FSG) as N1<br>
                         Processor output: MERIS L1P products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)
                     </p>
+
+                    <p>CHANGES to previous version (1.8.2):
+                        <ul>
+                           <li>
+                               Uses an updated BEAM MERIS Radiometry module (bug fix in case of very bright nearly saturated pixels)
+                           </li>
+                        </ul>
+                    </p>
+
+                    <p>This version was provided by O.Danne.</p>
                             ]]>
             </descriptionHtml>
             <inputProductTypes>MERIS_L1B</inputProductTypes>
@@ -205,7 +217,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L1P.Icol</executableName>
             <processorName>MERIS CoastColour L1P ICOL</processorName>
-            <processorVersion>1.7</processorVersion>
+            <processorVersion>1.8.3</processorVersion>
             <!--<defaultParameters><![CDATA[]]></defaultParameters>-->
 
             <parameterDescriptors>
@@ -248,14 +260,16 @@
                 <parameterDescriptor>
                     <name>ccCloudScreeningAmbiguous</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous (i.e. a higher value results in fewer ambiguous clouds)
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still
+                        ambiguous (i.e. a higher value results in fewer ambiguous clouds)
                     </description>
                     <defaultValue>1.4</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>ccCloudScreeningSure</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure (i.e. a higher value results in fewer sure clouds)
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure
+                        (i.e. a higher value results in fewer sure clouds)
                     </description>
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
@@ -286,7 +300,17 @@
                     Processor output: MERIS L1P products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)<br>
                 <b>Do not apply this processor to MERIS L1B unless the input region is small. Use the L1P processor first, then apply L2R to the output set, then apply L2W.</b>
                 </p>
-                            ]]>
+
+                <p>CHANGES to previous version (1.8.2):
+                    <ul>
+                       <li>
+                           Uses an updated BEAM MERIS Radiometry module (bug fix in case of very bright nearly saturated pixels)
+                       </li>
+                    </ul>
+                </p>
+
+                <p>This version was provided by O.Danne.</p>
+                ]]>
             </descriptionHtml>
             <inputProductTypes>MERIS_L1B</inputProductTypes>
             <outputProductType>MERIS_CC_L1P</outputProductType>
@@ -396,7 +420,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2R</executableName>
             <processorName>MERIS CoastColour L2R</processorName>
-            <processorVersion>1.7</processorVersion>
+            <processorVersion>1.8.3</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
                 <parameterDescriptor>
@@ -414,7 +438,9 @@
                 <parameterDescriptor>
                     <name>doEqualization</name>
                     <type>boolean</type>
-                    <description>Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products</description>
+                    <description>Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b
+                        data products
+                    </description>
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
                 <!-- IdePix parameters -->
@@ -427,50 +453,64 @@
                 <parameterDescriptor>
                     <name>ccCloudBufferWidth</name>
                     <type>string</type>
-                    <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy, [0,100]</description>
+                    <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy,
+                        [0,100]
+                    </description>
                     <defaultValue>2</defaultValue>
                 </parameterDescriptor>
                 <!--<parameterDescriptor>-->
-                    <!--<name>ccOutputCloudProbabilityFeatureValue</name>-->
-                    <!--<type>boolean</type>-->
-                    <!--<description>Write Cloud Probability Feature Value to the CC L1P target product</description>-->
-                    <!--<defaultValue>false</defaultValue>-->
+                <!--<name>ccOutputCloudProbabilityFeatureValue</name>-->
+                <!--<type>boolean</type>-->
+                <!--<description>Write Cloud Probability Feature Value to the CC L1P target product</description>-->
+                <!--<defaultValue>false</defaultValue>-->
                 <!--</parameterDescriptor>-->
                 <parameterDescriptor>
                     <name>ccCloudScreeningAmbiguous</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous (i.e. a higher value results in fewer ambiguous clouds)</description>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still
+                        ambiguous (i.e. a higher value results in fewer ambiguous clouds)
+                    </description>
                     <defaultValue>1.4</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>ccCloudScreeningSure</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure (i.e. a higher value results in fewer sure clouds)</description>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure
+                        (i.e. a higher value results in fewer sure clouds)
+                    </description>
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
                 <!-- L2R parameters -->
                 <parameterDescriptor>
                     <name>useSnTMap</name>
                     <type>boolean</type>
-                    <description>By default a climatology map is used. If set to 'false' the specified average values are used for the whole scene</description>
+                    <description>By default a climatology map is used. If set to 'false' the specified average values
+                        are used for the whole scene
+                    </description>
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>averageSalinity</name>
                     <type>string</type>
-                    <description>If no climatology is used, the average salinity [PSU] of the water in the region to be processed is taken</description>
+                    <description>If no climatology is used, the average salinity [PSU] of the water in the region to be
+                        processed is taken
+                    </description>
                     <defaultValue>35</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>averageTemperature</name>
                     <type>string</type>
-                    <description>If no climatology is used, the average temperature [C] of the water in the region to be processed is taken</description>
+                    <description>If no climatology is used, the average temperature [C] of the water in the region to be
+                        processed is taken
+                    </description>
                     <defaultValue>15</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>useExtremeCaseMode</name>
                     <type>boolean</type>
-                    <description>If set, a neural network for maximum range of concentrations and IOPs is used. Otherwise a neural net with limited ranges but less noisy for low concentration ranges is used. </description>
+                    <description>If set, a neural network for maximum range of concentrations and IOPs is used.
+                        Otherwise a neural net with limited ranges but less noisy for low concentration ranges is used.
+                    </description>
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
@@ -484,7 +524,8 @@
                     <type>string</type>
                     <description>The arithmetic expression used for cloud/ice masking</description>
                     <!--<defaultValue>(l1p_flags.CC_CLOUD &amp;&amp; not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>-->
-                    <defaultValue>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>
+                    <defaultValue>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE
+                    </defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>outputL2RToa</name>
@@ -495,7 +536,9 @@
                 <parameterDescriptor>
                     <name>outputL2RReflecAs</name>
                     <type>stringArray</type>
-                    <description>Select if water leaving reflectances shall be written as radiances or irradiances. The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.</description>
+                    <description>Select if water leaving reflectances shall be written as radiances or irradiances. The
+                        irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.
+                    </description>
                     <defaultValue>RADIANCE_REFLECTANCES</defaultValue>
                     <valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>
                 </parameterDescriptor>
@@ -544,6 +587,16 @@
                         Processor input: MERIS L1b and CoastColour L1P products <br>
                         Processor output: CoastColour L2R products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)
                 </p>
+
+                <p>CHANGES to previous version (1.8.2):
+                    <ul>
+                       <li>
+                           Uses an updated BEAM MERIS Radiometry module (bug fix in case of very bright nearly saturated pixels)
+                       </li>
+                    </ul>
+                </p>
+
+                <p>This version was provided by O.Danne.</p>
             ]]></descriptionHtml>
             <inputProductTypes>MERIS_L1B,MERIS_CC_L1P</inputProductTypes>
             <outputProductType>MERIS_CC_L2R</outputProductType>
@@ -771,7 +824,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2W</executableName>
             <processorName>MERIS CoastColour L2W</processorName>
-            <processorVersion>1.7</processorVersion>
+            <processorVersion>1.8.3</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
                 <parameterDescriptor>
@@ -789,7 +842,9 @@
                 <parameterDescriptor>
                     <name>doEqualization</name>
                     <type>boolean</type>
-                    <description>Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products</description>
+                    <description>Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b
+                        data products
+                    </description>
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
                 <!-- IdePix parameters -->
@@ -802,44 +857,58 @@
                 <parameterDescriptor>
                     <name>ccCloudBufferWidth</name>
                     <type>string</type>
-                    <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy, [0,100]</description>
+                    <description>The width of a cloud 'safety buffer' around a pixel which was classified as cloudy,
+                        [0,100]
+                    </description>
                     <defaultValue>2</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>ccCloudScreeningAmbiguous</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous (i.e. a higher value results in fewer ambiguous clouds)</description>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as still
+                        ambiguous (i.e. a higher value results in fewer ambiguous clouds)
+                    </description>
                     <defaultValue>1.4</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>ccCloudScreeningSure</name>
                     <type>string</type>
-                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure (i.e. a higher value results in fewer sure clouds)</description>
+                    <description>Threshold of Cloud Probability Feature Value above which cloud is regarded as sure
+                        (i.e. a higher value results in fewer sure clouds)
+                    </description>
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
                 <!-- L2R parameters -->
                 <parameterDescriptor>
                     <name>useSnTMap</name>
                     <type>boolean</type>
-                    <description>By default a climatology map is used. If set to 'false' the specified average values are used for the whole scene</description>
+                    <description>By default a climatology map is used. If set to 'false' the specified average values
+                        are used for the whole scene
+                    </description>
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>averageSalinity</name>
                     <type>string</type>
-                    <description>If no climatology is used, the average salinity [PSU] of the water in the region to be processed is taken</description>
+                    <description>If no climatology is used, the average salinity [PSU] of the water in the region to be
+                        processed is taken
+                    </description>
                     <defaultValue>35</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>averageTemperature</name>
                     <type>string</type>
-                    <description>If no climatology is used, the average temperature [C] of the water in the region to be processed is taken</description>
+                    <description>If no climatology is used, the average temperature [C] of the water in the region to be
+                        processed is taken
+                    </description>
                     <defaultValue>15</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>useExtremeCaseMode</name>
                     <type>boolean</type>
-                    <description>If set, a neural network for maximum range of concentrations and IOPs is used. Otherwise a neural net with limited ranges but less noisy for low concentration ranges is used. </description>
+                    <description>If set, a neural network for maximum range of concentrations and IOPs is used.
+                        Otherwise a neural net with limited ranges but less noisy for low concentration ranges is used.
+                    </description>
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
@@ -853,20 +922,21 @@
                     <type>string</type>
                     <description>The arithmetic expression used for cloud/ice masking</description>
                     <!--<defaultValue>(l1p_flags.CC_CLOUD &amp;&amp; not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>-->
-                    <defaultValue>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE</defaultValue>
+                    <defaultValue>(l1p_flags.CC_CLOUD and not l1p_flags.CC_CLOUD_AMBIGUOUS) || l1p_flags.CC_SNOW_ICE
+                    </defaultValue>
                 </parameterDescriptor>
                 <!--<parameterDescriptor>-->
-                    <!--<name>outputToa</name>-->
-                    <!--<type>boolean</type>-->
-                    <!--<description>Writes the Top of Atmosphere reflectances to the CC L2R target product</description>-->
-                    <!--<defaultValue>false</defaultValue>-->
+                <!--<name>outputToa</name>-->
+                <!--<type>boolean</type>-->
+                <!--<description>Writes the Top of Atmosphere reflectances to the CC L2R target product</description>-->
+                <!--<defaultValue>false</defaultValue>-->
                 <!--</parameterDescriptor>-->
                 <!--<parameterDescriptor>-->
-                    <!--<name>outputReflecAs</name>-->
-                    <!--<type>stringArray</type>-->
-                    <!--<description>Select if water leaving reflectances shall be written as radiances or irradiances. The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.</description>-->
-                    <!--<defaultValue>RADIANCE_REFLECTANCES</defaultValue>-->
-                    <!--<valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>-->
+                <!--<name>outputReflecAs</name>-->
+                <!--<type>stringArray</type>-->
+                <!--<description>Select if water leaving reflectances shall be written as radiances or irradiances. The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.</description>-->
+                <!--<defaultValue>RADIANCE_REFLECTANCES</defaultValue>-->
+                <!--<valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>-->
                 <!--</parameterDescriptor>-->
 
                 <!-- L2W parameters -->
@@ -885,14 +955,18 @@
                 <parameterDescriptor>
                     <name>outputL2WReflecAs</name>
                     <type>stringArray</type>
-                    <description>Select if water leaving reflectances shall be written as radiances or irradiances. The irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.</description>
+                    <description>Select if water leaving reflectances shall be written as radiances or irradiances. The
+                        irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.
+                    </description>
                     <defaultValue>RADIANCE_REFLECTANCES</defaultValue>
                     <valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>outputKdSpectrum</name>
                     <type>boolean</type>
-                    <description>Write the output of downwelling irradiance attenuation coefficients (Kd) to the CC L2W target product. If disabled only Kd_490 is added to the output.</description>
+                    <description>Write the output of downwelling irradiance attenuation coefficients (Kd) to the CC L2W
+                        target product. If disabled only Kd_490 is added to the output.
+                    </description>
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
             </parameterDescriptors>
@@ -949,6 +1023,17 @@
                     Processor input: MERIS L1b, CoastColour L1P, or CoastColour L2R products <br>
                     Processor output: CoastColour L2W products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)</p>
                 </p>
+
+                <p>CHANGES to previous version (1.8.2):
+                    <ul>
+                       <li>
+                           Uses an updated BEAM MERIS Radiometry module (bug fix in case of very bright nearly saturated pixels)
+                       </li>
+                    </ul>
+                </p>
+
+                <p>This version was provided by O.Danne.</p>
+
                 ]]></descriptionHtml>
             <inputProductTypes>MERIS_L1B,MERIS_CC_L1P,MERIS_CC_L2R</inputProductTypes>
             <outputProductType>MERIS_CC_L2W</outputProductType>

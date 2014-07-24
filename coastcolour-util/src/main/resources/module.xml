@@ -3,7 +3,7 @@
 
     <symbolicName>coastcolour-util</symbolicName>
     <name>BEAM CoastColour Processing Utilities</name>
-    <version>1.8.2</version>
+    <version>1.8.3</version>
     <description>
         This module provides software utilities used in the context of the CoastColour project.
     </description>

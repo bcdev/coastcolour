@@ -13,6 +13,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VirtualBandOpImage;
+import org.esa.beam.owt.OWT_TYPE;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 import org.esa.beam.util.SystemUtils;
@@ -160,6 +161,12 @@ public class L2WOp extends Operator {
                        "If disabled only Kd_490 is added to the output.")
     private boolean outputKdSpectrum;
 
+    @Parameter(defaultValue = "COASTAL",
+               label = "OWT classification type",
+               description = "OWT classification type."
+    )
+    private OWT_TYPE owtType;
+
 
     private float qaaATotalLower = -0.02f;
     private float qaaATotalUpper = 5.0f;
@@ -276,7 +283,9 @@ public class L2WOp extends Operator {
         final Product l2WProduct = l2wProductFactory.createL2WProduct();
         final Product l2WQaaIopProduct = l2wQaaIopProductFactory.createL2WProduct();
         if (classMembershipProduct == null) {
-            classMembershipProduct = GPF.createProduct("OWTClassification", GPF.NO_PARAMS, l2rProduct);
+            HashMap<String, Object> owtParams = new HashMap<String, Object>();
+            owtParams.put("owtType", owtType);
+            classMembershipProduct = GPF.createProduct("OWTClassification", owtParams, l2rProduct);
         }
         // NEW: call this for all 9 water inverse/forward nets,
         // (set each net pair as parameters in RegionalWaterOp)

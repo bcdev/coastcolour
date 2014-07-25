@@ -9,11 +9,7 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.esa.beam.framework.gpf.pointop.PixelOperator;
-import org.esa.beam.framework.gpf.pointop.ProductConfigurer;
-import org.esa.beam.framework.gpf.pointop.Sample;
-import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
-import org.esa.beam.framework.gpf.pointop.WritableSample;
+import org.esa.beam.framework.gpf.pointop.*;
 import org.esa.beam.util.ProductUtils;
 
 // todo 1 - (mp;28.02.2014) discuss with CB,KS,AR if sum bands can be removed. Have no additional use to the user. At least the norm_class_sum band
@@ -47,8 +43,23 @@ public class OWTClassificationOp extends PixelOperator {
     @Parameter(defaultValue = "false")
     private boolean writeInputReflectances;
 
+    @Parameter(defaultValue = "RADIANCE_REFLECTANCES")
+    private ReflectanceEnum inputReflectanceIs;
+
     private OWTClassification owtClassification;
     private Auxdata auxdata;
+
+
+    @Override
+    protected void prepareInputs() throws OperatorException {
+        super.prepareInputs();
+
+        if (sourceProduct.getDescription() != null &&
+                sourceProduct.getDescription().contains("IRRADIANCE_REFLECTANCES")) {
+            // overwrite user option (only for CC L2R case so far)
+            inputReflectanceIs = ReflectanceEnum.IRRADIANCE_REFLECTANCES;
+        }
+    }
 
     @Override
     protected void configureTargetProduct(ProductConfigurer productConfigurer) {
@@ -123,7 +134,7 @@ public class OWTClassificationOp extends PixelOperator {
         int numWLs = owtType.getWavelengths().length;
         if (sourceSamples.length != numWLs) {
             throw new OperatorException("Wrong number of source samples: Expected: " + numWLs +
-                                        ", Actual: " + sourceSamples.length);
+                                                ", Actual: " + sourceSamples.length);
         }
 
         int numClassSamples = owtType.getClassCount() * 2; // classes and norm_classes
@@ -246,10 +257,13 @@ public class OWTClassificationOp extends PixelOperator {
         return true;
     }
 
-    // todo 2
     private double convertToSubsurfaceWaterRrs(double merisL2Reflec) {
-        // convert to remote sensing reflectances
-        final double rrsAboveWater = merisL2Reflec / Math.PI;
+        double rrsAboveWater = merisL2Reflec;
+        if (inputReflectanceIs == ReflectanceEnum.IRRADIANCE_REFLECTANCES) {
+            // if necessary, convert to remote sensing reflectances, which is the same as 'RADIANCE REFLECTANCES'
+            // remember: IRRAD_REFL = RAD_REFL * PI
+            rrsAboveWater /= Math.PI;
+        }
         // convert to subsurface water remote sensing reflectances
         return rrsAboveWater / (0.52 + 1.7 * rrsAboveWater);
     }

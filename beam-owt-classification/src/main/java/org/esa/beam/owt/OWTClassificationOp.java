@@ -151,6 +151,11 @@ public class OWTClassificationOp extends PixelOperator {
         double[] rrsBelowWater = new double[numWLs];
         for (int i = 0; i < numWLs; i++) {
             rrsBelowWater[i] = convertToSubsurfaceWaterRrs(sourceSamples[i].getDouble());
+            if (inputReflectanceIs == ReflectanceEnum.IRRADIANCE_REFLECTANCES) {
+                // if input comes as IRRADIANCE_REFLECTANCES, convert to remote sensing reflectances,
+                // which is the same as 'RADIANCE REFLECTANCES'. Remember: IRRAD_REFL = RAD_REFL * PI
+                rrsBelowWater[i] /= Math.PI;
+            }
         }
 
         double[] classMemberships = owtClassification.computeClassMemberships(rrsBelowWater);
@@ -257,13 +262,10 @@ public class OWTClassificationOp extends PixelOperator {
         return true;
     }
 
+    // todo 2
     private double convertToSubsurfaceWaterRrs(double merisL2Reflec) {
-        double rrsAboveWater = merisL2Reflec;
-        if (inputReflectanceIs == ReflectanceEnum.IRRADIANCE_REFLECTANCES) {
-            // if necessary, convert to remote sensing reflectances, which is the same as 'RADIANCE REFLECTANCES'
-            // remember: IRRAD_REFL = RAD_REFL * PI
-            rrsAboveWater /= Math.PI;
-        }
+        // convert to remote sensing reflectances
+        final double rrsAboveWater = merisL2Reflec / Math.PI;
         // convert to subsurface water remote sensing reflectances
         return rrsAboveWater / (0.52 + 1.7 * rrsAboveWater);
     }

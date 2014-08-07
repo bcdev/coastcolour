@@ -32,11 +32,11 @@ public class CoastalAuxdataFactory extends AuxdataFactory {
                 double[][] spectralMeans = null;
                 double[][][] invCovarianceMatrix = null;
                 for (Variable variable : variableList) {
-                    if ("class_means".equals(variable.getName())) {
+                    if ("class_means".equals(variable.getFullName())) {
                         final Array arrayDouble = getDoubleArray(variable);
                         spectralMeans = (double[][]) arrayDouble.copyToNDJavaArray();
                     }
-                    if ("class_covariance".equals(variable.getName()) || "Yinv".equals(variable.getName())) {
+                    if ("class_covariance".equals(variable.getFullName()) || "Yinv".equals(variable.getFullName())) {
                         final Array arrayDouble = getDoubleArray(variable);
                         invCovarianceMatrix = invertMatrix((double[][][]) arrayDouble.copyToNDJavaArray());
                     }

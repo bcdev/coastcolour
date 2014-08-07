@@ -38,7 +38,7 @@ public class InlandAuxdataFactory extends AuxdataFactory {
 
 
     static int[] findWavelengthIndices(float[] useWavelengths) {
-        ArrayList<Integer> wavelengthIdxList = new ArrayList<Integer>();
+        ArrayList<Integer> wavelengthIdxList = new ArrayList<>();
         for (float useWavelength : useWavelengths) {
             for (int i = 0; i < ALL_WAVELENGTHS.length; i++) {
                 float wl = ALL_WAVELENGTHS[i];
@@ -63,7 +63,7 @@ public class InlandAuxdataFactory extends AuxdataFactory {
                 final List<Variable> variableList = rootGroup.getVariables();
 
                 for (Variable variable : variableList) {
-                    if ("rrs_cov".equals(variable.getName())) {
+                    if ("rrs_cov".equals(variable.getFullName())) {
                         final Array arrayDouble = getDoubleArray(variable);
                         double[][][] matrix = (double[][][]) arrayDouble.copyToNDJavaArray();
                         // important first reduce to the wavelength and invert afterwards
@@ -104,7 +104,7 @@ public class InlandAuxdataFactory extends AuxdataFactory {
                 final List<Variable> variableList = rootGroup.getVariables();
 
                 for (Variable variable : variableList) {
-                    if ("class_means".equals(variable.getName())) {
+                    if ("class_means".equals(variable.getFullName())) {
                         final Array arrayDouble = getDoubleArray(variable);
                         double[][] allSpectralMeans = (double[][]) arrayDouble.copyToNDJavaArray();
                         spectralMeans = reduceSpectralMeansToWLs(allSpectralMeans, wlIndices);

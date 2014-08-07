@@ -136,7 +136,59 @@ public enum OWT_TYPE {
 //            return memberships;
 //        }
 //    }
-    ;
+    GLASS_5C {
+        private float[] wavelength = new float[]{442.6f, 489.9f, 509.8f, 559.7f, 619.6f, 664.6f, 680.8f, 708.3f, 753.4f};
+        private String auxdataResource = "/auxdata/glass/Rrs_Glass_5C_owt_stats_140805.hdf";
+        private String covariance = "covariance";
+        private String owt_means = "owt_means";
+
+        @Override
+        AuxdataFactory getAuxdataFactory() {
+
+            return new HyperspectralAuxdataFactory(wavelength, auxdataResource, covariance, auxdataResource, owt_means);
+        }
+
+        @Override
+        int getClassCount() {
+            return 5;
+        }
+
+        @Override
+        double[] mapMembershipsToClasses(double[] memberships) {
+            return memberships;
+        }
+
+        @Override
+        float[] getWavelengths() {
+            return wavelength;
+        }
+    },
+    GLASS_6C {
+        private float[] wavelength = new float[]{442.6f, 489.9f, 509.8f, 559.7f, 619.6f, 664.6f, 680.8f, 708.3f, 753.4f};
+        private String auxdataResource = "/auxdata/glass/Rrs_Glass_6C_owt_stats_140805.hdf";
+        private String covariance = "covariance";
+        private String owt_means = "owt_means";
+
+        @Override
+        AuxdataFactory getAuxdataFactory() {
+            return new HyperspectralAuxdataFactory(wavelength, auxdataResource, covariance, auxdataResource, owt_means);
+        }
+
+        @Override
+        int getClassCount() {
+            return 6;
+        }
+
+        @Override
+        double[] mapMembershipsToClasses(double[] memberships) {
+            return memberships;
+        }
+
+        @Override
+        float[] getWavelengths() {
+            return wavelength;
+        }
+    };
 
     abstract AuxdataFactory getAuxdataFactory();
 

@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class InlandAuxdataFactory extends AuxdataFactory {
 
-    public static final float[] ALL_WAVELENGTHS = new float[]{412, 443, 490, 510, 531, 547, 555, 560, 620, 665, 667, 670, 678, 680, 709, 748, 754};
+    private static final float[] ALL_WAVELENGTHS = new float[]{412, 443, 490, 510, 531, 547, 555, 560, 620, 665, 667, 670, 678, 680, 709, 748, 754};
     private static final String COVARIANCE_MATRIX_RESOURCE = "/auxdata/inland/rrs_owt_cov_inland.hdf";
     private static final String SPECTRAL_MEANS_RESOURCE = "/auxdata/inland/rrs_owt_means_inland.hdf";
 

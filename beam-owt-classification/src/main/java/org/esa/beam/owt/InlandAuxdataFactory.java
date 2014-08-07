@@ -44,6 +44,7 @@ public class InlandAuxdataFactory extends AuxdataFactory {
                 float wl = ALL_WAVELENGTHS[i];
                 if (useWavelength == wl) {
                     wavelengthIdxList.add(i);
+                    break;
                 }
             }
         }

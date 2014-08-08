@@ -97,21 +97,16 @@ public class HyperspectralAuxdataFactoryTest {
 //    @Test
 //    public void testInvCovMatrix_Glass() throws AuxdataFactory.Exception {
 //        double[] timGlassValues = {
-//                687175.231134958,
-//                -1335855.38968399,
-//                713860.185133806,
-//                317120.902151734,
-//                -1619201.81830567,
-//                2415910.20286054,
-//                -654291.322596574,
-//                -148146.956167948,
-//                -114210.464633796
+//                4893410.48415868,
+//                -10224103.9474018,
+//                6700192.28488435,
+//                -1308481.68310133,
+//                445410.221755202,
+//                -2266801.94484215,
+//                1295478.0526651,
+//                1695980.80303018,
+//                -901530.436612556
 //        };
-//        AuxdataFactory auxdataFactory = OWT_TYPE.GLASS_6C.getAuxdataFactory();
-//        Auxdata auxdata = auxdataFactory.createAuxdata();
-//        double[][][] glass6c = auxdata.getInvertedCovarianceMatrices();
-//        assertArrayEquals(timGlassValues, glass6c[0][0], 1.0e-6) ;
-//
 //
 //        auxdataFactory = OWT_TYPE.GLASS_5C.getAuxdataFactory();
 //        auxdata = auxdataFactory.createAuxdata();

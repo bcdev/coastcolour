@@ -1,5 +1,9 @@
 package org.esa.beam.owt;
 
+// todo (mp) - configuration of AuxdataFactory should be turned into a configuration object
+// todo (mp) - the actually used wavelength could be a parameter to getAuxdataFactory(); this way it would be configurable by the user
+// todo        and it would be better separated
+
 public enum OWT_TYPE {
     COASTAL {
         private float[] wavelength = new float[]{410, 443, 490, 510, 555};
@@ -61,12 +65,17 @@ public enum OWT_TYPE {
 //        }
 //    },
     INLAND {
-
+        private final float[] ALL_WAVELENGTHS = new float[]{412, 443, 490, 510, 531, 547, 555, 560, 620, 665, 667, 670, 678, 680, 709, 748, 754};
+        private final String COVARIANCE_MATRIX_RESOURCE = "/auxdata/inland/rrs_owt_cov_inland.hdf";
+        private final String SPECTRAL_MEANS_RESOURCE = "/auxdata/inland/rrs_owt_means_inland.hdf";
+        private String covariance = "rrs_cov";
+        private String owt_means = "class_means";
         private float[] wavelength = new float[]{412, 443, 490, 510, 560, 620, 665, 680, 709, 754};
 
         @Override
         AuxdataFactory getAuxdataFactory() {
-            return new InlandAuxdataFactory(wavelength);
+            return new HyperspectralAuxdataFactory(wavelength, ALL_WAVELENGTHS, 10, COVARIANCE_MATRIX_RESOURCE, covariance, SPECTRAL_MEANS_RESOURCE,
+                                                   owt_means);
         }
 
         @Override
@@ -87,11 +96,17 @@ public enum OWT_TYPE {
     },
     INLAND_NO_BLUE_BAND {
 
+        private final float[] ALL_WAVELENGTHS = new float[]{412, 443, 490, 510, 531, 547, 555, 560, 620, 665, 667, 670, 678, 680, 709, 748, 754};
+        private final String COVARIANCE_MATRIX_RESOURCE = "/auxdata/inland/rrs_owt_cov_inland.hdf";
+        private final String SPECTRAL_MEANS_RESOURCE = "/auxdata/inland/rrs_owt_means_inland.hdf";
+        private String covariance = "rrs_cov";
+        private String owt_means = "class_means";
         private float[] wavelength = new float[]{443, 490, 510, 560, 620, 665, 680, 709, 754};
 
         @Override
         AuxdataFactory getAuxdataFactory() {
-            return new InlandAuxdataFactory(wavelength);
+            return new HyperspectralAuxdataFactory(wavelength, ALL_WAVELENGTHS, 10, COVARIANCE_MATRIX_RESOURCE, covariance, SPECTRAL_MEANS_RESOURCE,
+                                                   owt_means);
         }
 
         @Override
@@ -112,12 +127,17 @@ public enum OWT_TYPE {
     },
     // exclude this (CB, 20140613):
 //    INLAND_WITHOUT_443 {
-//
-//        private float[] wavelength = new float[]{412, 490, 510, 560, 620, 665, 680, 709, 754};
+//    private final float[] ALL_WAVELENGTHS = new float[]{412, 443, 490, 510, 531, 547, 555, 560, 620, 665, 667, 670, 678, 680, 709, 748, 754};
+//    private final String COVARIANCE_MATRIX_RESOURCE = "/auxdata/inland/rrs_owt_cov_inland.hdf";
+//    private final String SPECTRAL_MEANS_RESOURCE = "/auxdata/inland/rrs_owt_means_inland.hdf";
+//    private String covariance = "rrs_cov";
+//    private String owt_means = "class_means";
+//    private float[] wavelength = new float[]{412, 490, 510, 560, 620, 665, 680, 709, 754};
 //
 //        @Override
 //        AuxdataFactory getAuxdataFactory() {
-//            return new InlandAuxdataFactory(wavelength);
+//    return new HyperspectralAuxdataFactory(wavelength, ALL_WAVELENGTHS, 10, COVARIANCE_MATRIX_RESOURCE, covariance, SPECTRAL_MEANS_RESOURCE,
+//                                           owt_means);
 //        }
 //
 //        @Override
@@ -137,6 +157,19 @@ public enum OWT_TYPE {
 //        }
 //    }
     GLASS_5C {
+        private final float[] ALL_WAVELENGTHS = new float[]{
+                400, 403, 406, 409, 412, 415, 418, 421, 424, 427, 430, 433, 436, 439, 442,
+                445, 448, 451, 454, 457, 460, 463, 466, 469, 472, 475, 478, 481, 484, 487,
+                490, 493, 496, 499, 502, 505, 508, 511, 514, 517, 520, 523, 526, 529, 532,
+                535, 538, 541, 544, 547, 550, 553, 556, 559, 562, 565, 568, 571, 574, 577,
+                580, 583, 586, 589, 592, 595, 598, 601, 604, 607, 610, 613, 616, 619, 622,
+                625, 628, 631, 634, 637, 640, 643, 646, 649, 652, 655, 658, 661, 664, 667,
+                670, 673, 676, 679, 682, 685, 688, 691, 694, 697, 700, 703, 706, 709, 712,
+                715, 718, 721, 724, 727, 730, 733, 736, 739, 742, 745, 748, 751, 754, 757,
+                760, 763, 766, 769, 772, 775, 778, 781, 784, 787, 790, 793, 796, 799
+        };
+        private final float MAX_DISTANCE = 1.5f;
+
         private float[] wavelength = new float[]{442.6f, 489.9f, 509.8f, 559.7f, 619.6f, 664.6f, 680.8f, 708.3f, 753.4f};
         private String auxdataResource = "/auxdata/glass/Rrs_Glass_5C_owt_stats_140805.hdf";
         private String covariance = "covariance";
@@ -144,8 +177,9 @@ public enum OWT_TYPE {
 
         @Override
         AuxdataFactory getAuxdataFactory() {
-
-            return new HyperspectralAuxdataFactory(wavelength, auxdataResource, covariance, auxdataResource, owt_means);
+            return new HyperspectralAuxdataFactory(wavelength, ALL_WAVELENGTHS, MAX_DISTANCE,
+                                                   auxdataResource, covariance, auxdataResource, owt_means
+            );
         }
 
         @Override
@@ -164,6 +198,18 @@ public enum OWT_TYPE {
         }
     },
     GLASS_6C {
+        private final float[] ALL_WAVELENGTHS = new float[]{
+                400, 403, 406, 409, 412, 415, 418, 421, 424, 427, 430, 433, 436, 439, 442,
+                445, 448, 451, 454, 457, 460, 463, 466, 469, 472, 475, 478, 481, 484, 487,
+                490, 493, 496, 499, 502, 505, 508, 511, 514, 517, 520, 523, 526, 529, 532,
+                535, 538, 541, 544, 547, 550, 553, 556, 559, 562, 565, 568, 571, 574, 577,
+                580, 583, 586, 589, 592, 595, 598, 601, 604, 607, 610, 613, 616, 619, 622,
+                625, 628, 631, 634, 637, 640, 643, 646, 649, 652, 655, 658, 661, 664, 667,
+                670, 673, 676, 679, 682, 685, 688, 691, 694, 697, 700, 703, 706, 709, 712,
+                715, 718, 721, 724, 727, 730, 733, 736, 739, 742, 745, 748, 751, 754, 757,
+                760, 763, 766, 769, 772, 775, 778, 781, 784, 787, 790, 793, 796, 799
+        };
+        private final float MAX_DISTANCE = 1.5f;
         private float[] wavelength = new float[]{442.6f, 489.9f, 509.8f, 559.7f, 619.6f, 664.6f, 680.8f, 708.3f, 753.4f};
         private String auxdataResource = "/auxdata/glass/Rrs_Glass_6C_owt_stats_140805.hdf";
         private String covariance = "covariance";
@@ -171,7 +217,8 @@ public enum OWT_TYPE {
 
         @Override
         AuxdataFactory getAuxdataFactory() {
-            return new HyperspectralAuxdataFactory(wavelength, auxdataResource, covariance, auxdataResource, owt_means);
+            return new HyperspectralAuxdataFactory(wavelength, ALL_WAVELENGTHS, MAX_DISTANCE,
+                                                   auxdataResource, covariance, auxdataResource, owt_means);
         }
 
         @Override

@@ -20,18 +20,16 @@ public abstract class AuxdataFactory {
         ArrayList<Integer> wavelengthIdxList = new ArrayList<>();
         for (float useWavelength : useWavelengths) {
             int bestIndex = -1;
-            double minDelta = Double.MAX_VALUE;
-            float lastDelta;
+            double lastDelta = Double.MAX_VALUE;
             for (int i = 0; i < allWavelengths.length; i++) {
                 float delta = Math.abs(useWavelength - allWavelengths[i]);
-                lastDelta = delta;
-                if (delta <= maxDistance && delta <= minDelta) {
-                    minDelta = delta;
+                if (delta <= maxDistance && delta <= lastDelta) {
                     bestIndex = i;
                 } else if (delta > lastDelta) {
                     // assuming that ALL_WAVELENGTHS is sorted we can break the loop if delta increases
                     break;
                 }
+                lastDelta = delta;
             }
             if (bestIndex != -1) {
                 wavelengthIdxList.add(bestIndex);

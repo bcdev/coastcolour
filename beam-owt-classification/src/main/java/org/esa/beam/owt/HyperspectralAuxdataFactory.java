@@ -14,29 +14,19 @@ import java.util.List;
  * @author Marco Peters
  */
 public class HyperspectralAuxdataFactory extends AuxdataFactory {
+    // todo (mp) - configuration should be turned into a configuration object
 
-    private static final float[] ALL_WAVELENGTHS = new float[]{
-            400, 403, 406, 409, 412, 415, 418, 421, 424, 427, 430, 433, 436, 439, 442,
-            445, 448, 451, 454, 457, 460, 463, 466, 469, 472, 475, 478, 481, 484, 487,
-            490, 493, 496, 499, 502, 505, 508, 511, 514, 517, 520, 523, 526, 529, 532,
-            535, 538, 541, 544, 547, 550, 553, 556, 559, 562, 565, 568, 571, 574, 577,
-            580, 583, 586, 589, 592, 595, 598, 601, 604, 607, 610, 613, 616, 619, 622,
-            625, 628, 631, 634, 637, 640, 643, 646, 649, 652, 655, 658, 661, 664, 667,
-            670, 673, 676, 679, 682, 685, 688, 691, 694, 697, 700, 703, 706, 709, 712,
-            715, 718, 721, 724, 727, 730, 733, 736, 739, 742, 745, 748, 751, 754, 757,
-            760, 763, 766, 769, 772, 775, 778, 781, 784, 787, 790, 793, 796, 799
-    };
-    private static final int MAX_DISTANCE = 10;
     private String covarianceMatrixResource;
     private String covarianceVarName;
     private String spectralMeansResource;
     private String spectralMeansVarName;
     private int[] wlIndices;
 
-    public HyperspectralAuxdataFactory(float[] useWavelengths, String covarianceMatrixResource, String covarianceVarName,
+    public HyperspectralAuxdataFactory(float[] useWavelengths, float[] allWavelengths, float maxDistance, String covarianceMatrixResource,
+                                       String covarianceVarName,
                                        String spectralMeansResource, String spectralMeansVarName) {
         this.spectralMeansVarName = spectralMeansVarName;
-        this.wlIndices = findWavelengthIndices(useWavelengths, ALL_WAVELENGTHS, MAX_DISTANCE);
+        this.wlIndices = findWavelengthIndices(useWavelengths, allWavelengths, maxDistance);
         this.covarianceMatrixResource = covarianceMatrixResource;
         this.covarianceVarName = covarianceVarName;
         this.spectralMeansResource = spectralMeansResource;
@@ -116,10 +106,6 @@ public class HyperspectralAuxdataFactory extends AuxdataFactory {
             throw new Exception("Could not load auxiliary data", e);
         }
         return spectralMeans;
-    }
-
-    static int[] findWavelengthIndices(float[] useWavelengths) {
-        return AuxdataFactory.findWavelengthIndices(useWavelengths, ALL_WAVELENGTHS, 1.5f);
     }
 
     static double[][] reduceSpectralMeansToWLs(double[][] spectralMeans, int[] useIndices) {

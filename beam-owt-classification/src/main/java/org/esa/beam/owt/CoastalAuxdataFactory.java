@@ -5,7 +5,6 @@ import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -23,8 +22,7 @@ public class CoastalAuxdataFactory extends AuxdataFactory {
     public Auxdata createAuxdata() throws Exception {
         NetcdfFile netcdfFile;
         try {
-            final URI resourceUri = getClass().getResource(resourcePath).toURI();
-            netcdfFile = NetcdfFile.openInMemory(resourceUri);
+            netcdfFile = loadFile(resourcePath);
             try {
                 final Group rootGroup = netcdfFile.getRootGroup();
                 final List<Variable> variableList = rootGroup.getVariables();

@@ -5,9 +5,12 @@ import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 /**
@@ -64,6 +67,11 @@ public abstract class AuxdataFactory {
 
         }
         return invMatrix;
+    }
+
+    protected NetcdfFile loadFile(String resourcePath) throws URISyntaxException, IOException {
+        final URI resourceUri = getClass().getResource(resourcePath).toURI();
+        return NetcdfFile.openInMemory(resourceUri);
     }
 
     class Exception extends java.lang.Exception {

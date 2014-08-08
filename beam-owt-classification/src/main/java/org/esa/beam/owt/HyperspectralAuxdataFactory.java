@@ -5,9 +5,6 @@ import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -116,8 +113,4 @@ public class HyperspectralAuxdataFactory extends AuxdataFactory {
         return reducedSpectralMeans;
     }
 
-    private NetcdfFile loadFile(String resourcePath) throws URISyntaxException, IOException {
-        final URI resourceUri = getClass().getResource(resourcePath).toURI();
-        return NetcdfFile.openInMemory(resourceUri);
-    }
 }

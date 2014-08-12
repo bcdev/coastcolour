@@ -1200,7 +1200,7 @@
                     <defaultWeightCoeff>1.0</defaultWeightCoeff>
                 </outputVariable>
                 <outputVariable>
-                    <name>turbidity_index</name>
+                    <name>turbidity</name>
                     <defaultAggregator>AVG</defaultAggregator>
                     <defaultWeightCoeff>1.0</defaultWeightCoeff>
                 </outputVariable>

@@ -9,7 +9,11 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.esa.beam.framework.gpf.pointop.*;
+import org.esa.beam.framework.gpf.pointop.PixelOperator;
+import org.esa.beam.framework.gpf.pointop.ProductConfigurer;
+import org.esa.beam.framework.gpf.pointop.Sample;
+import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
+import org.esa.beam.framework.gpf.pointop.WritableSample;
 import org.esa.beam.util.ProductUtils;
 
 // todo 1 - (mp;28.02.2014) discuss with CB,KS,AR if sum bands can be removed. Have no additional use to the user. At least the norm_class_sum band
@@ -55,7 +59,7 @@ public class OWTClassificationOp extends PixelOperator {
         super.prepareInputs();
 
         if (sourceProduct.getDescription() != null &&
-                sourceProduct.getDescription().contains("IRRADIANCE_REFLECTANCES")) {
+            sourceProduct.getDescription().contains("IRRADIANCE_REFLECTANCES")) {
             // overwrite user option (only for CC L2R case so far)
             inputReflectanceIs = ReflectanceEnum.IRRADIANCE_REFLECTANCES;
         }
@@ -100,9 +104,16 @@ public class OWTClassificationOp extends PixelOperator {
                 final String bandName = getSourceBandName(reflectancesPrefix, wavelength);
                 ProductUtils.copyBand(bandName, sourceProduct, targetProduct, true);
             }
+            if (owtType.mustNormalizeSpectra()) {
+                for (float wavelength : wavelengths) {
+                    final String sourceBandName = getSourceBandName(reflectancesPrefix, wavelength);
+                    final String targetBandName = "norm_" + sourceBandName;
+                    ProductUtils.copyBand(sourceBandName, sourceProduct, targetBandName, targetProduct, false);
+                }
+            }
         }
 
-        targetProduct.setAutoGrouping("reflec:class:norm_class");
+        targetProduct.setAutoGrouping("reflec:norm_reflec:class:norm_class");
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
     }
 
@@ -134,7 +145,7 @@ public class OWTClassificationOp extends PixelOperator {
         int numWLs = owtType.getWavelengths().length;
         if (sourceSamples.length != numWLs) {
             throw new OperatorException("Wrong number of source samples: Expected: " + numWLs +
-                                                ", Actual: " + sourceSamples.length);
+                                        ", Actual: " + sourceSamples.length);
         }
 
         int numClassSamples = owtType.getClassCount() * 2; // classes and norm_classes
@@ -156,6 +167,10 @@ public class OWTClassificationOp extends PixelOperator {
                 // which is the same as 'RADIANCE REFLECTANCES'. Remember: IRRAD_REFL = RAD_REFL * PI
                 rrsBelowWater[i] /= Math.PI;
             }
+        }
+
+        if (owtType.mustNormalizeSpectra()) {
+            normalizeSpectra(rrsBelowWater);
         }
 
         double[] classMemberships = owtClassification.computeClassMemberships(rrsBelowWater);
@@ -189,6 +204,20 @@ public class OWTClassificationOp extends PixelOperator {
         targetSamples[numClassSamples + 1].set(classSum);
         targetSamples[numClassSamples + 2].set(normalizedClassSum);
 
+        if (writeInputReflectances && owtType.mustNormalizeSpectra()) {
+            for (int i = 0; i < rrsBelowWater.length; i++) {
+                targetSamples[numClassSamples + 3 + i].set(rrsBelowWater[i]);
+            }
+        }
+
+    }
+
+    static double trapz(double[] x, double[] y) {
+        double sum = 0.0;
+        for (int i = 1; i < x.length; i++) {
+            sum += 0.5 * (x[i] - x[i - 1]) * (y[i] + y[i - 1]);
+        }
+        return sum;
     }
 
     static double[] normalizeClassMemberships(double[] memberships) {
@@ -221,6 +250,19 @@ public class OWTClassificationOp extends PixelOperator {
             }
         }
         return bestBandName;
+    }
+
+    private void normalizeSpectra(double[] rrsBelowWater) {
+        double wls[] = new double[owtType.getWavelengths().length];
+        for (int i = 0; i < wls.length; i++) {
+            wls[i] = owtType.getWavelengths()[i];
+        }
+
+        double integral = trapz(wls, rrsBelowWater);
+
+        for (int i = 0; i < rrsBelowWater.length; i++) {
+            rrsBelowWater[i] /= integral;
+        }
     }
 
     private void addClassBands(String bandNamePrefix, Product targetProduct) {

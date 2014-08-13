@@ -89,10 +89,6 @@ public enum OWT_TYPE {
             return 7;
         }
 
-        @Override
-        double[] mapMembershipsToClasses(double[] memberships) {
-            return memberships;
-        }
     },
     INLAND_NO_BLUE_BAND {
 
@@ -120,10 +116,6 @@ public enum OWT_TYPE {
             return 7;
         }
 
-        @Override
-        double[] mapMembershipsToClasses(double[] memberships) {
-            return memberships;
-        }
     },
     // exclude this (CB, 20140613):
 //    INLAND_WITHOUT_443 {
@@ -151,10 +143,6 @@ public enum OWT_TYPE {
 //            return 7;
 //        }
 //
-//        @Override
-//        double[] mapMembershipsToClasses(double[] memberships) {
-//            return memberships;
-//        }
 //    }
     GLASS_5C {
         private final float[] ALL_WAVELENGTHS = new float[]{
@@ -185,11 +173,6 @@ public enum OWT_TYPE {
         @Override
         int getClassCount() {
             return 5;
-        }
-
-        @Override
-        double[] mapMembershipsToClasses(double[] memberships) {
-            return memberships;
         }
 
         @Override
@@ -227,13 +210,48 @@ public enum OWT_TYPE {
         }
 
         @Override
-        double[] mapMembershipsToClasses(double[] memberships) {
-            return memberships;
+        float[] getWavelengths() {
+            return wavelength;
+        }
+    },
+
+    GLASS_6C_NORMALISED {
+        private final float[] ALL_WAVELENGTHS = new float[]{
+                400, 403, 406, 409, 412, 415, 418, 421, 424, 427, 430, 433, 436, 439, 442,
+                445, 448, 451, 454, 457, 460, 463, 466, 469, 472, 475, 478, 481, 484, 487,
+                490, 493, 496, 499, 502, 505, 508, 511, 514, 517, 520, 523, 526, 529, 532,
+                535, 538, 541, 544, 547, 550, 553, 556, 559, 562, 565, 568, 571, 574, 577,
+                580, 583, 586, 589, 592, 595, 598, 601, 604, 607, 610, 613, 616, 619, 622,
+                625, 628, 631, 634, 637, 640, 643, 646, 649, 652, 655, 658, 661, 664, 667,
+                670, 673, 676, 679, 682, 685, 688, 691, 694, 697, 700, 703, 706, 709, 712,
+                715, 718, 721, 724, 727, 730, 733, 736, 739, 742, 745, 748, 751, 754, 757,
+                760, 763, 766, 769, 772, 775, 778, 781, 784, 787, 790, 793, 796, 799
+        };
+        private final float MAX_DISTANCE = 1.5f;
+        private float[] wavelength = new float[]{442.6f, 489.9f, 509.8f, 559.7f, 619.6f, 664.6f, 680.8f, 708.3f, 753.4f};
+        private String auxdataResource = "/auxdata/glass/Rrs_Glass_6C_owt_stats_140805_normalised.hdf";
+        private String covariance = "covariance";
+        private String owt_means = "owt_means";
+
+        @Override
+        AuxdataFactory getAuxdataFactory() {
+            return new HyperspectralAuxdataFactory(wavelength, ALL_WAVELENGTHS, MAX_DISTANCE,
+                                                   auxdataResource, covariance, auxdataResource, owt_means);
+        }
+
+        @Override
+        int getClassCount() {
+            return 6;
         }
 
         @Override
         float[] getWavelengths() {
             return wavelength;
+        }
+
+        @Override
+        boolean mustNormalizeSpectra() {
+            return true;
         }
     };
 
@@ -243,5 +261,11 @@ public enum OWT_TYPE {
 
     abstract int getClassCount();
 
-    abstract double[] mapMembershipsToClasses(double[] memberships);
+    double[] mapMembershipsToClasses(double[] memberships) {
+        return memberships;
+    }
+
+    boolean mustNormalizeSpectra() {
+        return false;
+    }
 }

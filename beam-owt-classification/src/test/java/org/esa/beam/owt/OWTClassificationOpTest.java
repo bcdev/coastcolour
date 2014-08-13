@@ -126,4 +126,29 @@ public class OWTClassificationOpTest {
         return product;
     }
 
+    @Test
+    public void testTrapzSimple() throws Exception {
+        // this example is taken from the Matlab documentation
+        // http://www.mathworks.de/de/help/matlab/ref/trapz.html
+        double[] x = {0, 1, 2, 3, 4};
+        double[] y = {1, 4, 9, 16, 25};
+        double v = OWTClassificationOp.trapz(x, y);
+        assertEquals(42, v, 1e-4);
+
+    }
+
+    @Test
+    public void testTrapzNotSoSimple1() throws Exception {
+        // this example is taken from the Matlab documentation
+        // http://www.mathworks.de/de/help/matlab/ref/trapz.html
+        double[] x = new double[100];
+        double[] y = new double[100];
+
+        for (int i = 0; i < x.length; i++) {
+            x[i] = (Math.PI / 100) * i;
+            y[i] = Math.sin(x[i]);
+        }
+        double v = OWTClassificationOp.trapz(x, y);
+        assertEquals(1.9998, v, 1e-3);
+    }
 }

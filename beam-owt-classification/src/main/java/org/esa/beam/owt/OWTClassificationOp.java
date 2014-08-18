@@ -150,12 +150,7 @@ public class OWTClassificationOp extends PixelOperator {
 
         int numClassSamples = owtType.getClassCount() * 2; // classes and norm_classes
         if (!areSourceSamplesValid(x, y, sourceSamples)) {
-            for (int i = 0; i < numClassSamples; i++) {
-                targetSamples[i].set(Double.NaN);  // classes and norm_classes
-            }
-            targetSamples[numClassSamples].set(DOMINANT_CLASS_NO_DATA_VALUE); // dominant_class
-            targetSamples[numClassSamples + 1].set(CLASS_SUM_NO_DATA_VALUE); // class_sum
-            targetSamples[numClassSamples + 2].set(Double.NaN); // norm_class_sum
+            setTargetSamplesInvalid(targetSamples, numClassSamples);
             return;
         }
 
@@ -173,7 +168,13 @@ public class OWTClassificationOp extends PixelOperator {
             normalizeSpectra(rrsBelowWater);
         }
 
-        double[] classMemberships = owtClassification.computeClassMemberships(rrsBelowWater);
+        double[] classMemberships = new double[0];
+        try {
+            classMemberships = owtClassification.computeClassMemberships(rrsBelowWater);
+        } catch (OWTException e) {
+            setTargetSamplesInvalid(targetSamples, numClassSamples);
+            return;
+        }
         double[] classes = owtType.mapMembershipsToClasses(classMemberships);
         for (int i = 0; i < classes.length; i++) {
             targetSamples[i].set(classes[i]);
@@ -210,6 +211,15 @@ public class OWTClassificationOp extends PixelOperator {
             }
         }
 
+    }
+
+    private void setTargetSamplesInvalid(WritableSample[] targetSamples, int numClassSamples) {
+        for (int i = 0; i < numClassSamples; i++) {
+            targetSamples[i].set(Double.NaN);  // classes and norm_classes
+        }
+        targetSamples[numClassSamples].set(DOMINANT_CLASS_NO_DATA_VALUE); // dominant_class
+        targetSamples[numClassSamples + 1].set(CLASS_SUM_NO_DATA_VALUE); // class_sum
+        targetSamples[numClassSamples + 2].set(Double.NaN); // norm_class_sum
     }
 
     static double trapz(double[] x, double[] y) {

@@ -63,7 +63,7 @@ public class OWTClassification {
      * @return The fractional class memberships. The length of the returned array
      * is equal to {@link #getClassCount()}
      */
-    public double[] computeClassMemberships(double[] reflectances) {
+    public double[] computeClassMemberships(double[] reflectances) throws OWTException {
         final String pattern = "Number of reflectances must be %d but is %d.";
         Assert.argument(reflectances.length == wavelengthCount, String.format(pattern, wavelengthCount, reflectances.length));
 
@@ -98,8 +98,7 @@ public class OWTClassification {
     }
 
     // Computes the incomplete gamma function by its continued fraction
-
-    private static double computeIGFContinuedFraction(double a, double x) {
+    private static double computeIGFContinuedFraction(double a, double x) throws OWTException {
         final double min = 1.0e-30;
         final double constFactor = Math.exp(-x + a * Math.log(x) - logGamma(a));
         double b = x + 1.0 - a;
@@ -124,13 +123,13 @@ public class OWTClassification {
                 return constFactor * h;
             }
         }
-        throw new IllegalArgumentException("Parameter 'a' is too large");
+        throw new OWTException("Parameter 'a' is too large");
     }
 
     // Computes the incomplete gamma function by its series representation
-    private static double computeIGFSeries(double a, double x) {
+    private static double computeIGFSeries(double a, double x) throws OWTException {
         if (x < 0.0) {
-            throw new IllegalArgumentException("x must be greater or equal to zero");
+            throw new OWTException("x must be greater or equal to zero");
         }
         if (x > 0.0) {
             double incA = a;
@@ -147,7 +146,7 @@ public class OWTClassification {
                     return sum * constFactor;
                 }
             }
-            throw new IllegalArgumentException("Parameter 'a' is too large");
+            throw new OWTException("Parameter 'a' is too large");
         } else {
             return 0.0;
         }

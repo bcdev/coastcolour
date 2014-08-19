@@ -150,7 +150,7 @@ public class OWTClassificationOp extends PixelOperator {
 
         int numClassSamples = owtType.getClassCount() * 2; // classes and norm_classes
         if (!areSourceSamplesValid(x, y, sourceSamples)) {
-            setTargetSamplesInvalid(targetSamples, numClassSamples);
+            setTargetSamplesToInvalid(targetSamples, numClassSamples);
             return;
         }
 
@@ -168,11 +168,11 @@ public class OWTClassificationOp extends PixelOperator {
             normalizeSpectra(rrsBelowWater);
         }
 
-        double[] classMemberships = new double[0];
+        double[] classMemberships;
         try {
             classMemberships = owtClassification.computeClassMemberships(rrsBelowWater);
         } catch (OWTException e) {
-            setTargetSamplesInvalid(targetSamples, numClassSamples);
+            setTargetSamplesToInvalid(targetSamples, numClassSamples);
             return;
         }
         double[] classes = owtType.mapMembershipsToClasses(classMemberships);
@@ -213,7 +213,7 @@ public class OWTClassificationOp extends PixelOperator {
 
     }
 
-    private void setTargetSamplesInvalid(WritableSample[] targetSamples, int numClassSamples) {
+    private void setTargetSamplesToInvalid(WritableSample[] targetSamples, int numClassSamples) {
         for (int i = 0; i < numClassSamples; i++) {
             targetSamples[i].set(Double.NaN);  // classes and norm_classes
         }

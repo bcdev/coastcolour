@@ -16,7 +16,7 @@ public class OWTClassificationTest {
     }
 
     @Test
-    public void testFuzzyResults() {
+    public void testFuzzyResults() throws OWTException {
         final double[] reflectances = {0.0307, 0.0414, 0.0500, 0.0507, 0.0454};
         final OWTClassification owtClassification = new OWTClassification(auxdata.getSpectralMeans(),
                                                                                 auxdata.getInvertedCovarianceMatrices());

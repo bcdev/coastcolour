@@ -4,6 +4,8 @@ package org.esa.beam.owt;
 // todo (mp) - the actually used wavelength could be a parameter to getAuxdataFactory(); this way it would be configurable by the user
 // todo        and it would be better separated
 
+import java.awt.Color;
+
 public enum OWT_TYPE {
     COASTAL {
         private float[] wavelength = new float[]{410, 443, 490, 510, 555};
@@ -213,6 +215,19 @@ public enum OWT_TYPE {
         float[] getWavelengths() {
             return wavelength;
         }
+
+        @Override
+        public Color[] getColors() {
+            return new Color[]{
+                    new Color(42, 147, 63),
+                    new Color(10, 235, 165),
+                    new Color(8, 56, 151),
+                    new Color(186, 166, 187),
+                    new Color(98, 46, 179),
+                    new Color(232, 237, 174)
+            };
+        }
+
     },
 
     GLASS_6C_NORMALISED {
@@ -253,6 +268,19 @@ public enum OWT_TYPE {
         boolean mustNormalizeSpectra() {
             return true;
         }
+
+        @Override
+        public Color[] getColors() {
+            return new Color[]{
+                    new Color(42, 147, 63),
+                    new Color(10, 235, 165),
+                    new Color(8, 56, 151),
+                    new Color(186, 166, 187),
+                    new Color(98, 46, 179),
+                    new Color(232, 237, 174)
+            };
+        }
+
     };
 
     abstract AuxdataFactory getAuxdataFactory();
@@ -267,5 +295,9 @@ public enum OWT_TYPE {
 
     boolean mustNormalizeSpectra() {
         return false;
+    }
+
+    public Color[] getColors() {
+        return new Color[0];
     }
 }

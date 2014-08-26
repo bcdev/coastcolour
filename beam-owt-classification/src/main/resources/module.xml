@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-owt-classification</symbolicName>
-    <version>1.6.1-GLASS_SNAPSHOT</version>
+    <version>1.6.2-GLASS_SNAPSHOT</version>
     <name>MERIS Optical Water Type Classification</name>
     <packaging>dir</packaging>
 

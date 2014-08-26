@@ -1,6 +1,8 @@
 package org.esa.beam.owt;
 
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.ColorPaletteDef;
+import org.esa.beam.framework.datamodel.ImageInfo;
 import org.esa.beam.framework.datamodel.IndexCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -15,6 +17,8 @@ import org.esa.beam.framework.gpf.pointop.Sample;
 import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
 import org.esa.beam.framework.gpf.pointop.WritableSample;
 import org.esa.beam.util.ProductUtils;
+
+import java.awt.Color;
 
 // todo 1 - (mp;28.02.2014) discuss with CB,KS,AR if sum bands can be removed. Have no additional use to the user. At least the norm_class_sum band
 // todo 2 - (mp;22.11.2010) convertToSubsurfaceWaterRrs should be configurable; should be discussed with CB,KS,AR
@@ -88,6 +92,15 @@ public class OWTClassificationOp extends PixelOperator {
         for (int i = 1; i <= owtType.getClassCount(); i++) {
             String name = "class_" + i;
             indexCoding.addIndex(name, i, "Class " + i);
+        }
+        if (owtType.getColors().length == owtType.getClassCount()) {
+            ColorPaletteDef.Point[] points = new ColorPaletteDef.Point[owtType.getColors().length];
+            Color[] colors = owtType.getColors();
+            for (int i = 0; i < colors.length; i++) {
+                Color color = colors[i];
+                points[i] = new ColorPaletteDef.Point(i + 1, color);
+            }
+            domClassBand.setImageInfo(new ImageInfo(new ColorPaletteDef(points)));
         }
         targetProduct.getIndexCodingGroup().add(indexCoding);
         domClassBand.setSampleCoding(indexCoding);

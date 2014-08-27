@@ -161,7 +161,7 @@ public enum OWT_TYPE {
         private final float MAX_DISTANCE = 1.5f;
 
         private float[] wavelength = new float[]{442.6f, 489.9f, 509.8f, 559.7f, 619.6f, 664.6f, 680.8f, 708.3f, 753.4f};
-        private String auxdataResource = "/auxdata/glass/Rrs_Glass_5C_owt_stats_140805.hdf";
+        private String auxdataResource = "/auxdata/glass/Rrs_Glass_5C_owt_stats_140827.hdf";
         private String covariance = "covariance";
         private String owt_means = "owt_means";
 
@@ -216,18 +216,6 @@ public enum OWT_TYPE {
             return wavelength;
         }
 
-        @Override
-        public Color[] getColors() {
-            return new Color[]{
-                    new Color(42, 147, 63),
-                    new Color(10, 235, 165),
-                    new Color(8, 56, 151),
-                    new Color(186, 166, 187),
-                    new Color(98, 46, 179),
-                    new Color(232, 237, 174)
-            };
-        }
-
     },
 
     GLASS_6C_NORMALISED {
@@ -244,7 +232,7 @@ public enum OWT_TYPE {
         };
         private final float MAX_DISTANCE = 1.5f;
         private float[] wavelength = new float[]{442.6f, 489.9f, 509.8f, 559.7f, 619.6f, 664.6f, 680.8f, 708.3f, 753.4f};
-        private String auxdataResource = "/auxdata/glass/Rrs_Glass_6C_owt_stats_140805_normalised.hdf";
+        private String auxdataResource = "/auxdata/glass/Rrs_Glass_6C_owt_stats_140827_normalised.hdf";
         private String covariance = "covariance";
         private String owt_means = "owt_means";
 
@@ -267,18 +255,6 @@ public enum OWT_TYPE {
         @Override
         boolean mustNormalizeSpectra() {
             return true;
-        }
-
-        @Override
-        public Color[] getColors() {
-            return new Color[]{
-                    new Color(42, 147, 63),
-                    new Color(10, 235, 165),
-                    new Color(8, 56, 151),
-                    new Color(186, 166, 187),
-                    new Color(98, 46, 179),
-                    new Color(232, 237, 174)
-            };
         }
 
     };

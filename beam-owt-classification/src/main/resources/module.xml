@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-owt-classification</symbolicName>
-    <version>1.6.4-GLASS_SNAPSHOT</version>
+    <version>1.6.5-GLASS_SNAPSHOT</version>
     <name>MERIS Optical Water Type Classification</name>
     <packaging>dir</packaging>
 
@@ -11,6 +11,8 @@
 
     <changelog>
         <![CDATA[
+        Changes in 1.6.5<br/>
+            New covariance and means tables for GLASS
         Changes in 1.6.4<br/>
             Fixed covariance and means tables for GLASS 5C
             New covariance and means tables for GLASS 6C

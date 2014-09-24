@@ -32,7 +32,7 @@ import java.awt.Color;
                   description = "Performs an optical water type classification based on atmospherically corrected reflectances.",
                   authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
                   copyright = "(c) 2014 by Timothy Moore (University of New Hampshire) and Brockmann Consult",
-                  version = "1.3",
+                  version = "1.6.5",
                   internal = true)
 public class OWTClassificationOp extends PixelOperator {
 

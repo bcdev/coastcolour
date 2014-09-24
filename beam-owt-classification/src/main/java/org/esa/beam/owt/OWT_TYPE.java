@@ -161,7 +161,7 @@ public enum OWT_TYPE {
         private final float MAX_DISTANCE = 1.5f;
 
         private float[] wavelength = new float[]{442.6f, 489.9f, 509.8f, 559.7f, 619.6f, 664.6f, 680.8f, 708.3f, 753.4f};
-        private String auxdataResource = "/auxdata/glass/Rrs_Glass_5C_owt_stats_140827.hdf";
+        private String auxdataResource = "/auxdata/glass/Rrs_Glass_5C_owt_stats_140912.hdf";
         private String covariance = "covariance";
         private String owt_means = "owt_means";
 
@@ -196,7 +196,7 @@ public enum OWT_TYPE {
         };
         private final float MAX_DISTANCE = 1.5f;
         private float[] wavelength = new float[]{442.6f, 489.9f, 509.8f, 559.7f, 619.6f, 664.6f, 680.8f, 708.3f, 753.4f};
-        private String auxdataResource = "/auxdata/glass/Rrs_Glass_6C_owt_stats_140829.hdf";
+        private String auxdataResource = "/auxdata/glass/Rrs_Glass_6C_owt_stats_140912.hdf";
         private String covariance = "covariance";
         private String owt_means = "owt_means";
 
@@ -232,7 +232,7 @@ public enum OWT_TYPE {
         };
         private final float MAX_DISTANCE = 1.5f;
         private float[] wavelength = new float[]{442.6f, 489.9f, 509.8f, 559.7f, 619.6f, 664.6f, 680.8f, 708.3f, 753.4f};
-        private String auxdataResource = "/auxdata/glass/Rrs_Glass_6C_owt_stats_140827_normalised.hdf";
+        private String auxdataResource = "/auxdata/glass/Rrs_Glass_norm6_owt_stats_140912.hdf";
         private String covariance = "covariance";
         private String owt_means = "owt_means";
 

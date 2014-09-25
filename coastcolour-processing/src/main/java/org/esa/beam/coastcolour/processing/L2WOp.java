@@ -161,6 +161,11 @@ public class L2WOp extends Operator {
                        "If disabled only Kd_490 is added to the output.")
     private boolean outputKdSpectrum;
 
+    @Parameter(defaultValue = "false",
+               label = "Write AOT (550nm) to the target product",
+               description = "Write AOT (550nm) to the CC L2W target product.")
+    private boolean outputAOT550;
+
     @Parameter(defaultValue = "COASTAL",
                label = "OWT classification type",
                description = "OWT classification type."
@@ -352,6 +357,11 @@ public class L2WOp extends Operator {
             if (!l2WProduct.containsBand("corr_latitude")) {
                 ProductUtils.copyBand("corr_latitude", sourceProduct, l2WProduct, true);
             }
+        }
+
+        // optionally copy AOT 550nm band from L2R
+        if (outputAOT550) {
+            ProductUtils.copyBand("atm_tau_550", l2rProduct, l2WProduct, true);
         }
 
         for (Band b : l2WProduct.getBands()) {

@@ -1,6 +1,6 @@
 <bundleDescriptor>
     <bundleName>coastcolour-processing</bundleName>
-    <bundleVersion>1.7</bundleVersion>
+    <bundleVersion>1.8.4-SNAPSHOT</bundleVersion>
     <processorDescriptors>
 
         <processorDescriptor>
@@ -109,10 +109,10 @@
                         Processor output: MERIS L1P products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)
                     </p>
 
-                    <p>CHANGES to previous version (1.8.2):
+                    <p>CHANGES to previous version (1.8.3):
                         <ul>
                            <li>
-                               Uses an updated BEAM MERIS Radiometry module (bug fix in case of very bright nearly saturated pixels)
+                               none
                            </li>
                         </ul>
                     </p>
@@ -301,10 +301,10 @@
                 <b>Do not apply this processor to MERIS L1B unless the input region is small. Use the L1P processor first, then apply L2R to the output set, then apply L2W.</b>
                 </p>
 
-                <p>CHANGES to previous version (1.8.2):
+                <p>CHANGES to previous version (1.8.3):
                     <ul>
                        <li>
-                           Uses an updated BEAM MERIS Radiometry module (bug fix in case of very bright nearly saturated pixels)
+                           none
                        </li>
                     </ul>
                 </p>
@@ -588,10 +588,10 @@
                         Processor output: CoastColour L2R products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)
                 </p>
 
-                <p>CHANGES to previous version (1.8.2):
+                <p>CHANGES to previous version (1.8.3):
                     <ul>
                        <li>
-                           Uses an updated BEAM MERIS Radiometry module (bug fix in case of very bright nearly saturated pixels)
+                           none
                        </li>
                     </ul>
                 </p>
@@ -969,6 +969,13 @@
                     </description>
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>outputAOT550</name>
+                    <type>boolean</type>
+                    <description>Write AOT (550nm) to the CC L2W target product.
+                    </description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
             </parameterDescriptors>
             <jobConfig>
                 <jobParameter>
@@ -1000,6 +1007,8 @@
                       Values: [RADIANCE_REFLECTANCES/IRRADIANCE_REFLECTANCES]. Default value: <em>RADIANCE_REFLECTANCES</em></li>
                       <li>outputKdSpectrum: Whether to write the output of downwelling irradiance attenuation coefficients (Kd) to the CC L2W target product. If disabled, only Kd_490 is added to the output. <br>
                       Values: [true/false]. Default value: false</li>
+                      <li>outputAOT550: Whether to write the Atmosphere optical thickness at 550 nm to the CC L2W target product.<br>
+                      Values: [true/false]. Default value: false</li>
                     </ul>
                     <p><b>Output bands:</b>
                     <ul>
@@ -1012,6 +1021,7 @@
                         <li>conc_chl - Chlorophyll concentration.</li>
                         <li>K_min - Minimum downwelling irradiance attenuation coefficient.</li>
                         <li>Kd_&lt;λ&gt; - Downwelling irradiance attenuation coefficient at &lt;λ&gt;, where &lt;λ&gt; is one of 412, 443, 490, 510, 560, 620, 664 and 680</li>
+                        <li>atm_tau_550 - Atmosphere optical thickness at 550 nm.</li>
                         <li>Z90_max - Maximum signal depth.</li>
                         <li>turbidity - Turbidity in FNU (Formazine Nephelometric Unit).</li>
                         <li>altitude - DEM altitude.</li>
@@ -1024,10 +1034,10 @@
                     Processor output: CoastColour L2W products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)</p>
                 </p>
 
-                <p>CHANGES to previous version (1.8.2):
+                <p>CHANGES to previous version (1.8.3):
                     <ul>
                        <li>
-                           Uses an updated BEAM MERIS Radiometry module (bug fix in case of very bright nearly saturated pixels)
+                           Added option to write AOT (550 nm) to the L2W product.
                        </li>
                     </ul>
                 </p>
@@ -1196,6 +1206,11 @@
                 </outputVariable>
                 <outputVariable>
                     <name>Z90_max</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>atm_tau_550</name>
                     <defaultAggregator>AVG</defaultAggregator>
                     <defaultWeightCoeff>1.0</defaultWeightCoeff>
                 </outputVariable>

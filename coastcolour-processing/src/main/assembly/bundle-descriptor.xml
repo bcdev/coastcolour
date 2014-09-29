@@ -61,6 +61,13 @@
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
+                    <name>ccGlintCloudThresholdAddition</name>
+                    <type>string</type>
+                    <description>Value added to cloud screening ambiguous/sure thresholds in case of glint
+                    </description>
+                    <defaultValue>0.1</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
                     <name>ccOutputCloudProbabilityFeatureValue</name>
                     <type>boolean</type>
                     <description>Write Cloud Probability Feature Value to the CC L1P target product</description>
@@ -93,6 +100,7 @@
                                  <li>ccCloudBufferWidth: The width of a cloud 'safety buffer' around a pixel which was classified as cloudy, [0,100]. Default value: 2</li>
                                  <li>ccCloudScreeningAmbiguous: Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous (i.e. a higher value results in fewer ambiguous clouds). Default value: 1.4</li>
                                  <li>ccCloudScreeningSure: Threshold of Cloud Probability Feature Value above which cloud is regarded as sure (i.e. a higher value results in fewer sure clouds). Default value: 1.8</li>
+                                 <li>ccGlintCloudThresholdAddition: Value added to cloud screening ambiguous/sure thresholds in case of glint. Default value: 0.1</li>
                                  <li>ccOutputCloudProbabilityFeatureValue: Whether to write Cloud Probability Feature Value to the CC L1P target product.<br>
                                    Values: [true/false]. Default value: false</li>
                                </ul>
@@ -112,7 +120,7 @@
                     <p>CHANGES to previous version (1.8.3):
                         <ul>
                            <li>
-                               none
+                               Added option 'ccGlintCloudThresholdAddition': Value added to cloud screening ambiguous/sure thresholds in case of glint.
                            </li>
                         </ul>
                     </p>
@@ -274,6 +282,13 @@
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
+                    <name>ccGlintCloudThresholdAddition</name>
+                    <type>string</type>
+                    <description>Value added to cloud screening ambiguous/sure thresholds in case of glint
+                    </description>
+                    <defaultValue>0.1</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
                     <name>ccOutputCloudProbabilityFeatureValue</name>
                     <type>boolean</type>
                     <description>Write Cloud Probability Feature Value to the CC L1P target product</description>
@@ -304,7 +319,7 @@
                 <p>CHANGES to previous version (1.8.3):
                     <ul>
                        <li>
-                           none
+                            Added option 'ccGlintCloudThresholdAddition': Value added to cloud screening ambiguous/sure thresholds in case of glint.
                        </li>
                     </ul>
                 </p>
@@ -480,6 +495,13 @@
                     </description>
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccGlintCloudThresholdAddition</name>
+                    <type>string</type>
+                    <description>Value added to cloud screening ambiguous/sure thresholds in case of glint
+                    </description>
+                    <defaultValue>0.1</defaultValue>
+                </parameterDescriptor>
                 <!-- L2R parameters -->
                 <parameterDescriptor>
                     <name>useSnTMap</name>
@@ -591,7 +613,7 @@
                 <p>CHANGES to previous version (1.8.3):
                     <ul>
                        <li>
-                           none
+                          Added option 'ccGlintCloudThresholdAddition': Value added to cloud screening ambiguous/sure thresholds in case of glint.
                        </li>
                     </ul>
                 </p>
@@ -878,6 +900,13 @@
                     </description>
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccGlintCloudThresholdAddition</name>
+                    <type>string</type>
+                    <description>Value added to cloud screening ambiguous/sure thresholds in case of glint
+                    </description>
+                    <defaultValue>0.1</defaultValue>
+                </parameterDescriptor>
                 <!-- L2R parameters -->
                 <parameterDescriptor>
                     <name>useSnTMap</name>
@@ -1038,6 +1067,9 @@
                     <ul>
                        <li>
                            Added option to write AOT (550 nm) to the L2W product.
+                       </li>
+                       <li>
+                           Added option 'ccGlintCloudThresholdAddition': Value added to cloud screening ambiguous/sure thresholds in case of glint.
                        </li>
                     </ul>
                 </p>

@@ -92,6 +92,11 @@ public class L2ROp extends Operator {
                label = " [L1P] Cloud screening 'sure' threshold")
     private double ccCloudScreeningSure = 1.8;       // Schiller
 
+    @Parameter(defaultValue = "0.1",
+               description = "Value added to cloud screening ambiguous/sure thresholds in case of glint",
+               label = "Cloud screening threshold addition in case of glint")
+    private double ccGlintCloudThresholdAddition;
+
     @Parameter(defaultValue = "false",
                description = "Write Cloud Probability Feature Value to the target product. " +
                        "This is a L1P option and has only effect if the source product is a MERIS L1b product.",
@@ -221,6 +226,7 @@ public class L2ROp extends Operator {
         l1pParams.put("ccIgnoreSeaIceClimatology", ccIgnoreSeaIceClimatology);
         l1pParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
         l1pParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
+        l1pParams.put("ccGlintCloudThresholdAddition", ccGlintCloudThresholdAddition);
         l1pParams.put("ccOutputCloudProbabilityFeatureValue", ccOutputCloudProbabilityFeatureValue);
         return l1pParams;
     }

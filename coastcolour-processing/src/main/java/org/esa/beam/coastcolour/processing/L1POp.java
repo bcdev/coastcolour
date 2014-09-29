@@ -112,6 +112,11 @@ public class L1POp extends Operator {
             label = " Cloud screening 'sure' threshold")
     private double ccCloudScreeningSure = 1.8;       // Schiller
 
+    @Parameter(defaultValue = "0.1",
+               description = "Value added to cloud screening ambiguous/sure thresholds in case of glint",
+               label = "Cloud screening threshold addition in case of glint")
+    private double ccGlintCloudThresholdAddition;
+
     @Parameter(defaultValue = "false",
             description = "Write Cloud Probability Feature Value to the  CC L1P target product.",
             label = " Write Cloud Probability Feature Value to the target product")
@@ -188,6 +193,7 @@ public class L1POp extends Operator {
         idepixParams.put("ccIgnoreSeaIceClimatology", ccIgnoreSeaIceClimatology);
         idepixParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
         idepixParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
+        idepixParams.put("ccGlintCloudThresholdAddition", ccGlintCloudThresholdAddition);
         idepixParams.put("ccOutputCloudProbabilityFeatureValue", ccOutputCloudProbabilityFeatureValue);
         return idepixParams;
     }

@@ -40,7 +40,7 @@ public class HyperspectralAuxdataFactory extends AuxdataFactory {
     }
 
 
-    private double[][][] loadInvCovarianceMatrix() throws Exception {
+    private double[][][] loadInvCovarianceMatrix() throws AuxdataException {
         double[][][] invCovarianceMatrix = null;
         try {
             NetcdfFile covMatrixFile = loadFile(covarianceMatrixResource);
@@ -60,8 +60,8 @@ public class HyperspectralAuxdataFactory extends AuxdataFactory {
             } finally {
                 covMatrixFile.close();
             }
-        } catch (java.lang.Exception e) {
-            throw new Exception("Could not load auxiliary data", e);
+        } catch (Exception e) {
+            throw new AuxdataException("Could not load auxiliary data", e);
         }
         return invCovarianceMatrix;
     }
@@ -81,7 +81,7 @@ public class HyperspectralAuxdataFactory extends AuxdataFactory {
         return reducedMatrix;
     }
 
-    private double[][] loadSpectralMeans() throws Exception {
+    private double[][] loadSpectralMeans() throws AuxdataException {
         double[][] spectralMeans = null;
         try {
             NetcdfFile specMeansFile = loadFile(spectralMeansResource);
@@ -99,8 +99,8 @@ public class HyperspectralAuxdataFactory extends AuxdataFactory {
             } finally {
                 specMeansFile.close();
             }
-        } catch (java.lang.Exception e) {
-            throw new Exception("Could not load auxiliary data", e);
+        } catch (Exception e) {
+            throw new AuxdataException("Could not load auxiliary data", e);
         }
         return spectralMeans;
     }

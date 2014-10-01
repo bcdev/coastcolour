@@ -74,15 +74,4 @@ public abstract class AuxdataFactory {
         return NetcdfFile.openInMemory(resourceUri);
     }
 
-    class Exception extends java.lang.Exception {
-
-        public Exception(String message) {
-            super(message);
-        }
-
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
 }

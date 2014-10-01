@@ -115,7 +115,7 @@ public class HyperspectralAuxdataFactoryTest {
 //    }
 
     @Test
-    public void testInvCovMatrix_InlandNoBlue() throws AuxdataFactory.Exception {
+    public void testInvCovMatrix_InlandNoBlue() throws AuxdataException {
         double[] timInlandValues = {
                 687175.231134958,
                 -1335855.38968399,

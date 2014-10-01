@@ -19,7 +19,7 @@ public class CoastalAuxdataFactory extends AuxdataFactory {
     }
 
     @Override
-    public Auxdata createAuxdata() throws Exception {
+    public Auxdata createAuxdata() throws AuxdataException {
         NetcdfFile netcdfFile;
         try {
             netcdfFile = loadFile(resourcePath);
@@ -46,8 +46,8 @@ public class CoastalAuxdataFactory extends AuxdataFactory {
             } finally {
                 netcdfFile.close();
             }
-        } catch (java.lang.Exception e) {
-            throw new Exception("Could not load auxiliary data", e);
+        } catch (Exception e) {
+            throw new AuxdataException("Could not load auxiliary data", e);
         }
     }
 

@@ -15,6 +15,7 @@ public class HyperspectralAuxdataFactory extends AuxdataFactory {
 
     private String covarianceMatrixResource;
     private String covarianceVarName;
+    private boolean covNeedsInversion;
     private String spectralMeansResource;
     private String spectralMeansVarName;
     private int[] wlIndices;
@@ -22,19 +23,27 @@ public class HyperspectralAuxdataFactory extends AuxdataFactory {
     public HyperspectralAuxdataFactory(float[] useWavelengths, float[] allWavelengths, float maxDistance, String covarianceMatrixResource,
                                        String covarianceVarName,
                                        String spectralMeansResource, String spectralMeansVarName) {
+        this(useWavelengths, allWavelengths, maxDistance, covarianceMatrixResource, covarianceVarName, true,
+             spectralMeansResource, spectralMeansVarName);
+    }
+
+    public HyperspectralAuxdataFactory(float[] useWavelengths, float[] allWavelengths, float maxDistance, String covarianceMatrixResource,
+                                       String covarianceVarName, boolean covNeedsInversion,
+                                       String spectralMeansResource, String spectralMeansVarName) {
         this.spectralMeansVarName = spectralMeansVarName;
+        this.spectralMeansResource = spectralMeansResource;
         this.wlIndices = findWavelengthIndices(useWavelengths, allWavelengths, maxDistance);
         this.covarianceMatrixResource = covarianceMatrixResource;
         this.covarianceVarName = covarianceVarName;
-        this.spectralMeansResource = spectralMeansResource;
+        this.covNeedsInversion = covNeedsInversion;
     }
 
     @Override
-    public Auxdata createAuxdata() throws Exception {
+    public Auxdata createAuxdata() throws AuxdataException {
         double[][] spectralMeans = loadSpectralMeans();
         double[][][] invCovarianceMatrix = loadInvCovarianceMatrix();
         if (spectralMeans == null || invCovarianceMatrix == null) {
-            throw new Exception("Could not load auxiliary data");
+            throw new AuxdataException("Could not load auxiliary data");
         }
         return new Auxdata(spectralMeans, invCovarianceMatrix);
     }
@@ -54,7 +63,9 @@ public class HyperspectralAuxdataFactory extends AuxdataFactory {
                         double[][][] matrix = (double[][][]) arrayDouble.copyToNDJavaArray();
                         // important first reduce to the wavelength and invert afterwards
                         double[][][] redMatrix = reduceCovarianceMatrixToWLs(matrix, wlIndices);
-                        invCovarianceMatrix = invertMatrix(redMatrix);
+                        if (covNeedsInversion) {
+                            invCovarianceMatrix = invertMatrix(redMatrix);
+                        }
                     }
                 }
             } finally {

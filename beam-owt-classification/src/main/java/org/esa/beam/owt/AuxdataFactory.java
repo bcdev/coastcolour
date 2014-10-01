@@ -49,7 +49,7 @@ public abstract class AuxdataFactory {
         return result;
     }
 
-    abstract Auxdata createAuxdata() throws Exception;
+    abstract Auxdata createAuxdata() throws AuxdataException;
 
     protected Array getDoubleArray(Variable variable) throws IOException, InvalidRangeException {
         final int[] origin = new int[variable.getRank()];

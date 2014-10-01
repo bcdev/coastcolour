@@ -222,14 +222,15 @@ public enum OWT_TYPE {
         private final float[] ALL_WAVELENGTHS = new float[]{442, 490, 511, 559, 619, 664, 682, 709, 754};
         private final float MAX_DISTANCE = 1.5f;
         private float[] wavelength = new float[]{442.6f, 489.9f, 509.8f, 559.7f, 619.6f, 664.6f, 680.8f, 708.3f, 753.4f};
-        private String auxdataResource = "/auxdata/glass/Rrs_Glass_norm6_owt_stats_140918.hdf";
+        private String auxdataResource = "/auxdata/glass/Rrs_Glass_norm6C_owt_stats_140918.hdf";
         private String covariance = "covariance";
         private String owt_means = "owt_means";
 
         @Override
         AuxdataFactory getAuxdataFactory() {
             return new HyperspectralAuxdataFactory(wavelength, ALL_WAVELENGTHS, MAX_DISTANCE,
-                                                   auxdataResource, covariance, auxdataResource, owt_means);
+                                                   auxdataResource, covariance, false,
+                                                   auxdataResource, owt_means);
         }
 
         @Override

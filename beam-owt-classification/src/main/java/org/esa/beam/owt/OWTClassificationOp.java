@@ -77,7 +77,7 @@ public class OWTClassificationOp extends PixelOperator {
         try {
             auxdata = auxdataFactory.createAuxdata();
         } catch (AuxdataException e) {
-            throw new OperatorException("Unable to initialise auxdata", e);
+            throw new OperatorException("Unable to initialise auxdata\n" + e.getMessage(), e);
         }
 
         Product targetProduct = productConfigurer.getTargetProduct();

@@ -3,7 +3,7 @@
     <symbolicName>beam-owt-classification</symbolicName>
     <version>1.6.5-GLASS_SNAPSHOT</version>
     <name>MERIS Optical Water Type Classification</name>
-    <packaging>dir</packaging>
+    <!--<packaging>dir</packaging>-->
 
     <description>
         Performs an optical water type classification based on atmospherically corrected reflectances.

@@ -5,8 +5,6 @@ import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-import java.util.List;
-
 /**
  * @author Marco Peters
  */
@@ -55,18 +53,19 @@ public class HyperspectralAuxdataFactory extends AuxdataFactory {
             NetcdfFile covMatrixFile = loadFile(covarianceMatrixResource);
             try {
                 final Group rootGroup = covMatrixFile.getRootGroup();
-                final List<Variable> variableList = rootGroup.getVariables();
+                Variable covarianceVariable = rootGroup.findVariable(covarianceVarName);
+                if (covarianceVariable == null) {
+                    throw new AuxdataException(String.format("Variable with name '%s' could not be found", covarianceVarName));
+                }
 
-                for (Variable variable : variableList) {
-                    if (covarianceVarName.equals(variable.getFullName())) {
-                        final Array arrayDouble = getDoubleArray(variable);
-                        double[][][] matrix = (double[][][]) arrayDouble.copyToNDJavaArray();
-                        // important first reduce to the wavelength and invert afterwards
-                        double[][][] redMatrix = reduceCovarianceMatrixToWLs(matrix, wlIndices);
-                        if (covNeedsInversion) {
-                            invCovarianceMatrix = invertMatrix(redMatrix);
-                        }
-                    }
+                final Array arrayDouble = getDoubleArray(covarianceVariable);
+                double[][][] matrix = (double[][][]) arrayDouble.copyToNDJavaArray();
+                // important first reduce to the wavelength and invert afterwards
+                double[][][] redMatrix = reduceCovarianceMatrixToWLs(matrix, wlIndices);
+                if (covNeedsInversion) {
+                    invCovarianceMatrix = invertMatrix(redMatrix);
+                } else {
+                    invCovarianceMatrix = redMatrix;
                 }
             } finally {
                 covMatrixFile.close();
@@ -98,15 +97,14 @@ public class HyperspectralAuxdataFactory extends AuxdataFactory {
             NetcdfFile specMeansFile = loadFile(spectralMeansResource);
             try {
                 final Group rootGroup = specMeansFile.getRootGroup();
-                final List<Variable> variableList = rootGroup.getVariables();
-
-                for (Variable variable : variableList) {
-                    if (spectralMeansVarName.equals(variable.getFullName())) {
-                        final Array arrayDouble = getDoubleArray(variable);
-                        double[][] allSpectralMeans = (double[][]) arrayDouble.copyToNDJavaArray();
-                        spectralMeans = reduceSpectralMeansToWLs(allSpectralMeans, wlIndices);
-                    }
+                Variable specMeansVariable = rootGroup.findVariable(spectralMeansVarName);
+                if (specMeansVariable == null) {
+                    throw new AuxdataException(String.format("Variable with name '%s' could not be found", spectralMeansVarName));
                 }
+
+                final Array arrayDouble = getDoubleArray(specMeansVariable);
+                double[][] allSpectralMeans = (double[][]) arrayDouble.copyToNDJavaArray();
+                spectralMeans = reduceSpectralMeansToWLs(allSpectralMeans, wlIndices);
             } finally {
                 specMeansFile.close();
             }

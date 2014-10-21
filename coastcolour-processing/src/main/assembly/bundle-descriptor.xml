@@ -74,16 +74,7 @@
                     <defaultValue>false</defaultValue>
                 </parameterDescriptor>
             </parameterDescriptors>
-            <jobConfig>
-                <jobParameter>
-                    <name>calvalus.output.regex</name>
-                    <value>.+(MER_..._)1.....(.+)</value>
-                </jobParameter>
-                <jobParameter>
-                    <name>calvalus.output.replacement</name>
-                    <value>$1CCL1P_$2</value>
-                </jobParameter>
-            </jobConfig>
+
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[
@@ -131,6 +122,17 @@
             <inputProductTypes>MERIS_L1B</inputProductTypes>
             <outputProductType>MERIS_CC_L1P</outputProductType>
             <validMaskExpression>!l1p_flags.INVALID</validMaskExpression>
+
+            <jobConfig>
+                <jobParameter>
+                    <name>calvalus.output.regex</name>
+                    <value>.+(MER_..._)1.....(.+)</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.output.replacement</name>
+                    <value>$1CCL1P_$2</value>
+                </jobParameter>
+            </jobConfig>
 
             <outputVariables>
                 <outputVariable>
@@ -296,16 +298,6 @@
                 </parameterDescriptor>
             </parameterDescriptors>
 
-            <jobConfig>
-                <jobParameter>
-                    <name>calvalus.output.regex</name>
-                    <value>.+(MER_..._)1.....(.+)</value>
-                </jobParameter>
-                <jobParameter>
-                    <name>calvalus.output.replacement</name>
-                    <value>$1CCL1P_ICOL_$2</value>
-                </jobParameter>
-            </jobConfig>
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[
@@ -333,12 +325,28 @@
 
             <jobConfig>
                 <jobParameter>
+                    <name>calvalus.output.regex</name>
+                    <value>.+(MER_..._)1.....(.+)</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.output.replacement</name>
+                    <value>$1CCL1P_ICOL_$2</value>
+                </jobParameter>
+                <jobParameter>
                     <name>calvalus.input.minWidth</name>
                     <value>50</value>
                 </jobParameter>
                 <jobParameter>
                     <name>calvalus.input.minHeight</name>
                     <value>50</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.hadoop.mapreduce.map.java.opts</name>
+	                <value>-Xmx4096M -Djava.awt.headless=true</value>
+                </jobParameter>
+                <jobParameter>
+                  <name>calvalus.hadoop.mapreduce.map.memory.mb</name>
+                  <value>4096</value>
                 </jobParameter>
             </jobConfig>
 
@@ -565,16 +573,7 @@
                     <valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>
                 </parameterDescriptor>
             </parameterDescriptors>
-            <jobConfig>
-                <jobParameter>
-                    <name>calvalus.output.regex</name>
-                    <value>.+(MER_..._)1.....(.+)</value>
-                </jobParameter>
-                <jobParameter>
-                    <name>calvalus.output.replacement</name>
-                    <value>$1CCL2R_$2</value>
-                </jobParameter>
-            </jobConfig>
+
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[
@@ -623,6 +622,25 @@
             <inputProductTypes>MERIS_L1B,MERIS_CC_L1P</inputProductTypes>
             <outputProductType>MERIS_CC_L2R</outputProductType>
             <validMaskExpression>!l2r_flags.INPUT_INVALID</validMaskExpression>
+
+            <jobConfig>
+                <jobParameter>
+                    <name>calvalus.output.regex</name>
+                    <value>.+(MER_..._)1.....(.+)</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.output.replacement</name>
+                    <value>$1CCL2R_$2</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.hadoop.mapreduce.map.java.opts</name>
+	                <value>-Xmx3072M -Djava.awt.headless=true</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.hadoop.mapreduce.map.memory.mb</name>
+                    <value>3072</value>
+                </jobParameter>
+            </jobConfig>
 
             <outputVariables>
                 <outputVariable>
@@ -1006,16 +1024,7 @@
                     <defaultValue>false</defaultValue>
                 </parameterDescriptor>
             </parameterDescriptors>
-            <jobConfig>
-                <jobParameter>
-                    <name>calvalus.output.regex</name>
-                    <value>.+(MER_..._)1.....(.+)</value>
-                </jobParameter>
-                <jobParameter>
-                    <name>calvalus.output.replacement</name>
-                    <value>$1CCL2W_$2</value>
-                </jobParameter>
-            </jobConfig>
+
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[
@@ -1080,6 +1089,26 @@
             <inputProductTypes>MERIS_L1B,MERIS_CC_L1P,MERIS_CC_L2R</inputProductTypes>
             <outputProductType>MERIS_CC_L2W</outputProductType>
             <validMaskExpression>!l2w_flags.INVALID</validMaskExpression>
+
+            <jobConfig>
+                <jobParameter>
+                    <name>calvalus.output.regex</name>
+                    <value>.+(MER_..._)1.....(.+)</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.output.replacement</name>
+                    <value>$1CCL2W_$2</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.hadoop.mapreduce.map.java.opts</name>
+	                <value>-Xmx3072M -Djava.awt.headless=true</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.hadoop.mapreduce.map.memory.mb</name>
+                    <value>3072</value>
+                </jobParameter>
+            </jobConfig>
+
             <outputVariables>
                 <outputVariable>
                     <name>reflec_1</name>

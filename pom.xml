@@ -301,7 +301,7 @@
                         <!--<descriptor>src/main/assembly/stitcher-bin.xml</descriptor>-->
                         <!--<descriptor>src/main/assembly/project.xml</descriptor>-->
                     </descriptors>
-                    <!--<finalName>coastcolour</finalName>-->
+                    <finalName>coastcolour</finalName>
                 </configuration>
             </plugin>
             <plugin>

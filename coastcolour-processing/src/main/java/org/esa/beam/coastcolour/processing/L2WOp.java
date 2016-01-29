@@ -7,7 +7,11 @@ import org.esa.beam.coastcolour.glint.atmosphere.operator.ReflectanceEnum;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.gpf.*;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.Operator;
+import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
@@ -18,7 +22,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 import org.esa.beam.util.SystemUtils;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
@@ -300,7 +304,7 @@ public class L2WOp extends Operator {
             try {
                 installer.install(".*", ProgressMonitor.NULL);
             } catch (IOException e) {
-                throw new RuntimeException("Unable to install auxdata of the costcolour module");
+                throw new RuntimeException("Unable to install auxdata of the coastcolour module");
             }
             if (ENABLE_OWT_CONC_BANDS) {
                 computeSingleCase2RProductsFromFuzzyApproach(auxDataDir);

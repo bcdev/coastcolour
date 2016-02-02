@@ -27,12 +27,11 @@ import java.awt.Color;
 // todo 5 - (cb;15.03.2014) provide a text field to enter a "valid pixel expression".
 // todo   -                 Currently the OWT is calculated everywhere, including land and clouds.
 // todo   -                 If a valid pixel expression would be provided the calculation would be restricted to those pixels
-
 @OperatorMetadata(alias = "OWTClassification",
                   description = "Performs an optical water type classification based on atmospherically corrected reflectances.",
                   authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
                   copyright = "(c) 2014 by Timothy Moore (University of New Hampshire) and Brockmann Consult",
-                  version = "1.6.5",
+        version = "1.6.6",
                   internal = true)
 public class OWTClassificationOp extends PixelOperator {
 

@@ -167,8 +167,6 @@
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-meris-radiometry</artifactId>
                 <version>${beamVersion}</version>
-                <!--<version>[5.0,5.1-SNAPSHOT)</version>-->
-                <!--<version>5.0.2</version>-->
             </dependency>
 
             <!-- CoastColour Libraries ############################################# -->
@@ -226,7 +224,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.11</version>
+                <version>4.12</version>
                 <scope>test</scope>
             </dependency>
 

@@ -207,7 +207,4 @@ public enum OWT_TYPE {
         return false;
     }
 
-    public Color[] getColors() {
-        return new Color[0];
-    }
 }

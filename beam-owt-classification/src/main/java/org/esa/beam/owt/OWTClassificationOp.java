@@ -89,15 +89,7 @@ public class OWTClassificationOp extends PixelOperator {
             String name = "class_" + i;
             indexCoding.addIndex(name, i, "Class " + i);
         }
-        if (owtType.getColors().length == owtType.getClassCount()) {
-            ColorPaletteDef.Point[] points = new ColorPaletteDef.Point[owtType.getColors().length];
-            Color[] colors = owtType.getColors();
-            for (int i = 0; i < colors.length; i++) {
-                Color color = colors[i];
-                points[i] = new ColorPaletteDef.Point(i + 1, color);
-            }
-            domClassBand.setImageInfo(new ImageInfo(new ColorPaletteDef(points)));
-        }
+
         targetProduct.getIndexCodingGroup().add(indexCoding);
         domClassBand.setSampleCoding(indexCoding);
 

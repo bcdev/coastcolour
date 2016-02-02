@@ -18,12 +18,12 @@ public class OWTClassificationOpTest {
 
     @Test
     public void testTheOpWithDefaults() throws Exception {
-        Operator fuzzyOp = new OWTClassificationOp();
-        fuzzyOp.setParameterDefaultValues();
-        fuzzyOp.setSourceProduct(createSourceProduct());
-        Product targetProduct = fuzzyOp.getTargetProduct();
+        Operator owtOp = new OWTClassificationOp();
+        owtOp.setParameterDefaultValues();
+        owtOp.setSourceProduct(createSourceProduct());
+        Product targetProduct = owtOp.getTargetProduct();
 
-        assertEquals(21, targetProduct.getNumBands());
+        assertEquals(20, targetProduct.getNumBands());
 
         // some band names
         List<String> bandNames = Arrays.asList(targetProduct.getBandNames());
@@ -33,7 +33,6 @@ public class OWTClassificationOpTest {
         assertTrue(bandNames.contains("norm_class_7"));
         assertTrue(bandNames.contains("dominant_class"));
         assertTrue(bandNames.contains("class_sum"));
-        assertTrue(bandNames.contains("norm_class_sum"));
 
         Band dominant_class = targetProduct.getBand("dominant_class");
         assertTrue(dominant_class.isIndexBand());
@@ -44,13 +43,13 @@ public class OWTClassificationOpTest {
 
     @Test
     public void testTheOpWithInputReflectances() throws Exception {
-        Operator fuzzyOp = new OWTClassificationOp();
-        fuzzyOp.setParameterDefaultValues();
-        fuzzyOp.setSourceProduct(createSourceProduct());
-        fuzzyOp.setParameter("writeInputReflectances", true);
-        Product targetProduct = fuzzyOp.getTargetProduct();
+        Operator owtOp = new OWTClassificationOp();
+        owtOp.setParameterDefaultValues();
+        owtOp.setSourceProduct(createSourceProduct());
+        owtOp.setParameter("writeInputReflectances", true);
+        Product targetProduct = owtOp.getTargetProduct();
 
-        assertEquals(26, targetProduct.getNumBands());
+        assertEquals(25, targetProduct.getNumBands());
 
         // test some band names
         List<String> bandNames = Arrays.asList(targetProduct.getBandNames());
@@ -60,7 +59,6 @@ public class OWTClassificationOpTest {
         assertTrue(bandNames.contains("norm_class_7"));
         assertTrue(bandNames.contains("dominant_class"));
         assertTrue(bandNames.contains("class_sum"));
-        assertTrue(bandNames.contains("norm_class_sum"));
         assertTrue(bandNames.contains("reflec_1"));
         assertTrue(bandNames.contains("reflec_3"));
         assertTrue(bandNames.contains("reflec_5"));
@@ -74,13 +72,13 @@ public class OWTClassificationOpTest {
 
     @Test
     public void testTheOpWithInlandAuxdata() throws Exception {
-        Operator fuzzyOp = new OWTClassificationOp();
-        fuzzyOp.setParameterDefaultValues();
-        fuzzyOp.setSourceProduct(createSourceProduct());
-        fuzzyOp.setParameter("owtType", "INLAND");
-        Product targetProduct = fuzzyOp.getTargetProduct();
+        Operator owtOp = new OWTClassificationOp();
+        owtOp.setParameterDefaultValues();
+        owtOp.setSourceProduct(createSourceProduct());
+        owtOp.setParameter("owtType", "INLAND");
+        Product targetProduct = owtOp.getTargetProduct();
 
-        assertEquals(17, targetProduct.getNumBands());
+        assertEquals(16, targetProduct.getNumBands());
 
         // test some band names
         List<String> bandNames = Arrays.asList(targetProduct.getBandNames());
@@ -90,7 +88,6 @@ public class OWTClassificationOpTest {
         assertTrue(bandNames.contains("norm_class_7"));
         assertTrue(bandNames.contains("dominant_class"));
         assertTrue(bandNames.contains("class_sum"));
-        assertTrue(bandNames.contains("norm_class_sum"));
 
         Band dominant_class = targetProduct.getBand("dominant_class");
         assertTrue(dominant_class.isIndexBand());

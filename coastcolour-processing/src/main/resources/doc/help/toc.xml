@@ -5,11 +5,13 @@
 <toc version="2.0" categoryclosedimage="folder" categoryopenimage="folder" topicimage="doc">
 
     <tocitem text="Data Processors">
-        <tocitem text="CoastColour Processors" target="CoastcolourPlugIn">
-            <tocitem text="Overview" target="processors"/>
-            <tocitem text="Pre-Processing and Pixel Classification" target="l1pprocessor"/>
-            <tocitem text="Atmospheric Correction" target="l2rprocessor"/>
-            <tocitem text="L2 Water Processor" target="l2wprocessor"/>
+        <tocitem text="Thematic Water Processing">
+            <tocitem text="CoastColour Processors" target="CoastcolourPlugIn">
+                <tocitem text="Overview" target="processors"/>
+                <tocitem text="Pre-Processing and Pixel Classification" target="l1pprocessor"/>
+                <tocitem text="Atmospheric Correction" target="l2rprocessor"/>
+                <tocitem text="L2 Water Processor" target="l2wprocessor"/>
+            </tocitem>
         </tocitem>
     </tocitem>
 </toc>

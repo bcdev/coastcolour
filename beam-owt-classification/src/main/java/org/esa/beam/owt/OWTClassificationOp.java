@@ -20,18 +20,15 @@ import org.esa.beam.util.ProductUtils;
 
 import java.awt.Color;
 
-// todo 1 - (mp;28.02.2014) discuss with CB,KS,AR if sum bands can be removed. Have no additional use to the user. At least the norm_class_sum band
-// todo 2 - (mp;22.11.2010) convertToSubsurfaceWaterRrs should be configurable; should be discussed with CB,KS,AR
-// todo 3 - (mp;28.02.2014) description should be checked by CB,KS,AR
-// todo 4 - (mp;10.03.2014) help is missing
-// todo 5 - (cb;15.03.2014) provide a text field to enter a "valid pixel expression".
-// todo   -                 Currently the OWT is calculated everywhere, including land and clouds.
-// todo   -                 If a valid pixel expression would be provided the calculation would be restricted to those pixels
+// todo 1 - (cb,ks;02.02.2016) provide a text field to enter a "valid pixel expression".
+// todo   -                    Currently the OWT is calculated everywhere, including land and clouds.
+// todo   -                    should be done when the operator is migrated to SNAP
+// todo 2 - (mp;10.03.2014)    help is missing
 @OperatorMetadata(alias = "OWTClassification",
                   description = "Performs an optical water type classification based on atmospherically corrected reflectances.",
                   authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
-                  copyright = "(c) 2014 by Timothy Moore (University of New Hampshire) and Brockmann Consult",
-        version = "1.6.6",
+        copyright = "(c) 2016 by Timothy Moore (University of New Hampshire) and Brockmann Consult",
+        version = "1.7",
                   internal = true)
 public class OWTClassificationOp extends PixelOperator {
 
@@ -41,7 +38,7 @@ public class OWTClassificationOp extends PixelOperator {
     @SourceProduct(alias = "source")
     private Product sourceProduct;
 
-    @Parameter(defaultValue = "COASTAL")
+    @Parameter(label = "OWT Type", defaultValue = "COASTAL")
     private OWT_TYPE owtType;
 
     @Parameter(defaultValue = "reflec")
@@ -107,8 +104,6 @@ public class OWTClassificationOp extends PixelOperator {
 
         final Band sumBand = targetProduct.addBand("class_sum", ProductData.TYPE_FLOAT32);
         sumBand.setValidPixelExpression(sumBand.getName() + " > 0.0");
-        final Band normalizedSumBand = targetProduct.addBand("norm_class_sum", ProductData.TYPE_FLOAT32);
-        normalizedSumBand.setValidPixelExpression(normalizedSumBand.getName() + " > 0.0");
 
         if (writeInputReflectances) {
             float[] wavelengths = owtType.getWavelengths();
@@ -203,7 +198,6 @@ public class OWTClassificationOp extends PixelOperator {
         int dominantClass = DOMINANT_CLASS_NO_DATA_VALUE;
         double dominantClassValue = Double.MIN_VALUE;
         double classSum = 0.0;
-        double normalizedClassSum = 0.0;
         for (int i = 0; i < owtType.getClassCount(); i++) {
             final double currentClassValue = targetSamples[i].getDouble();
             if (currentClassValue > dominantClassValue) {
@@ -211,15 +205,13 @@ public class OWTClassificationOp extends PixelOperator {
                 dominantClass = i + 1;
             }
             classSum += currentClassValue;
-            normalizedClassSum += targetSamples[owtType.getClassCount() + i].getDouble();
         }
         targetSamples[numClassSamples].set(dominantClass);
         targetSamples[numClassSamples + 1].set(classSum);
-        targetSamples[numClassSamples + 2].set(normalizedClassSum);
 
         if (writeInputReflectances && owtType.mustNormalizeSpectra()) {
             for (int i = 0; i < rrsBelowWater.length; i++) {
-                targetSamples[numClassSamples + 3 + i].set(rrsBelowWater[i]);
+                targetSamples[numClassSamples + 2 + i].set(rrsBelowWater[i]);
             }
         }
 
@@ -231,7 +223,6 @@ public class OWTClassificationOp extends PixelOperator {
         }
         targetSamples[numClassSamples].set(DOMINANT_CLASS_NO_DATA_VALUE); // dominant_class
         targetSamples[numClassSamples + 1].set(CLASS_SUM_NO_DATA_VALUE); // class_sum
-        targetSamples[numClassSamples + 2].set(Double.NaN); // norm_class_sum
     }
 
     static double trapz(double[] x, double[] y) {
@@ -326,7 +317,6 @@ public class OWTClassificationOp extends PixelOperator {
         return true;
     }
 
-    // todo 2
     private double convertToSubsurfaceWaterRrs(double merisL2Reflec) {
         // convert to remote sensing reflectances
         final double rrsAboveWater = merisL2Reflec / Math.PI;

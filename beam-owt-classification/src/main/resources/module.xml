@@ -55,8 +55,6 @@
 
     <categories>Processing,MERIS</categories>
 
-    <!-- As long 'OWTClassification' is internal, exclude from VISAT integration in BEAM 5 release -->
-    <!-- re-activated in new 1.4-SNAPSHOT version (CB, 20140613) -->
     <extension point="beam-ui:actions">
         <action>
             <id>owtClassification</id>
@@ -69,6 +67,13 @@
             <dialogTitle>Optical Water Type Classification</dialogTitle>
             <targetProductNameSuffix>_owt</targetProductNameSuffix>
         </action>
+    </extension>
+
+    <extension point="beam-ui:helpSets">
+        <helpSet>
+            <parent>beam-help</parent>
+            <path>doc/help/owt.hs</path>
+        </helpSet>
     </extension>
 
 

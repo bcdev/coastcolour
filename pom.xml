@@ -136,22 +136,22 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-bootstrap</artifactId>
-                <version>5.0</version>
+                <version>${beamVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-core</artifactId>
-                <version>5.0.2</version>
+                <version>${beamVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-ui</artifactId>
-                <version>5.0.1</version>
+                <version>${beamVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat</artifactId>
-                <version>5.0</version>
+                <version>${beamVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>

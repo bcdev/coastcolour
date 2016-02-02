@@ -1,6 +1,6 @@
 <bundleDescriptor>
     <bundleName>coastcolour-processing</bundleName>
-    <bundleVersion>1.7</bundleVersion>
+    <bundleVersion>1.8.4-SNAPSHOT</bundleVersion>
     <processorDescriptors>
 
         <processorDescriptor>
@@ -61,22 +61,20 @@
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
+                    <name>ccGlintCloudThresholdAddition</name>
+                    <type>string</type>
+                    <description>Value added to cloud screening ambiguous/sure thresholds in case of glint
+                    </description>
+                    <defaultValue>0.1</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
                     <name>ccOutputCloudProbabilityFeatureValue</name>
                     <type>boolean</type>
                     <description>Write Cloud Probability Feature Value to the CC L1P target product</description>
                     <defaultValue>false</defaultValue>
                 </parameterDescriptor>
             </parameterDescriptors>
-            <jobConfig>
-                <jobParameter>
-                    <name>calvalus.output.regex</name>
-                    <value>.+(MER_..._)1.....(.+)</value>
-                </jobParameter>
-                <jobParameter>
-                    <name>calvalus.output.replacement</name>
-                    <value>$1CCL1P_$2</value>
-                </jobParameter>
-            </jobConfig>
+
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[
@@ -93,6 +91,7 @@
                                  <li>ccCloudBufferWidth: The width of a cloud 'safety buffer' around a pixel which was classified as cloudy, [0,100]. Default value: 2</li>
                                  <li>ccCloudScreeningAmbiguous: Threshold of Cloud Probability Feature Value above which cloud is regarded as still ambiguous (i.e. a higher value results in fewer ambiguous clouds). Default value: 1.4</li>
                                  <li>ccCloudScreeningSure: Threshold of Cloud Probability Feature Value above which cloud is regarded as sure (i.e. a higher value results in fewer sure clouds). Default value: 1.8</li>
+                                 <li>ccGlintCloudThresholdAddition: Value added to cloud screening ambiguous/sure thresholds in case of glint. Default value: 0.1</li>
                                  <li>ccOutputCloudProbabilityFeatureValue: Whether to write Cloud Probability Feature Value to the CC L1P target product.<br>
                                    Values: [true/false]. Default value: false</li>
                                </ul>
@@ -109,10 +108,10 @@
                         Processor output: MERIS L1P products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)
                     </p>
 
-                    <p>CHANGES to previous version (1.8.2):
+                    <p>CHANGES to previous version (1.8.3):
                         <ul>
                            <li>
-                               Uses an updated BEAM MERIS Radiometry module (bug fix in case of very bright nearly saturated pixels)
+                               Added option 'ccGlintCloudThresholdAddition': Value added to cloud screening ambiguous/sure thresholds in case of glint.
                            </li>
                         </ul>
                     </p>
@@ -123,6 +122,17 @@
             <inputProductTypes>MERIS_L1B</inputProductTypes>
             <outputProductType>MERIS_CC_L1P</outputProductType>
             <validMaskExpression>!l1p_flags.INVALID</validMaskExpression>
+
+            <jobConfig>
+                <jobParameter>
+                    <name>calvalus.output.regex</name>
+                    <value>.+(MER_..._)1.....(.+)</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.output.replacement</name>
+                    <value>$1CCL1P_$2</value>
+                </jobParameter>
+            </jobConfig>
 
             <outputVariables>
                 <outputVariable>
@@ -274,6 +284,13 @@
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
                 <parameterDescriptor>
+                    <name>ccGlintCloudThresholdAddition</name>
+                    <type>string</type>
+                    <description>Value added to cloud screening ambiguous/sure thresholds in case of glint
+                    </description>
+                    <defaultValue>0.1</defaultValue>
+                </parameterDescriptor>
+                <parameterDescriptor>
                     <name>ccOutputCloudProbabilityFeatureValue</name>
                     <type>boolean</type>
                     <description>Write Cloud Probability Feature Value to the CC L1P target product</description>
@@ -281,16 +298,6 @@
                 </parameterDescriptor>
             </parameterDescriptors>
 
-            <jobConfig>
-                <jobParameter>
-                    <name>calvalus.output.regex</name>
-                    <value>.+(MER_..._)1.....(.+)</value>
-                </jobParameter>
-                <jobParameter>
-                    <name>calvalus.output.replacement</name>
-                    <value>$1CCL1P_ICOL_$2</value>
-                </jobParameter>
-            </jobConfig>
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[
@@ -301,10 +308,10 @@
                 <b>Do not apply this processor to MERIS L1B unless the input region is small. Use the L1P processor first, then apply L2R to the output set, then apply L2W.</b>
                 </p>
 
-                <p>CHANGES to previous version (1.8.2):
+                <p>CHANGES to previous version (1.8.3):
                     <ul>
                        <li>
-                           Uses an updated BEAM MERIS Radiometry module (bug fix in case of very bright nearly saturated pixels)
+                            Added option 'ccGlintCloudThresholdAddition': Value added to cloud screening ambiguous/sure thresholds in case of glint.
                        </li>
                     </ul>
                 </p>
@@ -318,12 +325,28 @@
 
             <jobConfig>
                 <jobParameter>
+                    <name>calvalus.output.regex</name>
+                    <value>.+(MER_..._)1.....(.+)</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.output.replacement</name>
+                    <value>$1CCL1P_ICOL_$2</value>
+                </jobParameter>
+                <jobParameter>
                     <name>calvalus.input.minWidth</name>
                     <value>50</value>
                 </jobParameter>
                 <jobParameter>
                     <name>calvalus.input.minHeight</name>
                     <value>50</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.hadoop.mapreduce.map.java.opts</name>
+	                <value>-Xmx4096M -Djava.awt.headless=true</value>
+                </jobParameter>
+                <jobParameter>
+                  <name>calvalus.hadoop.mapreduce.map.memory.mb</name>
+                  <value>4096</value>
                 </jobParameter>
             </jobConfig>
 
@@ -480,6 +503,13 @@
                     </description>
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccGlintCloudThresholdAddition</name>
+                    <type>string</type>
+                    <description>Value added to cloud screening ambiguous/sure thresholds in case of glint
+                    </description>
+                    <defaultValue>0.1</defaultValue>
+                </parameterDescriptor>
                 <!-- L2R parameters -->
                 <parameterDescriptor>
                     <name>useSnTMap</name>
@@ -543,16 +573,7 @@
                     <valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>
                 </parameterDescriptor>
             </parameterDescriptors>
-            <jobConfig>
-                <jobParameter>
-                    <name>calvalus.output.regex</name>
-                    <value>.+(MER_..._)1.....(.+)</value>
-                </jobParameter>
-                <jobParameter>
-                    <name>calvalus.output.replacement</name>
-                    <value>$1CCL2R_$2</value>
-                </jobParameter>
-            </jobConfig>
+
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[
@@ -588,10 +609,10 @@
                         Processor output: CoastColour L2R products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)
                 </p>
 
-                <p>CHANGES to previous version (1.8.2):
+                <p>CHANGES to previous version (1.8.3):
                     <ul>
                        <li>
-                           Uses an updated BEAM MERIS Radiometry module (bug fix in case of very bright nearly saturated pixels)
+                          Added option 'ccGlintCloudThresholdAddition': Value added to cloud screening ambiguous/sure thresholds in case of glint.
                        </li>
                     </ul>
                 </p>
@@ -601,6 +622,25 @@
             <inputProductTypes>MERIS_L1B,MERIS_CC_L1P</inputProductTypes>
             <outputProductType>MERIS_CC_L2R</outputProductType>
             <validMaskExpression>!l2r_flags.INPUT_INVALID</validMaskExpression>
+
+            <jobConfig>
+                <jobParameter>
+                    <name>calvalus.output.regex</name>
+                    <value>.+(MER_..._)1.....(.+)</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.output.replacement</name>
+                    <value>$1CCL2R_$2</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.hadoop.mapreduce.map.java.opts</name>
+	                <value>-Xmx3072M -Djava.awt.headless=true</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.hadoop.mapreduce.map.memory.mb</name>
+                    <value>3072</value>
+                </jobParameter>
+            </jobConfig>
 
             <outputVariables>
                 <outputVariable>
@@ -878,6 +918,13 @@
                     </description>
                     <defaultValue>1.8</defaultValue>
                 </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>ccGlintCloudThresholdAddition</name>
+                    <type>string</type>
+                    <description>Value added to cloud screening ambiguous/sure thresholds in case of glint
+                    </description>
+                    <defaultValue>0.1</defaultValue>
+                </parameterDescriptor>
                 <!-- L2R parameters -->
                 <parameterDescriptor>
                     <name>useSnTMap</name>
@@ -969,17 +1016,15 @@
                     </description>
                     <defaultValue>true</defaultValue>
                 </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>outputAOT550</name>
+                    <type>boolean</type>
+                    <description>Write AOT (550nm) to the CC L2W target product.
+                    </description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
             </parameterDescriptors>
-            <jobConfig>
-                <jobParameter>
-                    <name>calvalus.output.regex</name>
-                    <value>.+(MER_..._)1.....(.+)</value>
-                </jobParameter>
-                <jobParameter>
-                    <name>calvalus.output.replacement</name>
-                    <value>$1CCL2W_$2</value>
-                </jobParameter>
-            </jobConfig>
+
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
             <descriptionHtml>
                 <![CDATA[
@@ -1000,6 +1045,8 @@
                       Values: [RADIANCE_REFLECTANCES/IRRADIANCE_REFLECTANCES]. Default value: <em>RADIANCE_REFLECTANCES</em></li>
                       <li>outputKdSpectrum: Whether to write the output of downwelling irradiance attenuation coefficients (Kd) to the CC L2W target product. If disabled, only Kd_490 is added to the output. <br>
                       Values: [true/false]. Default value: false</li>
+                      <li>outputAOT550: Whether to write the Atmosphere optical thickness at 550 nm to the CC L2W target product.<br>
+                      Values: [true/false]. Default value: false</li>
                     </ul>
                     <p><b>Output bands:</b>
                     <ul>
@@ -1012,6 +1059,7 @@
                         <li>conc_chl - Chlorophyll concentration.</li>
                         <li>K_min - Minimum downwelling irradiance attenuation coefficient.</li>
                         <li>Kd_&lt;λ&gt; - Downwelling irradiance attenuation coefficient at &lt;λ&gt;, where &lt;λ&gt; is one of 412, 443, 490, 510, 560, 620, 664 and 680</li>
+                        <li>atm_tau_550 - Atmosphere optical thickness at 550 nm.</li>
                         <li>Z90_max - Maximum signal depth.</li>
                         <li>turbidity - Turbidity in FNU (Formazine Nephelometric Unit).</li>
                         <li>altitude - DEM altitude.</li>
@@ -1024,10 +1072,13 @@
                     Processor output: CoastColour L2W products in the selected format (NetCDF, GeoTIFF, or BEAM-DIMAP)</p>
                 </p>
 
-                <p>CHANGES to previous version (1.8.2):
+                <p>CHANGES to previous version (1.8.3):
                     <ul>
                        <li>
-                           Uses an updated BEAM MERIS Radiometry module (bug fix in case of very bright nearly saturated pixels)
+                           Added option to write AOT (550 nm) to the L2W product.
+                       </li>
+                       <li>
+                           Added option 'ccGlintCloudThresholdAddition': Value added to cloud screening ambiguous/sure thresholds in case of glint.
                        </li>
                     </ul>
                 </p>
@@ -1038,6 +1089,26 @@
             <inputProductTypes>MERIS_L1B,MERIS_CC_L1P,MERIS_CC_L2R</inputProductTypes>
             <outputProductType>MERIS_CC_L2W</outputProductType>
             <validMaskExpression>!l2w_flags.INVALID</validMaskExpression>
+
+            <jobConfig>
+                <jobParameter>
+                    <name>calvalus.output.regex</name>
+                    <value>.+(MER_..._)1.....(.+)</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.output.replacement</name>
+                    <value>$1CCL2W_$2</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.hadoop.mapreduce.map.java.opts</name>
+	                <value>-Xmx3072M -Djava.awt.headless=true</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.hadoop.mapreduce.map.memory.mb</name>
+                    <value>3072</value>
+                </jobParameter>
+            </jobConfig>
+
             <outputVariables>
                 <outputVariable>
                     <name>reflec_1</name>
@@ -1196,6 +1267,11 @@
                 </outputVariable>
                 <outputVariable>
                     <name>Z90_max</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>atm_tau_550</name>
                     <defaultAggregator>AVG</defaultAggregator>
                     <defaultWeightCoeff>1.0</defaultWeightCoeff>
                 </outputVariable>

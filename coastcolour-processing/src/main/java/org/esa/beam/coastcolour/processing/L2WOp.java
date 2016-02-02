@@ -99,6 +99,10 @@ public class L2WOp extends Operator {
                label = " [L1P] Cloud screening 'sure' threshold")
     private double ccCloudScreeningSure = 1.8;       // Schiller
 
+    @Parameter(defaultValue = "0.1",
+               description = "Value added to cloud screening ambiguous/sure thresholds in case of glint",
+               label = "Cloud screening threshold addition in case of glint")
+    private double ccGlintCloudThresholdAddition;
 
     @Parameter(defaultValue = "true",
                label = "[L2R] Use climatology map for salinity and temperature",
@@ -164,6 +168,11 @@ public class L2WOp extends Operator {
                description = "Write the output of downwelling irradiance attenuation coefficients (Kd) to the CC L2W target product. " +
                        "If disabled only Kd_490 is added to the output.")
     private boolean outputKdSpectrum;
+
+    @Parameter(defaultValue = "false",
+               label = "Write AOT (550nm) to the target product",
+               description = "Write AOT (550nm) to the CC L2W target product.")
+    private boolean outputAOT550;
 
     @Parameter(defaultValue = "COASTAL",
                label = "OWT classification type",
@@ -356,6 +365,11 @@ public class L2WOp extends Operator {
             if (!l2WProduct.containsBand("corr_latitude")) {
                 ProductUtils.copyBand("corr_latitude", sourceProduct, l2WProduct, true);
             }
+        }
+
+        // optionally copy AOT 550nm band from L2R
+        if (outputAOT550) {
+            ProductUtils.copyBand("atm_tau_550", l2rProduct, l2WProduct, true);
         }
 
         for (Band b : l2WProduct.getBands()) {
@@ -675,6 +689,7 @@ public class L2WOp extends Operator {
         l2rParams.put("ccCloudBufferWidth", ccCloudBufferWidth);
         l2rParams.put("ccIgnoreSeaIceClimatology", ccIgnoreSeaIceClimatology);
         l2rParams.put("ccCloudScreeningAmbiguous", ccCloudScreeningAmbiguous);
+        l2rParams.put("ccGlintCloudThresholdAddition", ccGlintCloudThresholdAddition);
         l2rParams.put("ccCloudScreeningSure", ccCloudScreeningSure);
         l2rParams.put("useSnTMap", useSnTMap);
         l2rParams.put("averageSalinity", averageSalinity);

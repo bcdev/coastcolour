@@ -44,11 +44,11 @@ public class OWTClassificationOp extends PixelOperator {
     @Parameter(defaultValue = "reflec")
     private String reflectancesPrefix;
 
-    @Parameter(defaultValue = "false")
-    private boolean writeInputReflectances;
-
     @Parameter(defaultValue = "RADIANCE_REFLECTANCES")
     private ReflectanceEnum inputReflectanceIs;
+
+    @Parameter(defaultValue = "false")
+    private boolean writeInputReflectances;
 
     private OWTClassification owtClassification;
     private Auxdata auxdata;

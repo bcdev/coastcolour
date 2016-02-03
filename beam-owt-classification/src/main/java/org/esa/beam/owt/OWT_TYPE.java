@@ -4,8 +4,6 @@ package org.esa.beam.owt;
 // todo (mp) - the actually used wavelength could be a parameter to getAuxdataFactory(); this way it would be configurable by the user
 // todo        and it would be better separated
 
-import java.awt.Color;
-
 public enum OWT_TYPE {
     COASTAL {
         private float[] wavelength = new float[]{410, 443, 490, 510, 555};
@@ -160,7 +158,6 @@ public enum OWT_TYPE {
         }
 
     },
-
     GLASS_6C_NORMALISED {
         private final float[] ALL_WAVELENGTHS = new float[]{442, 490, 511, 559, 619, 664, 682, 709, 754};
         private final float MAX_DISTANCE = 1.5f;

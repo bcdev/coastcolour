@@ -1025,12 +1025,10 @@
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>owtType</name>
-                    <type>stringArray</type>
-                    <description>OWT classification type. Possible values: COASTAL, INLAND, INLAND_NO_BLUE_BAND,
-                        GLASS_5C, GLASS_6C, GLASS_6C_NORMALISED
-                    </description>
+                    <type>string</type>
+                    <description>OWT classification type.</description>
                     <defaultValue>COASTAL</defaultValue>
-                    <valueSet>COASTAL, INLAND, INLAND_NO_BLUE_BAND, GLASS_5C, GLASS_6C, GLASS_6C_NORMALISED</valueSet>
+                    <valueSet>COASTAL,INLAND,INLAND_NO_BLUE_BAND,GLASS_5C,GLASS_6C,GLASS_6C_NORMALISED</valueSet>
                 </parameterDescriptor>
             </parameterDescriptors>
 
@@ -1316,12 +1314,11 @@
             <parameterDescriptors>
                 <parameterDescriptor>
                     <name>owtType</name>
-                    <type>stringArray</type>
-                    <description>OWT classification type. Possible values: COASTAL, INLAND, INLAND_NO_BLUE_BAND,
-                        GLASS_5C, GLASS_6C, GLASS_6C_NORMALISED
+                    <type>string</type>
+                    <description>OWT classification type.
                     </description>
                     <defaultValue>COASTAL</defaultValue>
-                    <valueSet>COASTAL, INLAND, INLAND_NO_BLUE_BAND, GLASS_5C, GLASS_6C, GLASS_6C_NORMALISED</valueSet>
+                    <valueSet>COASTAL,INLAND,INLAND_NO_BLUE_BAND,GLASS_5C,GLASS_6C,GLASS_6C_NORMALISED</valueSet>
                 </parameterDescriptor>
 
                 <parameterDescriptor>
@@ -1334,7 +1331,7 @@
 
                 <parameterDescriptor>
                     <name>inputReflectanceIs</name>
-                    <type>stringArray</type>
+                    <type>string</type>
                     <description>Specifies if the input reflectance is either radiance reflectances or irradiance
                         reflectances (ESA compatible)
                     </description>

@@ -1309,6 +1309,171 @@
             </outputVariables>
         </processorDescriptor>
 
+        <processorDescriptor>
+            <executableName>OWTClassification</executableName>
+            <processorName>OWT Classification</processorName>
+            <processorVersion>1.7</processorVersion>
+            <parameterDescriptors>
+                <parameterDescriptor>
+                    <name>owtType</name>
+                    <type>stringArray</type>
+                    <description>OWT classification type. Possible values: COASTAL, INLAND, INLAND_NO_BLUE_BAND,
+                        GLASS_5C, GLASS_6C, GLASS_6C_NORMALISED
+                    </description>
+                    <defaultValue>COASTAL</defaultValue>
+                    <valueSet>COASTAL, INLAND, INLAND_NO_BLUE_BAND, GLASS_5C, GLASS_6C, GLASS_6C_NORMALISED</valueSet>
+                </parameterDescriptor>
+
+                <parameterDescriptor>
+                    <name>reflectancePrefix</name>
+                    <type>string</type>
+                    <description>Specifies the prefix of the reflectance bands which are used for processing.
+                    </description>
+                    <defaultValue>reflec</defaultValue>
+                </parameterDescriptor>
+
+                <parameterDescriptor>
+                    <name>inputReflectanceIs</name>
+                    <type>stringArray</type>
+                    <description>Specifies if the input reflectance is either radiance reflectances or irradiance
+                        reflectances (ESA compatible)
+                    </description>
+                    <defaultValue>RADIANCE_REFLECTANCES</defaultValue>
+                    <valueSet>RADIANCE_REFLECTANCES,IRRADIANCE_REFLECTANCES</valueSet>
+                </parameterDescriptor>
+
+                <parameterDescriptor>
+                    <name>writeInputReflectances</name>
+                    <type>boolean</type>
+                    <description>Whether or not the input reflectances shall be copied into target product.
+                    </description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+            </parameterDescriptors>
+
+            <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
+            <descriptionHtml>
+                <![CDATA[<p>The optical water type classification (OWT) tool is an adaptation of a spectral based optical pre-classification
+    scheme (Moore et al., 2014) that calculates clusters from in-situ spectra. These spectra have been collected by
+    partners and advisors of the EU-GLaSS project and the ESA DUE CoastColour project.
+                ]]></descriptionHtml>
+            <inputProductTypes>*</inputProductTypes>
+            <outputProductType>OWT</outputProductType>
+
+            <outputVariables>
+                <outputVariable>
+                    <name>class__1</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>class_2</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>class_3</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>class_4</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>class_5</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>class_6</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>class_7</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>class_8</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>class_9</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>class_10</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>norm_class__1</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>norm_class_2</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>norm_class_3</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>norm_class_4</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>norm_class_5</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>norm_class_6</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>norm_class_7</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>norm_class_8</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>norm_class_9</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>norm_class_10</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>dominant_class</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>class_sum</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+            </outputVariables>
+        </processorDescriptor>
+
     </processorDescriptors>
 </bundleDescriptor>
 

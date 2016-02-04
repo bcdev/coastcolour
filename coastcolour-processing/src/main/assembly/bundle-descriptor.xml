@@ -342,11 +342,11 @@
                 </jobParameter>
                 <jobParameter>
                     <name>calvalus.hadoop.mapreduce.map.java.opts</name>
-	                <value>-Xmx4096M -Djava.awt.headless=true</value>
+                    <value>-Xmx4096M -Djava.awt.headless=true</value>
                 </jobParameter>
                 <jobParameter>
-                  <name>calvalus.hadoop.mapreduce.map.memory.mb</name>
-                  <value>4096</value>
+                    <name>calvalus.hadoop.mapreduce.map.memory.mb</name>
+                    <value>4096</value>
                 </jobParameter>
             </jobConfig>
 
@@ -634,7 +634,7 @@
                 </jobParameter>
                 <jobParameter>
                     <name>calvalus.hadoop.mapreduce.map.java.opts</name>
-	                <value>-Xmx3072M -Djava.awt.headless=true</value>
+                    <value>-Xmx3072M -Djava.awt.headless=true</value>
                 </jobParameter>
                 <jobParameter>
                     <name>calvalus.hadoop.mapreduce.map.memory.mb</name>
@@ -1023,6 +1023,15 @@
                     </description>
                     <defaultValue>false</defaultValue>
                 </parameterDescriptor>
+                <parameterDescriptor>
+                    <name>owtType</name>
+                    <type>stringArray</type>
+                    <description>OWT classification type. Possible values: COASTAL, INLAND, INLAND_NO_BLUE_BAND,
+                        GLASS_5C, GLASS_6C, GLASS_6C_NORMALISED
+                    </description>
+                    <defaultValue>COASTAL</defaultValue>
+                    <valueSet>COASTAL, INLAND, INLAND_NO_BLUE_BAND, GLASS_5C, GLASS_6C, GLASS_6C_NORMALISED</valueSet>
+                </parameterDescriptor>
             </parameterDescriptors>
 
             <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
@@ -1101,7 +1110,7 @@
                 </jobParameter>
                 <jobParameter>
                     <name>calvalus.hadoop.mapreduce.map.java.opts</name>
-	                <value>-Xmx3072M -Djava.awt.headless=true</value>
+                    <value>-Xmx3072M -Djava.awt.headless=true</value>
                 </jobParameter>
                 <jobParameter>
                     <name>calvalus.hadoop.mapreduce.map.memory.mb</name>

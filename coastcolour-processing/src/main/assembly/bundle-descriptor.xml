@@ -1322,7 +1322,7 @@
                 </parameterDescriptor>
 
                 <parameterDescriptor>
-                    <name>reflectancePrefix</name>
+                    <name>reflectancesPrefix</name>
                     <type>string</type>
                     <description>Specifies the prefix of the reflectance bands which are used for processing.
                     </description>

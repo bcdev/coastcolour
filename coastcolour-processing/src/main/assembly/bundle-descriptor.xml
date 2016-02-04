@@ -1,12 +1,12 @@
 <bundleDescriptor>
     <bundleName>coastcolour-processing</bundleName>
-    <bundleVersion>1.8.4-SNAPSHOT</bundleVersion>
+    <bundleVersion>1.8.4</bundleVersion>
     <processorDescriptors>
 
         <processorDescriptor>
             <executableName>CoastColour.L1P</executableName>
             <processorName>MERIS CoastColour L1P</processorName>
-            <processorVersion>1.8.4-SNAPSHOT</processorVersion>
+            <processorVersion>1.8.4</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
                 <parameterDescriptor>
@@ -227,7 +227,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L1P.Icol</executableName>
             <processorName>MERIS CoastColour L1P ICOL</processorName>
-            <processorVersion>1.8.4-SNAPSHOT</processorVersion>
+            <processorVersion>1.8.4</processorVersion>
             <!--<defaultParameters><![CDATA[]]></defaultParameters>-->
 
             <parameterDescriptors>
@@ -443,7 +443,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2R</executableName>
             <processorName>MERIS CoastColour L2R</processorName>
-            <processorVersion>1.8.4-SNAPSHOT</processorVersion>
+            <processorVersion>1.8.4</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
                 <parameterDescriptor>
@@ -864,7 +864,7 @@
         <processorDescriptor>
             <executableName>CoastColour.L2W</executableName>
             <processorName>MERIS CoastColour L2W</processorName>
-            <processorVersion>1.8.4-SNAPSHOT</processorVersion>
+            <processorVersion>1.8.4</processorVersion>
             <parameterDescriptors>
                 <!-- CoastColour L1P parameters -->
                 <parameterDescriptor>

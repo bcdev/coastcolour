@@ -1001,7 +1001,7 @@
                 </parameterDescriptor>
                 <parameterDescriptor>
                     <name>outputL2WReflecAs</name>
-                    <type>stringArray</type>
+                    <type>string</type>
                     <description>Select if water leaving reflectances shall be written as radiances or irradiances. The
                         irradiances ( = radiances multiplied by PI) are compatible with the standard MERIS product.
                     </description>

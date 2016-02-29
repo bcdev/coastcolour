@@ -58,6 +58,13 @@ abstract class L2WProductFactory {
     protected static final String IOP_QUALITY_BAND_NAME = "iop_quality";
     protected static final String IOP_QUALITY_DESCRIPTION = "Quality indicator for IOPs";
 
+    private static final String FLAG_NAME_NN_WLR_OOR = "NN_WLR_OOR";
+    private static final String FLAG_NAME_NN_CONC_OOR = "NN_CONC_OOR";
+    private static final String FLAG_NAME_NN_OOTR = "NN_OOTR";
+    private static final String FLAG_NAME_C2R_WHITECAPS = "C2R_WHITECAPS";
+    private static final String FLAG_NAME_QAA_IMAGINARY_NUMBER = "QAA_IMAGINARY_NUMBER";
+    private static final String FLAG_NAME_QAA_NEGATIVE_AYS = "QAA_NEGATIVE_AYS";
+
     private static final String WLR_OOR_DESCRIPTION = "Water leaving reflectance out of training range";
     private static final String CONC_OOR_DESCRIPTION = "Water constituents out of training range";
     private static final String OOTR_DESCRIPTION = "Spectrum out of training range (chiSquare threshold)";
@@ -236,12 +243,12 @@ abstract class L2WProductFactory {
 
         FlagCoding l2wFlagCoding = new FlagCoding(L2W_FLAGS_NAME);
         flagCodingGroup.add(l2wFlagCoding);
-        l2wFlagCoding.addFlag("NN_WLR_OOR", 1, WLR_OOR_DESCRIPTION);
-        l2wFlagCoding.addFlag("NN_CONC_OOR", 2, CONC_OOR_DESCRIPTION);
-        l2wFlagCoding.addFlag("NN_OOTR", 4, OOTR_DESCRIPTION);
-        l2wFlagCoding.addFlag("C2R_WHITECAPS", 8, WHITE_CAPS_DESCRIPTION);
-        l2wFlagCoding.addFlag("QAA_IMAGINARY_NUMBER", 16, IMAGINARY_NUMBER_DESCRIPTION);
-        l2wFlagCoding.addFlag("QAA_NEGATIVE_AYS", 32, NEGATIVE_AYS_DESCRIPTION);
+        l2wFlagCoding.addFlag(FLAG_NAME_NN_WLR_OOR, 1, WLR_OOR_DESCRIPTION);
+        l2wFlagCoding.addFlag(FLAG_NAME_NN_CONC_OOR, 2, CONC_OOR_DESCRIPTION);
+        l2wFlagCoding.addFlag(FLAG_NAME_NN_OOTR, 4, OOTR_DESCRIPTION);
+        l2wFlagCoding.addFlag(FLAG_NAME_C2R_WHITECAPS, 8, WHITE_CAPS_DESCRIPTION);
+        l2wFlagCoding.addFlag(FLAG_NAME_QAA_IMAGINARY_NUMBER, 16, IMAGINARY_NUMBER_DESCRIPTION);
+        l2wFlagCoding.addFlag(FLAG_NAME_QAA_NEGATIVE_AYS, 32, NEGATIVE_AYS_DESCRIPTION);
         final String invalidDescription = String.format(INVALID_DESCRIPTION_FORMAT, getInvalidPixelExpression());
         l2wFlagCoding.addFlag("INVALID", 64, invalidDescription);
 
@@ -251,18 +258,17 @@ abstract class L2WProductFactory {
 
         ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
 
-        addMask(maskGroup, 0, "l2w_cc_NN_wlr_ootr", WLR_OOR_DESCRIPTION, L2W_FLAGS_NAME + ".NN_WLR_OOR",
+        addMask(maskGroup, 0, "l2w_cc_NN_wlr_ootr", WLR_OOR_DESCRIPTION, L2W_FLAGS_NAME + "." + FLAG_NAME_NN_WLR_OOR,
                 Color.CYAN, 0.5f);
-        addMask(maskGroup, 1, "l2w_cc_NN_conc_ootr", CONC_OOR_DESCRIPTION, L2W_FLAGS_NAME + ".NN_CONC_OOR",
+        addMask(maskGroup, 1, "l2w_cc_NN_conc_ootr", CONC_OOR_DESCRIPTION, L2W_FLAGS_NAME + "." + FLAG_NAME_NN_CONC_OOR,
                 Color.DARK_GRAY, 0.5f);
-        addMask(maskGroup, 2, "l2w_cc_NN_ootr", OOTR_DESCRIPTION, L2W_FLAGS_NAME + ".NN_OOTR",
+        addMask(maskGroup, 2, "l2w_cc_NN_ootr", OOTR_DESCRIPTION, L2W_FLAGS_NAME + "." + FLAG_NAME_NN_OOTR,
                 Color.ORANGE, 0.5f);
-        addMask(maskGroup, 3, "l2w_cc_whitecaps", WHITE_CAPS_DESCRIPTION, L2W_FLAGS_NAME + ".WHITECAPS",
+        addMask(maskGroup, 3, "l2w_cc_whitecaps", WHITE_CAPS_DESCRIPTION, L2W_FLAGS_NAME + "." + FLAG_NAME_C2R_WHITECAPS,
                 Color.CYAN, 0.5f);
-        addMask(maskGroup, 4, "l2w_cc_qaa_imaginary_number", IMAGINARY_NUMBER_DESCRIPTION,
-                L2W_FLAGS_NAME + ".QAA_IMAGINARY_NUMBER",
+        addMask(maskGroup, 4, "l2w_cc_qaa_imaginary_number", IMAGINARY_NUMBER_DESCRIPTION, L2W_FLAGS_NAME + "." + FLAG_NAME_QAA_IMAGINARY_NUMBER,
                 Color.MAGENTA, 0.5f);
-        addMask(maskGroup, 5, "l2w_cc_qaa_negative_ays", NEGATIVE_AYS_DESCRIPTION, L2W_FLAGS_NAME + ".QAA_NEGATIVE_AYS",
+        addMask(maskGroup, 5, "l2w_cc_qaa_negative_ays", NEGATIVE_AYS_DESCRIPTION, L2W_FLAGS_NAME + "." + FLAG_NAME_QAA_NEGATIVE_AYS,
                 Color.YELLOW, 0.5f);
         final String invalidMaskDescription = String.format(INVALID_DESCRIPTION_FORMAT, L2W_INVALID_EXPRESSION);
         addMask(maskGroup, 6, "l2w_cc_invalid", invalidMaskDescription, L2W_INVALID_EXPRESSION, Color.RED, 0.0f);

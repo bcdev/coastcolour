@@ -7,13 +7,13 @@
     <parent>
         <groupId>org.esa.beam.coastcolour</groupId>
         <artifactId>coastcolour</artifactId>
-        <version>1.8.4</version>
+        <version>1.8.5-SNAPSHOT</version>
     </parent>
 
     <name>Optical Water Type Classification Operator</name>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-owt-classification</artifactId>
-    <version>1.7</version>
+    <version>1.7.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>

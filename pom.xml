@@ -186,7 +186,7 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-owt-classification</artifactId>
-                <version>1.7</version>
+                <version>1.7.1-SNAPSHOT</version>
             </dependency>
 
             <dependency>

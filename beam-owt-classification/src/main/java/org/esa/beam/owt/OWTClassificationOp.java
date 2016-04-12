@@ -1,8 +1,6 @@
 package org.esa.beam.owt;
 
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.ColorPaletteDef;
-import org.esa.beam.framework.datamodel.ImageInfo;
 import org.esa.beam.framework.datamodel.IndexCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -18,18 +16,15 @@ import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
 import org.esa.beam.framework.gpf.pointop.WritableSample;
 import org.esa.beam.util.ProductUtils;
 
-import java.awt.Color;
-
 // todo 1 - (cb,ks;02.02.2016) provide a text field to enter a "valid pixel expression".
 // todo   -                    Currently the OWT is calculated everywhere, including land and clouds.
 // todo   -                    should be done when the operator is migrated to SNAP
-// todo 2 - (mp;10.03.2014)    help is missing
 @OperatorMetadata(alias = "OWTClassification",
-                  description = "Performs an optical water type classification based on atmospherically corrected reflectances.",
-                  authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
+        description = "Performs an optical water type classification based on atmospherically corrected reflectances.",
+        authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
         copyright = "(c) 2016 by Timothy Moore (University of New Hampshire) and Brockmann Consult",
-        version = "1.7",
-                  internal = true)
+        version = "1.7.1",
+        internal = true)
 public class OWTClassificationOp extends PixelOperator {
 
     private static final int DOMINANT_CLASS_NO_DATA_VALUE = -1;
@@ -59,7 +54,7 @@ public class OWTClassificationOp extends PixelOperator {
         super.prepareInputs();
 
         if (sourceProduct.getDescription() != null &&
-            sourceProduct.getDescription().contains("IRRADIANCE_REFLECTANCES")) {
+                sourceProduct.getDescription().contains("IRRADIANCE_REFLECTANCES")) {
             // overwrite user option (only for CC L2R case so far)
             inputReflectanceIs = ReflectanceEnum.IRRADIANCE_REFLECTANCES;
         }
@@ -144,7 +139,7 @@ public class OWTClassificationOp extends PixelOperator {
         int numWLs = owtType.getWavelengths().length;
         if (sourceSamples.length != numWLs) {
             throw new OperatorException("Wrong number of source samples: Expected: " + numWLs +
-                                        ", Actual: " + sourceSamples.length);
+                                                ", Actual: " + sourceSamples.length);
         }
 
         int numClassSamples = owtType.getClassCount() * 2; // classes and norm_classes

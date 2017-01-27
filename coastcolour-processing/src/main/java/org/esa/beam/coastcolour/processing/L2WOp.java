@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @OperatorMetadata(alias = "CoastColour.L2W",
-                  version = "1.8",
+                  version = "1.8.5",
                   authors = "C. Brockmann, M. Bouvet, R. Santer, H. Schiller, M. Peters, O. Danne",
                   copyright = "(c) 2011-2013 Brockmann Consult",
                   description = "Computes information about water properties such as IOPs, concentrations and " +
@@ -665,7 +665,7 @@ public class L2WOp extends Operator {
 
     private HashMap<String, Object> createQaaParameterMap() {
         HashMap<String, Object> qaaParams = new HashMap<String, Object>();
-        qaaParams.put("invalidPixelExpression", invalidPixelExpression);
+        qaaParams.put("validPixelExpression", String.format("not (%s)", invalidPixelExpression));
         qaaParams.put("aTotalLower", qaaATotalLower);
         qaaParams.put("aTotalUpper", qaaATotalUpper);
         qaaParams.put("bbSpmLower", qaaBbSpmLower);

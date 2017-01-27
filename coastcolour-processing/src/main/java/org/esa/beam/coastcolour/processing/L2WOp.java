@@ -270,7 +270,7 @@ public class L2WOp extends Operator {
         if (invalidPixelExpression != null && !invalidPixelExpression.isEmpty()) {
             invalidL2wExpression = invalidPixelExpression + " || " + invalidL2wExpression;
         }
-        System.out.println("invalidL2wExpression = " + invalidL2wExpression);
+//        System.out.println("invalidL2wExpression = " + invalidL2wExpression);
         invalidL2wImage = VirtualBandOpImage.createMask(invalidL2wExpression,
                                                         l2rProduct,
                                                         ResolutionLevel.MAXRES);
